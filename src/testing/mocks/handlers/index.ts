@@ -1,23 +1,17 @@
-import { HttpResponse, http } from 'msw';
-
-import { env } from '@/config/env';
-
-import { networkDelay } from '../utils';
-
+import { alloPretreHandlers } from './allo-pretre';
 import { authHandlers } from './auth';
-import { commentsHandlers } from './comments';
-import { discussionsHandlers } from './discussions';
-import { teamsHandlers } from './teams';
-import { usersHandlers } from './users';
+import { bibleHandlers } from './bible';
+import { documentsHandlers } from './documents';
+import { messagingHandlers } from './messaging';
+import { newsHandlers } from './news';
+import { notificationsHandlers } from './notifications';
 
 export const handlers = [
   ...authHandlers,
-  ...commentsHandlers,
-  ...discussionsHandlers,
-  ...teamsHandlers,
-  ...usersHandlers,
-  http.get(`${env.API_URL}/healthcheck`, async () => {
-    await networkDelay();
-    return HttpResponse.json({ ok: true });
-  }),
+  ...documentsHandlers,
+  ...messagingHandlers,
+  ...notificationsHandlers,
+  ...newsHandlers,
+  ...bibleHandlers,
+  ...alloPretreHandlers,
 ];

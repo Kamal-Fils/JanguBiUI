@@ -1,35 +1,26 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from '@tanstack/react-query';
+import { Playfair_Display } from 'next/font/google';
 import { ReactNode } from 'react';
 
 import { AppProvider } from '@/app/provider';
-import { getUserQueryOptions } from '@/lib/auth';
 
 import '@/styles/globals.css';
 
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+  variable: '--font-playfair',
+});
+
 export const metadata = {
-  title: 'Bulletproof React',
-  description: 'Showcasing Best Practices For Building React Applications',
+  title: 'Jàngu Bi',
+  description: 'Plateforme communautaire catholique du Sénégal',
 };
 
-const RootLayout = async ({ children }: { children: ReactNode }) => {
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery(getUserQueryOptions());
-
-  const dehydratedState = dehydrate(queryClient);
-
+const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning className={playfair.variable}>
       <body>
-        <AppProvider>
-          <HydrationBoundary state={dehydratedState}>
-            {children}
-          </HydrationBoundary>
-        </AppProvider>
+        <AppProvider>{children}</AppProvider>
       </body>
     </html>
   );

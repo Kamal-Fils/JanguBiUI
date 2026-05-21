@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
 import {
-  Form,
+  FormProvider,
   FormControl,
   FormField,
   FormItem,
@@ -68,73 +68,67 @@ export function ServiceForm({
   };
 
   return (
-    <Form
-      schema={serviceSchema}
-      onSubmit={onSubmit}
-      options={{ defaultValues: form.getValues() }}
-    >
-      {() => (
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom du service</FormLabel>
-                <FormControl>
-                  <Input placeholder="Baptême, Rencontre..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description (Optionnelle)</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Célébration du sacrement de Baptême..."
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="duration_minutes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Durée estimée (minutes)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="60" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <FormProvider {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom du service</FormLabel>
+              <FormControl>
+                <Input placeholder="Baptême, Rencontre..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description (Optionnelle)</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Célébration du sacrement de Baptême..."
+                  className="resize-none"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="duration_minutes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Durée estimée (minutes)</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="60" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <DialogFooter className="pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isPending}
-            >
-              Annuler
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-              {service ? 'Enregistrer' : 'Créer'}
-            </Button>
-          </DialogFooter>
-        </div>
-      )}
-    </Form>
+        <DialogFooter className="pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isPending}
+          >
+            Annuler
+          </Button>
+          <Button type="submit" disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {service ? 'Enregistrer' : 'Créer'}
+          </Button>
+        </DialogFooter>
+      </form>
+    </FormProvider>
   );
 }

@@ -1,32 +1,21 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card/card';
-import { Separator } from '@/components/ui/separator/separator';
 import { useLiturgyToday } from '@/features/bible/api/get-liturgy-today';
-import { DailyMysteryCard } from '@/features/home/daily-mystery-card';
+import { DailyMysteryCard } from '@/features/chapelet/components/daily-mystery-card';
 
-import { ReadingView } from './reading-view';
+import { ReadingsSwiper } from './readings-swiper';
 
 export function TodayTab() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const { data, isLoading } = useLiturgyToday();
-  const [selectedReading, setSelectedReading] = useState<{
-    title: string;
-    ref: string;
-    text: string;
-  } | null>(null);
+  const [fontSize, setFontSize] = useState(16);
+  const { data, isLoading } = useLiturgyToday(currentDate);
 
   const dateStr = data?.date
-    ? new Date(data.date).toLocaleDateString('fr-FR', {
+    ? new Date(data.date + 'T00:00:00').toLocaleDateString('fr-FR', {
         weekday: 'long',
         day: 'numeric',
         month: 'long',
@@ -43,33 +32,18 @@ export function TodayTab() {
     setCurrentDate(next);
   };
 
-  if (selectedReading) {
-    return (
-      <ReadingView
-        title={selectedReading.title}
-        reference={selectedReading.ref}
-        text={selectedReading.text}
-        isHtml={true}
-        onBack={() => setSelectedReading(null)}
-      />
-    );
-  }
-
-  const readings = data?.readings || [];
-  const headerText = data?.mystery
-    ? `${data.season ? data.season + ' - ' : ''}${data.mystery}`
-    : 'Lectures du jour';
+  const readings = data?.readings ?? [];
 
   return (
     <div className="flex flex-col gap-4">
       {/* Date navigator */}
-      <div className="bg-background-surface flex items-center justify-between rounded-lg p-3">
+      <div className="flex items-center justify-between rounded-lg bg-muted/40 p-3">
         <Button
           variant="ghost"
           size="icon"
           className="size-8"
           onClick={() => navigateDay(-1)}
-          aria-label="Jour precedent"
+          aria-label="Jour précédent"
         >
           <ChevronLeft className="size-4" />
         </Button>
@@ -88,48 +62,45 @@ export function TodayTab() {
         </Button>
       </div>
 
-      {/* Chaplet component */}
+      {/* Rosary mystery card */}
       <DailyMysteryCard />
 
-      {/* Readings list */}
-      <Card className="gap-0 overflow-hidden py-0">
-        <CardHeader className="px-4 py-3">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            {headerText}
-          </CardTitle>
-        </CardHeader>
-        <Separator />
-        <CardContent className="flex flex-col gap-0 p-0">
-          {!isLoading && readings.length === 0 && (
-            <div className="text-sm text-muted-foreground italic p-4">
-              Aucune lecture disponible.
-            </div>
-          )}
-          {readings.map((reading) => (
-            <button
-              key={reading.id}
-              onClick={() =>
-                setSelectedReading({
-                  title: reading.type,
-                  ref: reading.citation || '',
-                  text: reading.text || '',
-                })
-              }
-              className="hover:bg-background-subtle flex items-center justify-between px-4 py-3 text-left transition-colors"
-            >
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium text-foreground capitalize">
-                  {reading.type.replace('_', ' ')}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {reading.citation}
-                </span>
-              </div>
-              <ChevronRight className="size-4 text-muted-foreground" />
-            </button>
-          ))}
-        </CardContent>
-      </Card>
+      {/* Season / mystery label */}
+      {(data?.season || data?.mystery) && (
+        <p className="px-1 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          {[data.season, data.mystery].filter(Boolean).join(' — ')}
+        </p>
+      )}
+
+      {/* Font size controls */}
+      {!isLoading && readings.length > 0 && (
+        <div className="flex items-center justify-end gap-1 px-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7"
+            onClick={() => setFontSize((s) => Math.max(12, s - 2))}
+            aria-label="Réduire la taille du texte"
+          >
+            <Minus className="size-3.5" />
+          </Button>
+          <span className="min-w-6 text-center text-xs text-muted-foreground">
+            {fontSize}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7"
+            onClick={() => setFontSize((s) => Math.min(24, s + 2))}
+            aria-label="Augmenter la taille du texte"
+          >
+            <Plus className="size-3.5" />
+          </Button>
+        </div>
+      )}
+
+      {/* Swipeable readings */}
+      <ReadingsSwiper readings={readings} fontSize={fontSize} />
     </div>
   );
 }

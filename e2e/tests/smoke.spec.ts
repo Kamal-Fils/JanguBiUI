@@ -1,95 +1,95 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
-import {
-  createDiscussion,
-  createComment,
-} from '../../src/testing/data-generators';
-test('smoke', async ({ page }) => {
-  const discussion = createDiscussion();
-  const comment = createComment();
+/**
+ * Smoke suite — verifies that all primary sections load correctly for an
+ * authenticated user navigating through the bottom nav / sidebar.
+ *
+ * Auth state is injected via storageState (configured in playwright.config.ts).
+ */
 
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Get started' }).click();
-  await page.waitForURL('/app/bible');
+test.describe('Navigation smoke — authenticated user', () => {
+  test('can reach the Bible & Liturgie page', async ({ page }) => {
+    await page.goto('/app/bible');
+    await expect(page).toHaveURL('/app/bible');
+    await expect(page.getByRole('main')).toBeVisible();
+  });
 
-  // create discussion:
-  await page.getByRole('link', { name: 'Discussions' }).click();
-  await page.waitForURL('/app/discussions');
+  test('bottom nav — Actus link navigates to news feed', async ({ page }) => {
+    await page.goto('/app/bible');
+    await page.getByRole('link', { name: /actus/i }).click();
+    await expect(page).toHaveURL('/app/actus');
+    await expect(page.getByRole('main')).toBeVisible();
+  });
 
-  await page.getByRole('button', { name: 'Create Discussion' }).click();
-  await page.getByLabel('Title').click();
-  await page.getByLabel('Title').fill(discussion.title);
-  await page.getByLabel('Body').click();
-  await page.getByLabel('Body').fill(discussion.body);
-  await page.getByRole('button', { name: 'Submit' }).click();
-  await page
-    .getByLabel('Discussion Created')
-    .getByRole('button', { name: 'Close' })
-    .click();
+  test('bottom nav — Spirituel link navigates to spiritual page', async ({
+    page,
+  }) => {
+    await page.goto('/app/bible');
+    await page.getByRole('link', { name: /spirituel/i }).click();
+    await expect(page).toHaveURL('/app/spirituel');
+    await expect(page.getByRole('main')).toBeVisible();
+  });
 
-  // visit discussion page:
-  await page.getByRole('link', { name: 'View' }).click();
+  test('bottom nav — Messages link navigates to messages', async ({ page }) => {
+    await page.goto('/app/bible');
+    await page.getByRole('link', { name: /messages/i }).click();
+    await expect(page).toHaveURL('/app/messages');
+    await expect(page.getByRole('main')).toBeVisible();
+  });
 
-  await expect(
-    page.getByRole('heading', { name: discussion.title }),
-  ).toBeVisible();
-  await expect(page.getByText(discussion.body)).toBeVisible();
+  test('bottom nav — Profil link navigates to profile', async ({ page }) => {
+    await page.goto('/app/bible');
+    await page.getByRole('link', { name: /profil/i }).click();
+    await expect(page).toHaveURL('/app/profil');
+    await expect(page.getByRole('main')).toBeVisible();
+  });
 
-  // update discussion:
-  await page.getByRole('button', { name: 'Update Discussion' }).click();
-  await page.getByLabel('Title').click();
-  await page.getByLabel('Title').fill(`${discussion.title} - updated`);
-  await page.getByLabel('Body').click();
-  await page.getByLabel('Body').fill(`${discussion.body} - updated`);
-  await page.getByRole('button', { name: 'Submit' }).click();
-  await page
-    .getByLabel('Discussion Updated')
-    .getByRole('button', { name: 'Close' })
-    .click();
+  test('direct route — /app/documents loads', async ({ page }) => {
+    await page.goto('/app/documents');
+    await expect(page).toHaveURL('/app/documents');
+    await expect(page.getByRole('main')).toBeVisible();
+  });
 
-  await expect(
-    page.getByRole('heading', { name: `${discussion.title} - updated` }),
-  ).toBeVisible();
-  await expect(page.getByText(`${discussion.body} - updated`)).toBeVisible();
+  test('direct route — /app/chapelet loads', async ({ page }) => {
+    await page.goto('/app/chapelet');
+    await expect(page).toHaveURL('/app/chapelet');
+    await expect(page.getByRole('main')).toBeVisible();
+  });
 
-  // create comment:
-  await page.getByRole('button', { name: 'Create Comment' }).click();
-  await page.getByLabel('Body').click();
-  await page.getByLabel('Body').fill(comment.body);
-  await page.getByRole('button', { name: 'Submit' }).click();
-  await expect(page.getByText(comment.body)).toBeVisible();
-  await page
-    .getByLabel('Comment Created')
-    .getByRole('button', { name: 'Close' })
-    .click();
+  test('direct route — /app/allo-pretre loads', async ({ page }) => {
+    await page.goto('/app/allo-pretre');
+    await expect(page).toHaveURL('/app/allo-pretre');
+    await expect(page.getByRole('main')).toBeVisible();
+  });
 
-  // delete comment:
-  await page.getByRole('button', { name: 'Delete Comment' }).click();
-  await expect(
-    page.getByText('Are you sure you want to delete this comment?'),
-  ).toBeVisible();
-  await page.getByRole('button', { name: 'Delete Comment' }).click();
-  await page
-    .getByLabel('Comment Deleted')
-    .getByRole('button', { name: 'Close' })
-    .click();
-  await expect(
-    page.getByRole('heading', { name: 'No Comments Found' }),
-  ).toBeVisible();
-  await expect(page.getByText(comment.body)).toBeHidden();
+  test('direct route — /app/tv loads', async ({ page }) => {
+    await page.goto('/app/tv');
+    await expect(page).toHaveURL('/app/tv');
+    await expect(page.getByRole('main')).toBeVisible();
+  });
 
-  // go back to discussions:
-  await page.getByRole('link', { name: 'Discussions' }).click();
-  await page.waitForURL('/app/discussions');
+  test('direct route — /app/assistant loads', async ({ page }) => {
+    await page.goto('/app/assistant');
+    await expect(page).toHaveURL('/app/assistant');
+    await expect(page.getByRole('main')).toBeVisible();
+  });
 
-  // delete discussion:
-  await page.getByRole('button', { name: 'Delete Discussion' }).click();
-  await page.getByRole('button', { name: 'Delete Discussion' }).click();
-  await page
-    .getByLabel('Discussion Deleted')
-    .getByRole('button', { name: 'Close' })
-    .click();
-  await expect(
-    page.getByRole('heading', { name: 'No Entries Found' }),
-  ).toBeVisible();
+  test('sequential full navigation through all bottom-nav items', async ({
+    page,
+  }) => {
+    await page.goto('/app/bible');
+    await expect(page).toHaveURL('/app/bible');
+
+    await page.getByRole('link', { name: /actus/i }).click();
+    await expect(page).toHaveURL('/app/actus');
+
+    await page.getByRole('link', { name: /spirituel/i }).click();
+    await expect(page).toHaveURL('/app/spirituel');
+
+    await page.getByRole('link', { name: /messages/i }).click();
+    await expect(page).toHaveURL('/app/messages');
+
+    await page.getByRole('link', { name: /profil/i }).click();
+    await expect(page).toHaveURL('/app/profil');
+  });
 });

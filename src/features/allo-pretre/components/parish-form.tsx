@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DialogFooter } from '@/components/ui/dialog';
 import {
-  Form,
+  FormProvider,
   FormControl,
   FormField,
   FormItem,
@@ -61,7 +61,6 @@ export function ParishForm({ parish, onSuccess, onCancel }: ParishFormProps) {
   });
 
   const onSubmit = (values: ParishFormValues) => {
-    // Convert empty strings to null for decimal fields if needed by backend, though types allow strings.
     if (parish) {
       updateMutation.mutate({ slug: parish.slug, data: values }, { onSuccess });
     } else {
@@ -70,123 +69,117 @@ export function ParishForm({ parish, onSuccess, onCancel }: ParishFormProps) {
   };
 
   return (
-    <Form
-      schema={parishSchema}
-      onSubmit={onSubmit}
-      options={{ defaultValues: form.getValues() }}
-    >
-      {() => (
-        <div className="space-y-4">
+    <FormProvider {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom</FormLabel>
+              <FormControl>
+                <Input placeholder="Paroisse Saint-Paul" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ville</FormLabel>
+              <FormControl>
+                <Input placeholder="Dakar" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Adresse</FormLabel>
+              <FormControl>
+                <Input placeholder="12 rue de la Paix" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="name"
+            name="latitude"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nom</FormLabel>
+                <FormLabel>Latitude</FormLabel>
                 <FormControl>
-                  <Input placeholder="Paroisse Saint-Paul" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="city"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ville</FormLabel>
-                <FormControl>
-                  <Input placeholder="Dakar" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Adresse</FormLabel>
-                <FormControl>
-                  <Input placeholder="12 rue de la Paix" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="latitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Latitude</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="14.69278"
-                      {...field}
-                      value={field.value || ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="longitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Longitude</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="-17.44667"
-                      {...field}
-                      value={field.value || ''}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={form.control}
-            name="is_active"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
+                  <Input
+                    placeholder="14.69278"
+                    {...field}
+                    value={field.value || ''}
                   />
                 </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Actif</FormLabel>
-                </div>
+                <FormMessage />
               </FormItem>
             )}
           />
-
-          <DialogFooter className="pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isPending}
-            >
-              Annuler
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-              {parish ? 'Enregistrer' : 'Créer'}
-            </Button>
-          </DialogFooter>
+          <FormField
+            control={form.control}
+            name="longitude"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Longitude</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="-17.44667"
+                    {...field}
+                    value={field.value || ''}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-      )}
-    </Form>
+
+        <FormField
+          control={form.control}
+          name="is_active"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Actif</FormLabel>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <DialogFooter className="pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isPending}
+          >
+            Annuler
+          </Button>
+          <Button type="submit" disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {parish ? 'Enregistrer' : 'Créer'}
+          </Button>
+        </DialogFooter>
+      </form>
+    </FormProvider>
   );
 }

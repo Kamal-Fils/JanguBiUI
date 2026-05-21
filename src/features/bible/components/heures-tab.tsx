@@ -65,7 +65,26 @@ export function HeuresTab() {
 
   if (selectedOffice) {
     const htmlSections: string[] = [];
-    const meta: any = selectedOffice.raw_metadata || {};
+    type OfficeSection = { texte?: string };
+    type OfficeMeta = {
+      introduction?: string;
+      hymne?: OfficeSection;
+      psaume_1?: OfficeSection;
+      psaume_2?: OfficeSection;
+      psaume_3?: OfficeSection;
+      cantique?: OfficeSection;
+      cantique_zacharie?: OfficeSection;
+      cantique_mariale?: OfficeSection;
+      cantique_symeon?: OfficeSection;
+      capitule?: OfficeSection;
+      pericope?: OfficeSection;
+      repons?: string;
+      intercession?: string;
+      notre_pere?: string;
+      oraison?: string;
+      benediction?: string;
+    };
+    const meta = (selectedOffice.raw_metadata || {}) as OfficeMeta;
 
     if (meta.introduction) htmlSections.push(`<div>${meta.introduction}</div>`);
     if (meta.hymne?.texte)

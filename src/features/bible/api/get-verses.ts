@@ -22,13 +22,11 @@ export const getVerses = async ({
   chapterNumber,
   ...options
 }: GetVersesOptions): Promise<Verse[]> => {
-  const res: any = await api.get(
+  const res = (await api.get<{ results: Verse[] } | Verse[]>(
     `/v1/bible/books/${bookId}/chapters/${chapterNumber}/verses/`,
-    {
-      params: options,
-    },
-  );
-  return res.results ?? res;
+    { params: options },
+  )) as { results: Verse[] } | Verse[];
+  return Array.isArray(res) ? res : res.results;
 };
 
 export const getVersesQueryOptions = (options: GetVersesOptions) => {

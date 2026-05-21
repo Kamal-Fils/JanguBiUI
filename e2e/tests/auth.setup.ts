@@ -1,41 +1,34 @@
-import { test as setup, expect } from '@playwright/test';
-import { createUser } from '../../src/testing/data-generators';
+import { test as setup } from '@playwright/test';
 
 const authFile = 'e2e/.auth/user.json';
 
 setup('authenticate', async ({ page }) => {
-  const user = createUser();
+  const email = `test-${Date.now()}@example.com`;
+  const password = 'Password123!';
+  const firstName = 'Jean';
+  const lastName = 'Dupont';
 
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Get started' }).click();
-  await page.waitForURL('/auth/login');
-  await page.getByRole('link', { name: 'Register' }).click();
+  await page.goto('/auth/register');
 
   // registration:
-  await page.getByLabel('First Name').click();
-  await page.getByLabel('First Name').fill(user.firstName);
-  await page.getByLabel('Last Name').click();
-  await page.getByLabel('Last Name').fill(user.lastName);
-  await page.getByLabel('Email Address').click();
-  await page.getByLabel('Email Address').fill(user.email);
-  await page.getByLabel('Password').click();
-  await page.getByLabel('Password').fill(user.password);
-  await page.getByLabel('Team Name').click();
-  await page.getByLabel('Team Name').fill(user.teamName);
-  await page.getByRole('button', { name: 'Register' }).click();
+  await page.getByLabel(/prénom/i).fill(firstName);
+  await page.getByLabel(/nom/i).fill(lastName);
+  await page.getByLabel(/adresse email/i).fill(email);
+  await page.getByLabel(/téléphone/i).fill('+221700000000');
+  await page.getByLabel(/mot de passe$/i).fill(password);
+  await page.getByLabel(/confirmer le mot de passe/i).fill(password);
+  await page.getByRole('button', { name: /s'inscrire/i }).click();
   await page.waitForURL('/app/bible');
 
   // log out:
-  await page.getByRole('button', { name: 'Open user menu' }).click();
-  await page.getByRole('menuitem', { name: 'Sign Out' }).click();
-  await page.waitForURL('/auth/login?redirectTo=%2Fapp');
+  await page.getByRole('button', { name: /menu utilisateur/i }).click();
+  await page.getByRole('menuitem', { name: /se déconnecter/i }).click();
+  await page.waitForURL('/auth/login');
 
   // log in:
-  await page.getByLabel('Email Address').click();
-  await page.getByLabel('Email Address').fill(user.email);
-  await page.getByLabel('Password').click();
-  await page.getByLabel('Password').fill(user.password);
-  await page.getByRole('button', { name: 'Log in' }).click();
+  await page.getByLabel(/adresse email/i).fill(email);
+  await page.getByLabel(/mot de passe/i).fill(password);
+  await page.getByRole('button', { name: /se connecter/i }).click();
   await page.waitForURL('/app/bible');
 
   await page.context().storageState({ path: authFile });

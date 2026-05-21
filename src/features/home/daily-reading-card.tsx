@@ -4,55 +4,61 @@ import { BookOpen, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const todayReadings = [
-  { label: '1ere Lecture', ref: 'Isaie 55, 10-11', type: 'lecture' },
+  { label: '1ère Lecture', ref: 'Isaïe 55, 10-11', type: 'lecture' },
   { label: 'Psaume', ref: 'Ps 33 (34)', type: 'psaume' },
-  { label: 'Evangile', ref: 'Matthieu 6, 7-15', type: 'evangile' },
+  { label: 'Évangile', ref: 'Matthieu 6, 7-15', type: 'evangile' },
 ];
 
 export function DailyReadingCard() {
   return (
-    <Card className="gap-0 overflow-hidden border-border py-0">
-      <CardHeader className="bg-primary/5 p-4 dark:bg-primary/10">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <BookOpen className="size-5" />
-          </div>
-          <div className="flex-1">
-            <CardTitle className="text-base">Lectures du jour</CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Temps ordinaire - Semaine XII
-            </p>
-          </div>
-          <Badge
-            variant="secondary"
-            className="bg-primary/10 text-primary dark:bg-primary/20"
-          >
-            Aujourd&apos;hui
-          </Badge>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      {/* Gold accent strip */}
+      <div className="h-0.5 bg-gradient-to-r from-gold via-gold/50 to-transparent" />
+
+      <div className="flex items-center gap-3 border-b border-border/60 bg-gradient-to-r from-gold/8 to-transparent p-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gold/15 ring-1 ring-gold/20">
+          <BookOpen className="size-5 text-gold" />
         </div>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-0 p-0">
+        <div className="min-w-0 flex-1">
+          <p className="font-serif text-sm font-semibold text-foreground">
+            Lectures du jour
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Temps ordinaire — Semaine XII
+          </p>
+        </div>
+        <Badge
+          variant="secondary"
+          className="shrink-0 border-gold/25 bg-gold/10 font-medium text-gold"
+        >
+          Aujourd&apos;hui
+        </Badge>
+      </div>
+
+      <div className="flex flex-col divide-y divide-border/50">
         {todayReadings.map((reading) => (
           <Link
             key={reading.label}
             href="/app/bible"
-            className="hover:bg-background-subtle flex items-center justify-between px-4 py-3 transition-colors"
+            className="group flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-muted/40"
           >
-            <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-medium text-foreground">
-                {reading.label}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {reading.ref}
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-1 rounded-full bg-gold/35 transition-colors group-hover:bg-gold" />
+              <div>
+                <span className="block text-sm font-semibold text-foreground">
+                  {reading.label}
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {reading.ref}
+                </span>
+              </div>
             </div>
-            <ChevronRight className="size-4 text-muted-foreground" />
+            <ChevronRight className="size-4 text-muted-foreground/50 transition-all group-hover:translate-x-0.5 group-hover:text-gold" />
           </Link>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

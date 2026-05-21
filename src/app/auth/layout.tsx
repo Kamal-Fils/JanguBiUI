@@ -6,8 +6,8 @@ import { Spinner } from '@/components/ui/spinner';
 import { AuthLayout as AuthLayoutComponent } from './_components/auth-layout';
 
 export const metadata = {
-  title: 'Bulletproof React',
-  description: 'Welcome to Bulletproof React',
+  title: 'Jàngu Bi',
+  description: 'Plateforme communautaire catholique',
 };
 
 const AuthLayout = ({ children }: { children: ReactNode }) => {

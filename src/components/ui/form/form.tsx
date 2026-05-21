@@ -182,7 +182,7 @@ type FormProps<TFormValues extends FieldValues, Schema> = {
 };
 
 const Form = <
-  Schema extends ZodType<any, any, any>,
+  Schema extends ZodType,
   TFormValues extends FieldValues = z.infer<Schema>,
 >({
   onSubmit,

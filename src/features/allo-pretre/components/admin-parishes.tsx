@@ -1,6 +1,5 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { Loader2, Plus, Edit } from 'lucide-react';
 import { useState } from 'react';
 
@@ -12,20 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useParishes } from '@/features/allo-pretre/api/get-parishes';
 import type { Parish } from '@/features/allo-pretre/api/mutations-parish';
-import { api } from '@/lib/api-client';
-
-export const getParishes = async (): Promise<Parish[]> => {
-  const res: any = await api.get('/v1/availability/parishes/');
-  return res.results ?? res;
-};
-
-export const useParishes = () => {
-  return useQuery({
-    queryKey: ['parishes'],
-    queryFn: getParishes,
-  });
-};
 
 import { ParishForm } from './parish-form';
 

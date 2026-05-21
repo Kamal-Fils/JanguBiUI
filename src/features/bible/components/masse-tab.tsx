@@ -1,39 +1,16 @@
 'use client';
 
-import { BookOpen, Music, BookMarked, Loader2 } from 'lucide-react';
+import { Loader2, Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
 
-import { Card, CardContent } from '@/components/ui/card';
-import {
-  useLiturgyToday,
-  LiturgyReading,
-} from '@/features/bible/api/get-liturgy-today';
+import { Button } from '@/components/ui/button/button';
+import { useLiturgyToday } from '@/features/bible/api/get-liturgy-today';
 
-import { ReadingView } from './reading-view';
-
-function getReadingIcon(type: string) {
-  const lowerType = type.toLowerCase();
-  if (lowerType.includes('psaume')) return Music;
-  if (lowerType.includes('evangile') || lowerType.includes('évangile'))
-    return BookMarked;
-  return BookOpen;
-}
-
-function getReadingColorClass(type: string) {
-  const lowerType = type.toLowerCase();
-  if (lowerType.includes('psaume')) return 'bg-accent/10 text-accent';
-  if (lowerType.includes('evangile') || lowerType.includes('évangile'))
-    return 'bg-warning/10 text-warning';
-  if (lowerType.includes('deux') || lowerType.includes('2'))
-    return 'bg-info/10 text-info';
-  return 'bg-primary/10 text-primary';
-}
+import { ReadingsSwiper } from './readings-swiper';
 
 export function MasseTab() {
   const { data, isLoading } = useLiturgyToday();
-  const [selectedReading, setSelectedReading] = useState<LiturgyReading | null>(
-    null,
-  );
+  const [fontSize, setFontSize] = useState(16);
 
   if (isLoading) {
     return (
@@ -43,60 +20,48 @@ export function MasseTab() {
     );
   }
 
-  const readings = data?.readings || [];
-
-  if (selectedReading) {
-    return (
-      <ReadingView
-        title={selectedReading.type || 'Lecture'}
-        reference={selectedReading.citation || ''}
-        text={selectedReading.text || ''}
-        isHtml={true}
-        onBack={() => setSelectedReading(null)}
-      />
-    );
-  }
+  const readings = data?.readings ?? [];
 
   return (
-    <div className="flex flex-col gap-3">
-      <p className="text-sm text-muted-foreground">
-        Lectures de la messe du {data?.date || 'jour'}
-      </p>
-
-      {readings.length === 0 && (
-        <div className="text-sm text-muted-foreground italic py-4">
-          Aucune lecture disponible pour aujourd&apos;hui.
-        </div>
-      )}
-
-      {readings.map((reading) => {
-        const Icon = getReadingIcon(reading.type);
-        const colorClass = getReadingColorClass(reading.type);
-
-        return (
-          <Card
-            key={reading.id}
-            className="hover:bg-background-subtle cursor-pointer gap-0 py-0 transition-colors"
-            onClick={() => setSelectedReading(reading)}
+    <div className="flex flex-col">
+      {/* Font size toolbar */}
+      <div className="flex items-center justify-between px-4 py-2.5">
+        <p className="text-xs text-muted-foreground">
+          Messe du{' '}
+          {data?.date
+            ? new Date(data.date + 'T00:00:00').toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+              })
+            : 'jour'}
+        </p>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7"
+            onClick={() => setFontSize((s) => Math.max(12, s - 2))}
+            aria-label="Réduire la taille du texte"
           >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div
-                className={`flex size-10 items-center justify-center rounded-lg ${colorClass}`}
-              >
-                <Icon className="size-5" />
-              </div>
-              <div className="flex flex-1 flex-col gap-0.5">
-                <span className="text-sm font-semibold text-foreground">
-                  {reading.type}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {reading.citation}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+            <Minus className="size-3.5" />
+          </Button>
+          <span className="min-w-6 text-center text-xs text-muted-foreground">
+            {fontSize}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7"
+            onClick={() => setFontSize((s) => Math.min(24, s + 2))}
+            aria-label="Augmenter la taille du texte"
+          >
+            <Plus className="size-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      <ReadingsSwiper readings={readings} fontSize={fontSize} />
     </div>
   );
 }

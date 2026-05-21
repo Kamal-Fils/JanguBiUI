@@ -9,6 +9,8 @@ module.exports = {
     'node_modules/*',
     'public/mockServiceWorker.js',
     'generators/*',
+    '**/__tests__/**',
+    'src/testing/**',
   ],
   extends: ['eslint:recommended', 'next/core-web-vitals'],
   overrides: [

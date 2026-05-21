@@ -1,15 +1,8 @@
-import { cookies } from 'next/headers';
+const REFRESH_TOKEN_KEY = 'jb_refresh_token';
 
-export const AUTH_TOKEN_COOKIE_NAME = 'bulletproof_react_app_token';
-
-export const getAuthTokenCookie = () => {
-  if (typeof window !== 'undefined') return '';
-  const cookieStore = cookies();
-  return cookieStore.get(AUTH_TOKEN_COOKIE_NAME)?.value;
-};
-
-export const checkLoggedIn = () => {
-  const cookieStore = cookies();
-  const isLoggedIn = !!cookieStore.get(AUTH_TOKEN_COOKIE_NAME);
-  return isLoggedIn;
+export const checkLoggedIn = (): boolean => {
+  if (typeof window !== 'undefined') {
+    return !!localStorage.getItem(REFRESH_TOKEN_KEY);
+  }
+  return false;
 };

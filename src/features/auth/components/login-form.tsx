@@ -31,37 +31,44 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
           <>
             <Input
               type="email"
-              label="Email Address"
+              label="Adresse email"
               error={formState.errors['email']}
               registration={register('email')}
             />
             <Input
               type="password"
-              label="Password"
+              label="Mot de passe"
               error={formState.errors['password']}
               registration={register('password')}
             />
+            <div className="flex justify-end text-sm">
+              <NextLink
+                className="font-medium text-primary hover:text-primary/80"
+                href={paths.auth.forgotPassword.getHref()}
+              >
+                Mot de passe oublié ?
+              </NextLink>
+            </div>
             <div>
               <Button
                 isLoading={login.isPending}
                 type="submit"
                 className="w-full"
               >
-                Log in
+                Se connecter
               </Button>
             </div>
           </>
         )}
       </Form>
-      <div className="mt-2 flex items-center justify-end">
-        <div className="text-sm">
-          <NextLink
-            href={paths.auth.register.getHref(redirectTo)}
-            className="font-medium text-blue-600 hover:text-blue-500"
-          >
-            Register
-          </NextLink>
-        </div>
+      <div className="mt-4 text-center text-sm text-muted-foreground">
+        Pas encore de compte ?{' '}
+        <NextLink
+          href={paths.auth.register.getHref(redirectTo)}
+          className="font-semibold text-primary hover:text-primary/80"
+        >
+          Créer un compte
+        </NextLink>
       </div>
     </div>
   );

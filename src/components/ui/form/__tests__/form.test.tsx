@@ -1,8 +1,9 @@
+import { render as rtlRender, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { rtlRender, screen, waitFor, userEvent } from '@/testing/test-utils';
 
 import { Form } from '../form';
 import { Input } from '../input';

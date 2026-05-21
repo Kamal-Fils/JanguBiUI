@@ -1,7 +1,8 @@
 'use client';
 
-import { Play, Headphones } from 'lucide-react';
+import { Play } from 'lucide-react';
 
+import { AudioPlayer } from '@/components/ui/audio-player/audio-player';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,7 +24,8 @@ export function MysterySelector({
   onStartGuide,
 }: MysterySelectorProps) {
   // Try to extract individual mystery names from the string
-  const mysteriesList = Array.isArray(selectedGroup.mysteries)
+  type MysteryItem = string | { title: string };
+  const mysteriesList: MysteryItem[] = Array.isArray(selectedGroup.mysteries)
     ? selectedGroup.mysteries
     : typeof selectedGroup.mysteries === 'string'
       ? selectedGroup.mysteries
@@ -76,7 +78,7 @@ export function MysterySelector({
         </CardHeader>
         <CardContent className="flex flex-col gap-0 p-0">
           {mysteriesList.length > 0 ? (
-            mysteriesList.map((mystery: any, i: number) => (
+            mysteriesList.map((mystery, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-3">
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
                   {i + 1}
@@ -101,30 +103,17 @@ export function MysterySelector({
         <Button
           size="lg"
           onClick={onStartGuide}
-          className="w-full gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
+          className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+          icon={<Play className="size-4" />}
         >
-          <Play className="size-4" />
           Commencer le chapelet guidé
         </Button>
-        <div className="flex gap-3">
-          {selectedGroup.audio_file ? (
-            <Button variant="outline" className="flex-1 gap-2" asChild>
-              <a
-                href={selectedGroup.audio_file}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Headphones className="size-4" />
-                Mode audio
-              </a>
-            </Button>
-          ) : (
-            <Button variant="outline" className="flex-1 gap-2" disabled>
-              <Headphones className="size-4" />
-              Audio indisponible
-            </Button>
-          )}
-        </div>
+        {selectedGroup.audio_file && (
+          <AudioPlayer
+            src={selectedGroup.audio_file}
+            title={`${selectedGroup.name} — Audio`}
+          />
+        )}
       </div>
     </div>
   );

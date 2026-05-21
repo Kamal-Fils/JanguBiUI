@@ -5,28 +5,20 @@ import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
 import { Button } from '@/components/ui/button/button';
-import { Form, Input, Select, Label, Switch } from '@/components/ui/form/index';
+import { Form, Input, Select } from '@/components/ui/form/index';
 import { paths } from '@/config/paths';
 import { useRegister, registerInputSchema } from '@/lib/auth';
 
-export type Team = {
-  id: string | number;
-  name: string;
-};
-
 type RegisterFormProps = {
   onSuccess: () => void;
-  chooseTeam: boolean;
-  setChooseTeam: () => void;
-  teams?: Team[];
 };
 
-export const RegisterForm = ({
-  onSuccess,
-  chooseTeam,
-  setChooseTeam,
-  teams,
-}: RegisterFormProps) => {
+const titleOptions = [
+  { label: 'Monsieur', value: 'MR' },
+  { label: 'Madame', value: 'MRS' },
+];
+
+export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
   const registering = useRegister({ onSuccess });
   const searchParams = useSearchParams();
   const redirectTo = searchParams?.get('redirectTo');
@@ -44,68 +36,57 @@ export const RegisterForm = ({
       >
         {({ register, formState }) => (
           <>
-            <Input
-              type="text"
-              label="First Name"
-              error={formState.errors['firstName']}
-              registration={register('firstName')}
+            <Select
+              label="Civilité"
+              error={formState.errors['title']}
+              registration={register('title')}
+              options={titleOptions}
             />
             <Input
               type="text"
-              label="Last Name"
-              error={formState.errors['lastName']}
-              registration={register('lastName')}
+              label="Prénom"
+              error={formState.errors['first_name']}
+              registration={register('first_name')}
+            />
+            <Input
+              type="text"
+              label="Nom"
+              error={formState.errors['last_name']}
+              registration={register('last_name')}
             />
             <Input
               type="email"
-              label="Email Address"
+              label="Adresse email"
               error={formState.errors['email']}
               registration={register('email')}
             />
             <Input
+              type="tel"
+              label="Téléphone"
+              placeholder="+221 77 000 00 00"
+              error={formState.errors['phone_number']}
+              registration={register('phone_number')}
+            />
+            <Input
               type="password"
-              label="Password"
+              label="Mot de passe"
               error={formState.errors['password']}
               registration={register('password')}
             />
+            <Input
+              type="password"
+              label="Confirmer le mot de passe"
+              error={formState.errors['confirmPassword']}
+              registration={register('confirmPassword')}
+            />
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                checked={chooseTeam}
-                onCheckedChange={setChooseTeam}
-                className={`${
-                  chooseTeam ? 'bg-blue-600' : 'bg-gray-200'
-                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2`}
-                id="choose-team"
-              />
-              <Label htmlFor="airplane-mode">Join Existing Team</Label>
-            </div>
-
-            {chooseTeam && teams ? (
-              <Select
-                label="Team"
-                error={formState.errors['teamId']}
-                registration={register('teamId')}
-                options={teams?.map((team) => ({
-                  label: team.name,
-                  value: team.id,
-                }))}
-              />
-            ) : (
-              <Input
-                type="text"
-                label="Team Name"
-                error={formState.errors['teamName']}
-                registration={register('teamName')}
-              />
-            )}
             <div>
               <Button
                 isLoading={registering.isPending}
                 type="submit"
                 className="w-full"
               >
-                Register
+                Créer mon compte
               </Button>
             </div>
           </>
@@ -117,7 +98,7 @@ export const RegisterForm = ({
             href={paths.auth.login.getHref(redirectTo)}
             className="font-medium text-blue-600 hover:text-blue-500"
           >
-            Log In
+            Se connecter
           </NextLink>
         </div>
       </div>

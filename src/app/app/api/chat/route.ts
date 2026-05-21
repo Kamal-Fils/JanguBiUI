@@ -6,7 +6,10 @@ import {
   UIMessage,
   stepCountIs,
 } from 'ai';
+import { cookies } from 'next/headers';
 import { z } from 'zod';
+
+import { env } from '@/config/env';
 
 export const maxDuration = 60;
 
@@ -363,6 +366,27 @@ const tools = {
 };
 
 export async function POST(req: Request) {
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join('; ');
+
+  const authRes = await fetch(`${env.API_URL}/v1/auth/me/`, {
+    headers: {
+      Cookie: cookieHeader,
+      Accept: 'application/json',
+    },
+    credentials: 'include',
+  });
+
+  if (!authRes.ok) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({

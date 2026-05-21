@@ -17,8 +17,11 @@ export type SearchBibleOptions = {
 export const searchBible = async (
   options: SearchBibleOptions,
 ): Promise<SearchResult[]> => {
-  const res: any = await api.get('/v1/bible/search/', { params: options });
-  return res.results ?? res;
+  const res = (await api.get<{ results: SearchResult[] } | SearchResult[]>(
+    '/v1/bible/search/',
+    { params: options },
+  )) as { results: SearchResult[] } | SearchResult[];
+  return Array.isArray(res) ? res : res.results;
 };
 
 export const searchBibleQueryOptions = (options: SearchBibleOptions) => {

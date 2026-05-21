@@ -1,5 +1,7 @@
+import { render as rtlRender, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import { Button } from '@/components/ui/button';
-import { rtlRender, screen, userEvent, waitFor } from '@/testing/test-utils';
 
 import { ConfirmationDialog } from '../confirmation-dialog';
 

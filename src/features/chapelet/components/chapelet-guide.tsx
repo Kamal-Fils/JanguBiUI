@@ -3,6 +3,7 @@
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
+import { AudioPlayer } from '@/components/ui/audio-player/audio-player';
 import { Button } from '@/components/ui/button/button';
 import { Card, CardContent } from '@/components/ui/card/card';
 import { Progress } from '@/components/ui/progress/progress';
@@ -146,9 +147,9 @@ export function ChapeletGuide({
         variant="ghost"
         size="sm"
         onClick={onBack}
-        className="w-fit gap-2 text-muted-foreground"
+        className="w-fit text-muted-foreground"
+        icon={<ArrowLeft className="size-4" />}
       >
-        <ArrowLeft className="size-4" />
         Retour
       </Button>
 
@@ -176,19 +177,11 @@ export function ChapeletGuide({
         </div>
 
         {group.audio_file && (
-          <div className="w-full max-w-sm">
-            <audio
-              controls
-              className="w-full h-10 shadow-sm rounded-full bg-accent/5 overflow-hidden border border-border"
-              src={group.audio_file}
-            >
-              <track kind="captions" />
-              Votre navigateur ne supporte pas l&apos;élément &lt;audio&gt;.
-            </audio>
-            <p className="text-xs text-muted-foreground mt-2">
-              Chapelet audio complet
-            </p>
-          </div>
+          <AudioPlayer
+            src={group.audio_file}
+            title="Chapelet audio complet"
+            className="w-full max-w-sm"
+          />
         )}
       </div>
 
@@ -271,16 +264,16 @@ export function ChapeletGuide({
           size="lg"
           onClick={goPrev}
           disabled={isFirst}
-          className="gap-2 bg-background hover:bg-secondary"
+          className="bg-background hover:bg-secondary"
+          icon={<ChevronLeft className="size-4" />}
         >
-          <ChevronLeft className="size-4" />
           Précédent
         </Button>
         {isLast ? (
           <Button
             size="lg"
             onClick={onBack}
-            className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90 px-8"
+            className="bg-accent text-accent-foreground hover:bg-accent/90 px-8"
           >
             Terminer
           </Button>
@@ -288,10 +281,12 @@ export function ChapeletGuide({
           <Button
             size="lg"
             onClick={goNext}
-            className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90 px-6"
+            className="bg-accent text-accent-foreground hover:bg-accent/90 px-6"
           >
-            Suivant
-            <ChevronRight className="size-4" />
+            <span className="flex items-center gap-2">
+              Suivant
+              <ChevronRight className="size-4" />
+            </span>
           </Button>
         )}
       </div>

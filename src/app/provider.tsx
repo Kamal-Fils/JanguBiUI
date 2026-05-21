@@ -6,7 +6,9 @@ import * as React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { MainErrorFallback } from '@/components/errors/main';
+import { ThemeProvider } from '@/components/layouts/theme-provider';
 import { Notifications } from '@/components/ui/notifications';
+import { getRefreshToken, tryRefreshAccess } from '@/lib/api-client';
 import { queryConfig } from '@/lib/react-query';
 
 type AppProviderProps = {
@@ -21,13 +23,25 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       }),
   );
 
+  React.useEffect(() => {
+    if (getRefreshToken()) {
+      tryRefreshAccess()
+        .then(() => queryClient.invalidateQueries({ queryKey: ['user'] }))
+        .catch(() => {
+          // Refresh token expired — user will need to log in again
+        });
+    }
+  }, [queryClient]);
+
   return (
-    <ErrorBoundary FallbackComponent={MainErrorFallback}>
-      <QueryClientProvider client={queryClient}>
-        {process.env.DEV && <ReactQueryDevtools />}
-        <Notifications />
-        {children}
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <ErrorBoundary FallbackComponent={MainErrorFallback}>
+        <QueryClientProvider client={queryClient}>
+          {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}
+          <Notifications />
+          {children}
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </ThemeProvider>
   );
 };

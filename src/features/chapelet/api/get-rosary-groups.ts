@@ -6,8 +6,10 @@ import { components } from '@/types/api';
 export type RosaryGroup = components['schemas']['Group'];
 
 export const getRosaryGroups = async (): Promise<RosaryGroup[]> => {
-  const res: any = await api.get('/v1/rosary/groups/');
-  return res.results ?? res;
+  const res = (await api.get<{ results: RosaryGroup[] } | RosaryGroup[]>(
+    '/v1/rosary/groups/',
+  )) as { results: RosaryGroup[] } | RosaryGroup[];
+  return Array.isArray(res) ? res : res.results;
 };
 
 export const getRosaryGroupsQueryOptions = () => {

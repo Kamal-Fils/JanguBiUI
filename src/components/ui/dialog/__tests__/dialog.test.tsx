@@ -1,8 +1,9 @@
+import { render as rtlRender, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useDisclosure } from '@/hooks/use-disclosure';
-import { rtlRender, screen, userEvent, waitFor } from '@/testing/test-utils';
 
 import {
   Dialog,

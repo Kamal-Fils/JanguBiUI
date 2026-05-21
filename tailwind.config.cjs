@@ -18,13 +18,21 @@ module.exports = {
   			sans: [
   				'Inter var',
                     ...defaultTheme.fontFamily.sans
-                ]
+                ],
+  			serif: [
+  				'var(--font-playfair)',
+  				...defaultTheme.fontFamily.serif
+  			],
   		},
   		colors: {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
-  			background: 'hsl(var(--background))',
+  			background: {
+  				DEFAULT: 'hsl(var(--background))',
+  				surface: 'hsl(var(--background-surface))',
+  				subtle: 'hsl(var(--background-subtle))'
+  			},
   			foreground: 'hsl(var(--foreground))',
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
@@ -54,6 +62,7 @@ module.exports = {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
   			},
+  			gold: 'hsl(var(--gold))',
   			success: 'hsl(var(--success, 142.1 76.2% 36.3%))',
   			warning: 'hsl(var(--warning, 38 92% 50%))',
   			info: 'hsl(var(--info, 221.2 83.2% 53.3%))',
@@ -72,25 +81,32 @@ module.exports = {
   		},
   		keyframes: {
   			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
+  				from: { height: '0' },
+  				to: { height: 'var(--radix-accordion-content-height)' }
   			},
   			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
-  			}
+  				from: { height: 'var(--radix-accordion-content-height)' },
+  				to: { height: '0' }
+  			},
+  			'float-c': {
+  				'0%,100%': { transform: 'translateY(0)' },
+  				'50%': { transform: 'translateY(-16px)' }
+  			},
+  			'float-l': {
+  				'0%,100%': { transform: 'translateY(-8px)' },
+  				'50%': { transform: 'translateY(4px)' }
+  			},
+  			'float-r': {
+  				'0%,100%': { transform: 'translateY(4px)' },
+  				'50%': { transform: 'translateY(-12px)' }
+  			},
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'float-c': 'float-c 6s ease-in-out infinite',
+  			'float-l': 'float-l 7s ease-in-out infinite',
+  			'float-r': 'float-r 5.5s ease-in-out infinite',
   		}
   	}
   },

@@ -67,3 +67,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  /* Verse numbers inside HTML liturgy content (AELF) */
+  .reading-content sup {
+    @apply text-primary font-bold not-italic text-xs align-super;
+  }
+  .reading-content .verse-num {
+    @apply text-primary font-bold;
+  }
+  /* Hide scrollbar for swipe containers */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}

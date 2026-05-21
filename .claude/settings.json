@@ -1,0 +1,33 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=\"$FILE_PATH\"; if echo \"$FILE\" | grep -qE '\\.(ts|tsx)$' && echo \"$FILE\" | grep -q 'JanguBiUI'; then cd /home/sosza/PycharmProjects/Numerisen/JanguBiUI && yarn prettier --write \"$FILE\" 2>/dev/null; true; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=\"$FILE_PATH\"; if echo \"$FILE\" | grep -qE '\\.(ts|tsx)$' && echo \"$FILE\" | grep -q 'JanguBiUI'; then cd /home/sosza/PycharmProjects/Numerisen/JanguBiUI && yarn eslint --fix \"$FILE\" 2>/dev/null; true; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=\"$FILE_PATH\"; if echo \"$FILE\" | grep -qE '\\.(ts|tsx)$' && echo \"$FILE\" | grep -q 'JanguBiUI'; then cd /home/sosza/PycharmProjects/Numerisen/JanguBiUI && yarn check-types 2>&1 | tail -15; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

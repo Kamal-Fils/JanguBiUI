@@ -22,7 +22,7 @@ export function AssistantChat() {
       setMessages((prev) => [
         ...prev,
         {
-          id: Date.now().toString() + '-assistant',
+          id: crypto.randomUUID(),
           role: 'assistant',
           content: data.answer || '',
           intent: (data.intent as Record<string, unknown>) || undefined,
@@ -33,7 +33,7 @@ export function AssistantChat() {
       setMessages((prev) => [
         ...prev,
         {
-          id: Date.now().toString() + '-error',
+          id: crypto.randomUUID(),
           role: 'assistant',
           content:
             "Desole, une erreur s'est produite lors de la generation de la reponse. Veuillez reessayer.",
@@ -60,7 +60,7 @@ export function AssistantChat() {
     setMessages((prev) => [
       ...prev,
       {
-        id: Date.now().toString() + '-user',
+        id: crypto.randomUUID(),
         role: 'user',
         content: query,
       },
@@ -75,7 +75,7 @@ export function AssistantChat() {
     setMessages((prev) => [
       ...prev,
       {
-        id: Date.now().toString() + '-user',
+        id: crypto.randomUUID(),
         role: 'user',
         content: text,
       },
@@ -136,7 +136,7 @@ export function AssistantChat() {
 
       {/* Suggestion chips after first response */}
       {messages.length > 0 && !isLoading && (
-        <div className="border-border-subtle border-t bg-background px-4 py-2">
+        <div className="border-t border-border bg-background px-4 py-2">
           <div className="mx-auto max-w-2xl">
             <SuggestionChips onSelect={handleSuggestion} compact />
           </div>

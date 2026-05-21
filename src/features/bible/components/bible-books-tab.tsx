@@ -1,15 +1,22 @@
 'use client';
 
-import { Search, ChevronRight, Loader2, ArrowLeft } from 'lucide-react';
+import {
+  Search,
+  ChevronRight,
+  Loader2,
+  ArrowLeft,
+  Minus,
+  Plus,
+  Bookmark,
+} from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBooks, Book } from '@/features/bible/api/get-books';
-import { useVerses } from '@/features/bible/api/get-verses';
+import { useInfiniteVerses } from '@/features/bible/api/get-verses';
 import { useSearchBible } from '@/features/bible/api/search-bible';
-import { ReadingView } from '@/features/bible/components/reading-view';
 import { useDebounce } from '@/hooks/use-debounce';
 
 function HighlightText({
@@ -86,6 +93,8 @@ function ChapterSelection({
   );
 }
 
+const VERSE_PAGE_SIZE = 50;
+
 function VerseReadingSection({
   book,
   chapterNumber,
@@ -95,14 +104,18 @@ function VerseReadingSection({
   chapterNumber: number;
   onBack: () => void;
 }) {
+  const [fontSize, setFontSize] = useState(16);
   const {
-    data: verses,
+    data,
     isLoading,
     isError,
-  } = useVerses({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteVerses({
     bookId: book.id,
     chapterNumber,
-    limit: 500, // Assuming a chapter doesn't have more than 500 verses
+    limit: VERSE_PAGE_SIZE,
   });
 
   if (isLoading) {
@@ -113,7 +126,7 @@ function VerseReadingSection({
     );
   }
 
-  if (isError || !verses) {
+  if (isError || !data) {
     return (
       <div className="flex flex-col gap-4">
         <Button
@@ -131,15 +144,106 @@ function VerseReadingSection({
     );
   }
 
-  const combinedText = verses.map((v) => `${v.number}. ${v.text}`).join('\n\n');
+  const allVerses = data.pages.flat();
 
   return (
-    <ReadingView
-      title={`${book.name} - Chapitre ${chapterNumber}`}
-      reference={`${book.name} ${chapterNumber}`}
-      text={combinedText}
-      onBack={onBack}
-    />
+    <div className="flex flex-col gap-4">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          className="gap-2 text-muted-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Retour
+        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => setFontSize((s) => Math.max(12, s - 2))}
+            aria-label="Reduire la taille du texte"
+          >
+            <Minus className="size-4" />
+          </Button>
+          <span className="min-w-8 text-center text-xs text-muted-foreground">
+            {fontSize}
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => setFontSize((s) => Math.min(24, s + 2))}
+            aria-label="Augmenter la taille du texte"
+          >
+            <Plus className="size-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            aria-label="Marquer comme favori"
+          >
+            <Bookmark className="size-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Chapter content */}
+      <article
+        className="bg-background-surface mx-auto w-full rounded-xl p-6"
+        style={{ maxWidth: '720px' }}
+      >
+        <header className="mb-6">
+          <h2 className="text-lg font-semibold text-foreground">
+            {book.name} - Chapitre {chapterNumber}
+          </h2>
+          <p className="text-sm text-primary">
+            {book.name} {chapterNumber}
+          </p>
+        </header>
+        <div className="flex flex-col gap-5">
+          {allVerses.map((verse) => (
+            <div key={verse.id} className="flex gap-3 items-start">
+              <span className="text-primary font-bold text-sm shrink-0 min-w-[1.75rem] pt-0.5 tabular-nums select-none">
+                {verse.number}
+              </span>
+              <span
+                className="text-foreground leading-relaxed"
+                style={{ fontSize: `${fontSize}px` }}
+              >
+                {verse.text}
+              </span>
+            </div>
+          ))}
+        </div>
+      </article>
+
+      {hasNextPage && (
+        <div className="flex justify-center pb-4">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="gap-2 text-muted-foreground"
+          >
+            {isFetchingNextPage ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : null}
+            {isFetchingNextPage ? 'Chargement…' : 'Charger la suite'}
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -149,7 +253,7 @@ export function BibleBooksTab() {
   const debouncedSearch = useDebounce(search, 400);
 
   const [selectedTestament, setSelectedTestament] = useState<
-    'ancien' | 'nouveau'
+    'ancien' | 'nouveau' | 'psaume'
   >('ancien');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
@@ -244,6 +348,16 @@ export function BibleBooksTab() {
         >
           Nouveau Testament
         </button>
+        <button
+          onClick={() => setSelectedTestament('psaume')}
+          className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            selectedTestament === 'psaume'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+          }`}
+        >
+          Psaumes
+        </button>
       </div>
 
       {/* Books or Search list */}
@@ -270,22 +384,60 @@ export function BibleBooksTab() {
                       {group.book.name}
                     </h3>
                     <div className="flex flex-col gap-3">
-                      {(group.matches as any[]).map((match) => (
+                      {group.matches.map((match) => (
                         <div
                           key={match.verse.id}
+                          role="button"
+                          tabIndex={0}
                           className="p-3 bg-background rounded-lg border border-border hover:border-primary transition-colors cursor-pointer"
                           onClick={() => {
-                            setSelectedTestament(group.book.testament as any);
-                            setSelectedBook(group.book as any);
+                            const testament = group.book.testament as
+                              | 'ancien'
+                              | 'nouveau'
+                              | 'psaume';
+                            setSelectedTestament(testament);
+                            const fullBook = books?.find(
+                              (b) => b.id === group.book.id,
+                            ) ?? {
+                              ...group.book,
+                              chapter_count: 50,
+                              verse_count: undefined,
+                            };
+                            setSelectedBook(fullBook);
                             setSelectedChapter(
-                              match.verse.chapter?.number as number,
+                              (match.verse.chapter as { number?: number })
+                                ?.number ?? 1,
                             );
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              const testament = group.book.testament as
+                                | 'ancien'
+                                | 'nouveau'
+                                | 'psaume';
+                              setSelectedTestament(testament);
+                              const fullBook = books?.find(
+                                (b) => b.id === group.book.id,
+                              ) ?? {
+                                ...group.book,
+                                chapter_count: 50,
+                                verse_count: undefined,
+                              };
+                              setSelectedBook(fullBook);
+                              setSelectedChapter(
+                                (match.verse.chapter as { number?: number })
+                                  ?.number ?? 1,
+                              );
+                            }
                           }}
                         >
                           <div className="text-xs font-bold text-primary mb-1">
                             {group.book.name}{' '}
-                            {match.verse.chapter?.number as number}:
-                            {match.verse.number as number}
+                            {
+                              (match.verse.chapter as { number?: number })
+                                ?.number
+                            }
+                            :{match.verse.number}
                           </div>
                           <p className="text-sm leading-relaxed text-foreground">
                             <HighlightText

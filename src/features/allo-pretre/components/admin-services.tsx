@@ -1,6 +1,5 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { Loader2, Plus, Edit } from 'lucide-react';
 import { useState } from 'react';
 
@@ -12,20 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useServices } from '@/features/allo-pretre/api/get-services';
 import type { ServiceType } from '@/features/allo-pretre/api/mutations-service';
-import { api } from '@/lib/api-client';
-
-export const getServices = async (): Promise<ServiceType[]> => {
-  const res: any = await api.get('/v1/availability/services/');
-  return res.results ?? res;
-};
-
-export const useServices = () => {
-  return useQuery({
-    queryKey: ['services'],
-    queryFn: getServices,
-  });
-};
 
 import { ServiceForm } from './service-form';
 

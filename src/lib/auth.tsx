@@ -6,29 +6,85 @@ import {
 } from '@tanstack/react-query';
 import { z } from 'zod';
 
-import { api } from './api-client';
+import {
+  api,
+  clearAccessToken,
+  clearRefreshToken,
+  getRefreshToken,
+  setAccessToken,
+  setRefreshToken,
+} from './api-client';
+
+export type UserRole =
+  | 'super_admin'
+  | 'province_admin'
+  | 'diocese_admin'
+  | 'parish_admin'
+  | 'church_admin'
+  | 'fidele'
+  | 'archeveque'
+  | 'eveque'
+  | 'pretre'
+  | 'diacre'
+  | 'religieux';
+
+export type PastoralRole =
+  | 'fidele'
+  | 'religieux'
+  | 'diacre'
+  | 'pretre'
+  | 'eveque'
+  | 'archeveque';
+
+export type OnboardingState = 'pending_email' | 'pending_parish' | 'completed';
+
+export const ADMIN_ROLES: UserRole[] = [
+  'super_admin',
+  'province_admin',
+  'diocese_admin',
+  'parish_admin',
+  'church_admin',
+];
+
+export const CLERGY_ROLES: UserRole[] = [
+  'archeveque',
+  'eveque',
+  'pretre',
+  'diacre',
+  'religieux',
+];
+
+export interface UserProfile {
+  first_name: string;
+  last_name: string;
+  title?: string;
+  phone?: string;
+  primary_parish?: number | null;
+  avatar?: string | null;
+}
 
 export interface User {
   id: string;
   email: string;
-  firstName?: string;
-  lastName?: string;
-  role?: 'ADMIN' | 'USER' | string;
-  [key: string]: any;
+  phone_number?: string;
+  role: UserRole;
+  pastoral_role?: PastoralRole | null;
+  onboarding_state: OnboardingState;
+  is_active: boolean;
+  is_verified: boolean;
+  is_admin: boolean;
+  is_staff: boolean;
+  profile: UserProfile;
 }
 
 export interface AuthResponse {
-  jwt: string;
+  access: string;
+  refresh: string;
   user: User;
 }
 
-// api call definitions for auth (types, schemas, requests):
-// these are not part of features as this is a module shared across features
-
 export const getUser = async (): Promise<User> => {
-  const response = (await api.get('/auth/me')) as { data: User };
-
-  return response.data;
+  return api.get('/v1/auth/me/');
 };
 
 const userQueryKey = ['user'];
@@ -42,33 +98,39 @@ export const getUserQueryOptions = () => {
 
 export const useUser = () => useQuery(getUserQueryOptions());
 
-export const useLogin = ({ onSuccess }: { onSuccess?: () => void }) => {
+export const useLogin = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: loginWithEmailAndPassword,
     onSuccess: (data) => {
+      if (data.access) setAccessToken(data.access);
+      if (data.refresh) setRefreshToken(data.refresh);
       queryClient.setQueryData(userQueryKey, data.user);
       onSuccess?.();
     },
   });
 };
 
-export const useRegister = ({ onSuccess }: { onSuccess?: () => void }) => {
+export const useRegister = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: registerWithEmailAndPassword,
     onSuccess: (data) => {
-      queryClient.setQueryData(userQueryKey, data.user);
+      if (data?.user) {
+        queryClient.setQueryData(userQueryKey, data.user);
+      }
       onSuccess?.();
     },
   });
 };
 
-export const useLogout = ({ onSuccess }: { onSuccess?: () => void }) => {
+export const useLogout = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: logout,
     onSuccess: () => {
+      clearAccessToken();
+      clearRefreshToken();
       queryClient.removeQueries({ queryKey: userQueryKey });
       onSuccess?.();
     },
@@ -76,44 +138,156 @@ export const useLogout = ({ onSuccess }: { onSuccess?: () => void }) => {
 };
 
 const logout = (): Promise<void> => {
-  return api.post('/auth/logout');
+  const refresh = getRefreshToken();
+  return api.post('/v1/auth/jwt/logout/', refresh ? { refresh } : undefined);
+};
+
+export const useLogoutAll = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post<void>('/v1/auth/jwt/logout-all/'),
+    onSuccess: () => {
+      clearAccessToken();
+      clearRefreshToken();
+      queryClient.removeQueries({ queryKey: userQueryKey });
+      onSuccess?.();
+    },
+  });
 };
 
 export const loginInputSchema = z.object({
-  email: z.string().min(1, 'Required').email('Invalid email'),
-  password: z.string().min(5, 'Required'),
+  email: z.string().min(1, 'Requis').email('Email invalide'),
+  password: z.string().min(1, 'Requis'),
 });
 
 export type LoginInput = z.infer<typeof loginInputSchema>;
+
 const loginWithEmailAndPassword = (data: LoginInput): Promise<AuthResponse> => {
-  return api.post('/auth/login', data);
+  return api.post('/v1/auth/jwt/login/', data);
 };
 
 export const registerInputSchema = z
   .object({
-    email: z.string().min(1, 'Required'),
-    firstName: z.string().min(1, 'Required'),
-    lastName: z.string().min(1, 'Required'),
-    password: z.string().min(5, 'Required'),
+    email: z.string().min(1, 'Requis').email('Email invalide'),
+    phone_number: z.string().min(1, 'Requis'),
+    first_name: z.string().min(1, 'Requis'),
+    last_name: z.string().min(1, 'Requis'),
+    title: z.enum(['MR', 'MRS'], {
+      required_error: 'Requis',
+      invalid_type_error: 'Civilité invalide',
+    }),
+    password: z.string().min(8, 'Minimum 8 caractères'),
+    confirmPassword: z.string().min(1, 'Requis'),
   })
-  .and(
-    z
-      .object({
-        teamId: z.string().min(1, 'Required'),
-        teamName: z.null().default(null),
-      })
-      .or(
-        z.object({
-          teamName: z.string().min(1, 'Required'),
-          teamId: z.null().default(null),
-        }),
-      ),
-  );
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Les mots de passe ne correspondent pas',
+    path: ['confirmPassword'],
+  });
 
 export type RegisterInput = z.infer<typeof registerInputSchema>;
 
 const registerWithEmailAndPassword = (
   data: RegisterInput,
 ): Promise<AuthResponse> => {
-  return api.post('/auth/register', data);
+  // Strip confirmPassword before sending to backend.
+  const { confirmPassword: _confirmPassword, ...payload } = data;
+  void _confirmPassword;
+  return api.post('/v1/users/register/', payload);
+};
+
+// -----------------------------------------------------------------------------
+// Password reset
+// -----------------------------------------------------------------------------
+
+export type RequestPasswordResetInput = { email: string };
+
+export const useRequestPasswordReset = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) =>
+  useMutation({
+    mutationFn: (data: RequestPasswordResetInput) =>
+      api.post<unknown>('/v1/users/password/reset/request/', data),
+    onSuccess,
+  });
+
+export type ConfirmPasswordResetInput = {
+  token: string;
+  new_password: string;
+};
+
+export const useConfirmPasswordReset = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) =>
+  useMutation({
+    mutationFn: (data: ConfirmPasswordResetInput) =>
+      api.post<unknown>('/v1/users/password/reset/confirm/', data),
+    onSuccess,
+  });
+
+// -----------------------------------------------------------------------------
+// Email verification
+// -----------------------------------------------------------------------------
+
+export type VerifyEmailInput = { token: string };
+
+export const useVerifyEmail = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) =>
+  useMutation({
+    mutationFn: (data: VerifyEmailInput) =>
+      api.post<unknown>('/v1/users/verify-email/', data),
+    onSuccess,
+  });
+
+// -----------------------------------------------------------------------------
+// Account deletion
+// -----------------------------------------------------------------------------
+
+export const useDeleteAccount = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.delete<unknown>('/v1/users/me/delete/'),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: userQueryKey });
+      onSuccess?.();
+    },
+  });
+};
+
+// -----------------------------------------------------------------------------
+// Email change flow
+// -----------------------------------------------------------------------------
+
+export type RequestEmailChangeInput = {
+  new_email: string;
+  current_password: string;
+};
+
+export const useRequestEmailChange = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) =>
+  useMutation({
+    mutationFn: (data: RequestEmailChangeInput) =>
+      api.post<unknown>('/v1/users/email/change/request/', data),
+    onSuccess,
+  });
+
+export type ConfirmEmailChangeInput = { otp_code: string };
+
+export const useConfirmEmailChange = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ConfirmEmailChangeInput) =>
+      api.post<unknown>('/v1/users/email/change/confirm/', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userQueryKey });
+      onSuccess?.();
+    },
+  });
 };

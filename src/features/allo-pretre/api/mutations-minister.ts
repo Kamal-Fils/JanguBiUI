@@ -35,8 +35,7 @@ export const createMinister = async (
   data: CreateMinisterInput,
 ): Promise<Minister> => {
   const formData = toFormData(data);
-  const response = await api.post('/v1/availability/ministers/', formData);
-  return response as unknown as Minister;
+  return api.post<Minister>('/v1/availability/ministers/', formData);
 };
 
 export const updateMinister = async (
@@ -44,11 +43,7 @@ export const updateMinister = async (
   data: UpdateMinisterInput,
 ): Promise<Minister> => {
   const formData = toFormData(data);
-  const response = await api.patch(
-    `/v1/availability/ministers/${slug}/`,
-    formData,
-  );
-  return response as unknown as Minister;
+  return api.patch<Minister>(`/v1/availability/ministers/${slug}/`, formData);
 };
 
 export const useCreateMinister = () => {

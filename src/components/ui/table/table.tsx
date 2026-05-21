@@ -5,7 +5,7 @@ import { cn } from '@/utils/cn';
 
 export type BaseEntity = {
   id: string | number;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 import { TablePagination, TablePaginationProps } from './pagination';

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 
 import { api } from '@/lib/api-client';
 import type { components } from '@/types/api';
@@ -19,9 +19,30 @@ export async function fetchLiturgyToday(): Promise<LiturgicalTodayResponse> {
   return api.get('/v1/liturgy/today/');
 }
 
-export function useLiturgyToday() {
-  return useQuery({
-    queryKey: ['liturgy', 'today'],
-    queryFn: fetchLiturgyToday,
+export async function fetchLiturgyForDate(
+  dateStr: string,
+): Promise<LiturgicalTodayResponse> {
+  return api.get(`/v1/liturgy/date/${dateStr}/`);
+}
+
+export const getLiturgyQueryOptions = (date?: Date) => {
+  const today = new Date();
+  const isToday = !date || date.toDateString() === today.toDateString();
+
+  if (isToday) {
+    return queryOptions({
+      queryKey: ['liturgy', 'today'],
+      queryFn: fetchLiturgyToday,
+    });
+  }
+
+  const dateStr = date.toISOString().split('T')[0];
+  return queryOptions({
+    queryKey: ['liturgy', 'date', dateStr],
+    queryFn: () => fetchLiturgyForDate(dateStr),
   });
+};
+
+export function useLiturgyToday(date?: Date) {
+  return useQuery(getLiturgyQueryOptions(date));
 }
