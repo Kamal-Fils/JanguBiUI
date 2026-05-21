@@ -103,9 +103,9 @@ export function getServerCookies() {
   if (typeof window !== 'undefined') return '';
 
   // Dynamic import next/headers only on server-side
-  return import('next/headers').then(({ cookies }) => {
+  return import('next/headers').then(async ({ cookies }) => {
     try {
-      const cookieStore = cookies();
+      const cookieStore = await cookies();
       return cookieStore
         .getAll()
         .map((c) => `${c.name}=${c.value}`)
