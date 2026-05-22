@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AdminMinisters } from '@/features/allo-pretre/components/admin-ministers';
@@ -26,29 +27,31 @@ export default function AvailabilityAdminPage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-background-surface">
-      <PageHeader
-        title="Disponibilités"
-        subtitle="Gestion des paroisses, services et ministres"
-      />
-      <div className="flex-1 p-4">
-        <Tabs defaultValue="parishes">
-          <TabsList className="mb-4">
-            <TabsTrigger value="parishes">Paroisses</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
-            <TabsTrigger value="ministers">Ministres</TabsTrigger>
-          </TabsList>
-          <TabsContent value="parishes">
-            <AdminParishes />
-          </TabsContent>
-          <TabsContent value="services">
-            <AdminServices />
-          </TabsContent>
-          <TabsContent value="ministers">
-            <AdminMinisters />
-          </TabsContent>
-        </Tabs>
+    <AppShell>
+      <div className="flex flex-col">
+        <PageHeader
+          title="Allo-Prêtre"
+          subtitle="Gestion des paroisses, services et ministres"
+        />
+        <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+          <Tabs defaultValue="parishes">
+            <TabsList className="mb-4">
+              <TabsTrigger value="parishes">Paroisses</TabsTrigger>
+              <TabsTrigger value="services">Services</TabsTrigger>
+              <TabsTrigger value="ministers">Ministres</TabsTrigger>
+            </TabsList>
+            <TabsContent value="parishes">
+              <AdminParishes />
+            </TabsContent>
+            <TabsContent value="services">
+              <AdminServices />
+            </TabsContent>
+            <TabsContent value="ministers">
+              <AdminMinisters />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

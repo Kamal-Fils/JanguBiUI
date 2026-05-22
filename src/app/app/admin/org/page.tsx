@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { useDioceses } from '@/features/org/api/get-dioceses';
 import { useParishes } from '@/features/org/api/get-parishes';
@@ -29,19 +30,22 @@ export default function AdminOrgPage() {
 
   if (!isSuperAdmin(user)) {
     return (
-      <div className="flex flex-col h-full">
-        <PageHeader title="Structure territoriale" />
-        <p className="p-4 text-sm text-red-500">
-          Accès réservé au super administrateur.
-        </p>
-      </div>
+      <AppShell>
+        <div className="flex flex-col">
+          <PageHeader title="Structure territoriale" />
+          <p className="p-4 text-sm text-destructive">
+            Accès réservé au super administrateur.
+          </p>
+        </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <PageHeader title="Structure territoriale" />
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+    <AppShell>
+      <div className="flex flex-col">
+        <PageHeader title="Structure territoriale" />
+        <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8 space-y-6">
         {/* Provinces */}
         <section className="space-y-2">
           <h2 className="text-sm font-semibold text-gray-700">Provinces</h2>
@@ -151,7 +155,8 @@ export default function AdminOrgPage() {
             ))}
           </ul>
         </section>
+        </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

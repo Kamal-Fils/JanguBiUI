@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button';
 import { paths } from '@/config/paths';
@@ -55,17 +56,20 @@ export default function AdminUsersPage() {
 
   if (!canManageUsers(currentUser)) {
     return (
-      <div className="flex flex-col h-full">
-        <PageHeader title="Utilisateurs" />
-        <p className="p-4 text-sm text-red-500">Accès non autorisé.</p>
-      </div>
+      <AppShell>
+        <div className="flex flex-col">
+          <PageHeader title="Utilisateurs" />
+          <p className="p-4 text-sm text-destructive">Accès non autorisé.</p>
+        </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <PageHeader title="Utilisateurs" />
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <AppShell>
+      <div className="flex flex-col">
+        <PageHeader title="Utilisateurs" />
+        <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8 space-y-4">
         {/* Filter + actions */}
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex gap-1 flex-wrap">
@@ -146,7 +150,8 @@ export default function AdminUsersPage() {
             {data.results.length} / {data.count} utilisateurs
           </p>
         )}
+        </div>
       </div>
-    </div>
+    </AppShell>
   );
 }
