@@ -7,7 +7,6 @@ import {
   Home,
   MessageCircle,
   Newspaper,
-  Settings,
   User,
 } from 'lucide-react';
 
@@ -60,17 +59,18 @@ const ITEM_CLERGE: NavItem = {
   icon: Church,
   clergyOnly: true,
 };
-const ITEM_ADMIN: NavItem = {
-  label: 'Administration',
+// Admin "home" points directly to /app/admin to avoid the /app → /app/admin redirect flash
+const ITEM_ACCUEIL_ADMIN: NavItem = {
+  label: 'Accueil',
   href: '/app/admin',
-  icon: Settings,
+  icon: Home,
   adminOnly: true,
 };
 
 export const buildNavItems = (user: UserType | null | undefined): NavItem[] => {
   // Admin roles and clergy roles are disjoint — the !isClergy guard is defensive
   if (isAdmin(user) && !isClergy(user)) {
-    return [ITEM_ACCUEIL, ITEM_ACTUS, ITEM_SPIRITUEL, ITEM_ADMIN, ITEM_MESSAGES, ITEM_PROFIL];
+    return [ITEM_ACCUEIL_ADMIN, ITEM_ACTUS, ITEM_SPIRITUEL, ITEM_MESSAGES, ITEM_PROFIL];
   }
 
   if (isClergy(user)) {
@@ -95,10 +95,9 @@ export const buildBottomNavItems = (
 ): NavItem[] => {
   if (isAdmin(user) && !isClergy(user)) {
     return [
-      ITEM_ACCUEIL,
+      ITEM_ACCUEIL_ADMIN,
       ITEM_ACTUS,
       ITEM_SPIRITUEL,
-      ITEM_ADMIN,
       ITEM_MESSAGES,
       ITEM_PROFIL,
     ];
