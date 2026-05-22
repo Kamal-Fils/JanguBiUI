@@ -43,9 +43,10 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
   return (
     <div className="space-y-6">
       {office.intro && (
-        <div className="rounded-xl bg-muted/50 p-4 text-sm leading-relaxed text-muted-foreground">
-          {office.intro}
-        </div>
+        <div
+          className="prose prose-sm max-w-none rounded-xl bg-muted/50 p-4 text-muted-foreground"
+          dangerouslySetInnerHTML={{ __html: office.intro }}
+        />
       )}
 
       {office.hymns && office.hymns.length > 0 && (
@@ -57,10 +58,9 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
           {office.hymns.map((hymn, i) => (
             <div
               key={i}
-              className="whitespace-pre-wrap rounded-xl border border-border bg-card p-4 text-sm leading-relaxed"
-            >
-              {hymn.text}
-            </div>
+              className="prose prose-sm max-w-none rounded-xl border border-border bg-card p-4 text-foreground"
+              dangerouslySetInnerHTML={{ __html: hymn.text }}
+            />
           ))}
         </section>
       )}
@@ -83,9 +83,10 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
                     {psalm.title ? ` — ${psalm.title}` : ''}
                   </p>
                 )}
-                <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {psalm.text}
-                </p>
+                <div
+                  className="prose prose-sm max-w-none text-foreground"
+                  dangerouslySetInnerHTML={{ __html: psalm.text }}
+                />
               </div>
             ))}
           </div>
@@ -99,18 +100,21 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
           </h3>
           <div className="space-y-2">
             {office.intercessions.map((item, i) => (
-              <p key={i} className="text-sm leading-relaxed">
-                {item.text}
-              </p>
+              <div
+                key={i}
+                className="prose prose-sm max-w-none text-foreground"
+                dangerouslySetInnerHTML={{ __html: item.text }}
+              />
             ))}
           </div>
         </section>
       )}
 
       {office.conclusion && (
-        <div className="rounded-xl bg-muted/50 p-4 text-sm leading-relaxed text-muted-foreground">
-          {office.conclusion}
-        </div>
+        <div
+          className="prose prose-sm max-w-none rounded-xl bg-muted/50 p-4 text-muted-foreground"
+          dangerouslySetInnerHTML={{ __html: office.conclusion }}
+        />
       )}
     </div>
   );
