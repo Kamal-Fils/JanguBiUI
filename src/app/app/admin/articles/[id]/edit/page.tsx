@@ -28,7 +28,7 @@ export default function EditArticlePage() {
 
   useEffect(() => {
     if (!userLoading && !canCreateArticle(user)) {
-      router.replace('/app');
+      router.replace(paths.app.root.getHref());
     }
   }, [user, userLoading, router]);
 

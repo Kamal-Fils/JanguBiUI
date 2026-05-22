@@ -19,12 +19,12 @@ export default function InvitationsPage() {
   const { data, isLoading: invitationsLoading } = useInvitations();
 
   useEffect(() => {
-    if (!isLoading && user && !canManageClergy(user)) {
+    if (!isLoading && !canManageClergy(user)) {
       router.replace(paths.app.root.getHref());
     }
   }, [user, isLoading, router]);
 
-  if (isLoading || (user && !canManageClergy(user))) return null;
+  if (isLoading || !canManageClergy(user)) return null;
 
   return (
     <AppShell>
