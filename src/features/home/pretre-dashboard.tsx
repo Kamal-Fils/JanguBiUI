@@ -5,14 +5,15 @@ import Link from 'next/link';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
+import type { ClergicalMessage } from '@/features/messaging/api/get-clerical-inbox';
 import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
+import type { MassIntention } from '@/features/intentions/api/get-my-intentions';
 import { useParishIntentions } from '@/features/intentions/api/get-parish-intentions';
 import {
   useAcceptIntention,
   useCelebrateIntention,
 } from '@/features/intentions/api/manage-intentions';
 import { IntentionStatusBadge } from '@/features/intentions/components/intention-status-badge';
-import type { MassIntention } from '@/features/intentions/api/get-my-intentions';
 import { cn } from '@/lib/utils';
 
 import { WelcomeBanner } from './welcome-banner';
@@ -48,13 +49,14 @@ const QUICK_ACTIONS = [
 
 // ── Stats row ─────────────────────────────────────────────────────────────────
 
-function StatsRow() {
-  const { data: intentions, isLoading: loadingIntentions } = useParishIntentions();
-  const { data: inbox, isLoading: loadingMessages } = useClericalInbox();
+interface StatsRowProps {
+  pendingCount: number;
+  unreadCount: number;
+  loadingIntentions: boolean;
+  loadingMessages: boolean;
+}
 
-  const pendingCount = intentions?.results.filter((i) => i.status === 'pending').length ?? 0;
-  const unreadCount = inbox?.results.filter((m) => !m.read_at).length ?? 0;
-
+function StatsRow({ pendingCount, unreadCount, loadingIntentions, loadingMessages }: StatsRowProps) {
   const stats = [
     {
       label: 'En attente',
@@ -148,13 +150,15 @@ function PendingIntentionCard({ intention }: { intention: MassIntention }) {
 
 // ── Intentions section ───────────────────────────────────────────────────────
 
-function PendingIntentionsSection() {
-  const { data, isLoading } = useParishIntentions();
+interface PendingIntentionsSectionProps {
+  intentions: MassIntention[];
+  isLoading: boolean;
+}
 
-  const actionable = data?.results.filter(
+function PendingIntentionsSection({ intentions, isLoading }: PendingIntentionsSectionProps) {
+  const actionable = intentions.filter(
     (i) => i.status === 'pending' || i.status === 'accepted' || i.status === 'date_proposed',
-  ) ?? [];
-
+  );
   const preview = actionable.slice(0, 3);
 
   return (
@@ -207,10 +211,13 @@ function PendingIntentionsSection() {
 
 // ── Recent messages section ──────────────────────────────────────────────────
 
-function RecentMessagesSection() {
-  const { data, isLoading } = useClericalInbox();
+interface RecentMessagesSectionProps {
+  messages: ClergicalMessage[];
+  isLoading: boolean;
+}
 
-  const recent = data?.results.slice(0, 2) ?? [];
+function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionProps) {
+  const recent = messages.slice(0, 2);
 
   return (
     <section className="flex flex-col gap-3">
@@ -268,14 +275,26 @@ function RecentMessagesSection() {
 // ── Main component ───────────────────────────────────────────────────────────
 
 export function PretreeDashboard() {
+  const { data: intentionsData, isLoading: loadingIntentions } = useParishIntentions();
+  const { data: inboxData, isLoading: loadingMessages } = useClericalInbox();
+
+  const intentions = intentionsData?.results ?? [];
+  const messages = inboxData?.results ?? [];
+  const pendingCount = intentions.filter((i) => i.status === 'pending').length;
+  const unreadCount = messages.filter((m) => !m.read_at).length;
+
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
       <div className="flex flex-col gap-6">
         <WelcomeBanner />
 
-        <StatsRow />
+        <StatsRow
+          pendingCount={pendingCount}
+          unreadCount={unreadCount}
+          loadingIntentions={loadingIntentions}
+          loadingMessages={loadingMessages}
+        />
 
-        {/* Quick actions */}
         <div className="grid grid-cols-4 gap-2">
           {QUICK_ACTIONS.map((action) => {
             const Icon = action.icon;
@@ -301,8 +320,8 @@ export function PretreeDashboard() {
           })}
         </div>
 
-        <PendingIntentionsSection />
-        <RecentMessagesSection />
+        <PendingIntentionsSection intentions={intentions} isLoading={loadingIntentions} />
+        <RecentMessagesSection messages={messages} isLoading={loadingMessages} />
       </div>
     </div>
   );
