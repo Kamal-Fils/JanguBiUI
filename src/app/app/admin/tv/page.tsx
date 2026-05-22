@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button';
 import { useCreateCategory } from '@/features/tv/api/create-category';
@@ -69,12 +70,14 @@ export default function AdminTvPage() {
 
   if (!canManageTV(user)) {
     return (
-      <div className="flex flex-col h-full">
-        <PageHeader title="TV — Administration" />
-        <p className="p-4 text-sm text-red-500">
-          Accès réservé au super administrateur.
-        </p>
-      </div>
+      <AppShell>
+        <div className="flex flex-col">
+          <PageHeader title="TV — Administration" />
+          <p className="p-4 text-sm text-red-500">
+            Accès réservé au super administrateur.
+          </p>
+        </div>
+      </AppShell>
     );
   }
 
@@ -107,9 +110,10 @@ export default function AdminTvPage() {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <PageHeader title="TV — Administration" />
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+    <AppShell>
+      <div className="flex flex-col">
+        <PageHeader title="TV — Administration" />
+        <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8 space-y-6">
         {/* Categories section */}
         <section className="space-y-2">
           <div className="flex items-center justify-between">
@@ -375,7 +379,8 @@ export default function AdminTvPage() {
             ))}
           </ul>
         </section>
+        </div>
       </div>
-    </div>
+    </AppShell>
   );
 }
