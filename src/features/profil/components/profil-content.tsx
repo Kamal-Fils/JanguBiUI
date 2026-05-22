@@ -1,14 +1,17 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, LogOut, Trash2 } from 'lucide-react';
+import { Loader2, LogOut, MapPin, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNotifications } from '@/components/ui/notifications';
+import { paths } from '@/config/paths';
 import { useDeleteAccount, useLogout, useUser } from '@/lib/auth';
+import { isFidele } from '@/lib/authorization';
 
 import {
   ChangePasswordInput,
@@ -328,6 +331,19 @@ export function ProfilContent() {
             </button>
           </form>
         </SectionCard>
+
+        {/* Transfert paroissial — fidèles uniquement */}
+        {isFidele(user) && (
+          <SectionCard title="Paroisse">
+            <Link
+              href={paths.app.transfert.getHref()}
+              className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+            >
+              <MapPin className="size-4 text-primary" />
+              Demander un transfert paroissial
+            </Link>
+          </SectionCard>
+        )}
 
         {/* Session section */}
         <SectionCard title="Session">
