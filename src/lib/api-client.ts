@@ -1,6 +1,16 @@
 import { useNotifications } from '@/components/ui/notifications';
 import { env } from '@/config/env';
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 // Access token — memory only (short-lived, refreshed via /jwt/refresh/)
 let _accessToken: string | null = null;
 
@@ -235,14 +245,14 @@ async function fetchApi<T>(
       unknown
     >;
     const message = (body.message as string | undefined) || response.statusText;
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && response.status !== 404) {
       useNotifications.getState().addNotification({
         type: 'error',
         title: 'Erreur',
         message,
       });
     }
-    throw new Error(message);
+    throw new ApiError(message, response.status);
   }
 
   return response.json();
