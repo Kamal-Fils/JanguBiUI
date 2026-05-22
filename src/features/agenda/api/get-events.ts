@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { api } from '@/lib/api-client';
 
-const eventSchema = z.object({
+export const eventSchema = z.object({
   id: z.number(),
   title: z.string(),
   description: z.string(),
@@ -16,44 +16,39 @@ const eventSchema = z.object({
   max_participants: z.number().nullable().optional(),
   organizer_email: z.string().email().nullable().optional(),
   registration_count: z.number(),
+  is_registered: z.boolean().optional(),
   created_at: z.string(),
 });
 
 export type Event = z.infer<typeof eventSchema>;
 
-type EventsResponse = { count: number; results: Event[] };
+const eventsResponseSchema = z.object({
+  count: z.number(),
+  results: z.array(eventSchema),
+});
 
-const parseEvents = (data: unknown): EventsResponse => {
-  const raw = data as { count: number; results: unknown[] };
-  return {
-    count: raw.count,
-    results: raw.results.map((item) => eventSchema.parse(item)),
-  };
-};
+type EventsResponse = z.infer<typeof eventsResponseSchema>;
 
-export const getEvents = (params?: {
+type EventsParams = {
   scope_type?: string;
   event_type?: string;
-}): Promise<EventsResponse> => {
+};
+
+export const getEvents = (params?: EventsParams): Promise<EventsResponse> => {
   const query = new URLSearchParams();
   if (params?.scope_type) query.set('scope_type', params.scope_type);
   if (params?.event_type) query.set('event_type', params.event_type);
   const qs = query.toString();
   return api
     .get<unknown>(`/v1/agenda/events/${qs ? `?${qs}` : ''}`)
-    .then(parseEvents);
+    .then((data) => eventsResponseSchema.parse(data));
 };
 
-export const getEventsQueryOptions = (params?: {
-  scope_type?: string;
-  event_type?: string;
-}) =>
+export const getEventsQueryOptions = (params?: EventsParams) =>
   queryOptions({
     queryKey: ['events', params],
     queryFn: () => getEvents(params),
   });
 
-export const useEvents = (params?: {
-  scope_type?: string;
-  event_type?: string;
-}) => useQuery(getEventsQueryOptions(params));
+export const useEvents = (params?: EventsParams) =>
+  useQuery(getEventsQueryOptions(params));
