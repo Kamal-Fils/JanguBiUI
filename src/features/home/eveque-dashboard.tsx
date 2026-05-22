@@ -180,7 +180,7 @@ interface DraftArticlesSectionProps {
 }
 
 function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps) {
-  const drafts = articles.filter((a) => a.status === 'draft').slice(0, 3);
+  const drafts = articles;
 
   return (
     <section className="flex flex-col gap-3">
@@ -233,13 +233,13 @@ function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps
 
 export function EvequeeDashboard() {
   const { data: inboxData, isLoading: loadingMessages } = useClericalInbox();
-  const { data: articlesData, isLoading: loadingArticles } = useAdminArticles({ limit: 10 });
+  const { data: draftsData, isLoading: loadingArticles } = useAdminArticles({ status: 'draft', limit: 3 });
   const { data: parishes = [], isLoading: loadingParishes } = useParishes();
 
   const messages = inboxData?.results ?? [];
-  const articles = articlesData?.results ?? [];
+  const drafts = draftsData?.results ?? [];
   const unreadCount = messages.filter((m) => !m.read_at).length;
-  const draftCount = articles.filter((a) => a.status === 'draft').length;
+  const draftCount = draftsData?.count ?? 0;
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
@@ -275,7 +275,7 @@ export function EvequeeDashboard() {
         </div>
 
         <RecentMessagesSection messages={messages} isLoading={loadingMessages} />
-        <DraftArticlesSection articles={articles} isLoading={loadingArticles} />
+        <DraftArticlesSection articles={drafts} isLoading={loadingArticles} />
       </div>
     </div>
   );
