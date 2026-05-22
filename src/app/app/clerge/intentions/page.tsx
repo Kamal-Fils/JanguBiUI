@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
+import { paths } from '@/config/paths';
 import { Button } from '@/components/ui/button';
 import { useParishIntentions } from '@/features/intentions/api/get-parish-intentions';
 import {
@@ -16,7 +19,8 @@ import { useUser } from '@/lib/auth';
 import { isClergy } from '@/lib/authorization';
 
 export default function ClergeIntentionsPage() {
-  const { data: user } = useUser();
+  const router = useRouter();
+  const { data: user, isLoading: userLoading } = useUser();
   const { data, isLoading } = useParishIntentions();
   const { mutate: accept, isPending: accepting } = useAcceptIntention();
   const { mutate: celebrate, isPending: celebrating } = useCelebrateIntention();
@@ -25,20 +29,18 @@ export default function ClergeIntentionsPage() {
   const [proposingDateFor, setProposingDateFor] = useState<number | null>(null);
   const [dateInput, setDateInput] = useState('');
 
-  if (!isClergy(user)) {
-    return (
-      <div className="flex flex-col h-full">
-        <PageHeader title="Intentions de Messe" />
-        <div className="flex-1 flex items-center justify-center p-6">
-          <p className="text-sm text-gray-500">Accès réservé au clergé.</p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!userLoading && !isClergy(user)) {
+      router.replace(paths.app.root.getHref());
+    }
+  }, [user, userLoading, router]);
+
+  if (userLoading || !isClergy(user)) return null;
 
   return (
-    <div className="flex flex-col h-full">
-      <PageHeader title="Intentions reçues" />
+    <AppShell>
+      <div className="flex flex-col">
+        <PageHeader title="Intentions reçues" />
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {isLoading && (
           <p className="text-sm text-gray-500 text-center py-6">Chargement…</p>
@@ -151,7 +153,8 @@ export default function ClergeIntentionsPage() {
               )}
             </div>
           ))}
+        </div>
       </div>
-    </div>
+    </AppShell>
   );
 }
