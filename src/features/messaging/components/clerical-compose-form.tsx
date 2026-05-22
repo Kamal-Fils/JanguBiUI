@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { useUser } from '@/lib/auth';
 import { isEvequeOrAbove } from '@/lib/authorization';
 
+import { useParishes } from '../../allo-pretre/api/get-parishes';
+import { usePriests } from '../api/get-priests';
 import { useSendClericalMessage } from '../api/send-clerical-message';
 
 const schema = z.object({
@@ -40,6 +42,8 @@ interface ClericalComposeFormProps {
 export function ClericalComposeForm({ onSuccess }: ClericalComposeFormProps) {
   const { data: user } = useUser();
   const { mutate, isPending } = useSendClericalMessage({ onSuccess });
+  const { data: priests = [] } = usePriests();
+  const { data: parishes = [] } = useParishes();
 
   const {
     register,
@@ -101,33 +105,61 @@ export function ClericalComposeForm({ onSuccess }: ClericalComposeFormProps) {
             htmlFor="individual_recipient_id"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            ID du destinataire
+            Destinataire
           </label>
-          <input
+          <select
             id="individual_recipient_id"
-            type="number"
             {...register('individual_recipient_id', { valueAsNumber: true })}
-            placeholder="ID utilisateur"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          >
+            <option value="">-- Choisir un prêtre --</option>
+            {priests.map((priest) => (
+              <option key={priest.id} value={priest.id}>
+                {priest.full_name}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
-      {(scope === 'parish_clergy' ||
-        scope === 'diocese_clergy' ||
-        scope === 'province_bishops') && (
+      {scope === 'parish_clergy' && (
         <div>
           <label
             htmlFor="scope_id"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            ID du territoire (paroisse / diocèse / province)
+            Paroisse
+          </label>
+          <select
+            id="scope_id"
+            {...register('scope_id', { valueAsNumber: true })}
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">-- Choisir une paroisse --</option>
+            {parishes.map((parish) => (
+              <option key={parish.id} value={parish.id}>
+                {parish.name} — {parish.city}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {(scope === 'diocese_clergy' || scope === 'province_bishops') && (
+        <div>
+          <label
+            htmlFor="scope_id"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            {scope === 'diocese_clergy' ? 'ID diocèse' : 'ID province'}
           </label>
           <input
             id="scope_id"
             type="number"
             {...register('scope_id', { valueAsNumber: true })}
-            placeholder="ID territoire"
+            placeholder={
+              scope === 'diocese_clergy' ? 'ID du diocèse' : 'ID de la province'
+            }
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

@@ -1,10 +1,13 @@
 'use client';
 
-import { Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { PageHeader } from '@/components/layouts/page-header';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AdminMinisters } from '@/features/allo-pretre/components/admin-ministers';
+import { AdminParishes } from '@/features/allo-pretre/components/admin-parishes';
+import { AdminServices } from '@/features/allo-pretre/components/admin-services';
 import { useUser } from '@/lib/auth';
 import { isAdmin } from '@/lib/authorization';
 
@@ -28,19 +31,23 @@ export default function AvailabilityAdminPage() {
         title="Disponibilités"
         subtitle="Gestion des paroisses, services et ministres"
       />
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-        <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
-          <Clock className="size-8 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">
-            Bientôt disponible
-          </h2>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            La gestion des disponibilités est en cours de développement. Cette
-            fonctionnalité sera disponible prochainement.
-          </p>
-        </div>
+      <div className="flex-1 p-4">
+        <Tabs defaultValue="parishes">
+          <TabsList className="mb-4">
+            <TabsTrigger value="parishes">Paroisses</TabsTrigger>
+            <TabsTrigger value="services">Services</TabsTrigger>
+            <TabsTrigger value="ministers">Ministres</TabsTrigger>
+          </TabsList>
+          <TabsContent value="parishes">
+            <AdminParishes />
+          </TabsContent>
+          <TabsContent value="services">
+            <AdminServices />
+          </TabsContent>
+          <TabsContent value="ministers">
+            <AdminMinisters />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
