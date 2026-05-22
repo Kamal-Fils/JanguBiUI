@@ -41,3 +41,6 @@ mocked-db.json
 /.next
 /.vite
 tsconfig.tsbuildinfo
+
+# graphify
+/graphify-out
