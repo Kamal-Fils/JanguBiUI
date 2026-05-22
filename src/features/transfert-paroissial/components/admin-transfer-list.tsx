@@ -103,7 +103,13 @@ function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
         </div>
       </div>
 
-      <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
+      <Dialog
+        open={rejectOpen}
+        onOpenChange={(open) => {
+          if (!open) setRejectReason('');
+          setRejectOpen(open);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Refuser le transfert</DialogTitle>

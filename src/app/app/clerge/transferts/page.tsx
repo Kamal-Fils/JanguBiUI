@@ -14,7 +14,8 @@ import { isClergy } from '@/lib/authorization';
 export default function ClergeTransfertsPage() {
   const router = useRouter();
   const { data: user, isLoading: userLoading } = useUser();
-  const { data, isLoading: dataLoading } = useAdminTransfers();
+  const authorized = !userLoading && isClergy(user);
+  const { data, isLoading: dataLoading } = useAdminTransfers(authorized);
 
   useEffect(() => {
     if (!userLoading && !isClergy(user)) {

@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
+import { useNotifications } from '@/components/ui/notifications';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMyTransfer } from '@/features/transfert-paroissial/api/get-my-transfer';
 import { TransferRequestForm } from '@/features/transfert-paroissial/components/transfer-request-form';
@@ -12,7 +13,16 @@ import { TransferStatusCard } from '@/features/transfert-paroissial/components/t
 import { paths } from '@/config/paths';
 
 export default function TransfertPage() {
+  const { addNotification } = useNotifications();
   const { data: transfer, isLoading } = useMyTransfer();
+
+  function handleTransferSuccess() {
+    addNotification({
+      type: 'success',
+      title: 'Demande envoyée',
+      message: 'Votre demande de transfert a bien été soumise.',
+    });
+  }
 
   return (
     <AppShell>
@@ -44,7 +54,7 @@ export default function TransfertPage() {
                   <p className="mb-4 text-sm text-muted-foreground">
                     Votre demande a été refusée. Vous pouvez en soumettre une nouvelle.
                   </p>
-                  <TransferRequestForm onSuccess={() => {}} />
+                  <TransferRequestForm onSuccess={handleTransferSuccess} />
                 </div>
               )}
             </div>
@@ -54,7 +64,7 @@ export default function TransfertPage() {
                 Vous n&apos;avez aucune demande de transfert en cours. Sélectionnez
                 votre nouvelle paroisse et soumettez votre demande ci-dessous.
               </p>
-              <TransferRequestForm onSuccess={() => {}} />
+              <TransferRequestForm onSuccess={handleTransferSuccess} />
             </div>
           )}
         </div>

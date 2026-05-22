@@ -4,13 +4,20 @@ import { CheckCircle, Clock, MapPin, XCircle } from 'lucide-react';
 
 import { TransferRequest, TransferStatus, TRANSFER_STATUS_LABELS } from '../types';
 
-const STATUS_ICON: Record<TransferStatus, React.ReactNode> = {
-  pending: <Clock className="size-5 text-amber-500" />,
-  approved_by_origin: <Clock className="size-5 text-blue-500" />,
-  acknowledged_by_destination: <Clock className="size-5 text-blue-600" />,
-  completed: <CheckCircle className="size-5 text-green-500" />,
-  rejected: <XCircle className="size-5 text-destructive" />,
-};
+function getStatusIcon(status: TransferStatus): React.ReactNode {
+  switch (status) {
+    case 'pending':
+      return <Clock className="size-5 text-amber-500" />;
+    case 'approved_by_origin':
+      return <Clock className="size-5 text-blue-500" />;
+    case 'acknowledged_by_destination':
+      return <Clock className="size-5 text-blue-600" />;
+    case 'completed':
+      return <CheckCircle className="size-5 text-green-500" />;
+    case 'rejected':
+      return <XCircle className="size-5 text-destructive" />;
+  }
+}
 
 const STATUS_BG: Record<TransferStatus, string> = {
   pending: 'border-amber-200 bg-amber-50 dark:bg-amber-950/20',
@@ -37,7 +44,7 @@ export function TransferStatusCard({ transfer }: TransferStatusCardProps) {
     <div className={`rounded-xl border p-4 ${STATUS_BG[transfer.status]}`}>
       <div className="flex items-start gap-3">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-background">
-          {STATUS_ICON[transfer.status]}
+          {getStatusIcon(transfer.status)}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground">

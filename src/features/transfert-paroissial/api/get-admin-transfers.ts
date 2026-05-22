@@ -17,10 +17,12 @@ const parseTransfers = (data: unknown): AdminTransfersResponse => {
 export const getAdminTransfers = (): Promise<AdminTransfersResponse> =>
   api.get<unknown>('/v1/transfers/admin/').then(parseTransfers);
 
-export const getAdminTransfersQueryOptions = () =>
+export const getAdminTransfersQueryOptions = (enabled: boolean) =>
   queryOptions({
     queryKey: ['transfers', 'admin'],
     queryFn: getAdminTransfers,
+    enabled,
   });
 
-export const useAdminTransfers = () => useQuery(getAdminTransfersQueryOptions());
+export const useAdminTransfers = (enabled = true) =>
+  useQuery(getAdminTransfersQueryOptions(enabled));
