@@ -32,7 +32,8 @@ export default function DocumentsPage() {
     }
   }, [user, isLoading, router]);
 
-  if (isLoading || (isAdmin(user) && !isClergy(user))) return null;
+  if (isLoading) return null;
+  if (isAdmin(user) && !isClergy(user)) return null;
 
   return (
     <AppShell>
@@ -73,7 +74,7 @@ export default function DocumentsPage() {
 
       {activeTab === 'requests' && (
         <Link
-          href="/app/documents/new"
+          href={paths.app.newDocument.getHref()}
           className="fixed bottom-24 right-4 z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl md:bottom-6"
           aria-label="Nouvelle demande"
         >

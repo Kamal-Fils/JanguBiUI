@@ -28,6 +28,7 @@ export function HomeRouter() {
   if (isAdmin(user) && !isClergy(user)) return null;
 
   if (isFidele(user)) return <FideleDashboard />;
+  // isEvequeOrAbove before isClergy — évêque/archevêque are clergy but need a distinct dashboard
   if (isEvequeOrAbove(user)) return <EvequeeDashboard />;
   if (isClergy(user)) return <PretreeDashboard />;
 
