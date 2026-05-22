@@ -19,6 +19,7 @@ const randParagraph = () => _paragraph();
 
 const randText = (_options?: { charCount?: number }) => _text();
 
+import type { Minister } from '@/features/allo-pretre/api/get-ministers';
 import type { DocumentRequest } from '@/features/documents/types';
 import type { Conversation, Message } from '@/features/messaging/types';
 import type {
@@ -273,30 +274,31 @@ export const createRosaryDay = (overrides?: Partial<RosaryDay>): RosaryDay => ({
 // Minister / Parish (Allo-prêtre)
 // ----------------------------------------------------------------
 
-export interface Minister {
-  id: string;
-  slug: string;
-  name: string;
-  title: string;
-  parish?: string;
-  bio?: string;
-  avatar?: string | null;
-}
+export type { Minister };
 
 export interface Parish {
   id: number;
   name: string;
   slug: string;
+  city: string;
 }
 
 export const createMinister = (overrides?: Partial<Minister>): Minister => ({
-  id: randUuid(),
+  id: randNumber({ min: 1, max: 9999 }),
+  first_name: randFirstName(),
+  last_name: randLastName(),
   slug: randWord().toLowerCase(),
-  name: `Abbé ${randFirstName()} ${randLastName()}`,
-  title: 'Prêtre',
-  parish: `Paroisse ${randWord()}`,
-  bio: randParagraph(),
-  avatar: null,
+  photo: null,
+  role: 'PRIEST',
+  role_display: 'Prêtre',
+  parish: {
+    id: randNumber({ min: 1, max: 500 }),
+    name: `Paroisse ${randWord()}`,
+    slug: randWord().toLowerCase(),
+    city: randWord(),
+  },
+  parish_id: randNumber({ min: 1, max: 500 }),
+  is_active: true,
   ...overrides,
 });
 
@@ -304,5 +306,6 @@ export const createParish = (overrides?: Partial<Parish>): Parish => ({
   id: randNumber({ min: 1, max: 500 }),
   name: `Paroisse ${randWord()}`,
   slug: randWord().toLowerCase(),
+  city: randWord(),
   ...overrides,
 });
