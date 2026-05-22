@@ -21,6 +21,6 @@ export const getProvinces = (): Promise<Province[]> =>
     .then((data) => provincesResponseSchema.parse(data).results);
 
 export const getProvincesQueryOptions = () =>
-  queryOptions({ queryKey: ['org', 'provinces'], queryFn: getProvinces });
+  queryOptions({ queryKey: ['org', 'provinces'], queryFn: getProvinces, retry: false });
 
 export const useProvinces = () => useQuery(getProvincesQueryOptions());

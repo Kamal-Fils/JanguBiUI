@@ -1,19 +1,10 @@
-import { Analytics } from '@vercel/analytics/react';
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
-
-import { ThemeProvider } from '@/components/layouts/theme-provider';
-import './globals.css';
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-});
+import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Jangu Bi - Bible, Chapelet & Spiritualite',
+  title: 'Jàngu Bi — Bible, Chapelet & Spiritualité',
   description:
-    'Votre compagnon spirituel quotidien. Lectures du jour, chapelet guide et mise en relation avec des pretres.',
+    'Votre compagnon spirituel quotidien. Lectures du jour, chapelet guidé et mise en relation avec des prêtres.',
 };
 
 export const viewport: Viewport = {
@@ -27,24 +18,8 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <div className={`${inter.variable} font-sans antialiased`}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        {children}
-      </ThemeProvider>
-      <Analytics />
-    </div>
-  );
-}
-
 export const dynamic = 'force-dynamic';
+
+export default function AppLayout({ children }: { children: ReactNode }) {
+  return <>{children}</>;
+}

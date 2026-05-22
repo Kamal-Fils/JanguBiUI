@@ -26,6 +26,7 @@ export const getDiocesesQueryOptions = (provinceId?: number) =>
   queryOptions({
     queryKey: ['org', 'dioceses', provinceId],
     queryFn: () => getDioceses(provinceId),
+    retry: false,
   });
 
 export const useDioceses = (provinceId?: number) =>
