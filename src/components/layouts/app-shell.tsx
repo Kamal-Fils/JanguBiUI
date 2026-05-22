@@ -98,8 +98,8 @@ function DesktopSidebar({ messageBadge }: { messageBadge?: number }) {
       <nav className="flex flex-1 flex-col gap-0.5 py-4 px-2">
         {navItems.map((item) => {
           const isActive =
-            item.href === '/app'
-              ? pathname === '/app'
+            item.href === '/app' || item.href === '/app/admin'
+              ? pathname === item.href
               : pathname.startsWith(item.href);
           const Icon = item.icon;
           const badge =
