@@ -19,6 +19,7 @@ function makeUser(role: User['role']): User {
     id: '1',
     email: `${role}@test.com`,
     role,
+    onboarding_state: 'completed',
     is_active: true,
     is_verified: true,
     is_admin: role !== 'fidele',

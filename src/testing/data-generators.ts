@@ -1,15 +1,23 @@
 import {
-  randEmail,
-  randFirstName,
-  randLastName,
-  randUuid,
-  randParagraph,
-  randWord,
-  randNumber,
-  randPastDate,
-  randPhoneNumber,
-  randText,
+  email as randEmail,
+  firstName as randFirstName,
+  lastName as randLastName,
+  randomUuid as randUuid,
+  paragraph as _paragraph,
+  word as randWord,
+  datatypeDatetime,
+  phoneNumber as randPhoneNumber,
+  text as _text,
 } from '@ngneat/falso';
+
+const randNumber = ({ min = 0, max = 1000 }: { min?: number; max?: number } = {}) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
+
+const randPastDate = () => new Date(datatypeDatetime());
+
+const randParagraph = () => _paragraph();
+
+const randText = (_options?: { charCount?: number }) => _text();
 
 import type { DocumentRequest } from '@/features/documents/types';
 import type { Conversation, Message } from '@/features/messaging/types';
