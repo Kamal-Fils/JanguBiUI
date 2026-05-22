@@ -1,5 +1,7 @@
 import {
+  ArrowLeftRight,
   BookOpen,
+  Calendar,
   Church,
   FileText,
   Home,
@@ -36,6 +38,16 @@ const ITEM_DOCUMENTS: NavItem = {
   href: '/app/documents',
   icon: FileText,
 };
+const ITEM_AGENDA: NavItem = {
+  label: 'Agenda',
+  href: '/app/agenda',
+  icon: Calendar,
+};
+const ITEM_TRANSFERT: NavItem = {
+  label: 'Transfert',
+  href: '/app/transfert',
+  icon: ArrowLeftRight,
+};
 const ITEM_MESSAGES: NavItem = {
   label: 'Messages',
   href: '/app/messages',
@@ -56,27 +68,32 @@ const ITEM_ADMIN: NavItem = {
 };
 
 export const buildNavItems = (user: UserType | null | undefined): NavItem[] => {
-  const base = [ITEM_ACCUEIL, ITEM_ACTUS, ITEM_SPIRITUEL];
+  // Admin roles and clergy roles are disjoint — the !isClergy guard is defensive
+  if (isAdmin(user) && !isClergy(user)) {
+    return [ITEM_ACCUEIL, ITEM_ACTUS, ITEM_SPIRITUEL, ITEM_ADMIN, ITEM_MESSAGES, ITEM_PROFIL];
+  }
 
   if (isClergy(user)) {
-    base.push(ITEM_CLERGE);
-  } else {
-    base.push(ITEM_DOCUMENTS);
+    return [ITEM_ACCUEIL, ITEM_ACTUS, ITEM_SPIRITUEL, ITEM_CLERGE, ITEM_MESSAGES, ITEM_PROFIL];
   }
 
-  base.push(ITEM_MESSAGES, ITEM_PROFIL);
-
-  if (isAdmin(user)) {
-    base.push(ITEM_ADMIN);
-  }
-
-  return base;
+  // Fidèle
+  return [
+    ITEM_ACCUEIL,
+    ITEM_ACTUS,
+    ITEM_SPIRITUEL,
+    ITEM_DOCUMENTS,
+    ITEM_AGENDA,
+    ITEM_TRANSFERT,
+    ITEM_MESSAGES,
+    ITEM_PROFIL,
+  ];
 };
 
 export const buildBottomNavItems = (
   user: UserType | null | undefined,
 ): NavItem[] => {
-  if (isAdmin(user)) {
+  if (isAdmin(user) && !isClergy(user)) {
     return [
       ITEM_ACCUEIL,
       ITEM_ACTUS,
@@ -98,10 +115,12 @@ export const buildBottomNavItems = (
     ];
   }
 
+  // Fidèle — Spirituel + Documents dans la bottom nav, Agenda/Transfert via sidebar
   return [
     ITEM_ACCUEIL,
     ITEM_ACTUS,
     ITEM_SPIRITUEL,
+    ITEM_DOCUMENTS,
     ITEM_MESSAGES,
     ITEM_PROFIL,
   ];
