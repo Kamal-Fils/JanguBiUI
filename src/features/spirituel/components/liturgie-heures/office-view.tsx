@@ -1,10 +1,13 @@
 'use client';
 
+import DOMPurify from 'isomorphic-dompurify';
 import { BookOpen } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { OfficeKey, useOffice } from '../../api/get-office';
+
+const safe = (html: string) => DOMPurify.sanitize(html);
 
 interface OfficeViewProps {
   officeKey: OfficeKey;
@@ -45,7 +48,7 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
       {office.intro && (
         <div
           className="prose prose-sm max-w-none rounded-xl bg-muted/50 p-4 text-muted-foreground"
-          dangerouslySetInnerHTML={{ __html: office.intro }}
+          dangerouslySetInnerHTML={{ __html: safe(office.intro) }}
         />
       )}
 
@@ -59,7 +62,7 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
             <div
               key={i}
               className="prose prose-sm max-w-none rounded-xl border border-border bg-card p-4 text-foreground"
-              dangerouslySetInnerHTML={{ __html: hymn.text }}
+              dangerouslySetInnerHTML={{ __html: safe(hymn.text) }}
             />
           ))}
         </section>
@@ -85,7 +88,7 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
                 )}
                 <div
                   className="prose prose-sm max-w-none text-foreground"
-                  dangerouslySetInnerHTML={{ __html: psalm.text }}
+                  dangerouslySetInnerHTML={{ __html: safe(psalm.text) }}
                 />
               </div>
             ))}
@@ -103,7 +106,7 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
               <div
                 key={i}
                 className="prose prose-sm max-w-none text-foreground"
-                dangerouslySetInnerHTML={{ __html: item.text }}
+                dangerouslySetInnerHTML={{ __html: safe(item.text) }}
               />
             ))}
           </div>
@@ -113,7 +116,7 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
       {office.conclusion && (
         <div
           className="prose prose-sm max-w-none rounded-xl bg-muted/50 p-4 text-muted-foreground"
-          dangerouslySetInnerHTML={{ __html: office.conclusion }}
+          dangerouslySetInnerHTML={{ __html: safe(office.conclusion) }}
         />
       )}
     </div>

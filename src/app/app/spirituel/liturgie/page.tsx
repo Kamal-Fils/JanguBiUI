@@ -1,5 +1,6 @@
 'use client';
 
+import DOMPurify from 'isomorphic-dompurify';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, BookOpen, Flame, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
@@ -94,7 +95,7 @@ function ReadingCard({ reading }: { reading: Reading }) {
       <CardContent className="p-4">
         <div
           className="prose prose-sm max-w-none text-foreground"
-          dangerouslySetInnerHTML={{ __html: reading.text }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(reading.text) }}
         />
       </CardContent>
     </Card>
@@ -140,7 +141,7 @@ function OfficeCard({
             </p>
             <div
               className="prose prose-sm max-w-none text-foreground"
-              dangerouslySetInnerHTML={{ __html: s.value }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(s.value) }}
             />
           </div>
         ))}
