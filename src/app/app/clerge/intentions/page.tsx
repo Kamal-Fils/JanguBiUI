@@ -39,8 +39,8 @@ export default function ClergeIntentionsPage() {
 
   return (
     <AppShell>
-    <div className="flex flex-col">
-      <PageHeader title="Intentions reçues" />
+      <div className="flex flex-col">
+        <PageHeader title="Intentions reçues" />
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {isLoading && (
           <p className="text-sm text-gray-500 text-center py-6">Chargement…</p>
@@ -153,8 +153,8 @@ export default function ClergeIntentionsPage() {
               )}
             </div>
           ))}
+        </div>
       </div>
-    </div>
     </AppShell>
   );
 }
