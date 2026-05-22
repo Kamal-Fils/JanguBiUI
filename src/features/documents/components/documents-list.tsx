@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 
 import { useDocumentRequests } from '../api/get-documents';
 import { DocumentStatus } from '../types';
+import { formatDocumentType } from '../utils/format-document-type';
 
 import { DocumentStatusBadge } from './document-status-badge';
 
@@ -123,7 +124,7 @@ export function DocumentsList() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-foreground">
-                      {doc.document_type}
+                      {formatDocumentType(doc.document_type)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {formatDate(doc.created_at)}
