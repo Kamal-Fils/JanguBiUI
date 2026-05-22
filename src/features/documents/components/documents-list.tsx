@@ -145,15 +145,6 @@ export function DocumentsList({ hideHeader = false }: DocumentsListProps) {
         )}
       </div>
 
-      {!hideHeader && (
-        <Link
-          href="/app/documents/new"
-          className="fixed bottom-24 right-4 z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl md:bottom-6"
-          aria-label="Nouvelle demande"
-        >
-          <Plus className="size-6" />
-        </Link>
-      )}
     </div>
   );
 }

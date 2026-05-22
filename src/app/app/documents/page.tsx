@@ -1,6 +1,7 @@
 'use client';
 
-import { Archive, FileText } from 'lucide-react';
+import { Archive, FileText, Plus } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { AppShell } from '@/components/layouts/app-shell';
@@ -55,6 +56,16 @@ export default function DocumentsPage() {
           {activeTab === 'vault' && <VaultContent />}
         </div>
       </div>
+
+      {activeTab === 'requests' && (
+        <Link
+          href="/app/documents/new"
+          className="fixed bottom-24 right-4 z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl md:bottom-6"
+          aria-label="Nouvelle demande"
+        >
+          <Plus className="size-6" />
+        </Link>
+      )}
     </AppShell>
   );
 }
