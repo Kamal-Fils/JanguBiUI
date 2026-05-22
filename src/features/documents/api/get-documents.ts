@@ -14,14 +14,16 @@ const parseDocuments = (data: unknown): DocumentsResponse => {
   };
 };
 
-export const getDocumentRequests = (): Promise<DocumentsResponse> =>
-  api.get<unknown>('/v1/documents/requests/').then(parseDocuments);
+export type DocumentsParams = { status?: string };
 
-export const getDocumentRequestsQueryOptions = () =>
+export const getDocumentRequests = (params?: DocumentsParams): Promise<DocumentsResponse> =>
+  api.get<unknown>('/v1/documents/requests/', { params }).then(parseDocuments);
+
+export const getDocumentRequestsQueryOptions = (params?: DocumentsParams) =>
   queryOptions({
-    queryKey: ['documents', 'requests'],
-    queryFn: getDocumentRequests,
+    queryKey: ['documents', 'requests', params],
+    queryFn: () => getDocumentRequests(params),
   });
 
-export const useDocumentRequests = () =>
-  useQuery(getDocumentRequestsQueryOptions());
+export const useDocumentRequests = (params?: DocumentsParams) =>
+  useQuery(getDocumentRequestsQueryOptions(params));
