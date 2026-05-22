@@ -10,6 +10,10 @@ export type UpdateArticleInput = {
   content?: string;
   category_id?: number;
   cover_image_id?: number | null;
+  content_type?: 'announcement' | 'article' | 'pastoral_letter';
+  scope_type?: 'global' | 'diocese' | 'parish';
+  scope_parish_id?: number | null;
+  scope_diocese_id?: number | null;
 };
 
 export const updateArticle = (
