@@ -16,6 +16,8 @@ import {
 import { IntentionStatusBadge } from '@/features/intentions/components/intention-status-badge';
 import { cn } from '@/lib/utils';
 
+import { PastoralReflectionComposer } from '@/features/reflexion-pastorale/components/pastoral-reflection-composer';
+
 import { WelcomeBanner } from './welcome-banner';
 
 // ── Quick actions ────────────────────────────────────────────────────────────
@@ -320,6 +322,7 @@ export function PretreeDashboard() {
           })}
         </div>
 
+        <PastoralReflectionComposer />
         <PendingIntentionsSection intentions={intentions} isLoading={loadingIntentions} />
         <RecentMessagesSection messages={messages} isLoading={loadingMessages} />
       </div>
