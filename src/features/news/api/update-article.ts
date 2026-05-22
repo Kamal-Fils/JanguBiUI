@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { api } from '@/lib/api-client';
 
-import { Article, articleSchema } from '../types';
+import { Article, ContentType, articleSchema } from '../types';
 
 export type UpdateArticleInput = {
   title?: string;
@@ -10,6 +10,10 @@ export type UpdateArticleInput = {
   content?: string;
   category_id?: number;
   cover_image_id?: number | null;
+  content_type?: ContentType;
+  scope_type?: 'global' | 'diocese' | 'parish';
+  scope_parish_id?: number | null;
+  scope_diocese_id?: number | null;
 };
 
 export const updateArticle = (
@@ -30,7 +34,7 @@ export const useUpdateArticle = ({
     onSuccess: (article) => {
       queryClient.invalidateQueries({ queryKey: ['articles', 'admin'] });
       queryClient.invalidateQueries({
-        queryKey: ['articles', 'detail', article.id],
+        queryKey: ['articles', 'admin', 'detail', article.id],
       });
       onSuccess?.(article);
     },
