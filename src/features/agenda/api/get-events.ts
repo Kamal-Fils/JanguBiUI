@@ -44,11 +44,12 @@ export const getEvents = (params?: EventsParams): Promise<EventsResponse> => {
     .then((data) => eventsResponseSchema.parse(data));
 };
 
-export const getEventsQueryOptions = (params?: EventsParams) =>
+export const getEventsQueryOptions = (params?: EventsParams, enabled = true) =>
   queryOptions({
     queryKey: ['events', params],
     queryFn: () => getEvents(params),
+    enabled,
   });
 
-export const useEvents = (params?: EventsParams) =>
-  useQuery(getEventsQueryOptions(params));
+export const useEvents = (params?: EventsParams, enabled = true) =>
+  useQuery(getEventsQueryOptions(params, enabled));

@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { CalendarPlus } from 'lucide-react';
 
 import { AppShell } from '@/components/layouts/app-shell';
@@ -34,6 +33,7 @@ export default function AdminAgendaPage() {
   const canManage = !userLoading && (isClergy(user) || isAdmin(user));
   const { data, isLoading: eventsLoading } = useEvents(
     selectedType ? { event_type: selectedType } : undefined,
+    canManage,
   );
 
   useEffect(() => {

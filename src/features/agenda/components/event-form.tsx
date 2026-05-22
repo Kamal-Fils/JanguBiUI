@@ -32,6 +32,7 @@ export function EventForm({ onSuccess }: EventFormProps) {
   const [endAt, setEndAt] = useState('');
   const [location, setLocation] = useState('');
   const [maxParticipants, setMaxParticipants] = useState('');
+  const [dateError, setDateError] = useState('');
 
   const { mutate: createEvent, isPending } = useCreateEvent({
     onSuccess: () => {
@@ -46,6 +47,7 @@ export function EventForm({ onSuccess }: EventFormProps) {
       setEndAt('');
       setLocation('');
       setMaxParticipants('');
+      setDateError('');
       onSuccess?.();
     },
   });
@@ -53,6 +55,11 @@ export function EventForm({ onSuccess }: EventFormProps) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title || !startAt || !endAt || !location) return;
+    if (endAt <= startAt) {
+      setDateError('La date de fin doit être après la date de début.');
+      return;
+    }
+    setDateError('');
 
     const payload: CreateEventInput = {
       title: title.trim(),
@@ -121,12 +128,15 @@ export function EventForm({ onSuccess }: EventFormProps) {
           <input
             type="datetime-local"
             value={endAt}
-            onChange={(e) => setEndAt(e.target.value)}
+            onChange={(e) => { setEndAt(e.target.value); setDateError(''); }}
             className={inputClass}
             required
           />
         </div>
       </div>
+      {dateError && (
+        <p className="text-xs text-destructive">{dateError}</p>
+      )}
 
       <div>
         <label className={labelClass}>Lieu *</label>

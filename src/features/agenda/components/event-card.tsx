@@ -1,6 +1,7 @@
 'use client';
 
-import { Calendar, MapPin, Trash2, Users } from 'lucide-react';
+import { Calendar, MapPin, Trash2, Users, X } from 'lucide-react';
+import { useState } from 'react';
 
 import { useNotifications } from '@/components/ui/notifications';
 import { Spinner } from '@/components/ui/spinner';
@@ -48,6 +49,7 @@ interface EventCardProps {
 
 export function EventCard({ event, canDelete = false }: EventCardProps) {
   const { addNotification } = useNotifications();
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const { mutate: register, isPending: registering } = useRegisterEvent();
   const { mutate: unregister, isPending: unregistering } = useUnregisterEvent();
   const { mutate: deleteEvent, isPending: deleting } = useDeleteEvent();
@@ -73,9 +75,13 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
   }
 
   function handleDelete() {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
     deleteEvent(event.id, {
       onSuccess: () =>
-        addNotification({ type: 'success', title: 'Supprimé', message: 'L\'événement a été supprimé.' }),
+        addNotification({ type: 'success', title: 'Supprimé', message: "L'événement a été supprimé." }),
     });
   }
 
@@ -96,15 +102,34 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
           >
             {EVENT_TYPE_LABELS[event.event_type] ?? event.event_type}
           </span>
-          {canDelete && (
+          {canDelete && !confirmDelete && (
             <button
               type="button"
               onClick={handleDelete}
               disabled={deleting}
               className="rounded-lg p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
             >
-              {deleting ? <Spinner className="size-3.5" /> : <Trash2 className="size-3.5" />}
+              <Trash2 className="size-3.5" />
             </button>
+          )}
+          {canDelete && confirmDelete && (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="rounded-lg px-2 py-0.5 text-[10px] font-semibold bg-destructive text-destructive-foreground disabled:opacity-50"
+              >
+                {deleting ? <Spinner className="size-3" /> : 'Supprimer'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="rounded-lg p-1 text-muted-foreground hover:bg-muted"
+              >
+                <X className="size-3.5" />
+              </button>
+            </div>
           )}
         </div>
       </div>
