@@ -90,9 +90,9 @@ export function ProfilContent() {
   useEffect(() => {
     if (user) {
       resetProfile({
-        first_name: user.profile.first_name ?? '',
-        last_name: user.profile.last_name ?? '',
-        phone: user.profile.phone ?? '',
+        first_name: user.profile?.first_name ?? '',
+        last_name: user.profile?.last_name ?? '',
+        phone: user.profile?.phone ?? '',
       });
     }
   }, [user, resetProfile]);
@@ -164,12 +164,12 @@ export function ProfilContent() {
   }
 
   const displayName =
-    [user?.profile.first_name, user?.profile.last_name]
+    [user?.profile?.first_name, user?.profile?.last_name]
       .filter(Boolean)
       .join(' ') || user?.email;
 
   const initials =
-    [user?.profile.first_name, user?.profile.last_name]
+    [user?.profile?.first_name, user?.profile?.last_name]
       .filter(Boolean)
       .map((n) => n![0].toUpperCase())
       .join('') ||
