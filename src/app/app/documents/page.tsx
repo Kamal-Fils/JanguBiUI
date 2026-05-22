@@ -2,13 +2,17 @@
 
 import { Archive, FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { cn } from '@/lib/utils';
 import { DocumentsList } from '@/features/documents/components/documents-list';
 import { VaultContent } from '@/features/documents/components/vault-content';
+import { paths } from '@/config/paths';
+import { useUser } from '@/lib/auth';
+import { isAdmin, isClergy } from '@/lib/authorization';
 
 type Tab = 'requests' | 'vault';
 
@@ -18,7 +22,18 @@ const TABS: { id: Tab; label: string; icon: typeof FileText }[] = [
 ];
 
 export default function DocumentsPage() {
+  const router = useRouter();
+  const { data: user, isLoading } = useUser();
   const [activeTab, setActiveTab] = useState<Tab>('requests');
+
+  useEffect(() => {
+    if (!isLoading && isAdmin(user) && !isClergy(user)) {
+      router.replace(paths.app.admin.documents.getHref());
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading) return null;
+  if (isAdmin(user) && !isClergy(user)) return null;
 
   return (
     <AppShell>
@@ -59,7 +74,7 @@ export default function DocumentsPage() {
 
       {activeTab === 'requests' && (
         <Link
-          href="/app/documents/new"
+          href={paths.app.newDocument.getHref()}
           className="fixed bottom-24 right-4 z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl md:bottom-6"
           aria-label="Nouvelle demande"
         >
