@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
@@ -13,13 +14,17 @@ import { useUser } from '@/lib/auth';
 import { canManageClergy } from '@/lib/authorization';
 
 export default function InvitationsPage() {
-  const { data: user } = useUser();
+  const { data: user, isLoading } = useUser();
+  const router = useRouter();
+  const { data, isLoading: invitationsLoading } = useInvitations();
 
-  if (user && !canManageClergy(user)) {
-    redirect(paths.app.root.getHref());
-  }
+  useEffect(() => {
+    if (!isLoading && user && !canManageClergy(user)) {
+      router.replace(paths.app.root.getHref());
+    }
+  }, [user, isLoading, router]);
 
-  const { data, isLoading } = useInvitations();
+  if (isLoading || (user && !canManageClergy(user))) return null;
 
   return (
     <AppShell>
@@ -41,7 +46,7 @@ export default function InvitationsPage() {
               </Link>
             </Button>
           </div>
-          <InvitationList invitations={data?.results ?? []} isLoading={isLoading} />
+          <InvitationList invitations={data?.results ?? []} isLoading={invitationsLoading} />
         </div>
       </div>
     </AppShell>
