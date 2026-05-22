@@ -77,32 +77,23 @@ export function LandingNav() {
 
             {/* Desktop CTAs */}
             <div className="hidden items-center gap-2 md:flex">
-              {!mounted ? (
+              {!mounted || isUserLoading ? (
+                <div className="h-8 w-[180px]" aria-hidden />
+              ) : user ? (
+                <Button size="sm" asChild>
+                  <Link href={paths.app.root.getHref()}>Tableau de bord</Link>
+                </Button>
+              ) : (
                 <>
                   <Button variant="ghost" size="sm" asChild>
                     <Link href={paths.auth.login.getHref()}>Se connecter</Link>
                   </Button>
                   <Button size="sm" asChild>
-                    <Link href={paths.auth.register.getHref()}>Créer un compte</Link>
+                    <Link href={paths.auth.register.getHref()}>
+                      Créer un compte
+                    </Link>
                   </Button>
                 </>
-              ) : !isUserLoading && (
-                user ? (
-                  <Button size="sm" asChild>
-                    <Link href={paths.app.root.getHref()}>Tableau de bord</Link>
-                  </Button>
-                ) : (
-                  <>
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={paths.auth.login.getHref()}>Se connecter</Link>
-                    </Button>
-                    <Button size="sm" asChild>
-                      <Link href={paths.auth.register.getHref()}>
-                        Créer un compte
-                      </Link>
-                    </Button>
-                  </>
-                )
               )}
               {mounted && (
                 <button
@@ -159,7 +150,9 @@ export function LandingNav() {
               </a>
             ))}
             <div className="flex flex-col gap-3 pt-2">
-              {mounted && !isUserLoading && user ? (
+              {!mounted || isUserLoading ? (
+                <div className="h-10 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden />
+              ) : user ? (
                 <Button asChild className="w-full">
                   <Link href={paths.app.root.getHref()} onClick={closeDrawer}>
                     Tableau de bord
