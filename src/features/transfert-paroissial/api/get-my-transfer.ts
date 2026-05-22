@@ -17,6 +17,7 @@ export const getMyTransferQueryOptions = () =>
   queryOptions({
     queryKey: ['transfers', 'my-request'],
     queryFn: getMyTransfer,
+    retry: false,
   });
 
 export const useMyTransfer = () => useQuery(getMyTransferQueryOptions());

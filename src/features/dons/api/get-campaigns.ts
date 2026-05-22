@@ -34,6 +34,6 @@ export const getCampaigns = (): Promise<CampaignsResponse> =>
   api.get<unknown>('/v1/donations/campaigns/').then(parseCampaigns);
 
 export const getCampaignsQueryOptions = () =>
-  queryOptions({ queryKey: ['donation-campaigns'], queryFn: getCampaigns });
+  queryOptions({ queryKey: ['donation-campaigns'], queryFn: getCampaigns, retry: false });
 
 export const useCampaigns = () => useQuery(getCampaignsQueryOptions());

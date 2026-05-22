@@ -20,7 +20,7 @@ export const metadata = {
 const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
     <html lang="fr" suppressHydrationWarning className={playfair.variable}>
-      <body>
+      <body suppressHydrationWarning>
         <AppProvider>{children}</AppProvider>
         <Analytics />
       </body>
