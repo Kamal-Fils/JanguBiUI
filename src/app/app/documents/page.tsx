@@ -2,13 +2,17 @@
 
 import { Archive, FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { cn } from '@/lib/utils';
 import { DocumentsList } from '@/features/documents/components/documents-list';
 import { VaultContent } from '@/features/documents/components/vault-content';
+import { paths } from '@/config/paths';
+import { useUser } from '@/lib/auth';
+import { isAdmin, isClergy } from '@/lib/authorization';
 
 type Tab = 'requests' | 'vault';
 
@@ -18,7 +22,17 @@ const TABS: { id: Tab; label: string; icon: typeof FileText }[] = [
 ];
 
 export default function DocumentsPage() {
+  const router = useRouter();
+  const { data: user, isLoading } = useUser();
   const [activeTab, setActiveTab] = useState<Tab>('requests');
+
+  useEffect(() => {
+    if (!isLoading && isAdmin(user) && !isClergy(user)) {
+      router.replace(paths.app.admin.documents.getHref());
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || (isAdmin(user) && !isClergy(user))) return null;
 
   return (
     <AppShell>

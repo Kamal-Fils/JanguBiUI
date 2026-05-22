@@ -50,7 +50,7 @@ const ITEM_CLERGE: NavItem = {
 };
 const ITEM_ADMIN: NavItem = {
   label: 'Administration',
-  href: '/app/admin/articles',
+  href: '/app/admin',
   icon: Settings,
   adminOnly: true,
 };
@@ -68,9 +68,6 @@ export const buildNavItems = (user: UserType | null | undefined): NavItem[] => {
 
   if (isAdmin(user)) {
     base.push(ITEM_ADMIN);
-    if (!base.includes(ITEM_DOCUMENTS)) {
-      base.splice(3, 0, ITEM_DOCUMENTS);
-    }
   }
 
   return base;
