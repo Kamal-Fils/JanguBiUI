@@ -15,14 +15,26 @@ export function OnboardingGuard({ children }: OnboardingGuardProps) {
   const { data: user, isLoading } = useUser();
 
   useEffect(() => {
-    if (!isLoading && user && user.onboarding_state === 'pending_parish') {
+    if (isLoading || !user) return;
+
+    if (user.onboarding_state === 'pending_email') {
+      router.replace(paths.auth.login.getHref());
+      return;
+    }
+
+    if (user.onboarding_state === 'pending_parish') {
       router.replace(paths.onboarding.getHref());
     }
   }, [user, isLoading, router]);
 
   if (isLoading) return null;
 
-  if (user?.onboarding_state === 'pending_parish') return null;
+  if (
+    user?.onboarding_state === 'pending_email' ||
+    user?.onboarding_state === 'pending_parish'
+  ) {
+    return null;
+  }
 
   return <>{children}</>;
 }
