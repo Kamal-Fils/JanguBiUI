@@ -12,6 +12,7 @@ vi.stubGlobal('localStorage', {
 });
 
 import { server } from '@/testing/mocks/server';
+import { clearRefreshToken, setRefreshToken } from '@/lib/api-client';
 
 vi.mock('zustand');
 
@@ -48,6 +49,9 @@ beforeAll(() => {
 afterAll(() => server.close());
 
 beforeEach(() => {
+  // Simulate a logged-in session so getUserQueryOptions enables the query
+  setRefreshToken('test-refresh-token');
+
   class ResizeObserverMock {
     observe = vi.fn();
     unobserve = vi.fn();
@@ -93,4 +97,5 @@ beforeEach(() => {
 afterEach(() => {
   server.resetHandlers();
   vi.clearAllMocks();
+  clearRefreshToken();
 });

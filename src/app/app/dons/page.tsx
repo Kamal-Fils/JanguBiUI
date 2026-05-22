@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button';
 import { useCampaigns } from '@/features/dons/api/get-campaigns';
@@ -49,7 +50,8 @@ export default function DonsPage() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <AppShell>
+    <div className="flex flex-col">
       <PageHeader title="Dons & Quêtes" />
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {isLoading && (
@@ -175,5 +177,6 @@ export default function DonsPage() {
         </div>
       </div>
     </div>
+    </AppShell>
   );
 }
