@@ -128,7 +128,8 @@ export function ConversationList() {
         <div className="flex flex-col divide-y divide-border">
           {data.results.map((conv) => {
             const participantName = getParticipantName(conv, currentUserId);
-            const lastContent = conv.last_message?.content ?? 'Aucun message';
+            const hasActivity = conv.last_message_at != null || conv.unread_count > 0;
+            const lastContent = conv.last_message?.content ?? (hasActivity ? '...' : 'Aucun message');
             const lastAt = conv.last_message?.sent_at ?? conv.last_message_at;
 
             return (
