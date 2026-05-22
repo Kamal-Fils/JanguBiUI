@@ -18,7 +18,7 @@ export function OnboardingGuard({ children }: OnboardingGuardProps) {
     if (isLoading || !user) return;
 
     if (user.onboarding_state === 'pending_email') {
-      router.replace(paths.auth.login.getHref());
+      router.replace(paths.onboarding.getHref());
       return;
     }
 
