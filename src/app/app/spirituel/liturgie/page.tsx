@@ -92,9 +92,10 @@ function ReadingCard({ reading }: { reading: Reading }) {
         </div>
       </CardHeader>
       <CardContent className="p-4">
-        <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
-          {reading.text}
-        </p>
+        <div
+          className="prose prose-sm max-w-none text-foreground"
+          dangerouslySetInnerHTML={{ __html: reading.text }}
+        />
       </CardContent>
     </Card>
   );
@@ -137,9 +138,10 @@ function OfficeCard({
             <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {s.label}
             </p>
-            <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
-              {s.value}
-            </p>
+            <div
+              className="prose prose-sm max-w-none text-foreground"
+              dangerouslySetInnerHTML={{ __html: s.value }}
+            />
           </div>
         ))}
       </CardContent>
