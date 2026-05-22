@@ -190,11 +190,14 @@ async function fetchApi<T>(
       // Refresh token expired or missing — session is dead, redirect to login
       clearAccessToken();
       clearRefreshToken();
-      if (!window.location.pathname.startsWith('/auth/')) {
-        const redirectTo = encodeURIComponent(window.location.pathname);
+      const { pathname } = window.location;
+      const isPublicPage = pathname === '/' || pathname.startsWith('/auth/');
+      if (!isPublicPage) {
+        const redirectTo = encodeURIComponent(pathname);
         window.location.href = `/auth/login?redirectTo=${redirectTo}`;
+        return new Promise<never>(() => {});
       }
-      return new Promise<never>(() => {});
+      throw new Error('Unauthenticated');
     }
 
     // Refresh succeeded — retry with the new access token
