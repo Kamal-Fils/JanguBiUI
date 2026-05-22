@@ -8,7 +8,10 @@ export const getMyTransfer = (): Promise<TransferRequest | null> =>
   api
     .get<unknown>('/v1/transfers/my-request/')
     .then((data) => transferRequestSchema.parse(data))
-    .catch(() => null);
+    .catch((err: { response?: { status?: number } }) => {
+      if (err?.response?.status === 404) return null;
+      throw err;
+    });
 
 export const getMyTransferQueryOptions = () =>
   queryOptions({

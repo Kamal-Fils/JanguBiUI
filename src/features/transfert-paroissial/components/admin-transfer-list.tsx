@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog/dialog';
+import { useNotifications } from '@/components/ui/notifications';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 
@@ -29,6 +30,7 @@ function formatDate(iso: string) {
 function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const { addNotification } = useNotifications();
 
   const { mutate: approve, isPending: approving } = useApproveTransfer();
   const { mutate: reject, isPending: rejecting } = useRejectTransfer();
@@ -72,7 +74,12 @@ function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
                 <>
                   <Button
                     size="sm"
-                    onClick={() => approve(transfer.id)}
+                    onClick={() =>
+                      approve(transfer.id, {
+                        onSuccess: () =>
+                          addNotification({ type: 'success', title: 'Approuvé', message: 'La demande a été approuvée.' }),
+                      })
+                    }
                     disabled={approving}
                   >
                     {approving ? <Spinner className="size-3.5" /> : <CheckCircle className="mr-1.5 size-3.5" />}
@@ -91,7 +98,12 @@ function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
               {canAcknowledge && (
                 <Button
                   size="sm"
-                  onClick={() => acknowledge(transfer.id)}
+                  onClick={() =>
+                    acknowledge(transfer.id, {
+                      onSuccess: () =>
+                        addNotification({ type: 'success', title: 'Accusé réception', message: 'La réception a été enregistrée.' }),
+                    })
+                  }
                   disabled={acknowledging}
                 >
                   {acknowledging ? <Spinner className="size-3.5" /> : <CheckCircle className="mr-1.5 size-3.5" />}
@@ -138,6 +150,7 @@ function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
                     onSuccess: () => {
                       setRejectOpen(false);
                       setRejectReason('');
+                      addNotification({ type: 'success', title: 'Refus enregistré', message: 'La demande a été refusée.' });
                     },
                   },
                 )

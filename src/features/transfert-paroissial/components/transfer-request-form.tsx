@@ -13,7 +13,13 @@ interface TransferRequestFormProps {
 export function TransferRequestForm({ onSuccess }: TransferRequestFormProps) {
   const [destinationParishId, setDestinationParishId] = useState<number | null>(null);
   const [reason, setReason] = useState('');
-  const { mutate: createTransfer, isPending } = useCreateTransfer({ onSuccess });
+  const { mutate: createTransfer, isPending } = useCreateTransfer({
+    onSuccess: () => {
+      setDestinationParishId(null);
+      setReason('');
+      onSuccess();
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

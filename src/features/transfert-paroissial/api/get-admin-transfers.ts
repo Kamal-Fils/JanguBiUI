@@ -1,21 +1,21 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
+import { z } from 'zod';
 
 import { api } from '@/lib/api-client';
 
-import { TransferRequest, transferRequestSchema } from '../types';
+import { transferRequestSchema } from '../types';
 
-type AdminTransfersResponse = { count: number; results: TransferRequest[] };
+const adminTransfersResponseSchema = z.object({
+  count: z.number(),
+  results: z.array(transferRequestSchema),
+});
 
-const parseTransfers = (data: unknown): AdminTransfersResponse => {
-  const raw = data as { count: number; results: unknown[] };
-  return {
-    count: raw.count,
-    results: raw.results.map((item) => transferRequestSchema.parse(item)),
-  };
-};
+type AdminTransfersResponse = z.infer<typeof adminTransfersResponseSchema>;
 
 export const getAdminTransfers = (): Promise<AdminTransfersResponse> =>
-  api.get<unknown>('/v1/transfers/admin/').then(parseTransfers);
+  api.get<unknown>('/v1/transfers/admin/').then((data) =>
+    adminTransfersResponseSchema.parse(data),
+  );
 
 export const getAdminTransfersQueryOptions = (enabled: boolean) =>
   queryOptions({
