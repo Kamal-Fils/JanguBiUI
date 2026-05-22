@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
@@ -11,12 +11,16 @@ import { useUser } from '@/lib/auth';
 import { canManageClergy } from '@/lib/authorization';
 
 export default function InvitePage() {
-  const { data: user } = useUser();
+  const { data: user, isLoading } = useUser();
   const router = useRouter();
 
-  if (user && !canManageClergy(user)) {
-    redirect(paths.app.root.getHref());
-  }
+  useEffect(() => {
+    if (!isLoading && user && !canManageClergy(user)) {
+      router.replace(paths.app.root.getHref());
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || (user && !canManageClergy(user))) return null;
 
   return (
     <AppShell>

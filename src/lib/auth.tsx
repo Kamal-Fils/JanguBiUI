@@ -90,9 +90,12 @@ export const getUser = async (): Promise<User> => {
 const userQueryKey = ['user'];
 
 export const getUserQueryOptions = () => {
+  const hasToken = typeof window !== 'undefined' ? !!getRefreshToken() : false;
   return queryOptions({
     queryKey: userQueryKey,
     queryFn: getUser,
+    enabled: hasToken,
+    retry: false,
   });
 };
 

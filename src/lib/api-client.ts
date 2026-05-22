@@ -195,8 +195,9 @@ async function fetchApi<T>(
       if (!isPublicPage) {
         const redirectTo = encodeURIComponent(pathname);
         window.location.href = `/auth/login?redirectTo=${redirectTo}`;
+        return new Promise<never>(() => {});
       }
-      return new Promise<never>(() => {});
+      throw new Error('Unauthenticated');
     }
 
     // Refresh succeeded — retry with the new access token
