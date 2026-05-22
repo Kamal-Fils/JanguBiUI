@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 const sections = [
   {
-    href: '/app/bible',
+    href: '/app/bible?tab=bible',
     icon: BookOpen,
     label: 'Bible',
     description: 'Lectures du jour · Navigation complète',
