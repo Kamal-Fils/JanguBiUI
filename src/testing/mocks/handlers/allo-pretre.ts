@@ -5,24 +5,40 @@ import { createMinister, createParish } from '@/testing/data-generators';
 
 const mockMinisters = [
   createMinister({
-    id: 'minister-1',
-    slug: 'abbe-jean',
-    name: 'Abbé Jean Dupont',
-    title: 'Prêtre',
-    parish: 'Paroisse Saint-Pierre',
+    id: 1,
+    first_name: 'Jean',
+    last_name: 'Dupont',
+    role: 'PRIEST',
+    role_display: 'Prêtre',
+    parish: { id: 1, name: 'Paroisse Saint-Pierre', slug: 'saint-pierre', city: 'Dakar' },
+    parish_id: 1,
+    is_active: true,
   }),
   createMinister({
-    id: 'minister-2',
-    slug: 'abbe-paul',
-    name: 'Abbé Paul Martin',
-    title: 'Vicaire',
-    parish: 'Paroisse Sainte-Marie',
+    id: 2,
+    first_name: 'Marie',
+    last_name: 'Ndiaye',
+    role: 'SISTER',
+    role_display: 'Sœur',
+    parish: { id: 2, name: 'Paroisse Sainte-Marie', slug: 'sainte-marie', city: 'Thiès' },
+    parish_id: 2,
+    is_active: true,
+  }),
+  createMinister({
+    id: 3,
+    first_name: 'Paul',
+    last_name: 'Fall',
+    role: 'DEACON',
+    role_display: 'Diacre',
+    parish: { id: 1, name: 'Paroisse Saint-Pierre', slug: 'saint-pierre', city: 'Dakar' },
+    parish_id: 1,
+    is_active: true,
   }),
 ];
 
 const mockParishes = [
-  createParish({ id: 1, name: 'Paroisse Saint-Pierre', slug: 'saint-pierre' }),
-  createParish({ id: 2, name: 'Paroisse Sainte-Marie', slug: 'sainte-marie' }),
+  createParish({ id: 1, name: 'Paroisse Saint-Pierre', slug: 'saint-pierre', city: 'Dakar' }),
+  createParish({ id: 2, name: 'Paroisse Sainte-Marie', slug: 'sainte-marie', city: 'Thiès' }),
 ];
 
 const mockServices = [
@@ -32,22 +48,19 @@ const mockServices = [
 ];
 
 export const alloPretreHandlers = [
-  http.get(`${env.API_URL}/v1/availability/ministers/`, () => {
-    return HttpResponse.json({
-      count: mockMinisters.length,
-      results: mockMinisters,
-    });
-  }),
+  http.get(`${env.API_URL}/v1/availability/ministers/`, () =>
+    HttpResponse.json({ count: mockMinisters.length, results: mockMinisters }),
+  ),
 
-  http.get(`${env.API_URL}/v1/availability/parishes/`, () => {
-    return HttpResponse.json({ results: mockParishes });
-  }),
+  http.get(`${env.API_URL}/v1/availability/parishes/`, () =>
+    HttpResponse.json({ results: mockParishes }),
+  ),
 
-  http.get(`${env.API_URL}/v1/availability/services/`, () => {
-    return HttpResponse.json({ results: mockServices });
-  }),
+  http.get(`${env.API_URL}/v1/availability/services/`, () =>
+    HttpResponse.json({ results: mockServices }),
+  ),
 
-  http.get(`${env.API_URL}/v1/availability/available/`, () => {
-    return HttpResponse.json({ count: 0, results: [] });
-  }),
+  http.get(`${env.API_URL}/v1/availability/available/`, () =>
+    HttpResponse.json({ count: 0, results: [] }),
+  ),
 ];
