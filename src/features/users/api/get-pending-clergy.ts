@@ -3,10 +3,12 @@ import { z } from 'zod';
 
 import { api } from '@/lib/api-client';
 
+export const PASTORAL_ROLES = ['pretre', 'diacre', 'religieux', 'eveque', 'archeveque'] as const;
+
 export const pendingClergySchema = z.object({
   id: z.string(),
   email: z.string().email(),
-  pastoral_role: z.string(),
+  pastoral_role: z.enum(PASTORAL_ROLES),
   first_name: z.string().optional().nullable(),
   last_name: z.string().optional().nullable(),
   diocese_name: z.string().optional().nullable(),
@@ -29,10 +31,12 @@ const parsePendingClergy = (data: unknown): PendingClergyResponse => {
 export const getPendingClergy = (): Promise<PendingClergyResponse> =>
   api.get<unknown>('/v1/users/pending-validation/').then(parsePendingClergy);
 
-export const getPendingClergyQueryOptions = () =>
+export const getPendingClergyQueryOptions = (enabled: boolean) =>
   queryOptions({
     queryKey: ['users', 'pending-validation'],
     queryFn: getPendingClergy,
+    enabled,
   });
 
-export const usePendingClergy = () => useQuery(getPendingClergyQueryOptions());
+export const usePendingClergy = (enabled = true) =>
+  useQuery(getPendingClergyQueryOptions(enabled));

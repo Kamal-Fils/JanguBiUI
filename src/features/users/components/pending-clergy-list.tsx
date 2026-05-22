@@ -141,7 +141,7 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
   );
 }
 
-export function PendingClergyListSkeleton() {
+function PendingClergyListSkeleton() {
   return (
     <div className="space-y-3">
       {[1, 2].map((i) => (
@@ -157,13 +157,14 @@ export function PendingClergyListSkeleton() {
 
 interface PendingClergyListProps {
   accounts: PendingClergyAccount[];
+  totalCount: number;
   isLoading?: boolean;
 }
 
-export function PendingClergyList({ accounts, isLoading }: PendingClergyListProps) {
+export function PendingClergyList({ accounts, totalCount, isLoading }: PendingClergyListProps) {
   if (isLoading) return <PendingClergyListSkeleton />;
 
-  if (accounts.length === 0) {
+  if (totalCount === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-14 text-center">
         <div className="flex size-12 items-center justify-center rounded-full bg-green-500/10">
@@ -183,7 +184,7 @@ export function PendingClergyList({ accounts, isLoading }: PendingClergyListProp
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Clock className="size-4" />
-        <span>{accounts.length} compte{accounts.length > 1 ? 's' : ''} en attente de validation</span>
+        <span>{totalCount} compte{totalCount > 1 ? 's' : ''} en attente de validation</span>
       </div>
       {accounts.map((account) => (
         <PendingClergyCard key={account.id} account={account} />
