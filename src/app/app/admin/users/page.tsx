@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
@@ -49,21 +50,19 @@ const FILTER_ROLES = [
 ];
 
 export default function AdminUsersPage() {
-  const { data: currentUser } = useUser();
+  const router = useRouter();
+  const { data: currentUser, isLoading: userLoading } = useUser();
   const [roleFilter, setRoleFilter] = useState('');
   const { data, isLoading } = useAdminUsers(roleFilter || undefined);
   const { mutate: toggleActive } = useToggleUserActive();
 
-  if (!canManageUsers(currentUser)) {
-    return (
-      <AppShell>
-        <div className="flex flex-col">
-          <PageHeader title="Utilisateurs" />
-          <p className="p-4 text-sm text-destructive">Accès non autorisé.</p>
-        </div>
-      </AppShell>
-    );
-  }
+  useEffect(() => {
+    if (!userLoading && !canManageUsers(currentUser)) {
+      router.replace(paths.app.root.getHref());
+    }
+  }, [currentUser, userLoading, router]);
+
+  if (userLoading || !canManageUsers(currentUser)) return null;
 
   return (
     <AppShell>

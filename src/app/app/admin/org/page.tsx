@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
+import { paths } from '@/config/paths';
 import { useDioceses } from '@/features/org/api/get-dioceses';
 import { useParishes } from '@/features/org/api/get-parishes';
 import { useProvinces } from '@/features/org/api/get-provinces';
@@ -11,7 +13,8 @@ import { useUser } from '@/lib/auth';
 import { isSuperAdmin } from '@/lib/authorization';
 
 export default function AdminOrgPage() {
-  const { data: user } = useUser();
+  const router = useRouter();
+  const { data: user, isLoading: userLoading } = useUser();
   const [selectedProvinceId, setSelectedProvinceId] = useState<
     number | undefined
   >(undefined);
@@ -28,18 +31,13 @@ export default function AdminOrgPage() {
     search: parishSearch || undefined,
   });
 
-  if (!isSuperAdmin(user)) {
-    return (
-      <AppShell>
-        <div className="flex flex-col">
-          <PageHeader title="Structure territoriale" />
-          <p className="p-4 text-sm text-destructive">
-            Accès réservé au super administrateur.
-          </p>
-        </div>
-      </AppShell>
-    );
-  }
+  useEffect(() => {
+    if (!userLoading && !isSuperAdmin(user)) {
+      router.replace(paths.app.root.getHref());
+    }
+  }, [user, userLoading, router]);
+
+  if (userLoading || !isSuperAdmin(user)) return null;
 
   return (
     <AppShell>
