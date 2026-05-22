@@ -1,12 +1,21 @@
 'use client';
 
+import { use } from 'react';
+
 import { AppShell } from '@/components/layouts/app-shell';
 import { DocumentDetail } from '@/features/documents/components/document-detail';
 
-const DocumentDetailPage = ({ params }: { params: { id: string } }) => (
-  <AppShell hideNav>
-    <DocumentDetail documentId={params.id} />
-  </AppShell>
-);
+interface DocumentDetailPageProps {
+  params: Promise<{ id: string }>;
+}
+
+const DocumentDetailPage = ({ params }: DocumentDetailPageProps) => {
+  const { id } = use(params);
+  return (
+    <AppShell hideNav>
+      <DocumentDetail documentId={id} />
+    </AppShell>
+  );
+};
 
 export default DocumentDetailPage;
