@@ -1,10 +1,71 @@
+'use client';
+
+import { Archive, FileText, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
+
 import { AppShell } from '@/components/layouts/app-shell';
+import { PageHeader } from '@/components/layouts/page-header';
+import { cn } from '@/lib/utils';
 import { DocumentsList } from '@/features/documents/components/documents-list';
+import { VaultContent } from '@/features/documents/components/vault-content';
+
+type Tab = 'requests' | 'vault';
+
+const TABS: { id: Tab; label: string; icon: typeof FileText }[] = [
+  { id: 'requests', label: 'Mes demandes', icon: FileText },
+  { id: 'vault', label: 'Coffre-fort', icon: Archive },
+];
 
 export default function DocumentsPage() {
+  const [activeTab, setActiveTab] = useState<Tab>('requests');
+
   return (
     <AppShell>
-      <DocumentsList />
+      <div className="flex flex-col">
+        <PageHeader
+          title="Documents"
+          subtitle="Vos demandes et documents officiels"
+        />
+
+        <div className="mx-auto w-full max-w-2xl px-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+          {/* Tabs */}
+          <div className="mb-5 flex gap-1 rounded-xl bg-muted p-1">
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    activeTab === tab.id
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  <Icon className="size-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {activeTab === 'requests' && <DocumentsList hideHeader />}
+          {activeTab === 'vault' && <VaultContent />}
+        </div>
+      </div>
+
+      {activeTab === 'requests' && (
+        <Link
+          href="/app/documents/new"
+          className="fixed bottom-24 right-4 z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl md:bottom-6"
+          aria-label="Nouvelle demande"
+        >
+          <Plus className="size-6" />
+        </Link>
+      )}
     </AppShell>
   );
 }
