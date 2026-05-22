@@ -77,7 +77,16 @@ export function LandingNav() {
 
             {/* Desktop CTAs */}
             <div className="hidden items-center gap-2 md:flex">
-              {!isUserLoading && (
+              {!mounted ? (
+                <>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={paths.auth.login.getHref()}>Se connecter</Link>
+                  </Button>
+                  <Button size="sm" asChild>
+                    <Link href={paths.auth.register.getHref()}>Créer un compte</Link>
+                  </Button>
+                </>
+              ) : !isUserLoading && (
                 user ? (
                   <Button size="sm" asChild>
                     <Link href={paths.app.root.getHref()}>Tableau de bord</Link>
@@ -149,30 +158,28 @@ export function LandingNav() {
                 {label}
               </a>
             ))}
-            {!isUserLoading && (
-              <div className="flex flex-col gap-3 pt-2">
-                {user ? (
-                  <Button asChild className="w-full">
-                    <Link href={paths.app.root.getHref()} onClick={closeDrawer}>
-                      Tableau de bord
+            <div className="flex flex-col gap-3 pt-2">
+              {mounted && !isUserLoading && user ? (
+                <Button asChild className="w-full">
+                  <Link href={paths.app.root.getHref()} onClick={closeDrawer}>
+                    Tableau de bord
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" asChild className="w-full">
+                    <Link href={paths.auth.login.getHref()} onClick={closeDrawer}>
+                      Se connecter
                     </Link>
                   </Button>
-                ) : (
-                  <>
-                    <Button variant="outline" asChild className="w-full">
-                      <Link href={paths.auth.login.getHref()} onClick={closeDrawer}>
-                        Se connecter
-                      </Link>
-                    </Button>
-                    <Button asChild className="w-full">
-                      <Link href={paths.auth.register.getHref()} onClick={closeDrawer}>
-                        Créer un compte
-                      </Link>
-                    </Button>
-                  </>
-                )}
-              </div>
-            )}
+                  <Button asChild className="w-full">
+                    <Link href={paths.auth.register.getHref()} onClick={closeDrawer}>
+                      Créer un compte
+                    </Link>
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
