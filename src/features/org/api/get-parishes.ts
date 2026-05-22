@@ -35,6 +35,7 @@ export const getParishesQueryOptions = (filters: ParishFilters = {}) =>
   queryOptions({
     queryKey: ['org', 'parishes', filters],
     queryFn: () => getParishes(filters),
+    retry: false,
   });
 
 export const useParishes = (filters: ParishFilters = {}) =>

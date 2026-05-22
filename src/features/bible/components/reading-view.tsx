@@ -112,7 +112,7 @@ export function ReadingView({
         )}
       </article>
 
-      {showHomilyNotes && (
+      {showHomilyNotes && passageId !== undefined && (
         <div className="mx-auto w-full" style={{ maxWidth: '720px' }}>
           <HomilyNotes passageId={passageId} />
         </div>
