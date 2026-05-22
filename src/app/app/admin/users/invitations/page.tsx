@@ -30,11 +30,18 @@ export default function InvitationsPage() {
             Gérez les invitations envoyées aux membres du clergé.
           </p>
         </div>
-        <Button asChild size="sm">
-          <Link href={paths.app.admin.users.invite.getHref()}>
-            + Nouvelle invitation
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild size="sm" variant="outline">
+            <Link href={paths.app.admin.users.validation.getHref()}>
+              Validations en attente
+            </Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link href={paths.app.admin.users.invite.getHref()}>
+              + Nouvelle invitation
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <InvitationList invitations={data?.results ?? []} isLoading={isLoading} />

@@ -69,6 +69,7 @@ export const paths = {
         list: { getHref: () => '/app/admin/users' },
         invitations: { getHref: () => '/app/admin/users/invitations' },
         invite: { getHref: () => '/app/admin/users/invite' },
+        validation: { getHref: () => '/app/admin/users/validation' },
       },
     },
   },
