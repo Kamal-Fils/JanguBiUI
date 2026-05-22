@@ -2,7 +2,7 @@ import { queryOptions, useQuery } from '@tanstack/react-query';
 
 import { api } from '@/lib/api-client';
 
-import { DocumentRequest, documentRequestSchema } from '../types';
+import { DocumentRequest, DocumentStatus, documentRequestSchema } from '../types';
 
 export type DocumentsResponse = { count: number; results: DocumentRequest[] };
 
@@ -14,7 +14,7 @@ const parseDocuments = (data: unknown): DocumentsResponse => {
   };
 };
 
-export type DocumentsParams = { status?: string };
+export type DocumentsParams = { status?: DocumentStatus };
 
 export const getDocumentRequests = (params?: DocumentsParams): Promise<DocumentsResponse> =>
   api.get<unknown>('/v1/documents/requests/', { params }).then(parseDocuments);
