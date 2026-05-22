@@ -26,12 +26,18 @@ const profileSchema = z.object({
   phone: z.string().optional(),
 });
 
-const passwordSchema = z.object({
-  current_password: z.string().min(1, 'Mot de passe actuel requis'),
-  new_password: z
-    .string()
-    .min(8, 'Le nouveau mot de passe doit contenir au moins 8 caractères.'),
-});
+const passwordSchema = z
+  .object({
+    current_password: z.string().min(1, 'Mot de passe actuel requis'),
+    new_password: z
+      .string()
+      .min(8, 'Le nouveau mot de passe doit contenir au moins 8 caractères.'),
+    confirm_new_password: z.string().min(1, 'Confirmation requise'),
+  })
+  .refine((data) => data.new_password === data.confirm_new_password, {
+    message: 'Les mots de passe ne correspondent pas.',
+    path: ['confirm_new_password'],
+  });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 type PasswordFormValues = z.infer<typeof passwordSchema>;
@@ -293,6 +299,22 @@ export function ProfilContent() {
               {passwordErrors.new_password && (
                 <p className={errorClass} role="alert">
                   {passwordErrors.new_password.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="confirm_new_password" className={labelClass}>
+                Confirmer le nouveau mot de passe
+              </label>
+              <input
+                id="confirm_new_password"
+                type="password"
+                className={inputClass}
+                {...registerPassword('confirm_new_password')}
+              />
+              {passwordErrors.confirm_new_password && (
+                <p className={errorClass} role="alert">
+                  {passwordErrors.confirm_new_password.message}
                 </p>
               )}
             </div>

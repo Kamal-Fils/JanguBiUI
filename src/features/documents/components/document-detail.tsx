@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 import { useDocumentRequest } from '../api/get-document';
 import { useSubmitSupplement } from '../api/submit-supplement';
+import { formatDocumentType } from '../utils/format-document-type';
 
 import { DocumentStatusBadge } from './document-status-badge';
 
@@ -92,7 +93,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
                   Type de document
                 </p>
                 <h1 className="mt-1 text-xl font-semibold text-foreground">
-                  {data.document_type}
+                  {formatDocumentType(data.document_type)}
                 </h1>
                 {data.reference_number && (
                   <p className="mt-1 text-xs text-muted-foreground">
