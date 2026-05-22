@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, LogOut, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -67,7 +66,6 @@ const errorClass = 'mt-1 text-xs text-destructive';
 // ── Main component ───────────────────────────────────────────────────────────
 
 export function ProfilContent() {
-  const router = useRouter();
   const { addNotification } = useNotifications();
   const { data: user, isLoading } = useUser();
 
@@ -133,12 +131,12 @@ export function ProfilContent() {
     });
 
   const { mutate: logout, isPending: isLoggingOut } = useLogout({
-    onSuccess: () => router.push('/auth/login'),
+    onSuccess: () => { window.location.href = '/auth/login'; },
   });
 
   const { mutate: deleteAccount, isPending: isDeletingAccount } =
     useDeleteAccount({
-      onSuccess: () => router.push('/auth/login'),
+      onSuccess: () => { window.location.href = '/auth/login'; },
     });
 
   function onProfileSubmit(data: ProfileFormValues) {

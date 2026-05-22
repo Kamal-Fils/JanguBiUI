@@ -128,10 +128,10 @@ export const useLogout = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: logout,
-    onSuccess: () => {
+    onSettled: () => {
       clearAccessToken();
       clearRefreshToken();
-      queryClient.removeQueries({ queryKey: userQueryKey });
+      queryClient.clear();
       onSuccess?.();
     },
   });
