@@ -1,10 +1,12 @@
 'use client';
 
 import { Heart, MapPin, MessageCircle, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 
 import { PageHeader } from '@/components/layouts/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
+import { paths } from '@/config/paths';
 import type { Minister } from '../api/get-ministers';
 import { useMinisters } from '../api/get-ministers';
 
@@ -24,7 +26,7 @@ const ROLE_OPTIONS: { key: RoleFilter; label: string }[] = [
 // ── Minister card ─────────────────────────────────────────────────────────────
 
 function MinisterCard({ minister, onDon }: { minister: Minister; onDon: () => void }) {
-  const initials = [minister.first_name[0], minister.last_name[0]]
+  const initials = [minister.first_name?.[0], minister.last_name?.[0]]
     .filter(Boolean)
     .join('')
     .toUpperCase();
@@ -59,13 +61,13 @@ function MinisterCard({ minister, onDon }: { minister: Minister; onDon: () => vo
       </div>
 
       <div className="flex gap-2">
-        <a
-          href="/app/messages"
+        <Link
+          href={paths.app.messages.getHref()}
           className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <MessageCircle className="size-3.5" />
           Contacter
-        </a>
+        </Link>
         <button
           type="button"
           onClick={onDon}
@@ -87,12 +89,19 @@ function DonDialog({ minister, onClose }: { minister: Minister; onClose: () => v
   const [selectedAmount, setSelectedAmount] = useState<number>(1000);
   const [customAmount, setCustomAmount] = useState('');
   const [confirmed, setConfirmed] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const finalAmount = customAmount ? parseInt(customAmount, 10) : selectedAmount;
 
   const handleConfirm = () => {
     setConfirmed(true);
-    setTimeout(onClose, 2000);
+    timerRef.current = setTimeout(onClose, 2000);
   };
 
   return (

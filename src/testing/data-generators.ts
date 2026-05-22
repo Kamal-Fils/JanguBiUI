@@ -19,6 +19,7 @@ const randParagraph = () => _paragraph();
 
 const randText = (_options?: { charCount?: number }) => _text();
 
+import type { Minister } from '@/features/allo-pretre/api/get-ministers';
 import type { DocumentRequest } from '@/features/documents/types';
 import type { Conversation, Message } from '@/features/messaging/types';
 import type {
@@ -272,8 +273,6 @@ export const createRosaryDay = (overrides?: Partial<RosaryDay>): RosaryDay => ({
 // ----------------------------------------------------------------
 // Minister / Parish (Allo-prêtre)
 // ----------------------------------------------------------------
-
-import type { Minister } from '@/features/allo-pretre/api/get-ministers';
 
 export type { Minister };
 
