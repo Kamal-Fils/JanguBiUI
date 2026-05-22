@@ -2,10 +2,14 @@
 
 import { useState } from 'react';
 
-import { useEvents } from '@/features/agenda/api/get-events';
+import { AppShell } from '@/components/layouts/app-shell';
+import { PageHeader } from '@/components/layouts/page-header';
+import { Skeleton } from '@/components/ui/skeleton';
 import { EventCard } from '@/features/agenda/components/event-card';
+import { useEvents } from '@/features/agenda/api/get-events';
+import { cn } from '@/lib/utils';
 
-const EVENT_TYPES = [
+const EVENT_TYPE_FILTERS = [
   { value: '', label: 'Tous' },
   { value: 'mass', label: 'Messes' },
   { value: 'conference', label: 'Conférences' },
@@ -16,53 +20,67 @@ const EVENT_TYPES = [
 
 export default function AgendaPage() {
   const [selectedType, setSelectedType] = useState('');
-  const { data, isLoading, isError } = useEvents(
+  const { data, isLoading } = useEvents(
     selectedType ? { event_type: selectedType } : undefined,
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      <h1 className="text-xl font-semibold text-gray-900 mb-4">Agenda</h1>
+    <AppShell>
+      <div className="flex flex-col">
+        <PageHeader
+          title="Agenda"
+          subtitle="Événements et célébrations de votre paroisse"
+        />
 
-      <div className="flex gap-2 flex-wrap mb-6">
-        {EVENT_TYPES.map((type) => (
-          <button
-            key={type.value}
-            onClick={() => setSelectedType(type.value)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              selectedType === type.value
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            {type.label}
-          </button>
-        ))}
-      </div>
+        <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+          <div className="mb-6 flex flex-wrap gap-2">
+            {EVENT_TYPE_FILTERS.map((filter) => (
+              <button
+                key={filter.value}
+                type="button"
+                onClick={() => setSelectedType(filter.value)}
+                className={cn(
+                  'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
+                  selectedType === filter.value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80',
+                )}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
 
-      {isLoading && (
-        <p className="text-sm text-gray-500 text-center py-8">Chargement…</p>
-      )}
+          {isLoading && (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-3">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-1/2" />
+                  <Skeleton className="h-10 w-full rounded-xl" />
+                </div>
+              ))}
+            </div>
+          )}
 
-      {isError && (
-        <p className="text-sm text-red-500 text-center py-8">
-          Erreur lors du chargement des événements.
-        </p>
-      )}
+          {!isLoading && data?.results.length === 0 && (
+            <div className="flex flex-col items-center gap-3 py-16 text-center">
+              <p className="text-sm text-muted-foreground">
+                Aucun événement à venir.
+              </p>
+            </div>
+          )}
 
-      {data && data.results.length === 0 && (
-        <p className="text-sm text-gray-500 text-center py-8">
-          Aucun événement à venir.
-        </p>
-      )}
-
-      {data && data.results.length > 0 && (
-        <div className="space-y-4">
-          {data.results.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
+          {!isLoading && data && data.results.length > 0 && (
+            <div className="space-y-4">
+              {data.results.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </AppShell>
   );
 }

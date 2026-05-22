@@ -48,6 +48,7 @@ export const paths = {
     documents: { getHref: () => '/app/documents' },
     newDocument: { getHref: () => '/app/documents/new' },
     document: { getHref: (id: string) => `/app/documents/${id}` },
+    agenda: { getHref: () => '/app/agenda' },
     profil: { getHref: () => '/app/profil' },
     transfert: { getHref: () => '/app/transfert' },
     clerge: {
@@ -58,6 +59,7 @@ export const paths = {
     },
     admin: {
       root: { getHref: () => '/app/admin' },
+      agenda: { getHref: () => '/app/admin/agenda' },
       availability: { getHref: () => '/app/admin/availability' },
       articles: { getHref: () => '/app/admin/articles' },
       articleNew: { getHref: () => '/app/admin/articles/new' },
