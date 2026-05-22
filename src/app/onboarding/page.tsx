@@ -8,6 +8,7 @@ import { paths } from '@/config/paths';
 import { useSelectParish } from '@/features/org/api/update-parish';
 import { ParishSelector } from '@/features/org/components/parish-selector';
 import { useUser } from '@/lib/auth';
+import { getRoleHomePath } from '@/lib/get-role-home-path';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -16,12 +17,12 @@ export default function OnboardingPage() {
 
   const { mutate: selectParish, isPending } = useSelectParish({
     onSuccess: () => {
-      router.replace(paths.app.root.getHref());
+      router.replace(getRoleHomePath(user));
     },
   });
 
   if (user && user.onboarding_state === 'completed') {
-    router.replace(paths.app.root.getHref());
+    router.replace(getRoleHomePath(user));
     return null;
   }
 
