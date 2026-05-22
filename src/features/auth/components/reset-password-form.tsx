@@ -84,15 +84,6 @@ export const ResetPasswordForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <div>
-        <h2 className="text-base font-semibold text-foreground">
-          Nouveau mot de passe
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Choisissez un mot de passe d&apos;au moins 8 caractères.
-        </p>
-      </div>
-
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="new_password"

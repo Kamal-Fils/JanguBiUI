@@ -24,16 +24,24 @@ function CrossIcon({ className }: { className?: string }) {
   );
 }
 
+const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
+  '/auth/login': { title: 'Connexion', subtitle: 'Heureux de vous revoir' },
+  '/auth/register': { title: 'Créer un compte', subtitle: 'Rejoignez la communauté' },
+  '/auth/forgot-password': { title: 'Mot de passe oublié', subtitle: 'Réinitialisez votre accès' },
+  '/auth/reset-password': { title: 'Nouveau mot de passe', subtitle: 'Choisissez un mot de passe sécurisé' },
+  '/auth/verify-email': { title: 'Vérification email', subtitle: 'Confirmez votre adresse' },
+  '/auth/revert-email': { title: 'Annulation email', subtitle: 'Rétablissez votre ancienne adresse' },
+};
+
 export const AuthLayout = ({ children }: LayoutProps) => {
   const user = useUser();
   const router = useRouter();
   const pathname = usePathname();
-  const isLoginPage = pathname === paths.auth.login.getHref();
 
-  const title = isLoginPage ? 'Connexion' : 'Créer un compte';
-  const subtitle = isLoginPage
-    ? 'Heureux de vous revoir'
-    : 'Rejoignez la communauté';
+  const { title, subtitle } = PAGE_TITLES[pathname ?? ''] ?? {
+    title: 'Connexion',
+    subtitle: 'Heureux de vous revoir',
+  };
 
   const searchParams = useSearchParams();
   const redirectTo = searchParams?.get('redirectTo');

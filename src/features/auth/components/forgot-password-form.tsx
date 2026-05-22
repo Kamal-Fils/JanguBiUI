@@ -38,16 +38,6 @@ export const ForgotPasswordForm = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h2 className="text-base font-semibold text-foreground">
-          Mot de passe oublié
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Entrez votre adresse email. Nous vous enverrons un lien pour
-          réinitialiser votre mot de passe.
-        </p>
-      </div>
-
       {submitted ? (
         <div className="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-700 dark:text-green-300">
           Si cette adresse est enregistrée, vous recevrez un email sous peu.
