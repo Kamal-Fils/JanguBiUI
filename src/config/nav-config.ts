@@ -4,6 +4,7 @@ import {
   Calendar,
   Church,
   FileText,
+  Heart,
   Home,
   MessageCircle,
   Newspaper,
@@ -53,6 +54,11 @@ const ITEM_MESSAGES: NavItem = {
   icon: MessageCircle,
 };
 const ITEM_PROFIL: NavItem = { label: 'Profil', href: '/app/profil', icon: User };
+const ITEM_DONS: NavItem = {
+  label: 'Dons',
+  href: '/app/dons',
+  icon: Heart,
+};
 const ITEM_CLERGE: NavItem = {
   label: 'Clergé',
   href: '/app/clerge',
@@ -83,6 +89,7 @@ export const buildNavItems = (user: UserType | null | undefined): NavItem[] => {
     ITEM_ACTUS,
     ITEM_SPIRITUEL,
     ITEM_DOCUMENTS,
+    ITEM_DONS,
     ITEM_AGENDA,
     ITEM_TRANSFERT,
     ITEM_MESSAGES,

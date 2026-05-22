@@ -6,12 +6,16 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
 
+import { HomilyNotes } from './homily-notes';
+
 interface ReadingViewProps {
   title: string;
   reference: string;
   text: string;
   refrain?: string;
   isHtml?: boolean;
+  passageId?: number;
+  showHomilyNotes?: boolean;
   onBack: () => void;
 }
 
@@ -21,6 +25,8 @@ export function ReadingView({
   text,
   refrain,
   isHtml,
+  passageId,
+  showHomilyNotes = false,
   onBack,
 }: ReadingViewProps) {
   const [fontSize, setFontSize] = useState(16);
@@ -105,6 +111,12 @@ export function ReadingView({
           </div>
         )}
       </article>
+
+      {showHomilyNotes && (
+        <div className="mx-auto w-full" style={{ maxWidth: '720px' }}>
+          <HomilyNotes passageId={passageId} />
+        </div>
+      )}
     </div>
   );
 }

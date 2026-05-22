@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { api } from '@/lib/api-client';
 
-const readingPlanSchema = z.object({
+export const readingPlanSchema = z.object({
   id: z.number(),
   title: z.string(),
   description: z.string(),

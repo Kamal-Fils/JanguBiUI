@@ -42,6 +42,7 @@ export const paths = {
     spirituelHeures: { getHref: () => '/app/spirituel/heures' },
     bible: { getHref: () => '/app/bible' },
     chapelet: { getHref: () => '/app/chapelet' },
+    dons: { getHref: () => '/app/dons' },
     tv: { getHref: () => '/app/tv' },
     messages: { getHref: () => '/app/messages' },
     conversation: { getHref: (id: string) => `/app/messages/${id}` },
