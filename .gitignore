@@ -44,3 +44,6 @@ tsconfig.tsbuildinfo
 
 # graphify
 /graphify-out
+
+# sentry wizard logs
+sentry-wizard-installation-error-*.log
