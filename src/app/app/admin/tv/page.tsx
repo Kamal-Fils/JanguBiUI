@@ -97,6 +97,7 @@ export default function AdminTvPage() {
     is_live: boolean;
     is_pinned_live: boolean;
   }) => {
+    setConfirmDeleteVideoId(null);
     setVideoForm({
       title: v.title,
       youtube_url: v.youtube_url,
