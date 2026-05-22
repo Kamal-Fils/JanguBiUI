@@ -49,6 +49,6 @@ export const useGetMessages = (conversationId: string) => {
   return useQuery({
     queryKey: ['messages', conversationId],
     queryFn: () => getMessages(conversationId, user?.id),
-    enabled: !!conversationId,
+    enabled: !!conversationId && !!user,
   });
 };
