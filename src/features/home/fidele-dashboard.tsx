@@ -5,6 +5,8 @@ import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
 
+import { PastoralReflectionWidget } from '@/features/reflexion-pastorale/components/pastoral-reflection-widget';
+
 import { MyIntentionsSection } from './my-intentions-section';
 import { ParishEventsSection } from './parish-events-section';
 import { ParishNewsSection } from './parish-news-section';
@@ -69,6 +71,7 @@ export function FideleDashboard() {
           })}
         </div>
 
+        <PastoralReflectionWidget />
         <ParishNewsSection />
         <ParishEventsSection />
         <MyIntentionsSection />
