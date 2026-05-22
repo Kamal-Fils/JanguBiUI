@@ -1,5 +1,7 @@
 import {
+  ArrowLeftRight,
   BookOpen,
+  Calendar,
   Church,
   FileText,
   Home,
@@ -36,6 +38,16 @@ const ITEM_DOCUMENTS: NavItem = {
   href: '/app/documents',
   icon: FileText,
 };
+const ITEM_AGENDA: NavItem = {
+  label: 'Agenda',
+  href: '/app/agenda',
+  icon: Calendar,
+};
+const ITEM_TRANSFERT: NavItem = {
+  label: 'Transfert',
+  href: '/app/transfert',
+  icon: ArrowLeftRight,
+};
 const ITEM_MESSAGES: NavItem = {
   label: 'Messages',
   href: '/app/messages',
@@ -50,36 +62,37 @@ const ITEM_CLERGE: NavItem = {
 };
 const ITEM_ADMIN: NavItem = {
   label: 'Administration',
-  href: '/app/admin/articles',
+  href: '/app/admin',
   icon: Settings,
   adminOnly: true,
 };
 
 export const buildNavItems = (user: UserType | null | undefined): NavItem[] => {
-  const base = [ITEM_ACCUEIL, ITEM_ACTUS, ITEM_SPIRITUEL];
+  if (isAdmin(user) && !isClergy(user)) {
+    return [ITEM_ACCUEIL, ITEM_ACTUS, ITEM_SPIRITUEL, ITEM_ADMIN, ITEM_MESSAGES, ITEM_PROFIL];
+  }
 
   if (isClergy(user)) {
-    base.push(ITEM_CLERGE);
-  } else {
-    base.push(ITEM_DOCUMENTS);
+    return [ITEM_ACCUEIL, ITEM_ACTUS, ITEM_SPIRITUEL, ITEM_CLERGE, ITEM_MESSAGES, ITEM_PROFIL];
   }
 
-  base.push(ITEM_MESSAGES, ITEM_PROFIL);
-
-  if (isAdmin(user)) {
-    base.push(ITEM_ADMIN);
-    if (!base.includes(ITEM_DOCUMENTS)) {
-      base.splice(3, 0, ITEM_DOCUMENTS);
-    }
-  }
-
-  return base;
+  // Fidèle
+  return [
+    ITEM_ACCUEIL,
+    ITEM_ACTUS,
+    ITEM_SPIRITUEL,
+    ITEM_DOCUMENTS,
+    ITEM_AGENDA,
+    ITEM_TRANSFERT,
+    ITEM_MESSAGES,
+    ITEM_PROFIL,
+  ];
 };
 
 export const buildBottomNavItems = (
   user: UserType | null | undefined,
 ): NavItem[] => {
-  if (isAdmin(user)) {
+  if (isAdmin(user) && !isClergy(user)) {
     return [
       ITEM_ACCUEIL,
       ITEM_ACTUS,
@@ -101,10 +114,12 @@ export const buildBottomNavItems = (
     ];
   }
 
+  // Fidèle — Documents + Agenda dans la bottom nav, Transfert accessible via sidebar/accueil
   return [
     ITEM_ACCUEIL,
     ITEM_ACTUS,
-    ITEM_SPIRITUEL,
+    ITEM_DOCUMENTS,
+    ITEM_AGENDA,
     ITEM_MESSAGES,
     ITEM_PROFIL,
   ];
