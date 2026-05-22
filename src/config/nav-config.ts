@@ -68,6 +68,7 @@ const ITEM_ADMIN: NavItem = {
 };
 
 export const buildNavItems = (user: UserType | null | undefined): NavItem[] => {
+  // Admin roles and clergy roles are disjoint — the !isClergy guard is defensive
   if (isAdmin(user) && !isClergy(user)) {
     return [ITEM_ACCUEIL, ITEM_ACTUS, ITEM_SPIRITUEL, ITEM_ADMIN, ITEM_MESSAGES, ITEM_PROFIL];
   }
@@ -114,12 +115,12 @@ export const buildBottomNavItems = (
     ];
   }
 
-  // Fidèle — Documents + Agenda dans la bottom nav, Transfert accessible via sidebar/accueil
+  // Fidèle — Spirituel + Documents dans la bottom nav, Agenda/Transfert via sidebar
   return [
     ITEM_ACCUEIL,
     ITEM_ACTUS,
+    ITEM_SPIRITUEL,
     ITEM_DOCUMENTS,
-    ITEM_AGENDA,
     ITEM_MESSAGES,
     ITEM_PROFIL,
   ];
