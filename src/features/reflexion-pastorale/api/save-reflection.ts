@@ -4,12 +4,15 @@ import { api } from '@/lib/api-client';
 
 import { PastoralReflection, pastoralReflectionSchema } from '../types';
 
-export type SaveReflectionInput = { content: string };
+export type SaveReflectionInput = { content: string; existingId?: number };
 
-export const saveReflection = (data: SaveReflectionInput): Promise<PastoralReflection> =>
-  api
-    .post<unknown>('/v1/spiritual/reflections/', data)
-    .then((res) => pastoralReflectionSchema.parse(res));
+const saveReflection = ({ content, existingId }: SaveReflectionInput): Promise<PastoralReflection> => {
+  const payload = { content };
+  const request = existingId
+    ? api.patch<unknown>(`/v1/spiritual/reflections/${existingId}/`, payload)
+    : api.post<unknown>('/v1/spiritual/reflections/', payload);
+  return request.then((res) => pastoralReflectionSchema.parse(res));
+};
 
 export const useSaveReflection = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   const queryClient = useQueryClient();

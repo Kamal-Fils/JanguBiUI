@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle, Pencil, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -17,22 +17,34 @@ export function PastoralReflectionComposer() {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState('');
   const [saved, setSaved] = useState(false);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (existing?.content) {
-      setContent(existing.content);
-    }
-  }, [existing]);
+    return () => {
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    };
+  }, []);
+
+  const handleStartEditing = () => {
+    setContent(existing?.content ?? '');
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setContent('');
+  };
 
   const handleSave = () => {
     if (!content.trim()) return;
     save(
-      { content: content.trim() },
+      { content: content.trim(), existingId: existing?.id },
       {
         onSuccess: () => {
           setIsEditing(false);
+          setContent('');
           setSaved(true);
-          setTimeout(() => setSaved(false), 3000);
+          savedTimerRef.current = setTimeout(() => setSaved(false), 3000);
         },
       },
     );
@@ -57,7 +69,7 @@ export function PastoralReflectionComposer() {
         {!isEditing && (
           <button
             type="button"
-            onClick={() => setIsEditing(true)}
+            onClick={handleStartEditing}
             className="text-xs text-primary hover:underline"
           >
             {existing ? 'Modifier' : 'Rédiger'}
@@ -76,13 +88,15 @@ export function PastoralReflectionComposer() {
             autoFocus
           />
           <div className="flex items-center justify-between">
-            <span className={`text-xs ${content.length >= MAX_CHARS ? 'text-destructive' : 'text-muted-foreground'}`}>
+            <span
+              className={`text-xs ${content.length >= MAX_CHARS ? 'text-destructive' : 'text-muted-foreground'}`}
+            >
               {content.length}/{MAX_CHARS}
             </span>
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => { setIsEditing(false); setContent(existing?.content ?? ''); }}
+                onClick={handleCancel}
                 className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
               >
                 <X className="size-3.5" />
@@ -106,7 +120,7 @@ export function PastoralReflectionComposer() {
             &ldquo;{existing.content}&rdquo;
           </p>
           {saved && (
-            <p className="mt-2 text-xs text-green-600 flex items-center gap-1">
+            <p className="mt-2 flex items-center gap-1 text-xs text-green-600">
               <CheckCircle className="size-3" />
               Réflexion publiée
             </p>
@@ -115,8 +129,8 @@ export function PastoralReflectionComposer() {
       ) : (
         <button
           type="button"
-          onClick={() => setIsEditing(true)}
-          className="rounded-xl border border-dashed border-border p-6 text-center hover:bg-muted transition-colors w-full"
+          onClick={handleStartEditing}
+          className="w-full rounded-xl border border-dashed border-border p-6 text-center transition-colors hover:bg-muted"
         >
           <Pencil className="mx-auto mb-2 size-5 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
