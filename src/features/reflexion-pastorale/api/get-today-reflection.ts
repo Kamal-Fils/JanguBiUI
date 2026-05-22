@@ -15,6 +15,7 @@ export const getTodayReflectionQueryOptions = () =>
     queryKey: ['reflexion-pastorale', 'today'],
     queryFn: getTodayReflection,
     staleTime: 5 * 60 * 1000,
+    retry: false,
   });
 
 export const useTodayReflection = () => useQuery(getTodayReflectionQueryOptions());
