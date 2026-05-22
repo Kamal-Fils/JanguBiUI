@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button/button';
 import { Link } from '@/components/ui/link/link';
 import { paths } from '@/config/paths';
+import { useUser } from '@/lib/auth';
 import { cn } from '@/utils/cn';
 
 const LogoMark = () => (
@@ -22,6 +23,7 @@ export function LandingNav() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { data: user, isLoading: isUserLoading } = useUser();
 
   useEffect(() => {
     setMounted(true);
@@ -75,14 +77,24 @@ export function LandingNav() {
 
             {/* Desktop CTAs */}
             <div className="hidden items-center gap-2 md:flex">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href={paths.auth.login.getHref()}>Se connecter</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href={paths.auth.register.getHref()}>
-                  Créer un compte
-                </Link>
-              </Button>
+              {!isUserLoading && (
+                user ? (
+                  <Button size="sm" asChild>
+                    <Link href={paths.app.root.getHref()}>Tableau de bord</Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={paths.auth.login.getHref()}>Se connecter</Link>
+                    </Button>
+                    <Button size="sm" asChild>
+                      <Link href={paths.auth.register.getHref()}>
+                        Créer un compte
+                      </Link>
+                    </Button>
+                  </>
+                )
+              )}
               {mounted && (
                 <button
                   onClick={toggleTheme}
@@ -137,21 +149,30 @@ export function LandingNav() {
                 {label}
               </a>
             ))}
-            <div className="flex flex-col gap-3 pt-2">
-              <Button variant="outline" asChild className="w-full">
-                <Link href={paths.auth.login.getHref()} onClick={closeDrawer}>
-                  Se connecter
-                </Link>
-              </Button>
-              <Button asChild className="w-full">
-                <Link
-                  href={paths.auth.register.getHref()}
-                  onClick={closeDrawer}
-                >
-                  Créer un compte
-                </Link>
-              </Button>
-            </div>
+            {!isUserLoading && (
+              <div className="flex flex-col gap-3 pt-2">
+                {user ? (
+                  <Button asChild className="w-full">
+                    <Link href={paths.app.root.getHref()} onClick={closeDrawer}>
+                      Tableau de bord
+                    </Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="outline" asChild className="w-full">
+                      <Link href={paths.auth.login.getHref()} onClick={closeDrawer}>
+                        Se connecter
+                      </Link>
+                    </Button>
+                    <Button asChild className="w-full">
+                      <Link href={paths.auth.register.getHref()} onClick={closeDrawer}>
+                        Créer un compte
+                      </Link>
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
