@@ -104,6 +104,7 @@ function requireAuth(request: Request): HttpResponse<any> | null {
 }
 
 export const newsHandlers = [
+  // Static routes first — before parameterized :id routes
   http.get(`${env.API_URL}/v1/news/`, () => {
     return HttpResponse.json({
       count: mockGlobalArticles.length,
@@ -120,21 +121,13 @@ export const newsHandlers = [
     });
   }),
 
-  http.get(`${env.API_URL}/v1/news/:id/`, ({ params }) => {
-    const id = String(params.id);
-    const article = mockArticleDetails[id];
-    if (!article) {
-      return HttpResponse.json(
-        { message: 'Article introuvable.' },
-        { status: 404 },
-      );
-    }
-    return HttpResponse.json(article);
-  }),
-
-  // Admin endpoints
+  // Admin routes before /v1/news/:id/ — otherwise "admin" would match :id
   http.get(`${env.API_URL}/v1/news/admin/`, () =>
     HttpResponse.json({ count: mockAdminArticles.length, results: mockAdminArticles }),
+  ),
+
+  http.post(`${env.API_URL}/v1/news/admin/`, () =>
+    HttpResponse.json(createArticleDetail({ status: 'draft' }), { status: 201 }),
   ),
 
   http.get(`${env.API_URL}/v1/news/admin/:id/`, ({ params }) => {
@@ -152,10 +145,6 @@ export const newsHandlers = [
     return HttpResponse.json(article);
   }),
 
-  http.post(`${env.API_URL}/v1/news/admin/`, () =>
-    HttpResponse.json(createArticleDetail({ status: 'draft' }), { status: 201 }),
-  ),
-
   http.post(`${env.API_URL}/v1/news/admin/:id/publish/`, ({ params }) => {
     const id = String(params.id);
     const article = mockAdminArticles.find((a) => a.id === id) ?? createArticle({ id });
@@ -171,4 +160,17 @@ export const newsHandlers = [
   http.delete(`${env.API_URL}/v1/news/admin/:id/delete/`, () =>
     new HttpResponse(null, { status: 204 }),
   ),
+
+  // Parameterized public route last
+  http.get(`${env.API_URL}/v1/news/:id/`, ({ params }) => {
+    const id = String(params.id);
+    const article = mockArticleDetails[id];
+    if (!article) {
+      return HttpResponse.json(
+        { message: 'Article introuvable.' },
+        { status: 404 },
+      );
+    }
+    return HttpResponse.json(article);
+  }),
 ];

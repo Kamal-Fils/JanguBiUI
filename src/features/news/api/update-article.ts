@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { api } from '@/lib/api-client';
 
-import { Article, articleSchema } from '../types';
+import { Article, ArticleDetail, ContentType, articleSchema } from '../types';
 
 export type UpdateArticleInput = {
   title?: string;
@@ -10,8 +10,8 @@ export type UpdateArticleInput = {
   content?: string;
   category_id?: number;
   cover_image_id?: number | null;
-  content_type?: 'announcement' | 'article' | 'pastoral_letter';
-  scope_type?: 'global' | 'diocese' | 'parish';
+  content_type?: ContentType;
+  scope_type?: ArticleDetail['scope_type'];
   scope_parish_id?: number | null;
   scope_diocese_id?: number | null;
 };
