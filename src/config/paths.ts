@@ -49,10 +49,12 @@ export const paths = {
     newDocument: { getHref: () => '/app/documents/new' },
     document: { getHref: (id: string) => `/app/documents/${id}` },
     profil: { getHref: () => '/app/profil' },
+    transfert: { getHref: () => '/app/transfert' },
     clerge: {
       root: { getHref: () => '/app/clerge' },
       intentions: { getHref: () => '/app/clerge/intentions' },
       messages: { getHref: () => '/app/clerge/messages' },
+      transferts: { getHref: () => '/app/clerge/transferts' },
     },
     admin: {
       root: { getHref: () => '/app/admin' },

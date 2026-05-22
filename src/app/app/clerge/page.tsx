@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, Clock, Cross, MessageSquare } from 'lucide-react';
+import { BookOpen, Clock, Cross, MapPin, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -25,6 +25,13 @@ const CLERGE_SECTIONS = [
     label: 'Messagerie inter-clergé',
     description: 'Correspondance · Annonces · Directives',
     color: 'bg-blue-500/10 text-blue-600',
+  },
+  {
+    href: paths.app.clerge.transferts.getHref(),
+    icon: MapPin,
+    label: 'Transferts paroissiaux',
+    description: 'Gérer les demandes de changement de paroisse',
+    color: 'bg-teal-500/10 text-teal-600',
   },
   {
     href: paths.app.spirituelHeures.getHref(),
