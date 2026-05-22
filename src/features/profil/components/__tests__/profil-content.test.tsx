@@ -105,10 +105,12 @@ describe('ProfilContent', () => {
     // eslint-disable-next-line testing-library/no-node-access
     const passwordSection = heading.closest('section')!;
     const currentPasswordInput = within(passwordSection).getByLabelText(/mot de passe actuel/i);
-    const newPasswordInput = within(passwordSection).getByLabelText(/nouveau mot de passe/i);
+    const newPasswordInput = within(passwordSection).getByLabelText(/^nouveau mot de passe$/i);
+    const confirmPasswordInput = within(passwordSection).getByLabelText(/confirmer le nouveau mot de passe/i);
 
     await userEvent.type(currentPasswordInput, 'ancienmdp');
     await userEvent.type(newPasswordInput, 'nouveaumdp');
+    await userEvent.type(confirmPasswordInput, 'nouveaumdp');
     await userEvent.click(
       screen.getByRole('button', { name: /modifier le mot de passe/i }),
     );

@@ -19,23 +19,26 @@ export function getAccessToken(): string | null {
 // Refresh token — persisted to localStorage so it survives page reloads
 const REFRESH_TOKEN_KEY = 'jb_refresh_token';
 
-let _refreshToken: string | null =
-  typeof window !== 'undefined'
-    ? localStorage.getItem(REFRESH_TOKEN_KEY)
-    : null;
+let _refreshToken: string | null = (() => {
+  try {
+    return typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
+  } catch {
+    return null;
+  }
+})();
 
 export function setRefreshToken(token: string): void {
   _refreshToken = token;
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(REFRESH_TOKEN_KEY, token);
-  }
+  try {
+    if (typeof window !== 'undefined') localStorage.setItem(REFRESH_TOKEN_KEY, token);
+  } catch {}
 }
 
 export function clearRefreshToken(): void {
   _refreshToken = null;
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-  }
+  try {
+    if (typeof window !== 'undefined') localStorage.removeItem(REFRESH_TOKEN_KEY);
+  } catch {}
 }
 
 export function getRefreshToken(): string | null {

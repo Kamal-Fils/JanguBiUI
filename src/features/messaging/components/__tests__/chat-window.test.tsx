@@ -34,8 +34,9 @@ describe('ChatWindow', () => {
       />,
     );
 
-    const spinner = document.querySelector('.animate-spin');
-    expect(spinner).not.toBeNull();
+    await waitFor(() => {
+      expect(document.querySelector('.animate-spin')).not.toBeNull();
+    });
   });
 
   test('displays messages after loading', async () => {
