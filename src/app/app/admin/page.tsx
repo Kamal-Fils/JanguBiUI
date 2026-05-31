@@ -15,6 +15,7 @@ import { useEffect } from 'react';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
+import { env } from '@/config/env';
 import { paths } from '@/config/paths';
 import { useUser } from '@/lib/auth';
 import { canManageUsers, isAdmin, isSuperAdmin } from '@/lib/authorization';
@@ -80,7 +81,9 @@ export default function AdminDashboardPage() {
       href: paths.app.admin.availability.getHref(),
       icon: Phone,
       color: 'bg-teal-500/10 text-teal-600',
-      visible: true,
+      // Backend Availability supprimé : la feature ne fonctionne que sous MSW
+      // tant que l'API n'est pas reconstruite (cf. ticket Lot 2/3).
+      visible: Boolean(env.ENABLE_API_MOCKING),
     },
     {
       label: 'JanguBi TV',

@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { env } from '@/config/env';
 import { AdminMinisters } from '@/features/allo-pretre/components/admin-ministers';
 import { AdminParishes } from '@/features/allo-pretre/components/admin-parishes';
 import { AdminServices } from '@/features/allo-pretre/components/admin-services';
@@ -24,6 +25,19 @@ export default function AvailabilityAdminPage() {
 
   if (isLoading || !isAdmin(user)) {
     return null;
+  }
+
+  // Backend Availability supprimé : l'admin n'est exposé que sous MSW tant que
+  // l'API n'est pas reconstruite en HackSoft (cf. ticket Lot 2/3).
+  if (!env.ENABLE_API_MOCKING) {
+    return (
+      <AppShell>
+        <PageHeader
+          title="Allo-Prêtre"
+          subtitle="Fonctionnalité en cours de préparation."
+        />
+      </AppShell>
+    );
   }
 
   return (
