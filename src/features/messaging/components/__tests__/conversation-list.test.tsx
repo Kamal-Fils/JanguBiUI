@@ -177,6 +177,7 @@ describe('ConversationList', () => {
                 full_name: 'Père Jean',
               },
               last_message: null as never,
+              last_message_at: null as never,
               unread_count: 0,
             }),
           ],

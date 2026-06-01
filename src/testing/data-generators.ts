@@ -1,19 +1,19 @@
 import {
-  email as randEmail,
-  firstName as randFirstName,
-  lastName as randLastName,
-  randomUuid as randUuid,
-  paragraph as _paragraph,
-  word as randWord,
-  datatypeDatetime,
-  phoneNumber as randPhoneNumber,
-  text as _text,
+  randEmail,
+  randFirstName,
+  randLastName,
+  randUuid,
+  randParagraph as _paragraph,
+  randWord,
+  randPastDate as _pastDate,
+  randPhoneNumber,
+  randText as _text,
 } from '@ngneat/falso';
 
 const randNumber = ({ min = 0, max = 1000 }: { min?: number; max?: number } = {}) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
-const randPastDate = () => new Date(datatypeDatetime());
+const randPastDate = () => _pastDate();
 
 const randParagraph = () => _paragraph();
 
