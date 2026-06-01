@@ -17,7 +17,11 @@ export interface Parish {
   name: string;
   city: string;
   address: string;
-  diocese_id: number;
+  // Le back (ParishOutputSerializer) renvoie la FK sous la clé `diocese`
+  // (+ `diocese_name`). On garde `diocese_id` toléré pour les anciens mocks.
+  diocese?: number;
+  diocese_id?: number;
+  diocese_name: string;
 }
 
 export interface Church {

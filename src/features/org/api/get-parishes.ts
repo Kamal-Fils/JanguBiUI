@@ -7,9 +7,13 @@ import { Parish } from '@/types/org';
 const parishSchema = z.object({
   id: z.number(),
   name: z.string(),
-  city: z.string(),
-  address: z.string(),
-  diocese_id: z.number(),
+  city: z.string().optional().default(''),
+  address: z.string().optional().default(''),
+  // Le back renvoie `diocese` (FK) + `diocese_name`. `diocese_id` reste toléré
+  // pour les anciens mocks de tests. Tous optionnels → schéma robuste.
+  diocese: z.number().optional(),
+  diocese_id: z.number().optional(),
+  diocese_name: z.string().optional().default(''),
 });
 
 const parishesResponseSchema = z.object({
