@@ -1,5 +1,6 @@
+import { Analytics } from '@vercel/analytics/react';
 import { Playfair_Display } from 'next/font/google';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { AppProvider } from '@/app/provider';
 
@@ -19,8 +20,9 @@ export const metadata = {
 const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
     <html lang="fr" suppressHydrationWarning className={playfair.variable}>
-      <body>
+      <body suppressHydrationWarning>
         <AppProvider>{children}</AppProvider>
+        <Analytics />
       </body>
     </html>
   );

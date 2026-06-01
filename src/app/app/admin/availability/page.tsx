@@ -1,10 +1,15 @@
 'use client';
 
-import { Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { env } from '@/config/env';
+import { AdminMinisters } from '@/features/allo-pretre/components/admin-ministers';
+import { AdminParishes } from '@/features/allo-pretre/components/admin-parishes';
+import { AdminServices } from '@/features/allo-pretre/components/admin-services';
 import { useUser } from '@/lib/auth';
 import { isAdmin } from '@/lib/authorization';
 
@@ -22,26 +27,45 @@ export default function AvailabilityAdminPage() {
     return null;
   }
 
+  // Backend Availability supprimé : l'admin n'est exposé que sous MSW tant que
+  // l'API n'est pas reconstruite en HackSoft (cf. ticket Lot 2/3).
+  if (!env.ENABLE_API_MOCKING) {
+    return (
+      <AppShell>
+        <PageHeader
+          title="Allo-Prêtre"
+          subtitle="Fonctionnalité en cours de préparation."
+        />
+      </AppShell>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-full bg-background-surface">
-      <PageHeader
-        title="Disponibilités"
-        subtitle="Gestion des paroisses, services et ministres"
-      />
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-        <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
-          <Clock className="size-8 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">
-            Bientôt disponible
-          </h2>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            La gestion des disponibilités est en cours de développement. Cette
-            fonctionnalité sera disponible prochainement.
-          </p>
+    <AppShell>
+      <div className="flex flex-col">
+        <PageHeader
+          title="Allo-Prêtre"
+          subtitle="Gestion des paroisses, services et ministres"
+        />
+        <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+          <Tabs defaultValue="parishes">
+            <TabsList className="mb-4">
+              <TabsTrigger value="parishes">Paroisses</TabsTrigger>
+              <TabsTrigger value="services">Services</TabsTrigger>
+              <TabsTrigger value="ministers">Ministres</TabsTrigger>
+            </TabsList>
+            <TabsContent value="parishes">
+              <AdminParishes />
+            </TabsContent>
+            <TabsContent value="services">
+              <AdminServices />
+            </TabsContent>
+            <TabsContent value="ministers">
+              <AdminMinisters />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

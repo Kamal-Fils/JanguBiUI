@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button';
 import { paths } from '@/config/paths';
@@ -48,24 +50,25 @@ const FILTER_ROLES = [
 ];
 
 export default function AdminUsersPage() {
-  const { data: currentUser } = useUser();
+  const router = useRouter();
+  const { data: currentUser, isLoading: userLoading } = useUser();
   const [roleFilter, setRoleFilter] = useState('');
   const { data, isLoading } = useAdminUsers(roleFilter || undefined);
   const { mutate: toggleActive } = useToggleUserActive();
 
-  if (!canManageUsers(currentUser)) {
-    return (
-      <div className="flex flex-col h-full">
-        <PageHeader title="Utilisateurs" />
-        <p className="p-4 text-sm text-red-500">Accès non autorisé.</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!userLoading && !canManageUsers(currentUser)) {
+      router.replace(paths.app.root.getHref());
+    }
+  }, [currentUser, userLoading, router]);
+
+  if (userLoading || !canManageUsers(currentUser)) return null;
 
   return (
-    <div className="flex flex-col h-full">
-      <PageHeader title="Utilisateurs" />
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <AppShell>
+      <div className="flex flex-col">
+        <PageHeader title="Utilisateurs" />
+        <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8 space-y-4">
         {/* Filter + actions */}
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex gap-1 flex-wrap">
@@ -146,7 +149,8 @@ export default function AdminUsersPage() {
             {data.results.length} / {data.count} utilisateurs
           </p>
         )}
+        </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

@@ -32,7 +32,7 @@ const regularLinks = [
   {
     label: 'Calendrier',
     description: 'Fêtes et temps liturgiques',
-    href: '/app/bible?tab=calendrier',
+    href: '/app/bible?tab=heures',
     icon: Calendar,
     iconClass: 'bg-warning/10 text-warning',
     borderClass: 'border-t-warning/40',

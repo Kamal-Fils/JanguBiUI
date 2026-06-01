@@ -30,6 +30,7 @@ export const useNotifications = () => {
     queryFn: getNotifications,
     refetchInterval: 30_000,
     enabled: !!user?.id,
+    retry: false,
   });
 };
 

@@ -1,15 +1,17 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, LogOut, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Loader2, LogOut, MapPin, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNotifications } from '@/components/ui/notifications';
+import { paths } from '@/config/paths';
 import { useDeleteAccount, useLogout, useUser } from '@/lib/auth';
+import { isFidele } from '@/lib/authorization';
 
 import {
   ChangePasswordInput,
@@ -26,12 +28,18 @@ const profileSchema = z.object({
   phone: z.string().optional(),
 });
 
-const passwordSchema = z.object({
-  current_password: z.string().min(1, 'Mot de passe actuel requis'),
-  new_password: z
-    .string()
-    .min(8, 'Le nouveau mot de passe doit contenir au moins 8 caractères.'),
-});
+const passwordSchema = z
+  .object({
+    current_password: z.string().min(1, 'Mot de passe actuel requis'),
+    new_password: z
+      .string()
+      .min(8, 'Le nouveau mot de passe doit contenir au moins 8 caractères.'),
+    confirm_new_password: z.string().min(1, 'Confirmation requise'),
+  })
+  .refine((data) => data.new_password === data.confirm_new_password, {
+    message: 'Les mots de passe ne correspondent pas.',
+    path: ['confirm_new_password'],
+  });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 type PasswordFormValues = z.infer<typeof passwordSchema>;
@@ -61,7 +69,6 @@ const errorClass = 'mt-1 text-xs text-destructive';
 // ── Main component ───────────────────────────────────────────────────────────
 
 export function ProfilContent() {
-  const router = useRouter();
   const { addNotification } = useNotifications();
   const { data: user, isLoading } = useUser();
 
@@ -86,9 +93,9 @@ export function ProfilContent() {
   useEffect(() => {
     if (user) {
       resetProfile({
-        first_name: user.profile.first_name ?? '',
-        last_name: user.profile.last_name ?? '',
-        phone: user.profile.phone ?? '',
+        first_name: user.profile?.first_name ?? '',
+        last_name: user.profile?.last_name ?? '',
+        phone: user.profile?.phone ?? '',
       });
     }
   }, [user, resetProfile]);
@@ -127,12 +134,12 @@ export function ProfilContent() {
     });
 
   const { mutate: logout, isPending: isLoggingOut } = useLogout({
-    onSuccess: () => router.push('/auth/login'),
+    onSuccess: () => { window.location.href = '/auth/login'; },
   });
 
   const { mutate: deleteAccount, isPending: isDeletingAccount } =
     useDeleteAccount({
-      onSuccess: () => router.push('/auth/login'),
+      onSuccess: () => { window.location.href = '/auth/login'; },
     });
 
   function onProfileSubmit(data: ProfileFormValues) {
@@ -160,12 +167,12 @@ export function ProfilContent() {
   }
 
   const displayName =
-    [user?.profile.first_name, user?.profile.last_name]
+    [user?.profile?.first_name, user?.profile?.last_name]
       .filter(Boolean)
       .join(' ') || user?.email;
 
   const initials =
-    [user?.profile.first_name, user?.profile.last_name]
+    [user?.profile?.first_name, user?.profile?.last_name]
       .filter(Boolean)
       .map((n) => n![0].toUpperCase())
       .join('') ||
@@ -296,6 +303,22 @@ export function ProfilContent() {
                 </p>
               )}
             </div>
+            <div>
+              <label htmlFor="confirm_new_password" className={labelClass}>
+                Confirmer le nouveau mot de passe
+              </label>
+              <input
+                id="confirm_new_password"
+                type="password"
+                className={inputClass}
+                {...registerPassword('confirm_new_password')}
+              />
+              {passwordErrors.confirm_new_password && (
+                <p className={errorClass} role="alert">
+                  {passwordErrors.confirm_new_password.message}
+                </p>
+              )}
+            </div>
             <button
               type="submit"
               disabled={isChangingPassword}
@@ -308,6 +331,19 @@ export function ProfilContent() {
             </button>
           </form>
         </SectionCard>
+
+        {/* Transfert paroissial — fidèles uniquement */}
+        {isFidele(user) && (
+          <SectionCard title="Paroisse">
+            <Link
+              href={paths.app.transfert.getHref()}
+              className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+            >
+              <MapPin className="size-4 text-primary" />
+              Demander un transfert paroissial
+            </Link>
+          </SectionCard>
+        )}
 
         {/* Session section */}
         <SectionCard title="Session">

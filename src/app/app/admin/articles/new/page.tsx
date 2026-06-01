@@ -23,7 +23,7 @@ export default function NewArticlePage() {
 
   useEffect(() => {
     if (!isLoading && !canCreateArticle(user)) {
-      router.replace('/app');
+      router.replace(paths.app.root.getHref());
     }
   }, [user, isLoading, router]);
 

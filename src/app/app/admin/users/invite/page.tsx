@@ -1,38 +1,42 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
+import { PageHeader } from '@/components/layouts/page-header';
 import { paths } from '@/config/paths';
 import { InvitationForm } from '@/features/clergy-accounts/components/invitation-form';
 import { useUser } from '@/lib/auth';
 import { canManageClergy } from '@/lib/authorization';
 
 export default function InvitePage() {
-  const { data: user } = useUser();
+  const { data: user, isLoading } = useUser();
   const router = useRouter();
 
-  if (user && !canManageClergy(user)) {
-    redirect(paths.app.root.getHref());
-  }
+  useEffect(() => {
+    if (!isLoading && !canManageClergy(user)) {
+      router.replace(paths.app.root.getHref());
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || !canManageClergy(user)) return null;
 
   return (
-    <div className="mx-auto max-w-lg space-y-6 p-4 pb-24">
-      <div>
-        <h1 className="text-xl font-bold text-foreground">
-          Inviter un membre du clergé
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Un email d&apos;invitation sera envoyé à l&apos;adresse indiquée. Le
-          lien est valable 48 heures.
-        </p>
+    <AppShell>
+      <div className="flex flex-col">
+        <PageHeader
+          title="Inviter du clergé"
+          subtitle="Un email d'invitation sera envoyé. Le lien est valable 48h."
+        />
+        <div className="mx-auto w-full max-w-lg px-4 py-6">
+          <InvitationForm
+            onSuccess={() =>
+              router.push(paths.app.admin.users.invitations.getHref())
+            }
+          />
+        </div>
       </div>
-
-      <InvitationForm
-        onSuccess={() =>
-          router.push(paths.app.admin.users.invitations.getHref())
-        }
-      />
-    </div>
+    </AppShell>
   );
 }

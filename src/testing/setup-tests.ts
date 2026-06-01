@@ -1,6 +1,18 @@
 import '@testing-library/jest-dom/vitest';
 
+// Must be hoisted above all imports so api-client.ts can access localStorage at module level
+const _localStorageStore = vi.hoisted(() => new Map<string, string>());
+vi.stubGlobal('localStorage', {
+  getItem: (key: string) => _localStorageStore.get(key) ?? null,
+  setItem: (key: string, value: string) => _localStorageStore.set(key, value),
+  removeItem: (key: string) => _localStorageStore.delete(key),
+  clear: () => _localStorageStore.clear(),
+  get length() { return _localStorageStore.size; },
+  key: (index: number) => Array.from(_localStorageStore.keys())[index] ?? null,
+});
+
 import { server } from '@/testing/mocks/server';
+import { clearRefreshToken, setRefreshToken } from '@/lib/api-client';
 
 vi.mock('zustand');
 
@@ -37,11 +49,14 @@ beforeAll(() => {
 afterAll(() => server.close());
 
 beforeEach(() => {
-  const ResizeObserverMock = vi.fn(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-  }));
+  // Simulate a logged-in session so getUserQueryOptions enables the query
+  setRefreshToken('test-refresh-token');
+
+  class ResizeObserverMock {
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+  }
   vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 
   // Mock WebSocket for chat socket tests
@@ -82,4 +97,5 @@ beforeEach(() => {
 afterEach(() => {
   server.resetHandlers();
   vi.clearAllMocks();
+  clearRefreshToken();
 });

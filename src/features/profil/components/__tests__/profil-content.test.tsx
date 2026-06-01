@@ -105,10 +105,12 @@ describe('ProfilContent', () => {
     // eslint-disable-next-line testing-library/no-node-access
     const passwordSection = heading.closest('section')!;
     const currentPasswordInput = within(passwordSection).getByLabelText(/mot de passe actuel/i);
-    const newPasswordInput = within(passwordSection).getByLabelText(/nouveau mot de passe/i);
+    const newPasswordInput = within(passwordSection).getByLabelText(/^nouveau mot de passe$/i);
+    const confirmPasswordInput = within(passwordSection).getByLabelText(/confirmer le nouveau mot de passe/i);
 
     await userEvent.type(currentPasswordInput, 'ancienmdp');
     await userEvent.type(newPasswordInput, 'nouveaumdp');
+    await userEvent.type(confirmPasswordInput, 'nouveaumdp');
     await userEvent.click(
       screen.getByRole('button', { name: /modifier le mot de passe/i }),
     );
@@ -185,8 +187,27 @@ describe('ProfilContent', () => {
 
     renderApp(<ProfilContent />);
 
-    // Component must not crash — form is visible regardless of empty name fields
     await screen.findByRole('button', { name: /^enregistrer$/i });
     expect(screen.getByRole('heading', { name: /informations personnelles/i })).toBeInTheDocument();
+  });
+
+  test('does not crash when profile is undefined (missing from API response)', async () => {
+    // Simulates a backend response where the profile object is absent.
+    // This is the exact scenario that caused the TypeError on user.profile.first_name.
+    const userWithoutProfile = createUser({
+      profile: undefined as unknown as ReturnType<typeof createUser>['profile'],
+    });
+    server.use(
+      http.get(`${env.API_URL}/v1/auth/me/`, () =>
+        HttpResponse.json(userWithoutProfile),
+      ),
+    );
+
+    renderApp(<ProfilContent />);
+
+    // The component must render without crashing — email appears in both h1 and p when profile is absent
+    const emailElements = await screen.findAllByText(userWithoutProfile.email);
+    expect(emailElements.length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: /^enregistrer$/i })).toBeInTheDocument();
   });
 });

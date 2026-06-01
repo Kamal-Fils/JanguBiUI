@@ -1,6 +1,16 @@
 import { useNotifications } from '@/components/ui/notifications';
 import { env } from '@/config/env';
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 // Access token — memory only (short-lived, refreshed via /jwt/refresh/)
 let _accessToken: string | null = null;
 
@@ -19,23 +29,26 @@ export function getAccessToken(): string | null {
 // Refresh token — persisted to localStorage so it survives page reloads
 const REFRESH_TOKEN_KEY = 'jb_refresh_token';
 
-let _refreshToken: string | null =
-  typeof window !== 'undefined'
-    ? localStorage.getItem(REFRESH_TOKEN_KEY)
-    : null;
+let _refreshToken: string | null = (() => {
+  try {
+    return typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
+  } catch {
+    return null;
+  }
+})();
 
 export function setRefreshToken(token: string): void {
   _refreshToken = token;
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(REFRESH_TOKEN_KEY, token);
-  }
+  try {
+    if (typeof window !== 'undefined') localStorage.setItem(REFRESH_TOKEN_KEY, token);
+  } catch {}
 }
 
 export function clearRefreshToken(): void {
   _refreshToken = null;
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-  }
+  try {
+    if (typeof window !== 'undefined') localStorage.removeItem(REFRESH_TOKEN_KEY);
+  } catch {}
 }
 
 export function getRefreshToken(): string | null {
@@ -187,11 +200,14 @@ async function fetchApi<T>(
       // Refresh token expired or missing — session is dead, redirect to login
       clearAccessToken();
       clearRefreshToken();
-      if (!window.location.pathname.startsWith('/auth/')) {
-        const redirectTo = encodeURIComponent(window.location.pathname);
+      const { pathname } = window.location;
+      const isPublicPage = pathname === '/' || pathname.startsWith('/auth/');
+      if (!isPublicPage) {
+        const redirectTo = encodeURIComponent(pathname);
         window.location.href = `/auth/login?redirectTo=${redirectTo}`;
+        return new Promise<never>(() => {});
       }
-      return new Promise<never>(() => {});
+      throw new Error('Unauthenticated');
     }
 
     // Refresh succeeded — retry with the new access token
@@ -229,14 +245,14 @@ async function fetchApi<T>(
       unknown
     >;
     const message = (body.message as string | undefined) || response.statusText;
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && response.status !== 404) {
       useNotifications.getState().addNotification({
         type: 'error',
         title: 'Erreur',
         message,
       });
     }
-    throw new Error(message);
+    throw new ApiError(message, response.status);
   }
 
   return response.json();

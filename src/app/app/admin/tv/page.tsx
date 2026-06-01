@@ -1,9 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button';
+import { paths } from '@/config/paths';
 import { useCreateCategory } from '@/features/tv/api/create-category';
 import { useCreateVideo } from '@/features/tv/api/create-video';
 import { useDeleteVideo } from '@/features/tv/api/delete-video';
@@ -30,13 +33,15 @@ const EMPTY_VIDEO_FORM: VideoFormState = {
 };
 
 export default function AdminTvPage() {
-  const { data: user } = useUser();
+  const router = useRouter();
+  const { data: user, isLoading: userLoading } = useUser();
   const { data: cats, isLoading: catsLoading } = useTvCategories();
   const { data: videos, isLoading: videosLoading } = useTvVideos();
 
   const [videoForm, setVideoForm] = useState<VideoFormState>(EMPTY_VIDEO_FORM);
   const [editingVideoId, setEditingVideoId] = useState<number | null>(null);
   const [showVideoForm, setShowVideoForm] = useState(false);
+  const [confirmDeleteVideoId, setConfirmDeleteVideoId] = useState<number | null>(null);
 
   const [catForm, setCatForm] = useState({
     name: '',
@@ -67,16 +72,13 @@ export default function AdminTvPage() {
       },
     });
 
-  if (!canManageTV(user)) {
-    return (
-      <div className="flex flex-col h-full">
-        <PageHeader title="TV — Administration" />
-        <p className="p-4 text-sm text-red-500">
-          Accès réservé au super administrateur.
-        </p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!userLoading && !canManageTV(user)) {
+      router.replace(paths.app.root.getHref());
+    }
+  }, [user, userLoading, router]);
+
+  if (userLoading || !canManageTV(user)) return null;
 
   const handleVideoSubmit = () => {
     if (!videoForm.youtube_url || !videoForm.category_slug) return;
@@ -95,6 +97,7 @@ export default function AdminTvPage() {
     is_live: boolean;
     is_pinned_live: boolean;
   }) => {
+    setConfirmDeleteVideoId(null);
     setVideoForm({
       title: v.title,
       youtube_url: v.youtube_url,
@@ -107,9 +110,10 @@ export default function AdminTvPage() {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <PageHeader title="TV — Administration" />
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+    <AppShell>
+      <div className="flex flex-col">
+        <PageHeader title="TV — Administration" />
+        <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8 space-y-6">
         {/* Categories section */}
         <section className="space-y-2">
           <div className="flex items-center justify-between">
@@ -359,23 +363,43 @@ export default function AdminTvPage() {
                     >
                       Éditer
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (confirm('Supprimer cette vidéo ?'))
-                          deleteVideo(video.id);
-                      }}
-                      className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50"
-                    >
-                      Suppr.
-                    </button>
+                    {confirmDeleteVideoId === video.id ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            deleteVideo(video.id);
+                            setConfirmDeleteVideoId(null);
+                          }}
+                          className="rounded px-2 py-1 text-xs text-white bg-red-600 hover:bg-red-700"
+                        >
+                          Confirmer
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteVideoId(null)}
+                          className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-gray-100"
+                        >
+                          Annuler
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteVideoId(video.id)}
+                        className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                      >
+                        Suppr.
+                      </button>
+                    )}
                   </div>
                 </div>
               </li>
             ))}
           </ul>
         </section>
+        </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

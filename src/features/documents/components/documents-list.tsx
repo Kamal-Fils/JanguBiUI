@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 
 import { useDocumentRequests } from '../api/get-documents';
 import { DocumentStatus } from '../types';
+import { formatDocumentType } from '../utils/format-document-type';
 
 import { DocumentStatusBadge } from './document-status-badge';
 
@@ -76,24 +77,30 @@ function EmptyState() {
   );
 }
 
-export function DocumentsList() {
+interface DocumentsListProps {
+  hideHeader?: boolean;
+}
+
+export function DocumentsList({ hideHeader = false }: DocumentsListProps) {
   const { data, isLoading, isError } = useDocumentRequests();
 
   return (
     <div className="relative flex flex-col">
-      <PageHeader
-        title="Documents"
-        subtitle="Demandes de documents officiels"
-        action={
-          <Link
-            href="/app/documents/new"
-            className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
-            aria-label="Nouvelle demande"
-          >
-            <Plus className="size-5" />
-          </Link>
-        }
-      />
+      {!hideHeader && (
+        <PageHeader
+          title="Documents"
+          subtitle="Demandes de documents officiels"
+          action={
+            <Link
+              href="/app/documents/new"
+              className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+              aria-label="Nouvelle demande"
+            >
+              <Plus className="size-5" />
+            </Link>
+          }
+        />
+      )}
 
       <div className="mx-auto w-full max-w-2xl px-4 py-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         {isLoading && <DocumentsSkeleton />}
@@ -123,7 +130,7 @@ export function DocumentsList() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-foreground">
-                      {doc.document_type}
+                      {formatDocumentType(doc.document_type)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {formatDate(doc.created_at)}
@@ -138,14 +145,6 @@ export function DocumentsList() {
         )}
       </div>
 
-      {/* FAB — New request */}
-      <Link
-        href="/app/documents/new"
-        className="fixed bottom-24 right-4 z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl md:bottom-6"
-        aria-label="Nouvelle demande"
-      >
-        <Plus className="size-6" />
-      </Link>
     </div>
   );
 }

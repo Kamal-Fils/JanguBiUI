@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { useMyIntentions } from '@/features/intentions/api/get-my-intentions';
 import { IntentionStatusBadge } from '@/features/intentions/components/intention-status-badge';
@@ -12,9 +13,10 @@ export default function IntentionsPage() {
   const { data, isLoading } = useMyIntentions();
 
   return (
-    <div className="flex flex-col h-full">
+    <AppShell>
+    <div className="flex flex-col">
       <PageHeader title="Intentions de Messe" />
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8 space-y-4">
         <button
           onClick={() => setShowForm((v) => !v)}
           className="w-full rounded-lg border-2 border-dashed border-blue-300 py-3 text-sm text-blue-600 font-medium hover:bg-blue-50 transition-colors"
@@ -70,5 +72,6 @@ export default function IntentionsPage() {
           ))}
       </div>
     </div>
+    </AppShell>
   );
 }

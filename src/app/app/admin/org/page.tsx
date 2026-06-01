@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
+import { paths } from '@/config/paths';
 import { useDioceses } from '@/features/org/api/get-dioceses';
 import { useParishes } from '@/features/org/api/get-parishes';
 import { useProvinces } from '@/features/org/api/get-provinces';
@@ -10,7 +13,8 @@ import { useUser } from '@/lib/auth';
 import { isSuperAdmin } from '@/lib/authorization';
 
 export default function AdminOrgPage() {
-  const { data: user } = useUser();
+  const router = useRouter();
+  const { data: user, isLoading: userLoading } = useUser();
   const [selectedProvinceId, setSelectedProvinceId] = useState<
     number | undefined
   >(undefined);
@@ -27,21 +31,19 @@ export default function AdminOrgPage() {
     search: parishSearch || undefined,
   });
 
-  if (!isSuperAdmin(user)) {
-    return (
-      <div className="flex flex-col h-full">
-        <PageHeader title="Structure territoriale" />
-        <p className="p-4 text-sm text-red-500">
-          Accès réservé au super administrateur.
-        </p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!userLoading && !isSuperAdmin(user)) {
+      router.replace(paths.app.root.getHref());
+    }
+  }, [user, userLoading, router]);
+
+  if (userLoading || !isSuperAdmin(user)) return null;
 
   return (
-    <div className="flex flex-col h-full">
-      <PageHeader title="Structure territoriale" />
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+    <AppShell>
+      <div className="flex flex-col">
+        <PageHeader title="Structure territoriale" />
+        <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8 space-y-6">
         {/* Provinces */}
         <section className="space-y-2">
           <h2 className="text-sm font-semibold text-gray-700">Provinces</h2>
@@ -151,7 +153,8 @@ export default function AdminOrgPage() {
             ))}
           </ul>
         </section>
+        </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

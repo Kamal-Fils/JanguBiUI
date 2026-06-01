@@ -25,8 +25,8 @@ export function BottomNav({ messageBadge }: BottomNavProps) {
       <div className="mx-auto flex h-[60px] max-w-lg items-center justify-around px-1">
         {navItems.map((item) => {
           const isActive =
-            item.href === '/app'
-              ? pathname === '/app'
+            item.href === '/app' || item.href === '/app/admin'
+              ? pathname === item.href
               : pathname.startsWith(item.href);
           const Icon = item.icon;
           const badge =

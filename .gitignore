@@ -41,3 +41,9 @@ mocked-db.json
 /.next
 /.vite
 tsconfig.tsbuildinfo
+
+# graphify
+/graphify-out
+
+# sentry wizard logs
+sentry-wizard-installation-error-*.log

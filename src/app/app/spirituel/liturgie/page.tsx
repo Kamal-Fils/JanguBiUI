@@ -1,8 +1,11 @@
 'use client';
 
+import DOMPurify from 'isomorphic-dompurify';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, BookOpen, Flame, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
+
+import { AppShell } from '@/components/layouts/app-shell';
 
 import {
   Card,
@@ -92,9 +95,10 @@ function ReadingCard({ reading }: { reading: Reading }) {
         </div>
       </CardHeader>
       <CardContent className="p-4">
-        <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
-          {reading.text}
-        </p>
+        <div
+          className="prose prose-sm max-w-none text-foreground"
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(reading.text) }}
+        />
       </CardContent>
     </Card>
   );
@@ -137,9 +141,10 @@ function OfficeCard({
             <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {s.label}
             </p>
-            <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
-              {s.value}
-            </p>
+            <div
+              className="prose prose-sm max-w-none text-foreground"
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(s.value) }}
+            />
           </div>
         ))}
       </CardContent>
@@ -176,6 +181,7 @@ export default function LiturgiePage() {
     loadingInfo || loadingReadings || loadingLaudes || loadingVepres;
 
   return (
+    <AppShell hideNav>
     <div className="flex flex-col">
       {/* Header */}
       <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-sm">
@@ -274,5 +280,6 @@ export default function LiturgiePage() {
         )}
       </div>
     </div>
+    </AppShell>
   );
 }
