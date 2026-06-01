@@ -8,6 +8,7 @@ import { paths } from '@/config/paths';
 import { useAdminArticles } from '@/features/news/api/get-admin-articles';
 import { useParishes } from '@/features/org/api/get-parishes';
 import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
+import { DioceseStatsSection } from '@/features/dashboard/components/diocese-stats-section';
 import { cn } from '@/lib/utils';
 
 import { WelcomeBanner } from './welcome-banner';
@@ -254,6 +255,8 @@ export function EvequeeDashboard() {
           loadingMessages={loadingMessages}
           loadingArticles={loadingArticles}
         />
+
+        <DioceseStatsSection />
 
         {/* Quick actions — 2 rows of 3 */}
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">

@@ -17,6 +17,7 @@ import { IntentionStatusBadge } from '@/features/intentions/components/intention
 import { cn } from '@/lib/utils';
 
 import { PastoralReflectionComposer } from '@/features/reflexion-pastorale/components/pastoral-reflection-composer';
+import { ParishStatsSection } from '@/features/dashboard/components/parish-stats-section';
 
 import { WelcomeBanner } from './welcome-banner';
 
@@ -296,6 +297,8 @@ export function PretreeDashboard() {
           loadingIntentions={loadingIntentions}
           loadingMessages={loadingMessages}
         />
+
+        <ParishStatsSection />
 
         <div className="grid grid-cols-4 gap-2">
           {QUICK_ACTIONS.map((action) => {
