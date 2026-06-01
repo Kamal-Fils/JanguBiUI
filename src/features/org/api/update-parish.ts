@@ -28,3 +28,36 @@ export const useAddMemberships = ({
     },
   });
 };
+
+/** Retire une appartenance — DELETE /me/memberships/{id}. */
+export const useRemoveMembership = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (membershipId: number) =>
+      api.delete<void>(`/v1/users/me/memberships/${membershipId}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      onSuccess?.();
+    },
+  });
+};
+
+/** Désigne une appartenance comme principale — PATCH /me/memberships/{id}/set-primary. */
+export const useSetPrimaryMembership = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (membershipId: number) =>
+      api.patch<unknown>(
+        `/v1/users/me/memberships/${membershipId}/set-primary/`,
+        {},
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      onSuccess?.();
+    },
+  });
+};

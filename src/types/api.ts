@@ -1960,6 +1960,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/news/feed/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fil d'actualités agrégé (toutes mes portées)
+         * @description Fil d'actualités AGRÉGÉ de l'utilisateur connecté (Chantier 7b) :
+         *     global ∪ église ∪ paroisse ∪ diocèse de toutes ses appartenances (C3a).
+         */
+        get: operations["v1_news_feed_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/news/my-parish/": {
         parameters: {
             query?: never;
@@ -7243,6 +7264,34 @@ export interface operations {
             path: {
                 diocese_id: number;
             };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleListOutput"][];
+                };
+            };
+        };
+    };
+    v1_news_feed_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par slug de catégorie */
+                category?: string;
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Décalage pagination */
+                offset?: number;
+                /** @description Recherche dans le titre */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
