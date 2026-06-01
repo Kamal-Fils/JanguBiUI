@@ -19,12 +19,14 @@ const parishesResponseSchema = z.object({
 export type ParishFilters = {
   dioceseId?: number;
   search?: string;
+  city?: string;
 };
 
 export const getParishes = (filters: ParishFilters = {}): Promise<Parish[]> => {
   const params = new URLSearchParams();
   if (filters.dioceseId) params.set('diocese', String(filters.dioceseId));
   if (filters.search) params.set('search', filters.search);
+  if (filters.city) params.set('city', filters.city);
   const query = params.toString();
   return api
     .get<unknown>(`/v1/org/parishes/${query ? `?${query}` : ''}`)
