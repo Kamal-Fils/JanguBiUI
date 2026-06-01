@@ -1,5 +1,4 @@
 import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
 
 import { env } from '@/config/env';
@@ -9,16 +8,15 @@ import { renderApp } from '@/testing/test-utils';
 
 import { ArticlesFeed } from '../articles-feed';
 
+const FEED = `${env.API_URL}/v1/news/feed/`;
+
 describe('ArticlesFeed', () => {
-  test('shows loading skeleton while fetching articles', async () => {
+  test('shows loading skeleton while fetching the aggregated feed', async () => {
     server.use(
-      http.get(`${env.API_URL}/v1/news/`, async () => {
+      http.get(FEED, async () => {
         await delay(Infinity);
         return HttpResponse.json({ count: 0, results: [] });
       }),
-      http.get(`${env.API_URL}/v1/news/my-parish/`, () =>
-        HttpResponse.json({ count: 0, results: [] }),
-      ),
     );
 
     renderApp(<ArticlesFeed />);
@@ -28,7 +26,8 @@ describe('ArticlesFeed', () => {
     expect(skeletonItems.length).toBeGreaterThan(0);
   });
 
-  test('shows global articles on the default "Universel" tab', async () => {
+  test('renders a single aggregated feed (no Universel/Ma paroisse tabs)', async () => {
+    // Le back agrège déjà global ∪ paroisse ∪ diocèse : un seul flux, pas d'onglet.
     const mockArticles = [
       createArticle({
         id: 'a1',
@@ -36,39 +35,36 @@ describe('ArticlesFeed', () => {
         scope_type: 'global',
       }),
       createArticle({
-        id: 'a2',
-        title: 'Retraite au sanctuaire de Popenguine',
-        scope_type: 'global',
+        id: 'p1',
+        title: 'Réunion du conseil paroissial',
+        scope_type: 'parish',
       }),
     ];
     server.use(
-      http.get(`${env.API_URL}/v1/news/`, () =>
-        HttpResponse.json({
-          count: mockArticles.length,
-          results: mockArticles,
-        }),
-      ),
-      http.get(`${env.API_URL}/v1/news/my-parish/`, () =>
-        HttpResponse.json({ count: 0, results: [] }),
+      http.get(FEED, () =>
+        HttpResponse.json({ count: mockArticles.length, results: mockArticles }),
       ),
     );
 
     renderApp(<ArticlesFeed />);
 
+    // Articles de portées différentes affichés dans le MÊME flux.
     await screen.findByText('Le pape François appelle à la paix');
     expect(
-      screen.getByText('Retraite au sanctuaire de Popenguine'),
+      screen.getByText('Réunion du conseil paroissial'),
     ).toBeInTheDocument();
+    // Plus aucun onglet.
+    expect(
+      screen.queryByRole('button', { name: /ma paroisse/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /universel/i }),
+    ).not.toBeInTheDocument();
   });
 
-  test('shows empty state when no articles are available', async () => {
+  test('shows empty state when the feed is empty', async () => {
     server.use(
-      http.get(`${env.API_URL}/v1/news/`, () =>
-        HttpResponse.json({ count: 0, results: [] }),
-      ),
-      http.get(`${env.API_URL}/v1/news/my-parish/`, () =>
-        HttpResponse.json({ count: 0, results: [] }),
-      ),
+      http.get(FEED, () => HttpResponse.json({ count: 0, results: [] })),
     );
 
     renderApp(<ArticlesFeed />);
@@ -78,61 +74,13 @@ describe('ArticlesFeed', () => {
     ).toBeInTheDocument();
   });
 
-  test('shows error message when global articles request fails', async () => {
-    server.use(
-      http.get(`${env.API_URL}/v1/news/`, () => HttpResponse.error()),
-      http.get(`${env.API_URL}/v1/news/my-parish/`, () =>
-        HttpResponse.json({ count: 0, results: [] }),
-      ),
-    );
+  test('shows error message when the feed request fails', async () => {
+    server.use(http.get(FEED, () => HttpResponse.error()));
 
     renderApp(<ArticlesFeed />);
 
     expect(
       await screen.findByText(/impossible de charger les actualités/i),
-    ).toBeInTheDocument();
-  });
-
-  test('switches to parish tab and shows parish articles', async () => {
-    const parishArticle = createArticle({
-      id: 'p1',
-      title: 'Réunion du conseil paroissial',
-      scope_type: 'parish',
-    });
-    server.use(
-      http.get(`${env.API_URL}/v1/news/`, () =>
-        HttpResponse.json({ count: 0, results: [] }),
-      ),
-      http.get(`${env.API_URL}/v1/news/my-parish/`, () =>
-        HttpResponse.json({ count: 1, results: [parishArticle] }),
-      ),
-    );
-
-    renderApp(<ArticlesFeed />);
-
-    await userEvent.click(screen.getByRole('button', { name: /ma paroisse/i }));
-
-    expect(
-      await screen.findByText('Réunion du conseil paroissial'),
-    ).toBeInTheDocument();
-  });
-
-  test('shows empty state for parish tab when no parish articles', async () => {
-    server.use(
-      http.get(`${env.API_URL}/v1/news/`, () =>
-        HttpResponse.json({ count: 0, results: [] }),
-      ),
-      http.get(`${env.API_URL}/v1/news/my-parish/`, () =>
-        HttpResponse.json({ count: 0, results: [] }),
-      ),
-    );
-
-    renderApp(<ArticlesFeed />);
-
-    await userEvent.click(screen.getByRole('button', { name: /ma paroisse/i }));
-
-    expect(
-      await screen.findByText(/aucune actualité pour votre paroisse/i),
     ).toBeInTheDocument();
   });
 });

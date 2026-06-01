@@ -20,6 +20,12 @@ export const getGlobalArticles = (
 ): Promise<ArticlesResponse> =>
   api.get<unknown>('/v1/news/', { params }).then(parseArticles);
 
+// Fil AGRÉGÉ de l'utilisateur (global ∪ église ∪ paroisse ∪ diocèse) — Chantier 7b.
+export const getFeedArticles = (
+  params?: GetArticlesParams,
+): Promise<ArticlesResponse> =>
+  api.get<unknown>('/v1/news/feed/', { params }).then(parseArticles);
+
 export const getParishArticles = (
   params?: GetArticlesParams,
 ): Promise<ArticlesResponse> =>
@@ -55,8 +61,17 @@ export const getDioceseArticlesQueryOptions = (
     enabled: !!dioceseId,
   });
 
+export const getFeedArticlesQueryOptions = (params?: GetArticlesParams) =>
+  queryOptions({
+    queryKey: ['articles', 'feed', params],
+    queryFn: () => getFeedArticles(params),
+  });
+
 export const useGlobalArticles = (params?: GetArticlesParams) =>
   useQuery(getGlobalArticlesQueryOptions(params));
+
+export const useFeedArticles = (params?: GetArticlesParams) =>
+  useQuery(getFeedArticlesQueryOptions(params));
 
 export const useParishArticles = (params?: GetArticlesParams) =>
   useQuery(getParishArticlesQueryOptions(params));
