@@ -19,3 +19,13 @@ export interface Parish {
   address: string;
   diocese_id: number;
 }
+
+export interface Church {
+  id: number;
+  name: string;
+  is_main: boolean;
+  city: string;
+  is_active: boolean;
+  parish: number;
+  parish_name: string;
+}
