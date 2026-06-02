@@ -209,7 +209,7 @@ describe('NewDocumentForm', () => {
     ).toBeEnabled();
   });
 
-  test('envoie parish_id (FK) de la paroisse choisie, plus parish_name dérivé', async () => {
+  test('envoie UNIQUEMENT parish_id (FK), sans texte libre parish_name/diocese', async () => {
     const capturedBodies: Array<Record<string, unknown>> = [];
     server.use(
       http.post(
@@ -239,9 +239,10 @@ describe('NewDocumentForm', () => {
       document_type: 'baptism',
       consent_given: true,
       parish_id: 11,
-      parish_name: 'Saint-Pierre',
-      diocese: 'Diocèse de Dakar',
     });
+    // B5c : plus de texte libre parish_name/diocese dans le payload (FK seule).
+    expect(capturedBodies[0]).not.toHaveProperty('parish_name');
+    expect(capturedBodies[0]).not.toHaveProperty('diocese');
   });
 
   test('redirects to /app/documents after successful submission', async () => {

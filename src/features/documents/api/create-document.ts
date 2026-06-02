@@ -21,11 +21,9 @@ export type CreateDocumentInput = {
   registered_first_names?: string;
   father_last_name: string;
   mother_last_name: string;
-  // Paroisse du registre : FK choisie via le picker. Le back dérive le diocèse
-  // depuis parish_id (C4) ; parish_name/diocese restent envoyés (validation back).
-  parish_id?: number | null;
-  parish_name: string;
-  diocese: string;
+  // Paroisse du registre : FK choisie via le picker (B5c). Le back exige parish_id
+  // et dérive nom + diocèse depuis la FK. parish_name/diocese ne sont plus envoyés.
+  parish_id: number;
   sacrament_approximate_date: string;
   sacrament_location: string;
   additional_info?: string;

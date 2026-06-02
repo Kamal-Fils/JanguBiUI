@@ -77,8 +77,6 @@ const schema = z
       })
       .int()
       .positive('Paroisse requise'),
-    parish_name: z.string().optional(),
-    diocese: z.string().optional(),
     sacrament_approximate_date: z.string().min(1, 'Date approximative requise'),
     sacrament_location: z.string().min(1, 'Lieu du sacrement requis'),
     additional_info: z.string().optional(),
@@ -346,8 +344,6 @@ export function NewDocumentForm() {
       father_last_name: '',
       mother_last_name: '',
       parish_id: undefined,
-      parish_name: '',
-      diocese: '',
       sacrament_approximate_date: '',
       sacrament_location: '',
       additional_info: '',
@@ -413,8 +409,6 @@ export function NewDocumentForm() {
       parish ? parish.id : (undefined as unknown as number),
       { shouldValidate: true },
     );
-    setValue('parish_name', parish?.name ?? '');
-    setValue('diocese', parish?.dioceseName ?? '');
   }
 
   function buildDocumentDetails(
@@ -448,11 +442,8 @@ export function NewDocumentForm() {
       contact_email: values.contact_email,
       father_last_name: values.father_last_name,
       mother_last_name: values.mother_last_name,
-      // Paroisse du registre : FK + libellés dérivés (le back réécrit le
-      // diocèse depuis la FK — C4). Fallback non vide pour passer la validation.
+      // Paroisse du registre : FK seule (B5c). Le back dérive nom + diocèse.
       parish_id: values.parish_id,
-      parish_name: values.parish_name || pickedParish?.name || '',
-      diocese: values.diocese || pickedParish?.dioceseName || '—',
       sacrament_approximate_date: values.sacrament_approximate_date,
       sacrament_location: values.sacrament_location,
       additional_info: values.additional_info || undefined,
@@ -876,7 +867,7 @@ export function NewDocumentForm() {
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">Paroisse</dt>
                     <dd className="font-medium text-foreground">
-                      {watch('parish_name')}
+                      {pickedParish?.name}
                     </dd>
                   </div>
                 </dl>
