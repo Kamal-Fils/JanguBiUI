@@ -1,4 +1,3 @@
-import { alloPretreHandlers } from './allo-pretre';
 import { authHandlers } from './auth';
 import { bibleHandlers } from './bible';
 import { documentsHandlers } from './documents';
@@ -13,5 +12,4 @@ export const handlers = [
   ...notificationsHandlers,
   ...newsHandlers,
   ...bibleHandlers,
-  ...alloPretreHandlers,
 ];
