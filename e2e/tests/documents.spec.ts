@@ -12,7 +12,8 @@ const EMPTY_DOCUMENTS_RESPONSE = JSON.stringify({
 });
 
 const DOCUMENT_CREATED_RESPONSE = JSON.stringify({
-  id: 42,
+  // id doit être une string (documentRequestSchema) sinon le parse échoue → pas de redirect.
+  id: '42',
   document_type: 'baptism',
   status: 'submitted',
   created_at: new Date().toISOString(),
@@ -82,7 +83,10 @@ test.describe('Liste des documents', () => {
   });
 
   test('page loads with "Documents" heading', async ({ page }) => {
-    await expect(page.getByText(/^documents$/i)).toBeVisible();
+    // getByRole heading cible le <h1> du PageHeader (et non le lien de nav homonyme).
+    await expect(
+      page.getByRole('heading', { name: /^documents$/i }),
+    ).toBeVisible();
   });
 
   test('shows empty state when there are no documents', async ({ page }) => {
@@ -132,8 +136,8 @@ test.describe('Formulaire — Étape 1 : Type & Motif', () => {
     await expect(page.getByText('Nouvelle demande')).toBeVisible();
   });
 
-  test('step indicator shows "Étape 1 sur 5 — Type"', async ({ page }) => {
-    await expect(page.getByText(/étape 1 sur 5/i)).toBeVisible();
+  test('step indicator shows "Étape 1 sur 6 — Type"', async ({ page }) => {
+    await expect(page.getByText(/étape 1 sur 6/i)).toBeVisible();
   });
 
   test('all document type options are visible', async ({ page }) => {
@@ -187,7 +191,7 @@ test.describe('Formulaire — Étape 1 : Type & Motif', () => {
     await continuerBtn.click();
 
     // After a valid step 1, the wizard advances to step 2.
-    await expect(page.getByText(/étape 2 sur 5/i)).toBeVisible({
+    await expect(page.getByText(/étape 2 sur 6/i)).toBeVisible({
       timeout: 5_000,
     });
   });
@@ -222,7 +226,7 @@ test.describe('Formulaire — Étape 2 : Identité', () => {
       .click();
     await page.getByRole('button', { name: /usage personnel/i }).click();
     await page.getByRole('button', { name: /continuer/i }).click();
-    await expect(page.getByText(/étape 2 sur 5/i)).toBeVisible();
+    await expect(page.getByText(/étape 2 sur 6/i)).toBeVisible();
   });
 
   test('identity step has required fields', async ({ page }) => {
@@ -242,7 +246,7 @@ test.describe('Formulaire — Étape 2 : Identité', () => {
 
     await page.getByRole('button', { name: /continuer/i }).click();
 
-    await expect(page.getByText(/étape 3 sur 5/i)).toBeVisible({
+    await expect(page.getByText(/étape 3 sur 6/i)).toBeVisible({
       timeout: 5_000,
     });
   });
@@ -267,7 +271,7 @@ test.describe('Formulaire — parcours complet', () => {
       .click();
     await page.getByRole('button', { name: /usage personnel/i }).click();
     await page.getByRole('button', { name: /continuer/i }).click();
-    await expect(page.getByText(/étape 2 sur 5/i)).toBeVisible();
+    await expect(page.getByText(/étape 2 sur 6/i)).toBeVisible();
 
     // Step 2 — Identité
     await page.locator('#req_first').fill('Jean-Baptiste');
@@ -275,7 +279,7 @@ test.describe('Formulaire — parcours complet', () => {
     await page.locator('#dob').fill('1990-06-15');
     await page.locator('#pob').fill('Dakar');
     await page.getByRole('button', { name: /continuer/i }).click();
-    await expect(page.getByText(/étape 3 sur 5/i)).toBeVisible();
+    await expect(page.getByText(/étape 3 sur 6/i)).toBeVisible();
 
     // Step 3 — Sacrement (B5c : paroisse du registre via le ParishPicker)
     await page.locator('#father_last').fill('Mamadou Diallo');
@@ -284,17 +288,20 @@ test.describe('Formulaire — parcours complet', () => {
     await page.locator('#sac_date').fill('2000');
     await page.locator('#sac_loc').fill('Dakar');
     await page.getByRole('button', { name: /continuer/i }).click();
-    await expect(page.getByText(/étape 4 sur 5/i)).toBeVisible();
+    await expect(page.getByText(/étape 4 sur 6/i)).toBeVisible();
 
     // Step 4 — Contact
     await page.locator('#contact_phone').fill('+221771234567');
     await page.locator('#contact_email').fill('jean@exemple.com');
     await page.getByRole('button', { name: /continuer/i }).click();
-    await expect(page.getByText(/étape 5 sur 5/i)).toBeVisible();
+    await expect(page.getByText(/étape 5 sur 6/i)).toBeVisible();
 
-    // Step 5 — Validation (consent)
-    // The CheckCircle2 button has text starting with "Je certifie…"
-    await page.getByText(/je certifie que les informations/i).click();
+    // Step 5 — Pièces jointes (optionnel) → on passe sans téléverser
+    await page.getByRole('button', { name: /continuer/i }).click();
+    await expect(page.getByText(/étape 6 sur 6/i)).toBeVisible();
+
+    // Step 6 — Validation (consentement)
+    await page.getByText(/je certifie/i).click();
 
     await page.getByRole('button', { name: /envoyer la demande/i }).click();
 
