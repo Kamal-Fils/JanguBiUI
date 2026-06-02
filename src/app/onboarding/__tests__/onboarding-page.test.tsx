@@ -10,10 +10,9 @@ import { renderApp, screen, waitFor, within } from '@/testing/test-utils';
 import OnboardingPage from '../page';
 
 beforeAll(() => {
+  // jsdom n'implémente pas ces méthodes pointer (Radix Select en a besoin).
   Element.prototype.scrollIntoView = vi.fn();
-  // @ts-expect-error jsdom n'implémente pas ces méthodes pointer.
   Element.prototype.hasPointerCapture = vi.fn(() => false);
-  // @ts-expect-error idem
   Element.prototype.releasePointerCapture = vi.fn();
 });
 
@@ -76,10 +75,12 @@ describe('OnboardingPage', () => {
   });
 
   test('soumet le batch church_ids (principale en tête) et complète l’onboarding', async () => {
-    let body: { church_ids?: number[] } | null = null;
+    // Holder objet : évite que la CFA TS ne réduise `body` à `null`
+    // (l'affectation a lieu dans la closure du handler MSW).
+    const captured: { body: { church_ids?: number[] } | null } = { body: null };
     server.use(
       http.post(`${env.API_URL}/v1/users/me/memberships/`, async ({ request }) => {
-        body = (await request.json()) as { church_ids: number[] };
+        captured.body = (await request.json()) as { church_ids: number[] };
         return HttpResponse.json([], { status: 201 });
       }),
     );
@@ -103,10 +104,10 @@ describe('OnboardingPage', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /commencer/i }));
 
-    await waitFor(() => expect(body).not.toBeNull());
+    await waitFor(() => expect(captured.body).not.toBeNull());
     // Batch posté avec la principale (211) en tête.
-    expect(body?.church_ids?.[0]).toBe(211);
-    expect(new Set(body?.church_ids)).toEqual(new Set([111, 211]));
+    expect(captured.body?.church_ids?.[0]).toBe(211);
+    expect(new Set(captured.body?.church_ids)).toEqual(new Set([111, 211]));
 
     // Onboarding complété → redirection (le back passe à completed dès ≥1 appartenance).
     await waitFor(() => expect(replace).toHaveBeenCalled());
