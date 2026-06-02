@@ -13,10 +13,9 @@ import {
 
 // Radix Select a besoin de ces stubs sous jsdom.
 beforeAll(() => {
+  // jsdom n'implémente pas ces méthodes pointer (Radix Select en a besoin).
   Element.prototype.scrollIntoView = vi.fn();
-  // @ts-expect-error jsdom n'implémente pas ces méthodes pointer.
   Element.prototype.hasPointerCapture = vi.fn(() => false);
-  // @ts-expect-error idem
   Element.prototype.releasePointerCapture = vi.fn();
 });
 

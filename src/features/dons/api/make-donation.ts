@@ -2,8 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { api } from '@/lib/api-client';
 
-interface MakeDonationInput {
+export interface MakeDonationInput {
   campaign_id?: number | null;
+  // Bénéficiaire : église du donateur (memberships). parish_id dérivé côté front.
+  church_id?: number | null;
+  parish_id?: number | null;
   amount: number;
   payment_provider: string;
   is_anonymous?: boolean;

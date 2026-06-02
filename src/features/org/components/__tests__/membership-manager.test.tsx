@@ -9,10 +9,9 @@ import { renderApp, screen, waitFor, within } from '@/testing/test-utils';
 import { MembershipManager } from '../membership-manager';
 
 beforeAll(() => {
+  // jsdom n'implémente pas ces méthodes pointer (Radix Select en a besoin).
   Element.prototype.scrollIntoView = vi.fn();
-  // @ts-expect-error jsdom n'implémente pas ces méthodes pointer.
   Element.prototype.hasPointerCapture = vi.fn(() => false);
-  // @ts-expect-error idem
   Element.prototype.releasePointerCapture = vi.fn();
 });
 
@@ -93,7 +92,9 @@ describe('MembershipManager', () => {
   });
 
   test('ajoute une église via la cascade (POST /me/memberships)', async () => {
-    let body: { church_ids?: number[] } | null = null;
+    // Holder objet : évite que la CFA TS ne réduise `body` à `null`
+    // (l'affectation a lieu dans la closure du handler MSW).
+    const captured: { body: { church_ids?: number[] } | null } = { body: null };
     server.use(
       http.get(`${env.API_URL}/v1/org/dioceses/`, () =>
         HttpResponse.json({
@@ -111,7 +112,7 @@ describe('MembershipManager', () => {
         }),
       ),
       http.post(`${env.API_URL}/v1/users/me/memberships/`, async ({ request }) => {
-        body = (await request.json()) as { church_ids: number[] };
+        captured.body = (await request.json()) as { church_ids: number[] };
         return HttpResponse.json([], { status: 201 });
       }),
     );
@@ -134,6 +135,6 @@ describe('MembershipManager', () => {
     await userEvent.click(screen.getByRole('button', { name: /^ajouter$/i }));
 
     await screen.findByText(/Église A/); // flush
-    expect(body?.church_ids).toEqual([999]);
+    expect(captured.body?.church_ids).toEqual([999]);
   });
 });

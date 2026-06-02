@@ -15,6 +15,10 @@ import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import {
+  ParishPicker,
+  type PickedParish,
+} from '@/features/org/components/parish-picker';
 import { useUser } from '@/lib/auth';
 
 import { CreateDocumentInput, useCreateDocument } from '../api/create-document';
@@ -64,8 +68,17 @@ const schema = z
     place_of_birth: z.string().min(1, 'Lieu de naissance requis'),
     father_last_name: z.string().min(1, 'Nom du père requis'),
     mother_last_name: z.string().min(1, 'Nom de la mère requis'),
-    parish_name: z.string().min(1, 'Paroisse requise'),
-    diocese: z.string().min(1, 'Diocèse requis'),
+    // Paroisse du registre choisie via le picker (FK). parish_name/diocese sont
+    // dérivés de la paroisse sélectionnée et envoyés au back (validation).
+    parish_id: z
+      .number({
+        required_error: 'Paroisse requise',
+        invalid_type_error: 'Paroisse requise',
+      })
+      .int()
+      .positive('Paroisse requise'),
+    parish_name: z.string().optional(),
+    diocese: z.string().optional(),
     sacrament_approximate_date: z.string().min(1, 'Date approximative requise'),
     sacrament_location: z.string().min(1, 'Lieu du sacrement requis'),
     additional_info: z.string().optional(),
@@ -149,8 +162,7 @@ const STEP_FIELDS: Record<Step, (keyof FormValues)[]> = {
   search: [
     'father_last_name',
     'mother_last_name',
-    'parish_name',
-    'diocese',
+    'parish_id',
     'sacrament_approximate_date',
     'sacrament_location',
     'spouse_full_name_groom',
@@ -310,6 +322,7 @@ export function NewDocumentForm() {
   const [stepIndex, setStepIndex] = useState(0);
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [pickedParish, setPickedParish] = useState<PickedParish | null>(null);
 
   const step = STEPS[stepIndex];
 
@@ -332,6 +345,7 @@ export function NewDocumentForm() {
       place_of_birth: '',
       father_last_name: '',
       mother_last_name: '',
+      parish_id: undefined,
       parish_name: '',
       diocese: '',
       sacrament_approximate_date: '',
@@ -392,6 +406,17 @@ export function NewDocumentForm() {
     if (valid) setStepIndex((i) => i + 1);
   }
 
+  function handlePickParish(parish: PickedParish | null) {
+    setPickedParish(parish);
+    setValue(
+      'parish_id',
+      parish ? parish.id : (undefined as unknown as number),
+      { shouldValidate: true },
+    );
+    setValue('parish_name', parish?.name ?? '');
+    setValue('diocese', parish?.dioceseName ?? '');
+  }
+
   function buildDocumentDetails(
     values: FormValues,
   ): Record<string, string> | undefined {
@@ -423,8 +448,11 @@ export function NewDocumentForm() {
       contact_email: values.contact_email,
       father_last_name: values.father_last_name,
       mother_last_name: values.mother_last_name,
-      parish_name: values.parish_name,
-      diocese: values.diocese,
+      // Paroisse du registre : FK + libellés dérivés (le back réécrit le
+      // diocèse depuis la FK — C4). Fallback non vide pour passer la validation.
+      parish_id: values.parish_id,
+      parish_name: values.parish_name || pickedParish?.name || '',
+      diocese: values.diocese || pickedParish?.dioceseName || '—',
       sacrament_approximate_date: values.sacrament_approximate_date,
       sacrament_location: values.sacrament_location,
       additional_info: values.additional_info || undefined,
@@ -634,35 +662,18 @@ export function NewDocumentForm() {
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="parish_name" className={labelClass}>
+                <span className={labelClass}>
                   Paroisse du sacrement{' '}
                   <span className="text-destructive">*</span>
-                </label>
-                <input
-                  id="parish_name"
-                  placeholder="Ex : Paroisse Saint-Pierre de Dakar"
-                  className={inputClass}
-                  {...register('parish_name')}
-                />
-                {errors.parish_name && (
+                </span>
+                <p className="text-xs text-muted-foreground">
+                  Choisissez parmi vos paroisses ou recherchez la paroisse du
+                  registre (le diocèse est déduit automatiquement).
+                </p>
+                <ParishPicker value={pickedParish} onChange={handlePickParish} />
+                {errors.parish_id && (
                   <p className={errorClass} role="alert">
-                    {errors.parish_name.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="diocese" className={labelClass}>
-                  Diocèse <span className="text-destructive">*</span>
-                </label>
-                <input
-                  id="diocese"
-                  placeholder="Ex : Diocèse de Dakar"
-                  className={inputClass}
-                  {...register('diocese')}
-                />
-                {errors.diocese && (
-                  <p className={errorClass} role="alert">
-                    {errors.diocese.message}
+                    {errors.parish_id.message}
                   </p>
                 )}
               </div>
