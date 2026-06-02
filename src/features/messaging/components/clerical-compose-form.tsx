@@ -6,10 +6,10 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
+import { useParishes } from '@/features/org/api/get-parishes';
 import { useUser } from '@/lib/auth';
 import { isEvequeOrAbove } from '@/lib/authorization';
 
-import { useParishes } from '../../allo-pretre/api/get-parishes';
 import { usePriests } from '../api/get-priests';
 import { useSendClericalMessage } from '../api/send-clerical-message';
 

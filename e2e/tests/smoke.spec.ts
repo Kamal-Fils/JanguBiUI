@@ -56,12 +56,6 @@ test.describe('Navigation smoke — authenticated user', () => {
     await expect(page.getByRole('main')).toBeVisible();
   });
 
-  test('direct route — /app/allo-pretre loads', async ({ page }) => {
-    await page.goto('/app/allo-pretre');
-    await expect(page).toHaveURL('/app/allo-pretre');
-    await expect(page.getByRole('main')).toBeVisible();
-  });
-
   test('direct route — /app/tv loads', async ({ page }) => {
     await page.goto('/app/tv');
     await expect(page).toHaveURL('/app/tv');
