@@ -41,6 +41,38 @@ async function mockEmptyDocuments(page: import('@playwright/test').Page) {
   });
 }
 
+// B5c : l'étape Sacrement utilise désormais le ParishPicker (recherche /org/parishes/),
+// plus les champs texte libres parish_name/diocese. On mocke la recherche de paroisses.
+async function mockParishSearch(page: import('@playwright/test').Page) {
+  await page.route('**/v1/org/parishes/**', async (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        results: [
+          {
+            id: 11,
+            name: 'Paroisse Saint-Pierre',
+            city: 'Dakar',
+            address: '',
+            diocese: 1,
+            diocese_name: 'Diocèse de Dakar',
+          },
+        ],
+      }),
+    }),
+  );
+}
+
+async function pickRegistryParish(page: import('@playwright/test').Page) {
+  await page
+    .getByLabel(/rechercher une paroisse du registre/i)
+    .fill('Saint-Pierre');
+  await page
+    .getByRole('button', { name: /Paroisse Saint-Pierre/ })
+    .click();
+}
+
 // ── List page ─────────────────────────────────────────────────────────────────
 
 test.describe('Liste des documents', () => {
@@ -226,6 +258,7 @@ test.describe('Formulaire — parcours complet', () => {
   test('submitting all 5 steps creates a document and redirects to /app/documents', async ({
     page,
   }) => {
+    await mockParishSearch(page);
     await page.goto('/app/documents/new');
 
     // Step 1 — Type & Motif
@@ -244,11 +277,10 @@ test.describe('Formulaire — parcours complet', () => {
     await page.getByRole('button', { name: /continuer/i }).click();
     await expect(page.getByText(/étape 3 sur 5/i)).toBeVisible();
 
-    // Step 3 — Sacrement
+    // Step 3 — Sacrement (B5c : paroisse du registre via le ParishPicker)
     await page.locator('#father_last').fill('Mamadou Diallo');
     await page.locator('#mother_last').fill('Fatou Ndiaye');
-    await page.locator('#parish_name').fill('Paroisse Saint-Pierre de Dakar');
-    await page.locator('#diocese').fill('Diocèse de Dakar');
+    await pickRegistryParish(page);
     await page.locator('#sac_date').fill('2000');
     await page.locator('#sac_loc').fill('Dakar');
     await page.getByRole('button', { name: /continuer/i }).click();
