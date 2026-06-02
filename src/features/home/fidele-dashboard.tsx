@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, MessageCircle, Phone, ScrollText } from 'lucide-react';
+import { BookOpen, MessageCircle, ScrollText } from 'lucide-react';
 import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
@@ -19,12 +19,6 @@ const QUICK_ACTIONS = [
     href: '/app/spirituel',
     icon: BookOpen,
     className: 'bg-primary/10 text-primary',
-  },
-  {
-    label: 'Allo-Prêtre',
-    href: '/app/allo-pretre',
-    icon: Phone,
-    className: 'bg-green-500/10 text-green-600',
   },
   {
     label: 'Intentions',

@@ -61,7 +61,6 @@ export const paths = {
     admin: {
       root: { getHref: () => '/app/admin' },
       agenda: { getHref: () => '/app/admin/agenda' },
-      availability: { getHref: () => '/app/admin/availability' },
       articles: { getHref: () => '/app/admin/articles' },
       articleNew: { getHref: () => '/app/admin/articles/new' },
       articleEdit: {

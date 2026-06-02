@@ -6,7 +6,6 @@ import {
   Calendar,
   Clock,
   MessageCircle,
-  Phone,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -20,14 +19,6 @@ const regularLinks = [
     icon: BookOpen,
     iconClass: 'bg-primary/10 text-primary',
     borderClass: 'border-t-primary/40',
-  },
-  {
-    label: 'Allo Prêtre',
-    description: 'Contacter un prêtre',
-    href: '/app/allo-pretre',
-    icon: Phone,
-    iconClass: 'bg-success/10 text-success',
-    borderClass: 'border-t-success/40',
   },
   {
     label: 'Calendrier',
