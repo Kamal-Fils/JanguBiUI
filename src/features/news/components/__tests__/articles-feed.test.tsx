@@ -113,7 +113,7 @@ describe('ArticlesFeed', () => {
     renderApp(<ArticlesFeed />);
 
     expect(
-      await screen.findByText(/aucune actualité disponible/i),
+      await screen.findByText(/^aucune actualité$/i),
     ).toBeInTheDocument();
   });
 

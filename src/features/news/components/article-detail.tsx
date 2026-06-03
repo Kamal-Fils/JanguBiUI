@@ -135,7 +135,7 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
           </div>
 
           <div
-            className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-p:text-foreground/90 prose-a:text-primary"
+            className="prose prose-sm max-w-reading text-foreground dark:prose-invert prose-headings:text-foreground prose-headings:font-serif prose-p:text-foreground/90 prose-a:text-primary"
             dangerouslySetInnerHTML={{
               __html: DOMPurify.sanitize(article.content),
             }}
