@@ -4,7 +4,15 @@ import { api } from '@/lib/api-client';
 
 import { Article, articleSchema } from '../types';
 
-export type GetArticlesParams = { limit?: number; offset?: number };
+export type ScopeTypeFilter = 'global' | 'diocese' | 'parish' | 'church';
+
+export type GetArticlesParams = {
+  limit?: number;
+  offset?: number;
+  // Filtre de portée (feed) — borné serveur aux appartenances de l'utilisateur.
+  scope_type?: ScopeTypeFilter;
+  scope_id?: number;
+};
 export type ArticlesResponse = { count: number; results: Article[] };
 
 const parseArticles = (data: unknown): ArticlesResponse => {
