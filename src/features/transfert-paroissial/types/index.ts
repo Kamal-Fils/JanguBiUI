@@ -21,11 +21,3 @@ export const transferRequestSchema = z.object({
 
 export type TransferStatus = z.infer<typeof transferStatusSchema>;
 export type TransferRequest = z.infer<typeof transferRequestSchema>;
-
-export const TRANSFER_STATUS_LABELS: Record<TransferStatus, string> = {
-  pending: 'En attente',
-  approved_by_origin: 'Approuvé par la paroisse d\'origine',
-  acknowledged_by_destination: 'Accusé réception',
-  completed: 'Transfert effectué',
-  rejected: 'Refusé',
-};
