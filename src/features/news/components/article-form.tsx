@@ -165,15 +165,23 @@ export function ArticleForm({
             htmlFor="form-diocese-id"
             className="block text-sm font-medium text-foreground"
           >
-            ID Diocèse
+            Diocèse <span className="text-destructive">*</span>
           </label>
           <input
             id="form-diocese-id"
             type="number"
             {...register('scope_diocese_id')}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-            placeholder="ID du diocèse"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            placeholder="Identifiant du diocèse"
           />
+          {errors.scope_diocese_id && (
+            <p className="text-xs text-destructive">
+              {errors.scope_diocese_id.message}
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Saisissez l’identifiant du diocèse concerné par cette portée.
+          </p>
         </div>
       )}
 
@@ -183,15 +191,23 @@ export function ArticleForm({
             htmlFor="form-parish-id"
             className="block text-sm font-medium text-foreground"
           >
-            ID Paroisse
+            Paroisse <span className="text-destructive">*</span>
           </label>
           <input
             id="form-parish-id"
             type="number"
             {...register('scope_parish_id')}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-            placeholder="ID de la paroisse"
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            placeholder="Identifiant de la paroisse"
           />
+          {errors.scope_parish_id && (
+            <p className="text-xs text-destructive">
+              {errors.scope_parish_id.message}
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Saisissez l’identifiant de la paroisse concernée par cette portée.
+          </p>
         </div>
       )}
 
