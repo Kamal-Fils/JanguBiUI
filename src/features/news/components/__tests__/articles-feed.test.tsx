@@ -62,6 +62,31 @@ describe('ArticlesFeed', () => {
     ).not.toBeInTheDocument();
   });
 
+  test('renders church-scoped articles without erroring (scope_type "church")', async () => {
+    // Anti-régression : le back émet des articles de portée "church" (Chantier 3a).
+    // L'enum Zod front doit l'accepter, sinon articleSchema.parse throw → page d'erreur.
+    const mockArticles = [
+      createArticle({
+        id: 'c1',
+        title: 'Veillée de prière — Cathédrale du Souvenir',
+        scope_type: 'church',
+        scope_church_id: 5,
+      }),
+    ];
+    server.use(
+      http.get(FEED, () =>
+        HttpResponse.json({ count: mockArticles.length, results: mockArticles }),
+      ),
+    );
+
+    renderApp(<ArticlesFeed />);
+
+    await screen.findByText('Veillée de prière — Cathédrale du Souvenir');
+    expect(
+      screen.queryByText(/impossible de charger les actualités/i),
+    ).not.toBeInTheDocument();
+  });
+
   test('shows empty state when the feed is empty', async () => {
     server.use(
       http.get(FEED, () => HttpResponse.json({ count: 0, results: [] })),

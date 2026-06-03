@@ -8,7 +8,10 @@ const dioceseSchema = z.object({
   id: z.number(),
   name: z.string(),
   code: z.string(),
-  province_id: z.number(),
+  // Le back (DioceseOutputSerializer) renvoie la FK sous la clé `province`
+  // (+ `province_name`), pas `province_id`.
+  province: z.number(),
+  province_name: z.string().optional(),
 });
 
 const diocesesResponseSchema = z.object({
