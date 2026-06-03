@@ -30,7 +30,7 @@ export const VerifyEmail = () => {
         </p>
         <NextLink
           href={paths.auth.login.getHref()}
-          className="text-sm font-medium text-blue-600 hover:text-blue-500"
+          className="text-sm font-medium text-primary hover:text-primary/80"
         >
           Retour à la connexion
         </NextLink>
@@ -56,7 +56,7 @@ export const VerifyEmail = () => {
         </p>
         <NextLink
           href={paths.auth.login.getHref()}
-          className="text-sm font-medium text-blue-600 hover:text-blue-500"
+          className="text-sm font-medium text-primary hover:text-primary/80"
         >
           Retour à la connexion
         </NextLink>
@@ -66,7 +66,7 @@ export const VerifyEmail = () => {
 
   return (
     <div className="flex flex-col items-center gap-4 py-4 text-center">
-      <CheckCircle2 className="size-12 text-green-500" />
+      <CheckCircle2 className="size-12 text-success" />
       <p className="text-sm font-medium text-foreground">
         Email vérifié avec succès ! Vous pouvez maintenant vous connecter.
       </p>

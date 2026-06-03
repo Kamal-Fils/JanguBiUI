@@ -1,8 +1,15 @@
 const LogoMark = () => (
-  <svg width="26" height="26" viewBox="0 0 30 30" fill="none" aria-hidden>
-    <rect x="12.5" y="2" width="5" height="26" rx="2.5" fill="#70CBFF" />
-    <rect x="3" y="9.5" width="24" height="5" rx="2.5" fill="#70CBFF" />
-    <circle cx="15" cy="12" r="3" fill="#06101A" />
+  <svg
+    width="26"
+    height="26"
+    viewBox="0 0 30 30"
+    fill="none"
+    aria-hidden
+    className="text-primary"
+  >
+    <rect x="12.5" y="2" width="5" height="26" rx="2.5" fill="currentColor" />
+    <rect x="3" y="9.5" width="24" height="5" rx="2.5" fill="currentColor" />
+    <circle cx="15" cy="12" r="3" fill="hsl(var(--background))" />
   </svg>
 );
 

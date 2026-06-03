@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/cn';
 
 interface PageHeaderProps {
   title: string;
@@ -16,18 +16,21 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        'sticky top-0 z-40 border-b border-border bg-background-surface/95 px-4 py-3 backdrop-blur-md',
+        'sticky top-0 z-40 border-b border-border bg-background-surface/90 px-4 py-3.5 backdrop-blur-md',
         className,
       )}
     >
-      <div className="mx-auto flex max-w-3xl items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+      {/* pr-12 sur mobile : laisse la place à la cloche de notification flottante */}
+      <div className="flex items-center justify-between gap-3 pr-12 md:pr-0">
+        <div className="min-w-0">
+          <h1 className="truncate font-serif text-xl font-bold tracking-tight text-foreground">
+            {title}
+          </h1>
           {subtitle && (
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
+            <p className="truncate text-sm text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        {action && <div>{action}</div>}
+        {action && <div className="shrink-0">{action}</div>}
       </div>
     </header>
   );
