@@ -1,10 +1,11 @@
 'use client';
 
-import DOMPurify from 'isomorphic-dompurify';
-import { ArrowLeft, Minus, Plus, Bookmark } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
+import { FontSizeStepper } from '@/components/ui/font-size-stepper';
+import { ReadingSurface } from '@/components/ui/reading-surface';
 
 import { HomilyNotes } from './homily-notes';
 
@@ -44,46 +45,20 @@ export function ReadingView({
           <ArrowLeft className="size-4" />
           Retour
         </Button>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={() => setFontSize((s) => Math.max(12, s - 2))}
-            aria-label="Reduire la taille du texte"
-          >
-            <Minus className="size-4" />
-          </Button>
-          <span className="min-w-8 text-center text-xs text-muted-foreground">
-            {fontSize}
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={() => setFontSize((s) => Math.min(24, s + 2))}
-            aria-label="Augmenter la taille du texte"
-          >
-            <Plus className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            aria-label="Marquer comme favori"
-          >
-            <Bookmark className="size-4" />
-          </Button>
-        </div>
+        <FontSizeStepper
+          value={fontSize}
+          onChange={setFontSize}
+          min={12}
+          max={24}
+        />
       </div>
 
       {/* Reading content */}
-      <article
-        className="bg-background-surface mx-auto w-full rounded-xl p-6"
-        style={{ maxWidth: '720px' }}
-      >
+      <article className="mx-auto w-full max-w-reading rounded-xl bg-background-surface p-6">
         <header className="mb-6">
-          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+          <h2 className="font-serif text-xl font-bold text-foreground">
+            {title}
+          </h2>
           <p className="text-sm text-primary">{reference}</p>
         </header>
         {refrain && (
@@ -97,23 +72,16 @@ export function ReadingView({
           </div>
         )}
         {isHtml ? (
-          <div
-            className="prose dark:prose-invert prose-sm max-w-none pb-8 prose-p:text-foreground/80 prose-strong:text-foreground prose-hr:border-muted reading-content"
-            style={{ fontSize: `${fontSize}px` }}
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(text) }}
-          />
+          <ReadingSurface fontSize={fontSize} html={text} className="pb-8" />
         ) : (
-          <div
-            className="text-foreground-secondary whitespace-pre-line leading-relaxed pb-8"
-            style={{ fontSize: `${fontSize}px`, lineHeight: 1.75 }}
-          >
-            {text}
-          </div>
+          <ReadingSurface fontSize={fontSize} className="pb-8">
+            <p className="whitespace-pre-line">{text}</p>
+          </ReadingSurface>
         )}
       </article>
 
       {showHomilyNotes && passageId !== undefined && (
-        <div className="mx-auto w-full" style={{ maxWidth: '720px' }}>
+        <div className="mx-auto w-full max-w-reading">
           <HomilyNotes passageId={passageId} />
         </div>
       )}
