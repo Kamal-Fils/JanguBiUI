@@ -1,9 +1,10 @@
 'use client';
 
-import { RotateCcw } from 'lucide-react';
+import { MailX, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
+import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog/dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Spinner } from '@/components/ui/spinner';
 
 import { useRevokeInvitation } from '../api/revoke-invitation';
@@ -49,62 +51,76 @@ export function InvitationList({
   );
   const revoke = useRevokeInvitation();
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner />
-      </div>
-    );
-  }
-
-  if (invitations.length === 0) {
-    return (
-      <div className="py-12 text-center text-sm text-muted-foreground">
-        Aucune invitation.
-      </div>
-    );
-  }
+  const columns: DataTableColumn<ClergicalInvitation>[] = [
+    {
+      header: 'Invité',
+      mobileLabel: 'Invité',
+      cell: (inv) => (
+        <div className="min-w-0">
+          <p className="truncate font-medium text-foreground">
+            {inv.first_name} {inv.last_name}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">{inv.email}</p>
+        </div>
+      ),
+    },
+    {
+      header: 'Rôle',
+      mobileLabel: 'Rôle',
+      cell: (inv) => (
+        <span className="text-sm text-muted-foreground">
+          {ROLE_LABELS[inv.pastoral_role] ?? inv.pastoral_role}
+          {inv.diocese_name && ` — ${inv.diocese_name}`}
+        </span>
+      ),
+    },
+    {
+      header: 'Statut',
+      mobileLabel: 'Statut',
+      cell: (inv) => <InvitationStatusBadge status={inv.status} />,
+    },
+    {
+      header: 'Expiration',
+      mobileLabel: 'Expire le',
+      cell: (inv) => (
+        <span className="text-sm text-muted-foreground">
+          {formatDate(inv.expires_at)}
+        </span>
+      ),
+    },
+    {
+      header: 'Actions',
+      isAction: true,
+      cell: (inv) =>
+        inv.status === 'pending' ? (
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => setRevokeTarget(inv)}
+          >
+            <RotateCcw className="mr-1.5 size-3.5" />
+            Révoquer
+          </Button>
+        ) : null,
+    },
+  ];
 
   return (
     <>
-      <div className="space-y-3">
-        {invitations.map((inv) => (
-          <div
-            key={inv.id}
-            className="rounded-lg border border-border bg-card p-4"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <span className="font-medium text-foreground">
-                    {inv.first_name} {inv.last_name}
-                  </span>
-                  <InvitationStatusBadge status={inv.status} />
-                </div>
-                <p className="text-sm text-muted-foreground">{inv.email}</p>
-                <p className="text-xs text-muted-foreground">
-                  Rôle : {ROLE_LABELS[inv.pastoral_role] ?? inv.pastoral_role}
-                  {inv.diocese_name && ` — ${inv.diocese_name}`}
-                </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Expire le {formatDate(inv.expires_at)}
-                </p>
-              </div>
-
-              {inv.status === 'pending' && (
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => setRevokeTarget(inv)}
-                >
-                  <RotateCcw className="mr-1.5 size-3.5" />
-                  Révoquer
-                </Button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      <DataTable
+        data={invitations}
+        columns={columns}
+        rowKey={(inv) => inv.id}
+        isLoading={isLoading}
+        caption="Liste des invitations cléricales"
+        emptyState={
+          <EmptyState
+            icon={<MailX />}
+            title="Aucune invitation"
+            description="Aucune invitation cléricale n'a encore été envoyée."
+          />
+        }
+      />
 
       <Dialog
         open={!!revokeTarget}

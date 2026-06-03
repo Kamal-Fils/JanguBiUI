@@ -4,7 +4,7 @@ import { CheckCircle, ChevronRight, Clock, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button/button';
 
 import { useSaveLectioSession } from '../api/save-lectio-session';
 
@@ -133,7 +133,7 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
   if (isSuccess) {
     return (
       <div className="flex flex-col items-center gap-4 py-12 text-center">
-        <CheckCircle className="size-12 text-green-500" />
+        <CheckCircle className="size-12 text-success" />
         <p className="text-base font-medium text-foreground">Session sauvegardée</p>
         <p className="text-sm text-muted-foreground">
           Que cette Parole porte du fruit en vous.
@@ -167,23 +167,23 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
                 reset();
                 setCurrentStepIndex(index);
               }}
-              className="flex flex-1 flex-col items-center gap-1"
+              className="flex flex-1 flex-col items-center gap-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <div
-                className={`h-1.5 w-full rounded-full transition-colors ${
+                className={`h-1.5 w-full rounded-full transition-colors motion-reduce:transition-none ${
                   completedSteps.has(index)
-                    ? 'bg-green-500'
+                    ? 'bg-success'
                     : index === currentStepIndex
                       ? 'bg-primary'
                       : 'bg-muted'
                 }`}
               />
               <span
-                className={`text-[10px] font-medium transition-colors ${
+                className={`text-[10px] font-medium transition-colors motion-reduce:transition-none ${
                   index === currentStepIndex
                     ? 'text-primary'
                     : completedSteps.has(index)
-                      ? 'text-green-600'
+                      ? 'text-success'
                       : 'text-muted-foreground'
                 }`}
               >
@@ -226,7 +226,7 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
                   strokeWidth="3"
                   strokeDasharray={`${2 * Math.PI * 24}`}
                   strokeDashoffset={`${2 * Math.PI * 24 * (1 - progress)}`}
-                  className={`transition-all duration-1000 ${secondsLeft === 0 ? 'text-green-500' : 'text-primary'}`}
+                  className={`transition-all duration-1000 motion-reduce:transition-none ${secondsLeft === 0 ? 'text-success' : 'text-primary'}`}
                 />
               </svg>
               <span className="text-xs font-mono font-semibold text-foreground">
@@ -237,7 +237,7 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
               <button
                 type="button"
                 onClick={() => setTimerActive((v) => !v)}
-                className="text-[10px] text-primary hover:underline"
+                className="rounded text-[10px] text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 {timerActive ? 'Pause' : 'Démarrer'}
               </button>
@@ -245,7 +245,7 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
               <button
                 type="button"
                 onClick={() => { reset(); setTimerActive(false); }}
-                className="text-[10px] text-muted-foreground hover:text-foreground"
+                className="rounded text-[10px] text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 aria-label="Réinitialiser le timer"
               >
                 <RotateCcw className="size-3" />

@@ -1,43 +1,30 @@
-import { cn } from '@/lib/utils';
+import { CheckCircle2, Clock, Slash, TimerOff } from 'lucide-react';
+
+import { StatusBadge, type StatusConfig } from '@/components/ui/status-badge';
 
 import { InvitationStatus } from '../types';
 
-const statusConfig: Record<
-  InvitationStatus,
-  { label: string; className: string }
-> = {
-  pending: {
-    label: 'En attente',
-    className: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
-  },
-  accepted: {
-    label: 'Acceptée',
-    className: 'bg-green-500/10 text-green-600 dark:text-green-400',
-  },
-  revoked: {
-    label: 'Révoquée',
-    className: 'bg-destructive/10 text-destructive',
-  },
-  expired: {
-    label: 'Expirée',
-    className: 'bg-gray-500/10 text-gray-500',
-  },
+/**
+ * Mapping unique statut d'invitation → libellé/ton/icône.
+ * La couleur n'est jamais le seul signal (icône + libellé) → WCAG 1.4.1.
+ */
+export const INVITATION_STATUS_CONFIG: Record<InvitationStatus, StatusConfig> = {
+  pending: { label: 'En attente', tone: 'warning', icon: <Clock /> },
+  accepted: { label: 'Acceptée', tone: 'success', icon: <CheckCircle2 /> },
+  revoked: { label: 'Révoquée', tone: 'danger', icon: <Slash /> },
+  expired: { label: 'Expirée', tone: 'neutral', icon: <TimerOff /> },
 };
 
 interface InvitationStatusBadgeProps {
   status: InvitationStatus;
+  className?: string;
 }
 
-export function InvitationStatusBadge({ status }: InvitationStatusBadgeProps) {
-  const config = statusConfig[status];
+export function InvitationStatusBadge({
+  status,
+  className,
+}: InvitationStatusBadgeProps) {
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
-        config.className,
-      )}
-    >
-      {config.label}
-    </span>
+    <StatusBadge {...INVITATION_STATUS_CONFIG[status]} className={className} />
   );
 }
