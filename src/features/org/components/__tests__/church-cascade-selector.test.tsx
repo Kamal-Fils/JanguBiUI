@@ -20,8 +20,8 @@ beforeAll(() => {
 });
 
 const DIOCESES = [
-  { id: 1, name: 'Diocèse de Dakar', code: 'DK', province_id: 1 },
-  { id: 2, name: 'Diocèse de Thiès', code: 'TH', province_id: 1 },
+  { id: 1, name: 'Diocèse de Dakar', code: 'DK', province: 1 },
+  { id: 2, name: 'Diocèse de Thiès', code: 'TH', province: 1 },
 ];
 const PARISHES: Record<string, unknown[]> = {
   '1': [{ id: 11, name: 'Saint-Pierre', city: 'Dakar', address: '', diocese_id: 1 }],

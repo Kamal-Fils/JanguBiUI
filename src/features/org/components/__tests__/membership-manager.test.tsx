@@ -98,7 +98,7 @@ describe('MembershipManager', () => {
     server.use(
       http.get(`${env.API_URL}/v1/org/dioceses/`, () =>
         HttpResponse.json({
-          results: [{ id: 9, name: 'Diocèse de Kaolack', code: 'KL', province_id: 1 }],
+          results: [{ id: 9, name: 'Diocèse de Kaolack', code: 'KL', province: 1 }],
         }),
       ),
       http.get(`${env.API_URL}/v1/org/parishes/`, () =>

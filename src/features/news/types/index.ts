@@ -20,10 +20,11 @@ export const articleSchema = z.object({
     .enum(['announcement', 'article', 'pastoral_letter'])
     .optional(),
   content_type_label: z.string().optional(),
-  scope_type: z.enum(['global', 'diocese', 'parish']),
+  scope_type: z.enum(['global', 'diocese', 'parish', 'church']),
   scope_type_label: z.string().optional(),
   scope_parish_id: z.number().nullable().optional(),
   scope_diocese_id: z.number().nullable().optional(),
+  scope_church_id: z.number().nullable().optional(),
   status: z.enum(['draft', 'published', 'unpublished']),
   status_label: z.string().optional(),
   views_count: z.number(),

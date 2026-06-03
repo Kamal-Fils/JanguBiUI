@@ -244,7 +244,12 @@ async function fetchApi<T>(
       string,
       unknown
     >;
-    const message = (body.message as string | undefined) || response.statusText;
+    // DRF renvoie l'erreur sous `detail` ({"detail": "..."}). On lit `detail`
+    // en priorité, puis `message` (autres backends), puis le statut HTTP.
+    const message =
+      (body.detail as string | undefined) ||
+      (body.message as string | undefined) ||
+      response.statusText;
     if (typeof window !== 'undefined' && response.status !== 404) {
       useNotifications.getState().addNotification({
         type: 'error',

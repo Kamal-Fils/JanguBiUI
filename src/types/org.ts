@@ -9,7 +9,10 @@ export interface Diocese {
   id: number;
   name: string;
   code: string;
-  province_id: number;
+  // Le back (DioceseOutputSerializer) renvoie la FK sous la clé `province`
+  // (+ `province_name`).
+  province: number;
+  province_name?: string;
 }
 
 export interface Parish {
