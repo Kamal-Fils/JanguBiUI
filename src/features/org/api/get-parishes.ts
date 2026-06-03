@@ -17,6 +17,8 @@ const parishSchema = z.object({
 });
 
 const parishesResponseSchema = z.object({
+  // Enveloppe paginée LimitOffsetPagination du back.
+  count: z.number().optional(),
   results: z.array(parishSchema),
 });
 
@@ -26,15 +28,33 @@ export type ParishFilters = {
   city?: string;
 };
 
-export const getParishes = (filters: ParishFilters = {}): Promise<Parish[]> => {
-  const params = new URLSearchParams();
-  if (filters.dioceseId) params.set('diocese', String(filters.dioceseId));
-  if (filters.search) params.set('search', filters.search);
-  if (filters.city) params.set('city', filters.city);
-  const query = params.toString();
-  return api
-    .get<unknown>(`/v1/org/parishes/${query ? `?${query}` : ''}`)
-    .then((data) => parishesResponseSchema.parse(data).results);
+// Le back pagine les paroisses (default_limit côté DRF). Un diocèse comme Dakar
+// dépasse une page → on charge TOUTES les pages pour ne pas tronquer le dropdown.
+const PARISHES_PAGE_SIZE = 100;
+
+export const getParishes = async (
+  filters: ParishFilters = {},
+): Promise<Parish[]> => {
+  const base = new URLSearchParams();
+  if (filters.dioceseId) base.set('diocese', String(filters.dioceseId));
+  if (filters.search) base.set('search', filters.search);
+  if (filters.city) base.set('city', filters.city);
+
+  const all: Parish[] = [];
+  let offset = 0;
+  for (;;) {
+    const params = new URLSearchParams(base);
+    params.set('limit', String(PARISHES_PAGE_SIZE));
+    params.set('offset', String(offset));
+    const page = parishesResponseSchema.parse(
+      await api.get<unknown>(`/v1/org/parishes/?${params.toString()}`),
+    );
+    all.push(...page.results);
+    const total = page.count ?? all.length;
+    if (page.results.length === 0 || all.length >= total) break;
+    offset += PARISHES_PAGE_SIZE;
+  }
+  return all;
 };
 
 export const getParishesQueryOptions = (filters: ParishFilters = {}) =>
