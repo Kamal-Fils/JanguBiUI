@@ -1,25 +1,41 @@
 'use client';
 
+import { ArrowLeft, Inbox } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
+import { EmptyState } from '@/components/ui/empty-state';
+import { RelativeTime } from '@/components/ui/relative-time';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { paths } from '@/config/paths';
 import type { ClergicalMessage } from '@/features/messaging/api/get-clerical-inbox';
 import { ClericalComposeForm } from '@/features/messaging/components/clerical-compose-form';
 import { ClericalInboxList } from '@/features/messaging/components/clerical-inbox-list';
+import { useParishes } from '@/features/org/api/get-parishes';
 import { useUser } from '@/lib/auth';
 import { isClergy } from '@/lib/authorization';
 import { cn } from '@/lib/utils';
 
 type Tab = 'inbox' | 'compose';
 
+const TAB_LABELS: Record<Tab, string> = {
+  inbox: 'Boîte de réception',
+  compose: 'Nouveau message',
+};
+
+const TABS: Tab[] = ['inbox', 'compose'];
+
 export default function ClergeMessagesPage() {
   const router = useRouter();
   const { data: user, isLoading } = useUser();
   const [activeTab, setActiveTab] = useState<Tab>('inbox');
   const [selectedMessage, setSelectedMessage] = useState<ClergicalMessage | null>(null);
+
+  // Le fetch des paroisses vit dans la page (couche `app`) : une feature ne peut
+  // pas importer une autre feature. La liste est passée en prop au formulaire.
+  const { data: parishes = [], isLoading: parishesLoading } = useParishes();
 
   useEffect(() => {
     if (!isLoading && !isClergy(user)) {
@@ -34,59 +50,130 @@ export default function ClergeMessagesPage() {
       <div className="flex flex-col">
         <PageHeader title="Messages inter-clergé" />
 
-        <div className="flex border-b border-border px-4">
-          {(['inbox', 'compose'] as Tab[]).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(tab)}
-              className={cn(
-                'px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
-                activeTab === tab
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:text-foreground',
-              )}
-            >
-              {tab === 'inbox' ? 'Boîte de réception' : 'Nouveau message'}
-            </button>
-          ))}
+        <div
+          role="tablist"
+          aria-label="Messages"
+          className="flex border-b border-border px-4"
+          onKeyDown={(e) => {
+            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+            e.preventDefault();
+            const current = TABS.indexOf(activeTab);
+            const delta = e.key === 'ArrowRight' ? 1 : -1;
+            const next = TABS[(current + delta + TABS.length) % TABS.length];
+            setActiveTab(next);
+          }}
+        >
+          {TABS.map((tab) => {
+            const selected = activeTab === tab;
+            return (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                id={`tab-${tab}`}
+                aria-selected={selected}
+                aria-controls={`tabpanel-${tab}`}
+                tabIndex={selected ? 0 : -1}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  '-mb-px flex min-h-11 items-center border-b-2 px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+                  selected
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {TAB_LABELS[tab]}
+              </button>
+            );
+          })}
         </div>
 
         <div className="flex flex-1 overflow-hidden">
           {activeTab === 'inbox' && (
-            <>
-              <div className="w-80 flex-shrink-0 border-r border-border overflow-y-auto">
+            <div
+              role="tabpanel"
+              id="tabpanel-inbox"
+              aria-labelledby="tab-inbox"
+              className="flex flex-1 overflow-hidden"
+            >
+              {/* Liste — pleine largeur sur mobile, colonne fixe sur desktop.
+                  Masquée sur mobile dès qu'un message est ouvert. */}
+              <div
+                className={cn(
+                  'w-full overflow-y-auto border-border md:w-80 md:flex-shrink-0 md:border-r',
+                  selectedMessage ? 'hidden md:block' : 'block',
+                )}
+              >
                 <ClericalInboxList
                   onSelect={setSelectedMessage}
                   selectedId={selectedMessage?.id}
                 />
               </div>
-              <div className="flex-1 p-6 overflow-y-auto">
+
+              {/* Détail — pleine largeur sur mobile quand un message est ouvert. */}
+              <div
+                className={cn(
+                  'flex-1 overflow-y-auto p-6',
+                  selectedMessage ? 'block' : 'hidden md:block',
+                )}
+              >
                 {selectedMessage ? (
-                  <div>
-                    <h2 className="text-lg font-semibold mb-1 text-foreground">
+                  <article>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMessage(null)}
+                      className="mb-4 -ml-2 flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
+                    >
+                      <ArrowLeft className="size-4" aria-hidden="true" />
+                      Retour
+                    </button>
+                    <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">
                       {selectedMessage.subject}
                     </h2>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      De : {selectedMessage.sender_email} —{' '}
-                      {new Date(selectedMessage.created_at).toLocaleString('fr-FR')}
-                    </p>
-                    <div className="prose prose-sm max-w-none whitespace-pre-wrap text-foreground">
+                    <div className="mb-5 flex items-center gap-3">
+                      <UserAvatar
+                        email={selectedMessage.sender_email}
+                        size="sm"
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {selectedMessage.sender_email}
+                        </p>
+                        <RelativeTime
+                          iso={selectedMessage.created_at}
+                          className="text-xs text-muted-foreground"
+                        />
+                      </div>
+                    </div>
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
                       {selectedMessage.body}
                     </div>
-                  </div>
+                  </article>
                 ) : (
-                  <p className="text-muted-foreground text-sm text-center mt-12">
-                    Sélectionnez un message pour le lire.
-                  </p>
+                  <div className="mt-12">
+                    <EmptyState
+                      icon={<Inbox aria-hidden="true" />}
+                      title="Aucun message sélectionné"
+                      description="Sélectionnez un message dans la liste pour le lire."
+                    />
+                  </div>
                 )}
               </div>
-            </>
+            </div>
           )}
 
           {activeTab === 'compose' && (
-            <div className="flex-1 max-w-2xl p-6">
-              <ClericalComposeForm onSuccess={() => setActiveTab('inbox')} />
+            <div
+              role="tabpanel"
+              id="tabpanel-compose"
+              aria-labelledby="tab-compose"
+              className="max-w-2xl flex-1 overflow-y-auto p-6"
+            >
+              <ClericalComposeForm
+                onSuccess={() => setActiveTab('inbox')}
+                parishes={parishes}
+                parishesLoading={parishesLoading}
+              />
             </div>
           )}
         </div>
