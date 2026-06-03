@@ -93,6 +93,7 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
               src={article.cover_image_url}
               alt={article.title}
               fill
+              unoptimized
               className="object-cover"
               priority
               sizes="(max-width: 512px) 100vw, 512px"

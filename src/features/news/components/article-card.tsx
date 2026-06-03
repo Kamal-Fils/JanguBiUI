@@ -37,6 +37,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
             src={article.cover_image_url}
             alt={article.title}
             fill
+            unoptimized
             className="object-cover"
             sizes="80px"
           />

@@ -193,7 +193,18 @@ async function fetchApi<T>(
 
   const response = await fetch(fullUrl, init);
 
-  if (response.status === 401 && typeof window !== 'undefined') {
+  // A 401 on the login/refresh endpoints means "bad credentials" or "dead
+  // session" — NOT an expired access token. Attempting a refresh here swallows
+  // the error before the user sees it (silent login failure). Let these fall
+  // through to the generic error handler below so a toast is shown.
+  const isAuthCredentialEndpoint =
+    url.includes('/auth/jwt/login/') || url.includes('/auth/jwt/refresh/');
+
+  if (
+    response.status === 401 &&
+    typeof window !== 'undefined' &&
+    !isAuthCredentialEndpoint
+  ) {
     try {
       await tryRefreshAccess();
     } catch {
@@ -246,10 +257,15 @@ async function fetchApi<T>(
     >;
     // DRF renvoie l'erreur sous `detail` ({"detail": "..."}). On lit `detail`
     // en priorité, puis `message` (autres backends), puis le statut HTTP.
-    const message =
+    let message =
       (body.detail as string | undefined) ||
       (body.message as string | undefined) ||
       response.statusText;
+    // Message clair et en français pour un échec d'authentification au login
+    // (SimpleJWT renvoie un message anglais peu parlant pour le fidèle).
+    if (response.status === 401 && url.includes('/auth/jwt/login/')) {
+      message = 'E-mail ou mot de passe incorrect.';
+    }
     if (typeof window !== 'undefined' && response.status !== 404) {
       useNotifications.getState().addNotification({
         type: 'error',
