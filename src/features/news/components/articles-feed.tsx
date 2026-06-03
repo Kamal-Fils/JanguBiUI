@@ -1,6 +1,7 @@
 'use client';
 
 import { MapPin } from 'lucide-react';
+import { useState } from 'react';
 
 import { PageHeader } from '@/components/layouts/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,6 +9,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useFeedArticles } from '../api/get-articles';
 
 import { ArticleCard } from './article-card';
+import {
+  ALL_SCOPE,
+  NewsScopeFilter,
+  scopeFilterToParams,
+  type ScopeFilterValue,
+} from './news-scope-filter';
 
 function ArticlesSkeleton() {
   return (
@@ -41,15 +48,22 @@ function EmptyState() {
 }
 
 export function ArticlesFeed() {
-  // Fil unique AGRÉGÉ (Chantier 7b) : le back agrège global ∪ église ∪ paroisse ∪
-  // diocèse de toutes les appartenances (plus d'onglets « Universel | Ma paroisse »).
-  const { data, isLoading, isError } = useFeedArticles({ limit: 20 });
+  // Fil AGRÉGÉ (Chantier 7b) filtrable par portée : « Tous » = l'agrégat inchangé,
+  // sinon le filtre serveur (?scope_type=&scope_id=) restreint à la portée choisie.
+  const [scope, setScope] = useState<ScopeFilterValue>(ALL_SCOPE);
+  const { data, isLoading, isError } = useFeedArticles({
+    limit: 20,
+    ...scopeFilterToParams(scope),
+  });
 
   return (
     <div className="flex flex-col">
       <PageHeader title="Actualités" subtitle="La vie de l'Église" />
 
       <div className="mx-auto w-full max-w-2xl px-4 py-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+        <div className="mb-4">
+          <NewsScopeFilter value={scope} onChange={setScope} />
+        </div>
         {isLoading ? (
           <ArticlesSkeleton />
         ) : isError ? (
