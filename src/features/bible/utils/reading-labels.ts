@@ -22,10 +22,9 @@ export function normalizeReadingLabel(raw: string): string {
 
 export function getReadingAccentClass(normalizedLabel: string): string {
   const l = normalizedLabel.toLowerCase();
-  if (l.includes('psaume')) return 'text-violet-600 dark:text-violet-400';
-  if (l.includes('évangile') || l.includes('evangile'))
-    return 'text-amber-600 dark:text-amber-400';
-  if (l.includes('deuxième') || l.includes('troisième'))
-    return 'text-cyan-600 dark:text-cyan-400';
+  // Accents tokenisés (theme-aware) plutôt que des couleurs littérales ad-hoc.
+  if (l.includes('psaume')) return 'text-accent';
+  if (l.includes('évangile') || l.includes('evangile')) return 'text-primary';
+  if (l.includes('deuxième') || l.includes('troisième')) return 'text-info';
   return 'text-primary';
 }

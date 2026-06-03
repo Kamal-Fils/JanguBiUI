@@ -199,12 +199,12 @@ export default function LiturgiePage() {
       <div className="mx-auto w-full max-w-lg px-4 py-6">
         {/* Page title */}
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-orange-500/10">
-            <Flame className="size-5 text-orange-500" />
+          <div className="flex size-10 items-center justify-center rounded-xl bg-warning/10">
+            <Flame className="size-5 text-warning" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-foreground">
-              Liturgie des Heures
+              Liturgie du Jour
             </h1>
             {info && (
               <p className="text-sm text-muted-foreground">

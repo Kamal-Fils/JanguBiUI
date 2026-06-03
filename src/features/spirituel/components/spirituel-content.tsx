@@ -1,11 +1,11 @@
 'use client';
 
-import { BookOpen, Flame, Tv2 } from 'lucide-react';
+import { BookOpen, ChevronRight, Clock, Flame, Tv2 } from 'lucide-react';
 import Link from 'next/link';
 
 import { PageHeader } from '@/components/layouts/page-header';
 import { paths } from '@/config/paths';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/cn';
 
 const sections = [
   {
@@ -45,21 +45,21 @@ const sections = [
     icon: Flame,
     label: 'Liturgie du Jour',
     description: 'Lectures · Évangile · Messe du jour',
-    color: 'bg-orange-500/10 text-orange-500',
+    color: 'bg-warning/10 text-warning',
   },
   {
     href: paths.app.spirituelHeures.getHref(),
-    icon: Flame,
+    icon: Clock,
     label: 'Liturgie des Heures',
     description: 'Laudes · Vêpres · Complies · 7 offices',
-    color: 'bg-amber-500/10 text-amber-600',
+    color: 'bg-accent/15 text-accent',
   },
   {
     href: paths.app.tv.getHref(),
     icon: Tv2,
     label: 'TV Catholique',
     description: 'En direct · Replays par catégorie',
-    color: 'bg-purple-500/10 text-purple-500',
+    color: 'bg-info/10 text-info',
   },
 ];
 
@@ -96,19 +96,7 @@ export function SpirituelContent() {
                     {section.description}
                   </p>
                 </div>
-                <svg
-                  className="size-4 flex-shrink-0 text-muted-foreground"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                <ChevronRight className="size-4 flex-shrink-0 text-muted-foreground" />
               </Link>
             );
           })}
