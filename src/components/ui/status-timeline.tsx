@@ -28,22 +28,32 @@ const toneRing: Record<StatusTone, string> = {
 interface StatusTimelineProps {
   steps: TimelineStep[];
   className?: string;
+  /** Nom accessible de la liste (lecteurs d'écran). */
+  'aria-label'?: string;
 }
 
 /**
  * Timeline verticale : ligne de connexion + nœuds colorés icône, l'étape
  * courante mise en relief par un anneau. Remplace le `<ol>` plat de points.
  */
-export function StatusTimeline({ steps, className }: StatusTimelineProps) {
+export function StatusTimeline({
+  steps,
+  className,
+  'aria-label': ariaLabel = 'Progression',
+}: StatusTimelineProps) {
   return (
-    <ol className={cn('relative', className)}>
+    <ol className={cn('relative', className)} aria-label={ariaLabel}>
       {steps.map((step, i) => {
         const isLast = i === steps.length - 1;
         const tone = step.tone ?? 'progress';
         const done = step.state === 'done';
         const current = step.state === 'current';
         return (
-          <li key={i} className="relative flex gap-3.5 pb-6 last:pb-0">
+          <li
+            key={step.label}
+            aria-current={current ? 'step' : undefined}
+            className="relative flex gap-3.5 pb-6 last:pb-0"
+          >
             {/* Connecteur */}
             {!isLast && (
               <span

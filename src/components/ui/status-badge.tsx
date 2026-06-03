@@ -44,7 +44,11 @@ interface StatusBadgeProps extends StatusConfig {
 export function StatusBadge({ label, tone, icon, className }: StatusBadgeProps) {
   return (
     <span className={cn(statusBadgeVariants({ tone }), className)}>
-      {icon}
+      {icon && (
+        <span className="contents" aria-hidden="true">
+          {icon}
+        </span>
+      )}
       {label}
     </span>
   );
