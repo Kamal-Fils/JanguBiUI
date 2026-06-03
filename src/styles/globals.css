@@ -28,6 +28,19 @@
     --ring: 202 100% 72%;
     --radius: 0.5rem;
     --gold: 40 65% 48%;
+    /* Sacred Editorial — filets or, ombres douces navy, mesure de lecture, motion */
+    --hairline-gold: 40 55% 52%;
+    --shadow-color: 212 45% 22%;
+    --reading-measure: 68ch;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out-soft: cubic-bezier(0.33, 1, 0.68, 1);
+    --duration-fast: 150ms;
+    --duration-normal: 280ms;
+    --duration-slow: 450ms;
+    /* Couleurs sémantiques (badges de statut, etc.) — theme-aware. */
+    --success: 142 71% 36%;
+    --warning: 38 92% 42%;
+    --info: 201 85% 42%;
   }
 
   .dark {
@@ -54,15 +67,52 @@
     --input: 210 30% 18%;
     --ring: 202 100% 72%;
     --gold: 40 65% 55%;
+    /* En sombre les ombres doivent être quasi noires pour se voir sur le navy */
+    --hairline-gold: 40 60% 58%;
+    --shadow-color: 212 90% 2%;
+    --success: 142 60% 50%;
+    --warning: 38 90% 58%;
+    --info: 201 90% 62%;
   }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+  /* Anneau de focus on-brand, cohérent partout (clavier uniquement). */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+  /* Titres en serif Playfair — direction Sacred Editorial.
+     h1/h2 = titres de page & sections ; h3+ restent en sans (libellés denses). */
+  h1, h2 {
+    @apply font-serif tracking-tight;
+  }
+}
+
+@layer components {
+  /* Surface papier subtile (grain ponctué très léger) */
+  .bg-paper {
+    background-color: hsl(var(--background-surface));
+    background-image: radial-gradient(
+      hsl(var(--foreground) / 0.022) 0.5px,
+      transparent 0.5px
+    );
+    background-size: 18px 18px;
+  }
+  /* Filet or — séparateur éditorial */
+  .hairline-gold {
+    @apply h-px w-full border-0;
+    background: linear-gradient(
+      to right,
+      transparent,
+      hsl(var(--hairline-gold) / 0.55),
+      transparent
+    );
   }
 }
 
@@ -90,4 +140,14 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
+  /* Désactive les animations décoratives/d'entrée pour les utilisateurs
+     sensibles au mouvement (étoiles, flottement, fade-in du kit). */
+  .star,
+  .animate-float-c,
+  .animate-float-l,
+  .animate-float-r,
+  .animate-fade-in,
+  .animate-fade-in-up {
+    animation: none !important;
+  }
 }

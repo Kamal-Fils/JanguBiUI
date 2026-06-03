@@ -16,6 +16,7 @@ module.exports = {
   	extend: {
   		fontFamily: {
   			sans: [
+  				'var(--font-inter)',
   				'Inter var',
                     ...defaultTheme.fontFamily.sans
                 ],
@@ -23,6 +24,18 @@ module.exports = {
   				'var(--font-playfair)',
   				...defaultTheme.fontFamily.serif
   			],
+  		},
+  		maxWidth: {
+  			reading: 'var(--reading-measure)'
+  		},
+  		boxShadow: {
+  			'soft-sm': '0 1px 2px 0 hsl(var(--shadow-color) / 0.05), 0 1px 3px -1px hsl(var(--shadow-color) / 0.04)',
+  			soft: '0 2px 8px -2px hsl(var(--shadow-color) / 0.08), 0 6px 20px -6px hsl(var(--shadow-color) / 0.07)',
+  			'soft-lg': '0 10px 32px -8px hsl(var(--shadow-color) / 0.12), 0 16px 56px -16px hsl(var(--shadow-color) / 0.10)'
+  		},
+  		transitionTimingFunction: {
+  			'out-expo': 'var(--ease-out-expo)',
+  			'out-soft': 'var(--ease-out-soft)'
   		},
   		colors: {
   			border: 'hsl(var(--border))',
@@ -100,6 +113,14 @@ module.exports = {
   				'0%,100%': { transform: 'translateY(4px)' },
   				'50%': { transform: 'translateY(-12px)' }
   			},
+  			'fade-in': {
+  				from: { opacity: '0' },
+  				to: { opacity: '1' }
+  			},
+  			'fade-in-up': {
+  				from: { opacity: '0', transform: 'translateY(8px)' },
+  				to: { opacity: '1', transform: 'translateY(0)' }
+  			},
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
@@ -107,6 +128,8 @@ module.exports = {
   			'float-c': 'float-c 6s ease-in-out infinite',
   			'float-l': 'float-l 7s ease-in-out infinite',
   			'float-r': 'float-r 5.5s ease-in-out infinite',
+  			'fade-in': 'fade-in var(--duration-normal) var(--ease-out-soft)',
+  			'fade-in-up': 'fade-in-up var(--duration-normal) var(--ease-out-soft)',
   		}
   	}
   },
