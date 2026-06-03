@@ -13,9 +13,9 @@ import { paths } from '@/config/paths';
 import type { ClergicalMessage } from '@/features/messaging/api/get-clerical-inbox';
 import { ClericalComposeForm } from '@/features/messaging/components/clerical-compose-form';
 import { ClericalInboxList } from '@/features/messaging/components/clerical-inbox-list';
-import { useParishes } from '@/features/org/api/get-parishes';
 import { useUser } from '@/lib/auth';
 import { isClergy } from '@/lib/authorization';
+import { useParishes } from '@/lib/org/get-parishes';
 import { cn } from '@/lib/utils';
 
 type Tab = 'inbox' | 'compose';

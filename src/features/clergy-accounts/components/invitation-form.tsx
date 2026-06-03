@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 import { Button } from '@/components/ui/button/button';
 import { Spinner } from '@/components/ui/spinner';
-import { useDioceses } from '@/features/org/api/get-dioceses';
+import { useDioceses } from '@/lib/org/get-dioceses';
 
 import { useCreateInvitation } from '../api/create-invitation';
 

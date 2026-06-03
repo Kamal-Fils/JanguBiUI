@@ -4,12 +4,12 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
 import { useUser } from '@/lib/auth';
-
 import {
   useAddMemberships,
   useRemoveMembership,
   useSetPrimaryMembership,
-} from '../api/update-parish';
+} from '@/lib/org/update-parish';
+
 import {
   ChurchCascadeSelector,
   type SelectedChurch,

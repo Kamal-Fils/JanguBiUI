@@ -18,7 +18,7 @@ import { z } from 'zod';
 import {
   ParishPicker,
   type PickedParish,
-} from '@/features/org/components/parish-picker';
+} from '@/components/org/parish-picker';
 import { useUser } from '@/lib/auth';
 
 import { CreateDocumentInput, useCreateDocument } from '../api/create-document';

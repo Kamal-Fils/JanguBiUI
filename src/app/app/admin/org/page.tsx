@@ -9,10 +9,10 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { FilterPills } from '@/components/ui/filter-pills';
 import { Pill } from '@/components/ui/pill';
 import { SectionHeader } from '@/components/ui/section-header';
-import { useDioceses } from '@/features/org/api/get-dioceses';
-import { useParishes } from '@/features/org/api/get-parishes';
-import { useProvinces } from '@/features/org/api/get-provinces';
 import { isSuperAdmin } from '@/lib/authorization';
+import { useDioceses } from '@/lib/org/get-dioceses';
+import { useParishes } from '@/lib/org/get-parishes';
+import { useProvinces } from '@/lib/org/get-provinces';
 import type { Diocese, Parish } from '@/types/org';
 
 const PAGE_SIZE = 20;

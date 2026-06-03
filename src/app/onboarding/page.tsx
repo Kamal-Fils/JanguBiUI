@@ -3,14 +3,14 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { Button } from '@/components/ui/button/button';
-import { useAddMemberships } from '@/features/org/api/update-parish';
 import {
   ChurchCascadeSelector,
   type SelectedChurch,
-} from '@/features/org/components/church-cascade-selector';
+} from '@/components/org/church-cascade-selector';
+import { Button } from '@/components/ui/button/button';
 import { useLogout, useUser } from '@/lib/auth';
 import { getRoleHomePath } from '@/lib/get-role-home-path';
+import { useAddMemberships } from '@/lib/org/update-parish';
 
 export default function OnboardingPage() {
   const router = useRouter();

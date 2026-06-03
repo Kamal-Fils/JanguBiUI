@@ -4,8 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { useUser } from '@/lib/auth';
-
-import { getParishesQueryOptions } from '../api/get-parishes';
+import { getParishesQueryOptions } from '@/lib/org/get-parishes';
 
 /**
  * Paroisse normalisée émise par le picker. `dioceseName` permet de satisfaire

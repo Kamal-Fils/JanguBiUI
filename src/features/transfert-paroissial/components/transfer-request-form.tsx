@@ -5,9 +5,9 @@ import { Send } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { ParishSelector } from '@/components/org/parish-selector';
 import { Button } from '@/components/ui/button/button';
 import { Textarea } from '@/components/ui/form/textarea';
-import { ParishSelector } from '@/features/org/components/parish-selector';
 
 import { CreateTransferInput, useCreateTransfer } from '../api/create-transfer';
 

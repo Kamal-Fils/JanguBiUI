@@ -5,10 +5,10 @@ import Link from 'next/link';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
-import { useAdminArticles } from '@/features/news/api/get-admin-articles';
-import { useParishes } from '@/features/org/api/get-parishes';
-import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
 import { DioceseStatsSection } from '@/features/dashboard/components/diocese-stats-section';
+import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
+import { useAdminArticles } from '@/features/news/api/get-admin-articles';
+import { useParishes } from '@/lib/org/get-parishes';
 import { cn } from '@/utils/cn';
 
 import { WelcomeBanner } from './welcome-banner';
