@@ -17,7 +17,6 @@ import { OnboardingGuard } from './onboarding-guard';
 
 interface AppShellProps {
   children: React.ReactNode;
-  hideNav?: boolean;
 }
 
 function CrossIcon({ className }: { className?: string }) {
@@ -153,25 +152,21 @@ function DesktopSidebar({ messageBadge }: { messageBadge?: number }) {
   );
 }
 
-export function AppShell({ children, hideNav }: AppShellProps) {
+export function AppShell({ children }: AppShellProps) {
   const totalUnread = useMessagingStore((s) => s.totalUnread);
 
   return (
     <OnboardingGuard>
       <div className="flex min-h-dvh bg-background">
-        {!hideNav && <DesktopSidebar messageBadge={totalUnread} />}
+        <DesktopSidebar messageBadge={totalUnread} />
         <div className="flex flex-1 flex-col min-w-0">
-          <main className={!hideNav ? 'flex-1 pb-20 md:pb-0' : 'flex-1'}>
-            {children}
-          </main>
-          {!hideNav && <BottomNav messageBadge={totalUnread} />}
+          <main className="flex-1 pb-20 md:pb-0">{children}</main>
+          <BottomNav messageBadge={totalUnread} />
         </div>
         {/* Notification bell — mobile only, fixed top-right */}
-        {!hideNav && (
-          <div className="fixed right-3 top-3 z-50 md:hidden">
-            <NotificationBell className="size-10 rounded-full border border-border bg-background/90 shadow-sm backdrop-blur-sm p-0 justify-center" />
-          </div>
-        )}
+        <div className="fixed right-3 top-3 z-50 md:hidden">
+          <NotificationBell className="size-10 rounded-full border border-border bg-background/90 shadow-sm backdrop-blur-sm p-0 justify-center" />
+        </div>
       </div>
     </OnboardingGuard>
   );

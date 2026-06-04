@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { RoleGuard } from '@/components/layouts/role-guard';
 import type { User } from '@/lib/auth';
@@ -28,9 +27,9 @@ interface AdminPageLayoutProps {
 }
 
 /**
- * Coquille unifiée des pages admin : AppShell + PageHeader + conteneur de
- * largeur cohérente (+ RoleGuard optionnel). Remplace le `max-w-*` choisi au
- * hasard sur chaque page admin.
+ * Coquille unifiée des pages admin : PageHeader + conteneur de largeur cohérente
+ * (+ RoleGuard optionnel). Le shell applicatif (sidebar + bottom-nav) est fourni
+ * une seule fois par `app/app/layout.tsx` — ne pas le remonter ici.
  */
 export function AdminPageLayout({
   title,
@@ -52,15 +51,13 @@ export function AdminPageLayout({
     </div>
   );
 
-  return (
-    <AppShell>
-      {allow ? (
-        <RoleGuard allow={allow} redirectTo={redirectTo}>
-          {body}
-        </RoleGuard>
-      ) : (
-        body
-      )}
-    </AppShell>
-  );
+  if (allow) {
+    return (
+      <RoleGuard allow={allow} redirectTo={redirectTo}>
+        {body}
+      </RoleGuard>
+    );
+  }
+
+  return body;
 }

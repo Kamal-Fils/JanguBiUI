@@ -5,7 +5,6 @@ import DOMPurify from 'isomorphic-dompurify';
 import { ArrowLeft, BookOpen, Flame, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 
-import { AppShell } from '@/components/layouts/app-shell';
 import {
   Card,
   CardContent,
@@ -180,7 +179,6 @@ export default function LiturgiePage() {
     loadingInfo || loadingReadings || loadingLaudes || loadingVepres;
 
   return (
-    <AppShell hideNav>
     <div className="flex flex-col">
       {/* Header */}
       <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-sm">
@@ -279,6 +277,5 @@ export default function LiturgiePage() {
         )}
       </div>
     </div>
-    </AppShell>
   );
 }
