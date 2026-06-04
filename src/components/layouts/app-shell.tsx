@@ -1,9 +1,7 @@
 'use client';
 
-import { LogOut, Moon, Sun } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
 
 import { Link } from '@/components/ui/link/link';
 import { buildNavItems, isNavActive } from '@/config/nav-config';
@@ -16,6 +14,7 @@ import { BottomNav } from './bottom-nav';
 import { NotificationBell } from './notification-bell';
 import { OnboardingGuard } from './onboarding-guard';
 import { PageMetaProvider, usePageMetaValue } from './page-meta';
+import { ThemeToggle } from './theme-toggle';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -32,43 +31,6 @@ function CrossIcon({ className }: { className?: string }) {
       <rect x="10" y="2" width="4" height="20" rx="2" />
       <rect x="2" y="8" width="20" height="4" rx="2" />
     </svg>
-  );
-}
-
-function ThemeToggle({ className }: { className?: string }) {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = mounted && resolvedTheme === 'dark';
-
-  return (
-    <button
-      type="button"
-      onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      className={cn(
-        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-muted/70 lg:justify-start justify-center',
-        className,
-      )}
-      aria-label={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
-      suppressHydrationWarning
-    >
-      {mounted ? (
-        isDark ? (
-          <Sun className="size-5 shrink-0 text-warning" />
-        ) : (
-          <Moon className="size-5 shrink-0 text-info" />
-        )
-      ) : (
-        <span className="size-5 shrink-0" aria-hidden="true" />
-      )}
-      <span className="hidden lg:block" suppressHydrationWarning>
-        {mounted ? (isDark ? 'Mode clair' : 'Mode sombre') : ''}
-      </span>
-    </button>
   );
 }
 
@@ -139,7 +101,7 @@ function DesktopSidebar({ messageBadge }: { messageBadge?: number }) {
       {/* Notifications + Theme + Logout */}
       <div className="shrink-0 border-t border-border p-2 flex flex-col gap-0.5">
         <NotificationBell className="w-full" />
-        <ThemeToggle className="w-full" />
+        <ThemeToggle className="w-full lg:justify-start justify-center" />
         <button
           type="button"
           onClick={() => logout()}

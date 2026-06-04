@@ -10,12 +10,13 @@ import { NotificationBell } from './notification-bell';
 import { usePageMetaValue } from './page-meta';
 
 /**
- * En-tête de shell partagé (sous-étape 1C) : fil d'Ariane sur desktop, app-bar
- * (retour + titre + cloche) sur mobile.
+ * En-tête de shell partagé : fil d'Ariane sur desktop, app-bar (retour + titre +
+ * cloche) sur mobile.
  *
- * Ne s'affiche QUE pour les routes « migrées » qui enregistrent leur meta via
- * `useRegisterPageMeta`. Les pages non migrées conservent leur `<PageHeader>` et
- * la cloche flottante (gérée par `AppShell`) — migration progressive (lot 1C-b).
+ * Ne s'affiche QUE pour les routes qui enregistrent leur meta via
+ * `useRegisterPageMeta`. Les vues plein écran exemptées (assistant, messagerie,
+ * documents/new, profil) gardent leur en-tête custom et la cloche flottante
+ * (gérée par `AppShell`).
  */
 export function AppHeader() {
   const pathname = usePathname();

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { ThemeToggle } from '@/components/layouts/theme-toggle';
 import { MembershipManager } from '@/components/org/membership-manager';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNotifications } from '@/components/ui/notifications';
@@ -133,12 +134,16 @@ export function ProfilContent() {
     });
 
   const { mutate: logout, isPending: isLoggingOut } = useLogout({
-    onSuccess: () => { window.location.href = '/auth/login'; },
+    onSuccess: () => {
+      window.location.href = '/auth/login';
+    },
   });
 
   const { mutate: deleteAccount, isPending: isDeletingAccount } =
     useDeleteAccount({
-      onSuccess: () => { window.location.href = '/auth/login'; },
+      onSuccess: () => {
+        window.location.href = '/auth/login';
+      },
     });
 
   function onProfileSubmit(data: ProfileFormValues) {
@@ -337,6 +342,17 @@ export function ProfilContent() {
             <MembershipManager />
           </SectionCard>
         )}
+
+        {/* Apparence — bascule thème (parité mobile ; la sidebar la porte sur
+            desktop). md:hidden : évite un 2e toggle sur le Profil desktop. */}
+        <div className="md:hidden">
+          <SectionCard title="Apparence">
+            <ThemeToggle
+              className="w-full justify-start border border-border bg-card"
+              labelClassName="block"
+            />
+          </SectionCard>
+        </div>
 
         {/* Session section */}
         <SectionCard title="Session">
