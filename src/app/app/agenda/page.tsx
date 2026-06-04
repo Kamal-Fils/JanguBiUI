@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { Card } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEvents } from '@/features/agenda/api/get-events';
 import { EventCard } from '@/features/agenda/components/event-card';
@@ -52,15 +53,12 @@ export default function AgendaPage() {
         {isLoading && (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="rounded-xl border border-border bg-card p-4 space-y-3"
-              >
+              <Card key={i} variant="elevated" className="p-4 space-y-3">
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-3 w-full" />
                 <Skeleton className="h-3 w-1/2" />
                 <Skeleton className="h-10 w-full rounded-xl" />
-              </div>
+              </Card>
             ))}
           </div>
         )}

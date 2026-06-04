@@ -4,6 +4,7 @@ import { Clock, Eye, Newspaper } from 'lucide-react';
 import { useState } from 'react';
 
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { Card } from '@/components/ui/card/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { MediaCard } from '@/components/ui/media-card';
@@ -25,17 +26,14 @@ function ArticlesSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="overflow-hidden rounded-xl border border-border bg-card"
-        >
+        <Card key={i} variant="elevated" className="overflow-hidden">
           <Skeleton className="aspect-video w-full rounded-none" />
           <div className="space-y-2 p-4">
             <Skeleton className="h-3 w-1/3" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-3 w-2/3" />
           </div>
-        </div>
+        </Card>
       ))}
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { MessageSquareQuote } from 'lucide-react';
 
+import { Card } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useTodayReflection } from '../api/get-today-reflection';
@@ -11,11 +12,11 @@ export function PastoralReflectionWidget() {
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+      <Card variant="elevated" className="p-4 space-y-2">
         <Skeleton className="h-4 w-32" />
         <Skeleton className="h-3 w-full" />
         <Skeleton className="h-3 w-4/5" />
-      </div>
+      </Card>
     );
   }
 

@@ -4,6 +4,7 @@ import { CheckCircle, Pencil, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
+import { Card } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useMyTodayReflection } from '../api/get-my-reflection';
@@ -53,10 +54,10 @@ export function PastoralReflectionComposer() {
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+      <Card variant="elevated" className="p-4 space-y-2">
         <Skeleton className="h-4 w-40" />
         <Skeleton className="h-3 w-full" />
-      </div>
+      </Card>
     );
   }
 
@@ -81,7 +82,7 @@ export function PastoralReflectionComposer() {
       </div>
 
       {isEditing ? (
-        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+        <Card variant="elevated" className="p-4 space-y-3">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value.slice(0, MAX_CHARS))}
@@ -117,7 +118,7 @@ export function PastoralReflectionComposer() {
               </Button>
             </div>
           </div>
-        </div>
+        </Card>
       ) : existing ? (
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
           <p className="text-sm leading-relaxed text-foreground italic">

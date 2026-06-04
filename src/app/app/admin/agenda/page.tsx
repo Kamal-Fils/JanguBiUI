@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 import { AdminPageLayout } from '@/components/layouts/admin-page-layout';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card/card';
 import { FilterPills } from '@/components/ui/filter-pills';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEvents } from '@/features/agenda/api/get-events';
@@ -72,13 +73,10 @@ export default function AdminAgendaPage() {
         {eventsLoading && (
           <div className="space-y-4">
             {[1, 2].map((i) => (
-              <div
-                key={i}
-                className="space-y-3 rounded-xl border border-border bg-card p-4"
-              >
+              <Card key={i} variant="elevated" className="space-y-3 p-4">
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
-              </div>
+              </Card>
             ))}
           </div>
         )}
