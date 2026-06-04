@@ -3,7 +3,7 @@
 import { ArrowLeft, ArrowRightLeft } from 'lucide-react';
 import Link from 'next/link';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { useNotifications } from '@/components/ui/notifications';
@@ -25,23 +25,23 @@ export default function TransfertPage() {
     });
   }
 
+  useRegisterPageMeta({
+    title: 'Transfert paroissial',
+    subtitle: 'Demander un rattachement à une nouvelle paroisse',
+  });
+
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Transfert paroissial"
-        subtitle="Demander un rattachement à une nouvelle paroisse"
-        action={
+      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:px-6">
+        <div className="mb-4">
           <Link
             href={paths.app.profil.getHref()}
-            className="flex h-11 items-center gap-1.5 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
-            Profil
+            Retour au profil
           </Link>
-        }
-      />
-
-      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:px-6">
+        </div>
         {isLoading ? (
           <SkeletonCard />
         ) : isError ? (

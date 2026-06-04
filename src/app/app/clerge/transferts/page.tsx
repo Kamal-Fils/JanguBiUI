@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { ErrorState } from '@/components/ui/error-state';
 import { SectionHeader } from '@/components/ui/section-header';
 import { paths } from '@/config/paths';
@@ -29,14 +29,15 @@ export default function ClergeTransfertsPage() {
     }
   }, [user, userLoading, router]);
 
+  useRegisterPageMeta({
+    title: 'Transferts paroissiaux',
+    subtitle: 'Gérer les demandes de transfert de votre paroisse',
+  });
+
   if (userLoading || !isClergy(user)) return null;
 
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Transferts paroissiaux"
-        subtitle="Gérer les demandes de transfert de votre paroisse"
-      />
       <div className="mx-auto w-full max-w-3xl px-4 py-6 md:px-6">
         <SectionHeader
           title="Demandes reçues"

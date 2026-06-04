@@ -4,7 +4,7 @@ import { ArrowLeft, Inbox } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { EmptyState } from '@/components/ui/empty-state';
 import { RelativeTime } from '@/components/ui/relative-time';
 import { UserAvatar } from '@/components/ui/user-avatar';
@@ -43,12 +43,12 @@ export default function ClergeMessagesPage() {
     }
   }, [user, isLoading, router]);
 
+  useRegisterPageMeta({ title: 'Messages inter-clergé' });
+
   if (isLoading || !isClergy(user)) return null;
 
   return (
     <div className="flex flex-col">
-      <PageHeader title="Messages inter-clergé" />
-
       <div
         role="tablist"
         aria-label="Messages"

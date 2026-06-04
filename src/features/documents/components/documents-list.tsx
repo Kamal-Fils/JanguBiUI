@@ -3,7 +3,6 @@
 import { ChevronRight, FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
 
-import { PageHeader } from '@/components/layouts/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -57,31 +56,11 @@ function DocumentsSkeleton() {
   );
 }
 
-interface DocumentsListProps {
-  hideHeader?: boolean;
-}
-
-export function DocumentsList({ hideHeader = false }: DocumentsListProps) {
+export function DocumentsList() {
   const { data, isLoading, isError, refetch } = useDocumentRequests();
 
   return (
     <div className="relative flex flex-col">
-      {!hideHeader && (
-        <PageHeader
-          title="Documents"
-          subtitle="Demandes de documents officiels"
-          action={
-            <Link
-              href="/app/documents/new"
-              className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-soft-sm hover:bg-primary/90"
-              aria-label="Nouvelle demande"
-            >
-              <Plus className="size-5" />
-            </Link>
-          }
-        />
-      )}
-
       <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         {isLoading && <DocumentsSkeleton />}
         {isError && (
