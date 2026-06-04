@@ -11,9 +11,11 @@ import { useLogout, useUser } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { useMessagingStore } from '@/stores/messaging-store';
 
+import { AppHeader } from './app-header';
 import { BottomNav } from './bottom-nav';
 import { NotificationBell } from './notification-bell';
 import { OnboardingGuard } from './onboarding-guard';
+import { PageMetaProvider, usePageMetaValue } from './page-meta';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -153,21 +155,34 @@ function DesktopSidebar({ messageBadge }: { messageBadge?: number }) {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const totalUnread = useMessagingStore((s) => s.totalUnread);
-
   return (
     <OnboardingGuard>
-      <div className="flex min-h-dvh bg-background">
-        <DesktopSidebar messageBadge={totalUnread} />
-        <div className="flex flex-1 flex-col min-w-0">
-          <main className="flex-1 pb-20 md:pb-0">{children}</main>
-          <BottomNav messageBadge={totalUnread} />
-        </div>
-        {/* Notification bell — mobile only, fixed top-right */}
+      <PageMetaProvider>
+        <AppShellLayout>{children}</AppShellLayout>
+      </PageMetaProvider>
+    </OnboardingGuard>
+  );
+}
+
+function AppShellLayout({ children }: AppShellProps) {
+  const totalUnread = useMessagingStore((s) => s.totalUnread);
+  const meta = usePageMetaValue();
+
+  return (
+    <div className="flex min-h-dvh bg-background">
+      <DesktopSidebar messageBadge={totalUnread} />
+      <div className="flex flex-1 flex-col min-w-0">
+        <AppHeader />
+        <main className="flex-1 pb-20 md:pb-0">{children}</main>
+        <BottomNav messageBadge={totalUnread} />
+      </div>
+      {/* Cloche flottante mobile — uniquement pour les pages NON migrées : les
+          pages migrées affichent la cloche dans l'app-bar de AppHeader. */}
+      {!meta && (
         <div className="fixed right-3 top-3 z-50 md:hidden">
           <NotificationBell className="size-10 rounded-full border border-border bg-background/90 shadow-sm backdrop-blur-sm p-0 justify-center" />
         </div>
-      </div>
-    </OnboardingGuard>
+      )}
+    </div>
   );
 }
