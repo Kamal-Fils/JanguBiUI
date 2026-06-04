@@ -462,18 +462,20 @@ export function NewDocumentForm() {
   return (
     <div className="flex flex-col">
       <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={
             stepIndex === 0
               ? () => router.back()
               : () => setStepIndex((i) => i - 1)
           }
-          className="flex size-8 items-center justify-center rounded-full hover:bg-muted"
+          className="rounded-full hover:bg-muted"
           aria-label="Retour"
         >
           <ArrowLeft className="size-5" />
-        </button>
+        </Button>
         <span className="text-sm font-semibold text-foreground">
           Nouvelle demande
         </span>
