@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { Button } from '@/components/ui/button/button';
 import { Card } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -317,7 +318,7 @@ export function PretreeDashboard() {
   const unreadCount = messages.filter((m) => !m.read_at).length;
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-6xl lg:px-8">
+    <ContentContainer width="wide">
       <div className="flex flex-col gap-6">
         <WelcomeBanner />
 
@@ -365,6 +366,6 @@ export function PretreeDashboard() {
           isLoading={loadingMessages}
         />
       </div>
-    </div>
+    </ContentContainer>
   );
 }

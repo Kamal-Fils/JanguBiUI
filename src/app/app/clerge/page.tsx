@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { paths } from '@/config/paths';
 import { useUser } from '@/lib/auth';
@@ -70,7 +71,7 @@ export default function ClergePage() {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         <div className="flex flex-col gap-3">
           {CLERGE_SECTIONS.map((section) => {
             const Icon = section.icon;
@@ -113,7 +114,7 @@ export default function ClergePage() {
             );
           })}
         </div>
-      </div>
+      </ContentContainer>
     </div>
   );
 }

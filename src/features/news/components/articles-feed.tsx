@@ -3,6 +3,7 @@
 import { Clock, Eye, Newspaper } from 'lucide-react';
 import { useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Card } from '@/components/ui/card/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -72,7 +73,7 @@ export function ArticlesFeed() {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         <div className="mb-4">
           <NewsScopeFilter value={scope} onChange={setScope} />
         </div>
@@ -138,7 +139,7 @@ export function ArticlesFeed() {
             )}
           </div>
         )}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Card } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,7 +32,7 @@ export default function AgendaPage() {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         <div className="mb-6 flex flex-wrap gap-2">
           {EVENT_TYPE_FILTERS.map((filter) => (
             <button
@@ -78,7 +79,7 @@ export default function AgendaPage() {
             ))}
           </div>
         )}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

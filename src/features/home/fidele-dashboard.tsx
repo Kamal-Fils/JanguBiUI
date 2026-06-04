@@ -3,6 +3,7 @@
 import { BookOpen, MessageCircle, ScrollText } from 'lucide-react';
 import Link from 'next/link';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { FideleSummarySection } from '@/features/dashboard/components/fidele-summary-section';
 import { PastoralReflectionWidget } from '@/features/reflexion-pastorale/components/pastoral-reflection-widget';
 import { cn } from '@/utils/cn';
@@ -35,7 +36,7 @@ const QUICK_ACTIONS = [
 
 export function FideleDashboard() {
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-6xl lg:px-8">
+    <ContentContainer width="wide">
       <div className="flex flex-col gap-6">
         <WelcomeBanner />
 
@@ -80,6 +81,6 @@ export function FideleDashboard() {
           </div>
         </div>
       </div>
-    </div>
+    </ContentContainer>
   );
 }

@@ -3,6 +3,7 @@
 import { FileDown, Paperclip, Send } from 'lucide-react';
 import { useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Button } from '@/components/ui/button/button';
 import { Card } from '@/components/ui/card/card';
@@ -70,7 +71,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         {isLoading && (
           <div className="flex justify-center py-12">
             <Spinner />
@@ -242,7 +243,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
             )}
           </div>
         )}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

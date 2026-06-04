@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import type { OfficeKey } from '@/features/spirituel/api/get-office';
 import { OfficeSelector } from '@/features/spirituel/components/liturgie-heures/office-selector';
@@ -29,7 +30,7 @@ export default function LiturgieHeuresPage() {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         <div className="mb-6">
           <OfficeSelector
             selected={selectedOffice}
@@ -37,7 +38,7 @@ export default function LiturgieHeuresPage() {
           />
         </div>
         <OfficeView officeKey={selectedOffice} />
-      </div>
+      </ContentContainer>
     </div>
   );
 }

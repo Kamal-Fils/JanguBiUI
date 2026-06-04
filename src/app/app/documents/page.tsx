@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { paths } from '@/config/paths';
 import { DocumentsList } from '@/features/documents/components/documents-list';
@@ -42,7 +43,7 @@ export default function DocumentsPage() {
   return (
     <>
       <div className="flex flex-col">
-        <div className="mx-auto w-full max-w-2xl px-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+        <ContentContainer>
           {/* Tabs */}
           <div className="mb-5 flex gap-1 rounded-xl bg-muted p-1">
             {TABS.map((tab) => {
@@ -68,7 +69,7 @@ export default function DocumentsPage() {
 
           {activeTab === 'requests' && <DocumentsList />}
           {activeTab === 'vault' && <VaultContent />}
-        </div>
+        </ContentContainer>
       </div>
 
       {activeTab === 'requests' && (

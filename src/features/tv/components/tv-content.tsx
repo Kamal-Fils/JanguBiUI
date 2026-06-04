@@ -3,6 +3,7 @@
 import { Play, Tv } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterPills } from '@/components/ui/filter-pills';
@@ -85,7 +86,7 @@ export function TvContent() {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-6xl p-4">
+      <ContentContainer width="wide">
         <div className="mb-4">
           <FilterPills
             options={filterOptions}
@@ -112,7 +113,7 @@ export function TvContent() {
             ))}
           </div>
         )}
-      </div>
+      </ContentContainer>
     </div>
   );
 }
