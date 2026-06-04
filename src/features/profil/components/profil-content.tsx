@@ -357,29 +357,32 @@ export function ProfilContent() {
         {/* Session section */}
         <SectionCard title="Session">
           <div className="flex flex-col gap-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              fullWidth
               onClick={() => logout()}
               disabled={isLoggingOut}
-              className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+              icon={<LogOut className="size-4" />}
+              className="justify-start"
             >
-              <LogOut className="size-4" />
               Se déconnecter
-            </button>
+            </Button>
           </div>
         </SectionCard>
 
         {/* Danger zone */}
         <SectionCard title="Zone de danger">
           {!showDeleteConfirm ? (
-            <button
+            <Button
               type="button"
+              variant="destructive"
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10"
+              icon={<Trash2 className="size-4" />}
+              className="border border-destructive/30 bg-destructive/5 text-destructive shadow-none hover:bg-destructive/10"
             >
-              <Trash2 className="size-4" />
               Supprimer mon compte
-            </button>
+            </Button>
           ) : (
             <div className="space-y-3">
               <p className="text-sm font-medium text-destructive">
@@ -387,24 +390,23 @@ export function ProfilContent() {
                 données seront supprimés.
               </p>
               <div className="flex gap-2">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                  className="flex-1"
                 >
                   Annuler
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="destructive"
                   onClick={() => deleteAccount()}
-                  disabled={isDeletingAccount}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
+                  isLoading={isDeletingAccount}
+                  className="flex-1"
                 >
-                  {isDeletingAccount && (
-                    <Loader2 className="size-4 animate-spin" />
-                  )}
                   Confirmer
-                </button>
+                </Button>
               </div>
             </div>
           )}

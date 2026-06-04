@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { Button } from '@/components/ui/button/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { RelativeTime } from '@/components/ui/relative-time';
 import { UserAvatar } from '@/components/ui/user-avatar';
@@ -119,14 +120,16 @@ export default function ClergeMessagesPage() {
             >
               {selectedMessage ? (
                 <article>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setSelectedMessage(null)}
-                    className="mb-4 -ml-2 flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
+                    icon={<ArrowLeft className="size-4" aria-hidden="true" />}
+                    className="mb-4 -ml-2 gap-1.5 px-2 text-muted-foreground hover:text-foreground md:hidden"
                   >
-                    <ArrowLeft className="size-4" aria-hidden="true" />
                     Retour
-                  </button>
+                  </Button>
                   <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">
                     {selectedMessage.subject}
                   </h2>
