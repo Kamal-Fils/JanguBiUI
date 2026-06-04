@@ -3,7 +3,7 @@
 import { Clock, Eye, Newspaper } from 'lucide-react';
 import { useState } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { MediaCard } from '@/components/ui/media-card';
@@ -70,10 +70,10 @@ export function ArticlesFeed() {
   const articles = data?.results ?? [];
   const [featured, ...rest] = articles;
 
+  useRegisterPageMeta({ title: 'Actualités', subtitle: "La vie de l'Église" });
+
   return (
     <div className="flex flex-col">
-      <PageHeader title="Actualités" subtitle="La vie de l'Église" />
-
       <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         <div className="mb-4">
           <NewsScopeFilter value={scope} onChange={setScope} />
