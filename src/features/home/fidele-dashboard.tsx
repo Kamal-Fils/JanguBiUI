@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, MessageCircle, ScrollText } from 'lucide-react';
+import { BookOpen, ScrollText } from 'lucide-react';
 import Link from 'next/link';
 
 import { ContentContainer } from '@/components/layouts/content-container';
