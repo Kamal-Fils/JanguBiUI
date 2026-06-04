@@ -4,6 +4,7 @@ import { CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
+import { Card } from '@/components/ui/card/card';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 
 import { PendingClergyAccount } from '../api/get-pending-clergy';
-import { useApproveClergy, useRejectClergyAccount } from '../api/validate-clergy-account';
+import {
+  useApproveClergy,
+  useRejectClergyAccount,
+} from '../api/validate-clergy-account';
 
 function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -32,7 +36,7 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
 
   return (
     <>
-      <div className="rounded-xl border border-border bg-card p-4">
+      <Card variant="elevated" className="p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -77,7 +81,7 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
             </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
       <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
         <DialogContent>
@@ -117,7 +121,11 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
                 )
               }
             >
-              {rejecting ? <Spinner className="size-4" /> : 'Confirmer le refus'}
+              {rejecting ? (
+                <Spinner className="size-4" />
+              ) : (
+                'Confirmer le refus'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -130,11 +138,11 @@ function PendingClergyListSkeleton() {
   return (
     <div className="space-y-3">
       {[1, 2].map((i) => (
-        <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-2">
+        <Card key={i} variant="elevated" className="p-4 space-y-2">
           <Skeleton className="h-4 w-40" />
           <Skeleton className="h-3 w-56" />
           <Skeleton className="h-3 w-32" />
-        </div>
+        </Card>
       ))}
     </div>
   );
@@ -146,7 +154,11 @@ interface PendingClergyListProps {
   isLoading?: boolean;
 }
 
-export function PendingClergyList({ accounts, totalCount, isLoading }: PendingClergyListProps) {
+export function PendingClergyList({
+  accounts,
+  totalCount,
+  isLoading,
+}: PendingClergyListProps) {
   if (isLoading) return <PendingClergyListSkeleton />;
 
   if (totalCount === 0) {
@@ -169,7 +181,10 @@ export function PendingClergyList({ accounts, totalCount, isLoading }: PendingCl
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Clock className="size-4" />
-        <span>{totalCount} compte{totalCount > 1 ? 's' : ''} en attente de validation</span>
+        <span>
+          {totalCount} compte{totalCount > 1 ? 's' : ''} en attente de
+          validation
+        </span>
       </div>
       {accounts.map((account) => (
         <PendingClergyCard key={account.id} account={account} />

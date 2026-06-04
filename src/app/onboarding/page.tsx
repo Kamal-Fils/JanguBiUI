@@ -8,6 +8,7 @@ import {
   type SelectedChurch,
 } from '@/components/org/church-cascade-selector';
 import { Button } from '@/components/ui/button/button';
+import { Card } from '@/components/ui/card/card';
 import { useLogout, useUser } from '@/lib/auth';
 import { getRoleHomePath } from '@/lib/get-role-home-path';
 import { useAddMemberships } from '@/lib/org/update-parish';
@@ -80,7 +81,7 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <Card variant="elevated" className="p-6">
           <ChurchCascadeSelector
             selected={selected}
             primaryChurchId={primaryChurchId}
@@ -95,7 +96,7 @@ export default function OnboardingPage() {
           >
             {isPending ? 'Enregistrement…' : 'Commencer'}
           </Button>
-        </div>
+        </Card>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Ce n&apos;est pas vous ?{' '}

@@ -11,6 +11,7 @@ import {
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button/button';
+import { Card } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { ParishStatsSection } from '@/features/dashboard/components/parish-stats-section';
@@ -118,7 +119,7 @@ function PendingIntentionCard({ intention }: { intention: MassIntention }) {
   const { mutate: celebrate, isPending: celebrating } = useCelebrateIntention();
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+    <Card variant="elevated" className="p-4 space-y-3">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-sm text-foreground line-clamp-2">
@@ -164,7 +165,7 @@ function PendingIntentionCard({ intention }: { intention: MassIntention }) {
           Détails
         </Link>
       </div>
-    </div>
+    </Card>
   );
 }
 

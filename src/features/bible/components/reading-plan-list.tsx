@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/lib/auth';
 import { isPretre } from '@/lib/authorization';
@@ -13,14 +14,19 @@ import { useCreateReadingPlan } from '../api/create-reading-plan';
 import type { CreateReadingPlanInput } from '../api/create-reading-plan';
 import { useReadingPlans } from '../api/get-reading-plans';
 import type { ReadingPlan } from '../api/get-reading-plans';
-import { useSubscribeReadingPlan, useUnsubscribeReadingPlan } from '../api/subscribe-reading-plan';
+import {
+  useSubscribeReadingPlan,
+  useUnsubscribeReadingPlan,
+} from '../api/subscribe-reading-plan';
 
 function PlanCard({ plan }: { plan: ReadingPlan }) {
-  const { mutate: subscribe, isPending: subscribing } = useSubscribeReadingPlan();
-  const { mutate: unsubscribe, isPending: unsubscribing } = useUnsubscribeReadingPlan();
+  const { mutate: subscribe, isPending: subscribing } =
+    useSubscribeReadingPlan();
+  const { mutate: unsubscribe, isPending: unsubscribing } =
+    useUnsubscribeReadingPlan();
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+    <Card variant="elevated" className="p-4 space-y-3">
       <div className="flex items-start gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
           <BookOpen className="size-4 text-primary" />
@@ -72,7 +78,7 @@ function PlanCard({ plan }: { plan: ReadingPlan }) {
           Se désinscrire
         </Button>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -88,8 +94,17 @@ function CreatePlanForm({ onClose }: { onClose: () => void }) {
     onSuccess: onClose,
   });
 
-  const { register, handleSubmit, formState: { errors } } = useForm<CreatePlanFormValues>({
-    defaultValues: { title: '', description: '', duration_days: 30, is_published: false },
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CreatePlanFormValues>({
+    defaultValues: {
+      title: '',
+      description: '',
+      duration_days: 30,
+      is_published: false,
+    },
   });
 
   const onSubmit = (data: CreatePlanFormValues) => {
@@ -97,11 +112,19 @@ function CreatePlanForm({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
-      <h3 className="text-sm font-semibold text-foreground">Nouveau parcours de lecture</h3>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3"
+    >
+      <h3 className="text-sm font-semibold text-foreground">
+        Nouveau parcours de lecture
+      </h3>
 
       <div className="space-y-1">
-        <label htmlFor="plan-title" className="text-xs font-medium text-muted-foreground">
+        <label
+          htmlFor="plan-title"
+          className="text-xs font-medium text-muted-foreground"
+        >
           Titre *
         </label>
         <input
@@ -116,7 +139,10 @@ function CreatePlanForm({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="plan-description" className="text-xs font-medium text-muted-foreground">
+        <label
+          htmlFor="plan-description"
+          className="text-xs font-medium text-muted-foreground"
+        >
           Description
         </label>
         <textarea
@@ -130,7 +156,10 @@ function CreatePlanForm({ onClose }: { onClose: () => void }) {
 
       <div className="flex gap-3">
         <div className="flex-1 space-y-1">
-          <label htmlFor="plan-duration" className="text-xs font-medium text-muted-foreground">
+          <label
+            htmlFor="plan-duration"
+            className="text-xs font-medium text-muted-foreground"
+          >
             Durée (jours)
           </label>
           <input

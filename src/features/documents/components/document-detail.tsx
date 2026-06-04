@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Button } from '@/components/ui/button/button';
+import { Card } from '@/components/ui/card/card';
 import { Spinner } from '@/components/ui/spinner';
 import {
   StatusTimeline,
@@ -112,7 +113,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
               </div>
             )}
 
-            <div className="rounded-xl border border-border bg-card p-4">
+            <Card variant="elevated" className="p-4">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Date de la demande
               </p>
@@ -139,7 +140,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
                   </p>
                 </>
               )}
-            </div>
+            </Card>
 
             {data.status === 'info_requested' && !submittedSupplement && (
               <form

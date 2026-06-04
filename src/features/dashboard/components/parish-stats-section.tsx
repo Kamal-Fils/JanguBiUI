@@ -3,6 +3,7 @@
 import { FileText, ScrollText, Users, Wallet } from 'lucide-react';
 import * as React from 'react';
 
+import { Card } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatCard } from '@/components/ui/stat-card';
 
@@ -76,7 +77,7 @@ export function ParishStatsSection() {
       </div>
 
       {data.donation_flow_year.by_type.length > 0 && (
-        <div className="rounded-xl border border-border bg-card p-4 shadow-soft-sm">
+        <Card variant="elevated" className="p-4">
           <h3 className="mb-2 text-xs font-semibold text-muted-foreground">
             Flux de dons par type (année)
           </h3>
@@ -93,7 +94,7 @@ export function ParishStatsSection() {
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
       )}
     </section>
   );

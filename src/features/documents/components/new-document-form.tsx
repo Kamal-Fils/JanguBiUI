@@ -20,6 +20,7 @@ import {
   type PickedParish,
 } from '@/components/org/parish-picker';
 import { Button } from '@/components/ui/button/button';
+import { Card } from '@/components/ui/card/card';
 import { useUser } from '@/lib/auth';
 
 import { CreateDocumentInput, useCreateDocument } from '../api/create-document';
@@ -272,12 +273,12 @@ function AttachmentStep({
       )}
 
       {isUploading && (
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+        <Card variant="elevated" className="flex items-center gap-3 px-4 py-3">
           <Loader2 className="size-5 animate-spin text-primary" />
           <span className="text-sm text-muted-foreground">
             Téléversement en cours…
           </span>
-        </div>
+        </Card>
       )}
 
       {fileName && !isUploading && (
@@ -839,7 +840,7 @@ export function NewDocumentForm() {
           {/* Step 6 — Consent */}
           {step === 'consent' && (
             <>
-              <div className="rounded-xl border border-border bg-card p-4">
+              <Card variant="elevated" className="p-4">
                 <h3 className="mb-2 font-semibold text-foreground">
                   Récapitulatif
                 </h3>
@@ -877,7 +878,7 @@ export function NewDocumentForm() {
                     </dd>
                   </div>
                 </dl>
-              </div>
+              </Card>
               <button
                 type="button"
                 onClick={() => setValue('consent_given', !watchedConsentGiven)}
