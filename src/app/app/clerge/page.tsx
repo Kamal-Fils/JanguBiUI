@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { paths } from '@/config/paths';
 import { useUser } from '@/lib/auth';
 import { isClergy } from '@/lib/authorization';
@@ -59,16 +59,17 @@ export default function ClergePage() {
     }
   }, [user, isLoading, router]);
 
+  useRegisterPageMeta({
+    title: 'Espace Clergé',
+    subtitle: 'Outils et ressources pastoraux',
+  });
+
   if (isLoading || !isClergy(user)) {
     return null;
   }
 
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Espace Clergé"
-        subtitle="Outils et ressources pastoraux"
-      />
       <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         <div className="flex flex-col gap-3">
           {CLERGE_SECTIONS.map((section) => {
