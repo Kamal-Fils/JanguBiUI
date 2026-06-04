@@ -12,11 +12,17 @@ Frontend de la plateforme **Jàngu Bi** — Next.js 14 App Router, TanStack Quer
 # Depuis JanguBiUI/
 yarn dev          # Serveur de développement (port 3000)
 yarn build        # Build production — doit être clean (0 erreurs TS)
-yarn test         # Vitest — tous les tests doivent passer (222/222)
-yarn test:watch   # Mode watch
-yarn lint         # ESLint
-yarn type-check   # tsc --noEmit
+yarn test --run   # Vitest — tous les tests doivent passer (247/247)
+yarn lint         # ESLint (eslint src) — doit être clean (0 erreur)
+yarn lint:fix     # ESLint --fix
+yarn format       # Prettier --write (le formatage n'est PAS géré par ESLint)
+yarn check-types  # tsc --noEmit
 ```
+
+> Note ESLint : la config (`.eslintrc.cjs`) est en eslintrc legacy sous ESLint 8.
+> `eslint-config-next@16` est flat-config-only et incompatible → on ne charge PAS
+> `next/core-web-vitals`. La règle **anti-palette** (`no-restricted-syntax`) interdit
+> la palette Tailwind brute (`bg-blue-500`…) hors `src/features/landing` (dark forcé).
 
 API backend : `http://localhost:8000/api/v1/`
 
@@ -112,14 +118,14 @@ canPublishArticle(user)      // Peut publier un article
 canProcessDocuments(user)    // Peut traiter des documents
 canManageUsers(user)         // Peut gérer les utilisateurs
 canManageTV(user)            // Peut gérer JanguBi TV
+isClergy(user)               // archeveque | eveque | pretre | diacre | religieux
+isPretre(user)               // pretre uniquement
+isEvequeOrAbove(user)        // eveque | archeveque
 ```
 
-Fonctions à ajouter (pas encore implémentées) :
-```typescript
-isClergy(user)          // archeveque | eveque | pretre | diacre | religieux
-isPretre(user)          // pretre uniquement
-isEvequeOrAbove(user)   // eveque | archeveque
-```
+> Les sélecteurs/hooks territoriaux (paroisse, diocèse, province, église) sont
+> **partagés** : composants dans `src/components/org/`, hooks dans `src/lib/org/`.
+> NE PAS les remettre dans une feature (import cross-feature interdit).
 
 ---
 
@@ -129,7 +135,7 @@ isEvequeOrAbove(user)   // eveque | archeveque
 - **Co-location** : `src/features/<nom>/components/__tests__/<nom>.test.tsx`
 - **Jamais** mocker `fetch` ou `api` directement — toujours passer par MSW
 - Helper central : `src/testing/test-utils.tsx` → `renderApp({ route })`
-- État actuel : **222/222 tests passent**
+- État actuel : **247/247 tests passent**
 
 ```bash
 # Un seul test
@@ -152,24 +158,27 @@ cd JanguBiUI && yarn test --reporter=verbose src/features/bible
 | JanguBi TV (lecture seule) | ✅ | `/app/tv` |
 | Assistant spirituel RAG | ✅ | `/app/assistant` |
 | Profil utilisateur | ✅ | `/app/profil` |
-| Admin availability (placeholder vide) | ⚠️ | `/app/admin/availability` |
+| Liturgie des Heures (offices) | ✅ | `/app/spirituel/heures` |
+| Intentions de messe (fidèle + clergé) | ✅ | `/app/intentions`, `/app/clerge/intentions` |
+| Transfert paroissial (clergé) | ✅ | `/app/transfert`, `/app/clerge/transferts` |
+| Inter-clergé messaging | ✅ | `/app/clerge/messages` |
+| Agenda / événements | ✅ | `/app/agenda` |
+| Admin (users, org, TV, articles, documents, agenda) | ✅ | `/app/admin/*` |
+
+> Toute la refonte UI « Sacred Editorial » (Phases 0→6 + clôture) est livrée sur
+> la branche `feat/refonte-ui-sacred-editorial` : tokens light-first + dark réparé,
+> kit design-system (`src/components/ui`), a11y, `DataTable`/`StatusBadge`/`RoleGuard`.
 
 ## Features manquantes (priorité SRS)
 
 | Feature | Priorité |
 |---|---|
-| Navigation conditionnelle par rôle | 🔴 P1 |
-| Dashboard fidèle scopé à sa paroisse | 🔴 P1 |
-| Onboarding : sélection paroisse obligatoire | 🔴 P1 |
-| Dashboard prêtre (intentions, messagerie, liturgie) | 🔴 P2 |
-| Dashboard évêque + archevêque | 🔴 P2 |
-| CMS Articles (créer, éditer, publier — 3 types) | 🔴 P2 |
-| Admin workflow documents (changer statut) | 🟡 P3 |
-| TV management (CRUD vidéos) | 🟡 P3 |
-| Gestion utilisateurs admin | 🟡 P3 |
-| Liturgie des Heures (7 offices) | 🔴 P1 |
-| Allo-Prêtre (fidèle) | 🔴 P2 |
-| Inter-clergé messaging | 🔴 P2 |
+| Navigation conditionnelle par rôle (affinage) | 🟡 P2 |
+| Dashboard fidèle scopé à sa paroisse (données réelles) | 🔴 P1 |
+| CMS Articles — 3 types distincts (Annonce/Article/Lettre) | 🔴 P2 |
+| Allo-Prêtre (disponibilités ministres) | 🔴 P2 |
+| CRUD org complet (backend : PATCH/DELETE sur Detail APIs) | 🟡 P3 |
+| Intentions de messe — alignement workflow backend | 🟡 P3 |
 
 ---
 
@@ -190,15 +199,14 @@ cd JanguBiUI && yarn test --reporter=verbose src/features/bible
 
 ---
 
-## Composants orphelins (construits mais non intégrés)
+## Dette connue / suivi
 
-Ces composants existent et fonctionnent — les intégrer en priorité plutôt que recréer :
-
-- `src/features/allo-pretre/components/admin-ministers.tsx` → CRUD ministres
-- `src/features/allo-pretre/components/admin-parishes.tsx` → CRUD paroisses
-- `src/features/allo-pretre/components/admin-services.tsx` → CRUD services
-
-Destination : `src/app/app/admin/availability/page.tsx` (actuellement placeholder vide).
+- **Allo-Prêtre** (disponibilités ministres) n'existe pas encore — ni la feature
+  `allo-pretre`, ni la route `/app/admin/availability`. À construire (pas à « réintégrer »).
+- **CRUD org** : la page `/app/admin/org` affiche l'existant en lecture ; les
+  endpoints backend `PATCH`/`DELETE` sur les Detail APIs manquent pour create/edit/delete.
+- **ESLint** : config eslintrc legacy (ESLint 8) — migration flat-config + ESLint 9
+  recommandée à terme (cf. note Commandes).
 
 ---
 
