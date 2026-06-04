@@ -164,7 +164,7 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-medium text-foreground line-clamp-1">{message.subject}</span>
-            {!message.read_at && <span className="size-2 flex-shrink-0 rounded-full bg-info" />}
+            {!message.read_at && <span className="size-2 shrink-0 rounded-full bg-info" />}
           </div>
           <p className="text-xs text-muted-foreground">{message.sender_email}</p>
         </Link>

@@ -98,7 +98,7 @@ export default function OnboardingPage() {
         </div>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Ce n'est pas vous ?{' '}
+          Ce n&apos;est pas vous ?{' '}
           <button
             type="button"
             onClick={() => logout()}

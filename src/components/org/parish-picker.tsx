@@ -137,12 +137,12 @@ export function ParishPicker({ value, onChange, disabled }: ParishPickerProps) {
         {trimmed.length >= MIN_SEARCH_LENGTH && (
           <ul className="space-y-1.5" aria-label="Résultats de recherche">
             {isFetching && (
-              <li className="px-1 py-1 text-xs text-muted-foreground">
+              <li className="p-1 text-xs text-muted-foreground">
                 Recherche…
               </li>
             )}
             {!isFetching && results.length === 0 && (
-              <li className="px-1 py-1 text-xs text-muted-foreground">
+              <li className="p-1 text-xs text-muted-foreground">
                 Aucune paroisse trouvée.
               </li>
             )}

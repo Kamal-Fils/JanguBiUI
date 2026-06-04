@@ -1,12 +1,11 @@
 'use client';
 
-import DOMPurify from 'isomorphic-dompurify';
 import { useQuery } from '@tanstack/react-query';
+import DOMPurify from 'isomorphic-dompurify';
 import { ArrowLeft, BookOpen, Flame, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 
 import { AppShell } from '@/components/layouts/app-shell';
-
 import {
   Card,
   CardContent,
@@ -236,14 +235,14 @@ export default function LiturgiePage() {
             {laudes && (
               <section className="flex flex-col gap-3">
                 <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-                  <Sun className="size-4 text-yellow-500" />
+                  <Sun className="size-4 text-warning" />
                   Laudes
                 </h2>
                 <OfficeCard
                   office={laudes}
-                  icon={<Sun className="size-4 text-yellow-500" />}
+                  icon={<Sun className="size-4 text-warning" />}
                   label="Laudes — Prière du matin"
-                  color="bg-yellow-500/5"
+                  color="bg-warning/5"
                 />
               </section>
             )}
@@ -252,14 +251,14 @@ export default function LiturgiePage() {
             {vepres && (
               <section className="flex flex-col gap-3">
                 <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-                  <Moon className="size-4 text-blue-500" />
+                  <Moon className="size-4 text-info" />
                   Vêpres
                 </h2>
                 <OfficeCard
                   office={vepres}
-                  icon={<Moon className="size-4 text-blue-500" />}
+                  icon={<Moon className="size-4 text-info" />}
                   label="Vêpres — Prière du soir"
-                  color="bg-blue-500/5"
+                  color="bg-info/5"
                 />
               </section>
             )}

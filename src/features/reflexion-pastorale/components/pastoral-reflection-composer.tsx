@@ -85,7 +85,6 @@ export function PastoralReflectionComposer() {
             placeholder="Partagez une réflexion liée aux lectures du jour…"
             rows={4}
             className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            autoFocus
           />
           <div className="flex items-center justify-between">
             <span

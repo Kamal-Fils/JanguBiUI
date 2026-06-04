@@ -181,7 +181,7 @@ function VerseReadingSection({
         <div className="flex flex-col gap-5">
           {allVerses.map((verse) => (
             <div key={verse.id} className="flex gap-3 items-start">
-              <span className="text-primary font-bold text-sm shrink-0 min-w-[1.75rem] pt-0.5 tabular-nums select-none">
+              <span className="text-primary font-bold text-sm shrink-0 min-w-7 pt-0.5 tabular-nums select-none">
                 {verse.number}
               </span>
               <span

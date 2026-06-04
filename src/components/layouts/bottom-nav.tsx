@@ -119,7 +119,7 @@ export function BottomNav({ messageBadge }: BottomNavProps) {
               className="rounded-t-2xl pb-[max(1.5rem,env(safe-area-inset-bottom))]"
             >
               <DrawerHeader className="px-0 text-left">
-                <DrawerTitle className="font-serif">Plus d'options</DrawerTitle>
+                <DrawerTitle className="font-serif">Plus d&apos;options</DrawerTitle>
               </DrawerHeader>
               <div className="grid grid-cols-3 gap-2.5">
                 {overflow.map((item) => {

@@ -1,8 +1,8 @@
 import { Check } from 'lucide-react';
 import * as React from 'react';
 
-import { cn } from '@/utils/cn';
 import type { StatusTone } from '@/components/ui/status-badge';
+import { cn } from '@/utils/cn';
 
 export interface TimelineStep {
   label: string;

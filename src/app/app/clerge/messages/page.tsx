@@ -54,14 +54,6 @@ export default function ClergeMessagesPage() {
           role="tablist"
           aria-label="Messages"
           className="flex border-b border-border px-4"
-          onKeyDown={(e) => {
-            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-            e.preventDefault();
-            const current = TABS.indexOf(activeTab);
-            const delta = e.key === 'ArrowRight' ? 1 : -1;
-            const next = TABS[(current + delta + TABS.length) % TABS.length];
-            setActiveTab(next);
-          }}
         >
           {TABS.map((tab) => {
             const selected = activeTab === tab;
@@ -75,6 +67,15 @@ export default function ClergeMessagesPage() {
                 aria-controls={`tabpanel-${tab}`}
                 tabIndex={selected ? 0 : -1}
                 onClick={() => setActiveTab(tab)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+                  e.preventDefault();
+                  const current = TABS.indexOf(activeTab);
+                  const delta = e.key === 'ArrowRight' ? 1 : -1;
+                  setActiveTab(
+                    TABS[(current + delta + TABS.length) % TABS.length],
+                  );
+                }}
                 className={cn(
                   '-mb-px flex min-h-11 items-center border-b-2 px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
                   selected

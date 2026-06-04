@@ -82,7 +82,7 @@ export function DocumentsList({ hideHeader = false }: DocumentsListProps) {
         />
       )}
 
-      <div className="mx-auto w-full max-w-2xl px-4 py-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         {isLoading && <DocumentsSkeleton />}
         {isError && (
           <ErrorState

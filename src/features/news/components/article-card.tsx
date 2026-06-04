@@ -32,7 +32,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
       className="flex gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-muted active:scale-[0.98]"
     >
       {article.cover_image_url && (
-        <div className="relative size-20 flex-shrink-0 overflow-hidden rounded-lg">
+        <div className="relative size-20 shrink-0 overflow-hidden rounded-lg">
           <Image
             src={article.cover_image_url}
             alt={article.title}

@@ -10,8 +10,8 @@ import { MediaCard } from '@/components/ui/media-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatFrDate } from '@/utils/format-date';
 
-import type { Article } from '../types';
 import { useFeedArticles } from '../api/get-articles';
+import type { Article } from '../types';
 
 import { ArticleTypeBadge } from './article-type-badge';
 import {
@@ -74,7 +74,7 @@ export function ArticlesFeed() {
     <div className="flex flex-col">
       <PageHeader title="Actualités" subtitle="La vie de l'Église" />
 
-      <div className="mx-auto w-full max-w-2xl px-4 py-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         <div className="mb-4">
           <NewsScopeFilter value={scope} onChange={setScope} />
         </div>

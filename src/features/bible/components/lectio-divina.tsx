@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, ChevronRight, Clock, RotateCcw } from 'lucide-react';
+import { CheckCircle, ChevronRight, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 

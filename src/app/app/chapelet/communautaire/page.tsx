@@ -17,8 +17,8 @@ export default function CommunautairePage() {
           <>
             <PageHeader title="Chapelet en cours" />
             <div className="mx-auto w-full max-w-2xl px-4 py-6 md:px-6 space-y-4">
-              <div className="rounded-xl border border-green-200 bg-green-50 dark:bg-green-950/20 p-4">
-                <p className="text-sm font-medium text-green-700 dark:text-green-400">
+              <div className="rounded-xl border border-success/30 bg-success/10 p-4">
+                <p className="text-sm font-medium text-success">
                   Vous participez au chapelet — décade {joined.current_decade}
                 </p>
                 {joined.intention && (

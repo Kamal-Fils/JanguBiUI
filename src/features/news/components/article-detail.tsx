@@ -31,7 +31,7 @@ const scopeLabel: Record<string, string> = {
 
 function ArticleDetailSkeleton() {
   return (
-    <div className="mx-auto max-w-2xl px-4 py-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+    <div className="mx-auto max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
       <Skeleton className="mb-4 h-48 w-full rounded-xl" />
       <Skeleton className="mb-2 h-4 w-1/3" />
       <Skeleton className="mb-3 h-7 w-full" />

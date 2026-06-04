@@ -1,6 +1,7 @@
 'use client';
 
 import { BookOpen, Clock, Cross, MapPin, MessageSquare } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -10,7 +11,6 @@ import { paths } from '@/config/paths';
 import { useUser } from '@/lib/auth';
 import { isClergy } from '@/lib/authorization';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 
 const CLERGE_SECTIONS = [
   {
@@ -18,28 +18,28 @@ const CLERGE_SECTIONS = [
     icon: Cross,
     label: 'Intentions de messe',
     description: 'Recevoir · Accepter · Célébrer',
-    color: 'bg-amber-500/10 text-amber-600',
+    color: 'bg-warning/10 text-warning',
   },
   {
     href: paths.app.clerge.messages.getHref(),
     icon: MessageSquare,
     label: 'Messagerie inter-clergé',
     description: 'Correspondance · Annonces · Directives',
-    color: 'bg-blue-500/10 text-blue-600',
+    color: 'bg-info/10 text-info',
   },
   {
     href: paths.app.clerge.transferts.getHref(),
     icon: MapPin,
     label: 'Transferts paroissiaux',
     description: 'Gérer les demandes de changement de paroisse',
-    color: 'bg-teal-500/10 text-teal-600',
+    color: 'bg-success/10 text-success',
   },
   {
     href: paths.app.spirituelHeures.getHref(),
     icon: Clock,
     label: 'Liturgie des Heures',
     description: 'Laudes · Vêpres · Complies · 7 offices',
-    color: 'bg-orange-500/10 text-orange-500',
+    color: 'bg-accent/15 text-accent',
   },
   {
     href: paths.app.spirituel.getHref(),
@@ -98,7 +98,7 @@ export default function ClergePage() {
                   </p>
                 </div>
                 <svg
-                  className="size-4 flex-shrink-0 text-muted-foreground"
+                  className="size-4 shrink-0 text-muted-foreground"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

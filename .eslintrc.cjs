@@ -12,7 +12,10 @@ module.exports = {
     '**/__tests__/**',
     'src/testing/**',
   ],
-  extends: ['eslint:recommended', 'next/core-web-vitals'],
+  // NOTE: `next/core-web-vitals` (eslint-config-next@16) is a flat-config-only
+  // package and crashes ESLint 8's eslintrc loader. We load the underlying
+  // @next/eslint-plugin-next directly (eslintrc-compatible) in the overrides.
+  extends: ['eslint:recommended'],
   overrides: [
     {
       files: ['**/*.ts', '**/*.tsx'],
@@ -44,7 +47,6 @@ module.exports = {
         'plugin:vitest/legacy-recommended',
       ],
       rules: {
-        '@next/next/no-img-element': 'off',
         'import/no-restricted-paths': [
           'error',
           {
@@ -129,7 +131,38 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': ['off'],
         'tailwindcss/no-custom-classname': 'off',
         'tailwindcss/classnames-order': 'off',
-        'prettier/prettier': ['error', {}, { usePrettierrc: true }],
+        // Sacred Editorial — interdit la palette Tailwind brute (cassée en dark /
+        // off-brand). Utiliser les tokens sémantiques : text-foreground,
+        // text-muted-foreground, text-primary, bg-card, bg-success|warning|info|
+        // destructive|accent/…. Exceptions documentées dans l'override ci-dessous.
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector:
+              "Literal[value=/(text|bg|border|ring|from|to|via|fill|stroke|divide|placeholder|decoration|shadow|outline|caret|accent)-(gray|slate|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(50|[1-9]00|950)/]",
+            message:
+              'Palette Tailwind brute interdite (Sacred Editorial). Utilise un token sémantique : text-foreground/-muted-foreground, text-primary, bg-card, bg-success|warning|info|destructive|accent/…',
+          },
+        ],
+        // Formatage géré par Prettier CLI (`yarn format`), pas par ESLint :
+        // l'intégration plugin:prettier produisait des milliers de faux
+        // positifs de drift. eslint-config-prettier (via le preset) désactive
+        // toujours les règles de style en conflit avec Prettier.
+        'prettier/prettier': 'off',
+      },
+    },
+    {
+      // Exceptions à la règle anti-palette : la landing a une direction
+      // artistique « dark forcé » avec surfaces fixes intentionnelles (badges
+      // de store sur fond blanc) ; les stories et la page démo Sentry ne sont
+      // pas du code applicatif livré.
+      files: [
+        'src/features/landing/**/*',
+        '**/*.stories.tsx',
+        'src/app/sentry-example-page/**/*',
+      ],
+      rules: {
+        'no-restricted-syntax': 'off',
       },
     },
     {

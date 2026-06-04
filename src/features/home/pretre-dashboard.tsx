@@ -5,8 +5,7 @@ import Link from 'next/link';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
-import type { ClergicalMessage } from '@/features/messaging/api/get-clerical-inbox';
-import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
+import { ParishStatsSection } from '@/features/dashboard/components/parish-stats-section';
 import type { MassIntention } from '@/features/intentions/api/get-my-intentions';
 import { useParishIntentions } from '@/features/intentions/api/get-parish-intentions';
 import {
@@ -14,10 +13,11 @@ import {
   useCelebrateIntention,
 } from '@/features/intentions/api/manage-intentions';
 import { IntentionStatusBadge } from '@/features/intentions/components/intention-status-badge';
+import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
+import type { ClergicalMessage } from '@/features/messaging/api/get-clerical-inbox';
+import { PastoralReflectionComposer } from '@/features/reflexion-pastorale/components/pastoral-reflection-composer';
 import { cn } from '@/utils/cn';
 
-import { PastoralReflectionComposer } from '@/features/reflexion-pastorale/components/pastoral-reflection-composer';
-import { ParishStatsSection } from '@/features/dashboard/components/parish-stats-section';
 
 import { WelcomeBanner } from './welcome-banner';
 
@@ -265,7 +265,7 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
               {message.subject}
             </span>
             {!message.read_at && (
-              <span className="size-2 flex-shrink-0 rounded-full bg-info" />
+              <span className="size-2 shrink-0 rounded-full bg-info" />
             )}
           </div>
           <p className="text-xs text-muted-foreground">{message.sender_email}</p>

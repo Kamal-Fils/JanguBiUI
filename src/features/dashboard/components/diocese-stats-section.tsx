@@ -74,7 +74,7 @@ export function DioceseStatsSection() {
 
       {data.parishes_without_main_church > 0 && (
         <div className="flex items-center gap-2 rounded-xl border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
-          <AlertTriangle className="size-4 flex-shrink-0" />
+          <AlertTriangle className="size-4 shrink-0" />
           {data.parishes_without_main_church} paroisse(s) sans église principale —
           à corriger.
         </div>

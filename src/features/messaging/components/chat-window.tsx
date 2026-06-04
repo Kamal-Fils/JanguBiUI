@@ -377,7 +377,7 @@ export function ChatWindow({
           aria-live="polite"
           aria-label="Fil de la conversation"
           aria-relevant="additions"
-          className="h-full overflow-y-auto px-4 py-4"
+          className="h-full overflow-y-auto p-4"
         >
           {isLoading && (
             <div className="flex justify-center py-8">

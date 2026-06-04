@@ -3,8 +3,8 @@ import * as React from 'react';
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { RoleGuard } from '@/components/layouts/role-guard';
-import { cn } from '@/utils/cn';
 import type { User } from '@/lib/auth';
+import { cn } from '@/utils/cn';
 
 const widthClass = {
   md: 'max-w-2xl',

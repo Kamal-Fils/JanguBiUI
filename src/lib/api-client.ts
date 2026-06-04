@@ -41,14 +41,18 @@ export function setRefreshToken(token: string): void {
   _refreshToken = token;
   try {
     if (typeof window !== 'undefined') localStorage.setItem(REFRESH_TOKEN_KEY, token);
-  } catch {}
+  } catch {
+    // localStorage indisponible (SSR / navigation privée) — non bloquant
+  }
 }
 
 export function clearRefreshToken(): void {
   _refreshToken = null;
   try {
     if (typeof window !== 'undefined') localStorage.removeItem(REFRESH_TOKEN_KEY);
-  } catch {}
+  } catch {
+    // localStorage indisponible (SSR / navigation privée) — non bloquant
+  }
 }
 
 export function getRefreshToken(): string | null {

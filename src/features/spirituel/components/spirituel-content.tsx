@@ -96,7 +96,7 @@ export function SpirituelContent() {
                     {section.description}
                   </p>
                 </div>
-                <ChevronRight className="size-4 flex-shrink-0 text-muted-foreground" />
+                <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
               </Link>
             );
           })}

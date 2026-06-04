@@ -82,7 +82,7 @@ export function TvContent() {
     <div className="flex flex-col">
       <PageHeader title="TV Catholique" subtitle="Chaînes et programmes" />
 
-      <div className="mx-auto w-full max-w-6xl px-4 py-4">
+      <div className="mx-auto w-full max-w-6xl p-4">
         <div className="mb-4">
           <FilterPills
             options={filterOptions}

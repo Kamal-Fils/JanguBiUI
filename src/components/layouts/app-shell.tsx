@@ -57,9 +57,9 @@ function ThemeToggle({ className }: { className?: string }) {
     >
       {mounted ? (
         isDark ? (
-          <Sun className="size-5 shrink-0 text-yellow-500" />
+          <Sun className="size-5 shrink-0 text-warning" />
         ) : (
-          <Moon className="size-5 shrink-0 text-blue-500" />
+          <Moon className="size-5 shrink-0 text-info" />
         )
       ) : (
         <span className="size-5 shrink-0" aria-hidden="true" />
@@ -169,7 +169,7 @@ export function AppShell({ children, hideNav }: AppShellProps) {
         {/* Notification bell — mobile only, fixed top-right */}
         {!hideNav && (
           <div className="fixed right-3 top-3 z-50 md:hidden">
-            <NotificationBell className="size-10 rounded-full border border-border bg-background/90 shadow-sm backdrop-blur-sm px-0 py-0 justify-center" />
+            <NotificationBell className="size-10 rounded-full border border-border bg-background/90 shadow-sm backdrop-blur-sm p-0 justify-center" />
           </div>
         )}
       </div>

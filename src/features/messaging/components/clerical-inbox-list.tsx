@@ -5,9 +5,9 @@ import { Inbox, Mail, MailOpen } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { Pill } from '@/components/ui/pill';
+import { RelativeTime } from '@/components/ui/relative-time';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UserAvatar } from '@/components/ui/user-avatar';
-import { RelativeTime } from '@/components/ui/relative-time';
 import { cn } from '@/lib/utils';
 
 import { useClericalInbox } from '../api/get-clerical-inbox';
