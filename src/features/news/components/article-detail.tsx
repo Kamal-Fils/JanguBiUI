@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { Button } from '@/components/ui/button/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useArticleDetail } from '../api/get-article';
@@ -65,13 +66,14 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
         <p className="text-sm text-muted-foreground">Article introuvable.</p>
-        <button
+        <Button
           type="button"
+          variant="link"
+          size="sm"
           onClick={() => router.back()}
-          className="text-sm text-primary underline underline-offset-2"
         >
           Retour
-        </button>
+        </Button>
       </div>
     );
   }
