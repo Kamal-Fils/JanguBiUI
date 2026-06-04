@@ -10,7 +10,7 @@ import { cn } from '@/utils/cn';
  * `status -> { label, tone, icon }` dans sa feature.
  */
 const statusBadgeVariants = cva(
-  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold [&_svg]:size-3.5',
+  'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold [&_svg]:size-3.5',
   {
     variants: {
       tone: {

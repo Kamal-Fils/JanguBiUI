@@ -120,7 +120,7 @@ export function DocumentsList({ hideHeader = false }: DocumentsListProps) {
                     statusStripe[doc.status],
                   )}
                 />
-                <div className="flex flex-1 items-center gap-3 p-4">
+                <div className="flex min-w-0 flex-1 items-center gap-3 p-4">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted">
                     <FileText className="size-5 text-muted-foreground" />
                   </div>
@@ -132,8 +132,10 @@ export function DocumentsList({ hideHeader = false }: DocumentsListProps) {
                       {formatDate(doc.created_at)}
                     </p>
                   </div>
-                  <DocumentStatusBadge status={doc.status} />
-                  <ChevronRight className="size-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5" />
+                  <div className="flex shrink-0 items-center gap-3">
+                    <DocumentStatusBadge status={doc.status} />
+                    <ChevronRight className="size-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5" />
+                  </div>
                 </div>
               </Link>
             ))}

@@ -51,7 +51,7 @@ export function BottomNav({ messageBadge }: BottomNavProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                'relative flex flex-col items-center gap-0.5 px-2 py-1.5 transition-colors',
+                'relative flex flex-1 min-w-0 flex-col items-center gap-0.5 px-1 py-1.5 transition-colors',
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground',
@@ -73,7 +73,7 @@ export function BottomNav({ messageBadge }: BottomNavProps) {
               </span>
               <span
                 className={cn(
-                  'text-[10px] transition-all',
+                  'max-w-full truncate text-[10px] transition-all',
                   isActive ? 'font-semibold' : 'font-medium',
                 )}
               >
@@ -91,7 +91,7 @@ export function BottomNav({ messageBadge }: BottomNavProps) {
               onClick={() => setMoreOpen(true)}
               aria-label="Plus d'options"
               className={cn(
-                'relative flex flex-col items-center gap-0.5 px-2 py-1.5 transition-colors',
+                'relative flex flex-1 min-w-0 flex-col items-center gap-0.5 px-1 py-1.5 transition-colors',
                 overflowActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground',
@@ -107,7 +107,7 @@ export function BottomNav({ messageBadge }: BottomNavProps) {
               </span>
               <span
                 className={cn(
-                  'text-[10px]',
+                  'max-w-full truncate text-[10px]',
                   overflowActive ? 'font-semibold' : 'font-medium',
                 )}
               >

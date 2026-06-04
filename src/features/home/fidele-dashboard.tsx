@@ -25,12 +25,12 @@ const QUICK_ACTIONS = [
     icon: ScrollText,
     className: 'bg-accent/15 text-accent',
   },
-  {
-    label: 'Assistant',
-    href: '/app/assistant',
-    icon: MessageCircle,
-    className: 'bg-info/10 text-info',
-  },
+  //{
+  //  label: 'Assistant',
+  //  href: '/app/assistant',
+  //  icon: MessageCircle,
+  //  className: 'bg-info/10 text-info',
+  //},
 ] as const;
 
 export function FideleDashboard() {
@@ -40,7 +40,7 @@ export function FideleDashboard() {
         <WelcomeBanner />
 
         {/* Quick actions */}
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {QUICK_ACTIONS.map((action) => {
             const Icon = action.icon;
             return (
