@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { Button } from '@/components/ui/button/button';
 import { useUser } from '@/lib/auth';
 import { getParishesQueryOptions } from '@/lib/org/get-parishes';
 
@@ -83,14 +84,16 @@ export function ParishPicker({ value, onChange, disabled }: ParishPickerProps) {
             </p>
           )}
         </div>
-        <button
+        <Button
           type="button"
+          variant="link"
+          size="sm"
           onClick={() => onChange(null)}
           disabled={disabled}
-          className="shrink-0 text-xs font-medium text-primary underline hover:opacity-80 disabled:opacity-50"
+          className="h-auto shrink-0 p-0 text-xs font-medium underline"
         >
           Changer
-        </button>
+        </Button>
       </div>
     );
   }
@@ -137,9 +140,7 @@ export function ParishPicker({ value, onChange, disabled }: ParishPickerProps) {
         {trimmed.length >= MIN_SEARCH_LENGTH && (
           <ul className="space-y-1.5" aria-label="Résultats de recherche">
             {isFetching && (
-              <li className="p-1 text-xs text-muted-foreground">
-                Recherche…
-              </li>
+              <li className="p-1 text-xs text-muted-foreground">Recherche…</li>
             )}
             {!isFetching && results.length === 0 && (
               <li className="p-1 text-xs text-muted-foreground">

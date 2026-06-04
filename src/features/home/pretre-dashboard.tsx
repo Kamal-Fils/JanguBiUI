@@ -1,8 +1,16 @@
 'use client';
 
-import { BookOpen, CheckCircle, Clock, Inbox, MessageSquare, ScrollText } from 'lucide-react';
+import {
+  BookOpen,
+  CheckCircle,
+  Clock,
+  Inbox,
+  MessageSquare,
+  ScrollText,
+} from 'lucide-react';
 import Link from 'next/link';
 
+import { Button } from '@/components/ui/button/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { ParishStatsSection } from '@/features/dashboard/components/parish-stats-section';
@@ -17,7 +25,6 @@ import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
 import type { ClergicalMessage } from '@/features/messaging/api/get-clerical-inbox';
 import { PastoralReflectionComposer } from '@/features/reflexion-pastorale/components/pastoral-reflection-composer';
 import { cn } from '@/utils/cn';
-
 
 import { WelcomeBanner } from './welcome-banner';
 
@@ -59,7 +66,12 @@ interface StatsRowProps {
   loadingMessages: boolean;
 }
 
-function StatsRow({ pendingCount, unreadCount, loadingIntentions, loadingMessages }: StatsRowProps) {
+function StatsRow({
+  pendingCount,
+  unreadCount,
+  loadingIntentions,
+  loadingMessages,
+}: StatsRowProps) {
   const stats = [
     {
       label: 'En attente',
@@ -109,7 +121,9 @@ function PendingIntentionCard({ intention }: { intention: MassIntention }) {
     <div className="rounded-xl border border-border bg-card p-4 space-y-3">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-foreground line-clamp-2">{intention.intention_text}</p>
+          <p className="text-sm text-foreground line-clamp-2">
+            {intention.intention_text}
+          </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {intention.requestor_email}
           </p>
@@ -119,26 +133,29 @@ function PendingIntentionCard({ intention }: { intention: MassIntention }) {
 
       <div className="flex gap-2">
         {intention.status === 'pending' && (
-          <button
+          <Button
             type="button"
+            size="sm"
             onClick={() => accept(intention.id)}
-            disabled={accepting}
-            className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+            isLoading={accepting}
+            icon={<CheckCircle className="size-3.5" />}
+            className="rounded-lg font-semibold"
           >
-            <CheckCircle className="size-3.5" />
             Accepter
-          </button>
+          </Button>
         )}
-        {(intention.status === 'accepted' || intention.status === 'date_proposed') && (
-          <button
+        {(intention.status === 'accepted' ||
+          intention.status === 'date_proposed') && (
+          <Button
             type="button"
+            size="sm"
             onClick={() => celebrate(intention.id)}
-            disabled={celebrating}
-            className="flex items-center gap-1.5 rounded-lg bg-success px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+            isLoading={celebrating}
+            icon={<CheckCircle className="size-3.5" />}
+            className="rounded-lg bg-success font-semibold text-white shadow-sm hover:bg-success/90"
           >
-            <CheckCircle className="size-3.5" />
             Célébrée
-          </button>
+          </Button>
         )}
         <Link
           href={paths.app.clerge.intentions.getHref()}
@@ -158,9 +175,15 @@ interface PendingIntentionsSectionProps {
   isLoading: boolean;
 }
 
-function PendingIntentionsSection({ intentions, isLoading }: PendingIntentionsSectionProps) {
+function PendingIntentionsSection({
+  intentions,
+  isLoading,
+}: PendingIntentionsSectionProps) {
   const actionable = intentions.filter(
-    (i) => i.status === 'pending' || i.status === 'accepted' || i.status === 'date_proposed',
+    (i) =>
+      i.status === 'pending' ||
+      i.status === 'accepted' ||
+      i.status === 'date_proposed',
   );
   const preview = actionable.slice(0, 3);
 
@@ -219,7 +242,10 @@ interface RecentMessagesSectionProps {
   isLoading: boolean;
 }
 
-function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionProps) {
+function RecentMessagesSection({
+  messages,
+  isLoading,
+}: RecentMessagesSectionProps) {
   const recent = messages.slice(0, 2);
 
   return (
@@ -268,7 +294,9 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
               <span className="size-2 shrink-0 rounded-full bg-info" />
             )}
           </div>
-          <p className="text-xs text-muted-foreground">{message.sender_email}</p>
+          <p className="text-xs text-muted-foreground">
+            {message.sender_email}
+          </p>
         </Link>
       ))}
     </section>
@@ -278,7 +306,8 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
 // ── Main component ───────────────────────────────────────────────────────────
 
 export function PretreeDashboard() {
-  const { data: intentionsData, isLoading: loadingIntentions } = useParishIntentions();
+  const { data: intentionsData, isLoading: loadingIntentions } =
+    useParishIntentions();
   const { data: inboxData, isLoading: loadingMessages } = useClericalInbox();
 
   const intentions = intentionsData?.results ?? [];
@@ -326,8 +355,14 @@ export function PretreeDashboard() {
         </div>
 
         <PastoralReflectionComposer />
-        <PendingIntentionsSection intentions={intentions} isLoading={loadingIntentions} />
-        <RecentMessagesSection messages={messages} isLoading={loadingMessages} />
+        <PendingIntentionsSection
+          intentions={intentions}
+          isLoading={loadingIntentions}
+        />
+        <RecentMessagesSection
+          messages={messages}
+          isLoading={loadingMessages}
+        />
       </div>
     </div>
   );
