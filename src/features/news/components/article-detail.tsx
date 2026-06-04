@@ -54,7 +54,10 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
   const router = useRouter();
   const { data: article, isLoading, isError } = useArticleDetail(articleId);
 
-  useRegisterPageMeta({ title: article?.title ?? 'Article' });
+  useRegisterPageMeta({
+    title: article?.title ?? 'Article',
+    showHeading: false,
+  });
 
   if (isLoading) return <ArticleDetailSkeleton />;
 

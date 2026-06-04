@@ -3,10 +3,18 @@
 import * as React from 'react';
 
 export interface PageMeta {
-  /** Titre de la page (app-bar mobile + dernier crumb par défaut). */
+  /** Titre de la page (app-bar mobile + bloc titre desktop + dernier crumb). */
   title: string;
+  /** Sous-titre optionnel (affiché sous le titre). */
+  subtitle?: string;
   /** Libellé du dernier crumb si différent du titre (routes dynamiques). */
   leafLabel?: string;
+  /**
+   * Affiche le bloc titre prominent dans l'en-tête (défaut true). Les routes
+   * détail qui ont déjà un h1 dans leur contenu passent `false` — seul le fil
+   * d'Ariane est alors rendu sur desktop.
+   */
+  showHeading?: boolean;
 }
 
 const PageMetaStateContext = React.createContext<PageMeta | null>(null);
@@ -42,10 +50,12 @@ export function usePageMetaValue(): PageMeta | null {
 export function useRegisterPageMeta(meta: PageMeta | null): void {
   const setMeta = React.useContext(PageMetaSetContext);
   const title = meta?.title;
+  const subtitle = meta?.subtitle;
   const leafLabel = meta?.leafLabel;
+  const showHeading = meta?.showHeading;
 
   React.useEffect(() => {
-    setMeta(title ? { title, leafLabel } : null);
+    setMeta(title ? { title, subtitle, leafLabel, showHeading } : null);
     return () => setMeta(null);
-  }, [setMeta, title, leafLabel]);
+  }, [setMeta, title, subtitle, leafLabel, showHeading]);
 }

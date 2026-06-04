@@ -3,7 +3,7 @@
 import { HandHeart, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Card } from '@/components/ui/card/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -17,9 +17,10 @@ export default function IntentionsPage() {
   const [showForm, setShowForm] = useState(false);
   const { data, isLoading, isError, refetch } = useMyIntentions();
 
+  useRegisterPageMeta({ title: 'Intentions de Messe' });
+
   return (
     <div className="flex flex-col">
-      <PageHeader title="Intentions de Messe" />
       <div className="mx-auto w-full max-w-2xl space-y-5 px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         <button
           type="button"

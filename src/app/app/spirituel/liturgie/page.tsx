@@ -178,7 +178,7 @@ export default function LiturgiePage() {
   const isLoading =
     loadingInfo || loadingReadings || loadingLaudes || loadingVepres;
 
-  useRegisterPageMeta({ title: 'Liturgie du jour' });
+  useRegisterPageMeta({ title: 'Liturgie du jour', showHeading: false });
 
   return (
     <div className="flex flex-col">

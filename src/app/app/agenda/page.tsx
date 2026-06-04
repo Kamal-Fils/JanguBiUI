@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEvents } from '@/features/agenda/api/get-events';
 import { EventCard } from '@/features/agenda/components/event-card';
@@ -23,13 +23,13 @@ export default function AgendaPage() {
     selectedType ? { event_type: selectedType } : undefined,
   );
 
+  useRegisterPageMeta({
+    title: 'Agenda',
+    subtitle: 'Événements et célébrations de votre paroisse',
+  });
+
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Agenda"
-        subtitle="Événements et célébrations de votre paroisse"
-      />
-
       <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         <div className="mb-6 flex flex-wrap gap-2">
           {EVENT_TYPE_FILTERS.map((filter) => (

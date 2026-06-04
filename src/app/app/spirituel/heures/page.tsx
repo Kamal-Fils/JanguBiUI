@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import type { OfficeKey } from '@/features/spirituel/api/get-office';
 import { OfficeSelector } from '@/features/spirituel/components/liturgie-heures/office-selector';
 import { OfficeView } from '@/features/spirituel/components/liturgie-heures/office-view';
@@ -22,12 +22,13 @@ export default function LiturgieHeuresPage() {
   const [selectedOffice, setSelectedOffice] =
     useState<OfficeKey>(getCurrentOfficeKey);
 
+  useRegisterPageMeta({
+    title: 'Liturgie des Heures',
+    subtitle: 'Les 7 offices de la prière quotidienne',
+  });
+
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Liturgie des Heures"
-        subtitle="Les 7 offices de la prière quotidienne"
-      />
       <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         <div className="mb-6">
           <OfficeSelector

@@ -26,15 +26,35 @@ export function AppHeader() {
 
   const trail = buildBreadcrumbs(pathname, meta.leafLabel ?? meta.title);
   const isDeep = trail.length > 1;
+  const showHeading = meta.showHeading !== false;
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background-surface/90 backdrop-blur-md">
-      {/* Desktop — fil d'Ariane (les actions restent dans la sidebar en 1C-a). */}
-      <div className="hidden items-center gap-3 px-4 py-3 md:flex">
-        <Breadcrumb items={trail} className="flex-1" />
+      {/* Desktop — fil d'Ariane (routes profondes) + bloc titre (sections/listes).
+          Les actions globales restent dans la sidebar jusqu'à la bascule (1C-b
+          dernier lot). */}
+      <div className="hidden px-4 py-3 md:block">
+        {isDeep && (
+          <Breadcrumb
+            items={trail}
+            className={showHeading ? 'mb-2' : undefined}
+          />
+        )}
+        {showHeading && (
+          <div className="min-w-0">
+            <h1 className="truncate font-serif text-xl font-bold tracking-tight text-foreground">
+              {meta.title}
+            </h1>
+            {meta.subtitle && (
+              <p className="truncate text-sm text-muted-foreground">
+                {meta.subtitle}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Mobile — app-bar : retour (routes profondes) + titre + cloche. */}
+      {/* Mobile — app-bar : retour (routes profondes) + titre (+ sous-titre) + cloche. */}
       <div className="flex items-center gap-2 px-3 py-2.5 md:hidden">
         {isDeep && (
           <button
@@ -46,9 +66,16 @@ export function AppHeader() {
             <ArrowLeft className="size-5" />
           </button>
         )}
-        <span className="min-w-0 flex-1 truncate font-serif text-base font-bold tracking-tight text-foreground">
-          {meta.title}
-        </span>
+        <div className="min-w-0 flex-1">
+          <span className="block truncate font-serif text-base font-bold tracking-tight text-foreground">
+            {meta.title}
+          </span>
+          {showHeading && meta.subtitle && (
+            <span className="block truncate text-xs text-muted-foreground">
+              {meta.subtitle}
+            </span>
+          )}
+        </div>
         <NotificationBell className="size-9 shrink-0 justify-center rounded-full p-0" />
       </div>
     </header>
