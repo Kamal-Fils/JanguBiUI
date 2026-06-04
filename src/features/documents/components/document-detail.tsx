@@ -49,7 +49,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
   const { mutate: submitSupplement, isPending: isSubmitting } =
     useSubmitSupplement(documentId);
 
-  useRegisterPageMeta({ title: 'Demande de document' });
+  useRegisterPageMeta({ title: 'Demande de document', showHeading: false });
 
   function handleSupplementSubmit(e: React.FormEvent) {
     e.preventDefault();
