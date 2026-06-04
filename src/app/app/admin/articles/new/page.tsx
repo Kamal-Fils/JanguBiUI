@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { paths } from '@/config/paths';
 import { useCreateArticle } from '@/features/news/api/create-article';
 import {
@@ -26,6 +26,11 @@ export default function NewArticlePage() {
     }
   }, [user, isLoading, router]);
 
+  useRegisterPageMeta({
+    title: 'Nouvel article',
+    subtitle: 'Créer un brouillon — vous pourrez le publier ensuite',
+  });
+
   if (isLoading || !canCreateArticle(user)) return null;
 
   const handleSubmit = (data: ArticleFormValues) => {
@@ -34,10 +39,6 @@ export default function NewArticlePage() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Nouvel article"
-        subtitle="Créer un brouillon — vous pourrez le publier ensuite"
-      />
       <div className="mx-auto w-full max-w-3xl px-4 py-6 md:px-6">
         {createMutation.error && (
           <div className="mb-4 rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">

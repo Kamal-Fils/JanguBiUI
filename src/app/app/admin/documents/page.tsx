@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { useAdminDocuments } from '@/features/documents/api/get-admin-documents';
 import { AdminDocumentList } from '@/features/documents/components/admin-document-list';
 import { DocumentStatus } from '@/features/documents/types';
@@ -35,14 +35,15 @@ export default function AdminDocumentsPage() {
     statusFilter ? { status: statusFilter } : undefined,
   );
 
+  useRegisterPageMeta({
+    title: 'Demandes de documents',
+    subtitle: 'Traiter les demandes de documents ecclésiastiques',
+  });
+
   if (isLoading || !canProcessDocuments(user)) return null;
 
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Demandes de documents"
-        subtitle="Traiter les demandes de documents ecclésiastiques"
-      />
       <div className="mx-auto w-full max-w-4xl px-4 py-6 md:px-6">
         <div className="mb-4 flex flex-wrap gap-2">
           {STATUS_FILTERS.map((f) => (

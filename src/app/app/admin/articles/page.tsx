@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Button } from '@/components/ui/button/button';
 import { paths } from '@/config/paths';
 import { useAdminArticles } from '@/features/news/api/get-admin-articles';
@@ -36,14 +36,15 @@ export default function AdminArticlesPage() {
     statusFilter ? { status: statusFilter } : undefined,
   );
 
+  useRegisterPageMeta({
+    title: 'Gestion des articles',
+    subtitle: 'Créer, modifier et publier des articles',
+  });
+
   if (isLoading || !canCreateArticle(user)) return null;
 
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Gestion des articles"
-        subtitle="Créer, modifier et publier des articles"
-      />
       <div className="mx-auto w-full max-w-5xl px-4 py-6 md:px-6">
         <div className="mb-4 flex items-center justify-between gap-4">
           <div className="flex gap-2">
