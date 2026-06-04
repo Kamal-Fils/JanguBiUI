@@ -23,9 +23,10 @@ const PageMetaSetContext = React.createContext<(meta: PageMeta | null) => void>(
 );
 
 /**
- * Fournit le contexte de métadonnées de page au shell. Les pages « migrées »
- * (qui ne rendent plus `<PageHeader>`) enregistrent leur titre via
- * `useRegisterPageMeta` ; le shell (`AppHeader`) le lit via `usePageMetaValue`.
+ * Fournit le contexte de métadonnées de page au shell. Chaque page enregistre
+ * son titre via `useRegisterPageMeta` ; le shell (`AppHeader`) le lit via
+ * `usePageMetaValue`. Les vues plein écran exemptées (chat, profil…) ne
+ * l'enregistrent pas → `AppHeader` reste masqué pour elles.
  */
 export function PageMetaProvider({ children }: { children: React.ReactNode }) {
   const [meta, setMeta] = React.useState<PageMeta | null>(null);

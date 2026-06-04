@@ -31,9 +31,8 @@ interface AdminPageLayoutProps {
 /**
  * Coquille des pages admin. Le titre/sous-titre sont fournis au shell via
  * `usePageMeta` (en-tête AppHeader : fil d'Ariane + titre). `headerAction` et
- * `toolbar` sont rendus DANS le contenu, en tête (le `PageHeader` partagé n'est
- * plus utilisé). Le shell applicatif (sidebar + bottom-nav) vient de
- * `app/app/layout.tsx`.
+ * `toolbar` sont rendus DANS le contenu, en tête. Le shell applicatif (sidebar
+ * + bottom-nav) vient de `app/app/layout.tsx`.
  */
 export function AdminPageLayout({
   title,
