@@ -3,6 +3,7 @@
 import { ChevronRight, FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { Button } from '@/components/ui/button/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -62,7 +63,7 @@ export function DocumentsList() {
 
   return (
     <div className="relative flex flex-col">
-      <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         {isLoading && <DocumentsSkeleton />}
         {isError && (
           <ErrorState
@@ -120,7 +121,7 @@ export function DocumentsList() {
             ))}
           </div>
         )}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

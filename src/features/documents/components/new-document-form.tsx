@@ -15,6 +15,7 @@ import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import {
   ParishPicker,
   type PickedParish,
@@ -497,7 +498,7 @@ export function NewDocumentForm() {
         Étape {stepIndex + 1} sur {STEPS.length} — {STEP_LABELS[step]}
       </p>
 
-      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
           {/* Step 1 — Type */}
           {step === 'type' && (
@@ -936,7 +937,7 @@ export function NewDocumentForm() {
             </Button>
           )}
         </form>
-      </div>
+      </ContentContainer>
     </div>
   );
 }

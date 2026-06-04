@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import type { CommunityRosary } from '@/features/chapelet/api/get-community-rosaries';
 import { CommunityRosaryList } from '@/features/chapelet/components/community-rosary-list';
@@ -16,7 +17,7 @@ export default function CommunautairePage() {
   return (
     <div className="flex flex-col">
       {joined ? (
-        <div className="mx-auto w-full max-w-2xl space-y-4 px-4 py-6 md:px-6">
+        <ContentContainer width="narrow" className="space-y-4">
           <div className="rounded-xl border border-success/30 bg-success/10 p-4">
             <p className="text-sm font-medium text-success">
               Vous participez au chapelet — décade {joined.current_decade}
@@ -34,11 +35,11 @@ export default function CommunautairePage() {
           >
             Revenir à la liste
           </button>
-        </div>
+        </ContentContainer>
       ) : (
-        <div className="mx-auto w-full max-w-2xl overflow-y-auto px-4 py-6 md:px-6">
+        <ContentContainer width="narrow" className="overflow-y-auto">
           <CommunityRosaryList onJoin={setJoined} />
-        </div>
+        </ContentContainer>
       )}
     </div>
   );

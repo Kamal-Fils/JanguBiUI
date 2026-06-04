@@ -4,6 +4,7 @@ import { Inbox } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card/card';
@@ -46,7 +47,7 @@ export default function ClergeIntentionsPage() {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-2xl space-y-4 px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer className="space-y-4">
         {isLoading && <SkeletonList count={4} />}
 
         {isError && (
@@ -178,7 +179,7 @@ export default function ClergeIntentionsPage() {
               )}
             </Card>
           ))}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

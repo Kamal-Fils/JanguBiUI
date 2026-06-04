@@ -1,8 +1,18 @@
 'use client';
 
-import { BookOpen, Church, Clock, FileText, Inbox, MessageSquare, PlusCircle, Users } from 'lucide-react';
+import {
+  BookOpen,
+  Church,
+  Clock,
+  FileText,
+  Inbox,
+  MessageSquare,
+  PlusCircle,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { DioceseStatsSection } from '@/features/dashboard/components/diocese-stats-section';
@@ -122,11 +132,19 @@ function StatsRow({
 // ── Recent messages section ───────────────────────────────────────────────────
 
 interface RecentMessagesSectionProps {
-  messages: Array<{ id: number; subject: string; sender_email: string; read_at?: string | null }>;
+  messages: Array<{
+    id: number;
+    subject: string;
+    sender_email: string;
+    read_at?: string | null;
+  }>;
   isLoading: boolean;
 }
 
-function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionProps) {
+function RecentMessagesSection({
+  messages,
+  isLoading,
+}: RecentMessagesSectionProps) {
   const recent = messages.slice(0, 3);
 
   return (
@@ -136,14 +154,19 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
           <Inbox className="size-4 text-info" />
           Messages récents
         </h2>
-        <Link href={paths.app.clerge.messages.getHref()} className="text-xs text-primary hover:underline">
+        <Link
+          href={paths.app.clerge.messages.getHref()}
+          className="text-xs text-primary hover:underline"
+        >
           Boîte de réception
         </Link>
       </div>
 
       {isLoading && (
         <div className="flex flex-col gap-2">
-          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-xl" />
+          ))}
         </div>
       )}
 
@@ -163,10 +186,16 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
           )}
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium text-foreground line-clamp-1">{message.subject}</span>
-            {!message.read_at && <span className="size-2 shrink-0 rounded-full bg-info" />}
+            <span className="text-sm font-medium text-foreground line-clamp-1">
+              {message.subject}
+            </span>
+            {!message.read_at && (
+              <span className="size-2 shrink-0 rounded-full bg-info" />
+            )}
           </div>
-          <p className="text-xs text-muted-foreground">{message.sender_email}</p>
+          <p className="text-xs text-muted-foreground">
+            {message.sender_email}
+          </p>
         </Link>
       ))}
     </section>
@@ -176,11 +205,19 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
 // ── Draft articles section ────────────────────────────────────────────────────
 
 interface DraftArticlesSectionProps {
-  articles: Array<{ id: string; title: string; author_name: string; status: string }>;
+  articles: Array<{
+    id: string;
+    title: string;
+    author_name: string;
+    status: string;
+  }>;
   isLoading: boolean;
 }
 
-function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps) {
+function DraftArticlesSection({
+  articles,
+  isLoading,
+}: DraftArticlesSectionProps) {
   const drafts = articles;
 
   return (
@@ -198,7 +235,10 @@ function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps
             <PlusCircle className="size-3" />
             Nouveau
           </Link>
-          <Link href={paths.app.admin.articles.getHref()} className="text-xs text-primary hover:underline">
+          <Link
+            href={paths.app.admin.articles.getHref()}
+            className="text-xs text-primary hover:underline"
+          >
             Tout voir
           </Link>
         </div>
@@ -206,13 +246,17 @@ function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps
 
       {isLoading && (
         <div className="flex flex-col gap-2">
-          {[1, 2].map((i) => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
+          {[1, 2].map((i) => (
+            <Skeleton key={i} className="h-14 w-full rounded-xl" />
+          ))}
         </div>
       )}
 
       {!isLoading && drafts.length === 0 && (
         <div className="rounded-xl border border-dashed border-border p-4 text-center">
-          <p className="text-sm text-muted-foreground">Aucun brouillon en attente.</p>
+          <p className="text-sm text-muted-foreground">
+            Aucun brouillon en attente.
+          </p>
         </div>
       )}
 
@@ -222,7 +266,9 @@ function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps
           href={paths.app.admin.articles.getHref()}
           className="flex flex-col gap-0.5 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-muted"
         >
-          <span className="text-sm font-medium text-foreground line-clamp-1">{article.title}</span>
+          <span className="text-sm font-medium text-foreground line-clamp-1">
+            {article.title}
+          </span>
           <p className="text-xs text-muted-foreground">{article.author_name}</p>
         </Link>
       ))}
@@ -234,7 +280,10 @@ function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps
 
 export function EvequeeDashboard() {
   const { data: inboxData, isLoading: loadingMessages } = useClericalInbox();
-  const { data: draftsData, isLoading: loadingArticles } = useAdminArticles({ status: 'draft', limit: 3 });
+  const { data: draftsData, isLoading: loadingArticles } = useAdminArticles({
+    status: 'draft',
+    limit: 3,
+  });
   const { data: parishes = [], isLoading: loadingParishes } = useParishes();
 
   const messages = inboxData?.results ?? [];
@@ -243,7 +292,7 @@ export function EvequeeDashboard() {
   const draftCount = draftsData?.count ?? 0;
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-6xl lg:px-8">
+    <ContentContainer width="wide">
       <div className="flex flex-col gap-6">
         <WelcomeBanner />
 
@@ -268,18 +317,28 @@ export function EvequeeDashboard() {
                 href={action.href}
                 className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3 shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.97] motion-reduce:transform-none"
               >
-                <div className={cn('flex size-9 items-center justify-center rounded-xl', action.className)}>
+                <div
+                  className={cn(
+                    'flex size-9 items-center justify-center rounded-xl',
+                    action.className,
+                  )}
+                >
                   <Icon className="size-4" />
                 </div>
-                <span className="text-center text-[11px] font-medium text-foreground">{action.label}</span>
+                <span className="text-center text-[11px] font-medium text-foreground">
+                  {action.label}
+                </span>
               </Link>
             );
           })}
         </div>
 
-        <RecentMessagesSection messages={messages} isLoading={loadingMessages} />
+        <RecentMessagesSection
+          messages={messages}
+          isLoading={loadingMessages}
+        />
         <DraftArticlesSection articles={drafts} isLoading={loadingArticles} />
       </div>
-    </div>
+    </ContentContainer>
   );
 }

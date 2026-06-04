@@ -3,6 +3,7 @@
 import { HandHeart, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Card } from '@/components/ui/card/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -21,7 +22,7 @@ export default function IntentionsPage() {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-2xl space-y-5 px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer className="space-y-5">
         <button
           type="button"
           onClick={() => setShowForm((v) => !v)}
@@ -95,7 +96,7 @@ export default function IntentionsPage() {
               )}
             </Card>
           ))}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

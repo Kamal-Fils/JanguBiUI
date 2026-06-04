@@ -3,6 +3,7 @@
 import { ArrowLeft, ArrowRightLeft } from 'lucide-react';
 import Link from 'next/link';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -32,7 +33,7 @@ export default function TransfertPage() {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:px-6">
+      <ContentContainer width="narrow">
         <div className="mb-4">
           <Link
             href={paths.app.profil.getHref()}
@@ -76,7 +77,7 @@ export default function TransfertPage() {
             <TransferRequestForm onSuccess={handleTransferSuccess} />
           </div>
         )}
-      </div>
+      </ContentContainer>
     </div>
   );
 }
