@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { paths } from '@/config/paths';
 import { useUser } from '@/lib/auth';
@@ -65,7 +64,6 @@ export default function ClergePage() {
   }
 
   return (
-    <AppShell>
     <div className="flex flex-col">
       <PageHeader
         title="Espace Clergé"
@@ -116,6 +114,5 @@ export default function ClergePage() {
         </div>
       </div>
     </div>
-    </AppShell>
   );
 }

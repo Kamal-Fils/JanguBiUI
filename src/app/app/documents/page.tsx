@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { paths } from '@/config/paths';
 import { DocumentsList } from '@/features/documents/components/documents-list';
@@ -36,7 +35,7 @@ export default function DocumentsPage() {
   if (isAdmin(user) && !isClergy(user)) return null;
 
   return (
-    <AppShell>
+    <>
       <div className="flex flex-col">
         <PageHeader
           title="Documents"
@@ -81,6 +80,6 @@ export default function DocumentsPage() {
           <Plus className="size-6" />
         </Link>
       )}
-    </AppShell>
+    </>
   );
 }

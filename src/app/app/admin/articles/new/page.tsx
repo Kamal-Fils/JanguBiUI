@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { paths } from '@/config/paths';
 import { useCreateArticle } from '@/features/news/api/create-article';
@@ -34,25 +33,23 @@ export default function NewArticlePage() {
   };
 
   return (
-    <AppShell>
-      <div className="flex flex-col">
-        <PageHeader
-          title="Nouvel article"
-          subtitle="Créer un brouillon — vous pourrez le publier ensuite"
+    <div className="flex flex-col">
+      <PageHeader
+        title="Nouvel article"
+        subtitle="Créer un brouillon — vous pourrez le publier ensuite"
+      />
+      <div className="mx-auto w-full max-w-3xl px-4 py-6 md:px-6">
+        {createMutation.error && (
+          <div className="mb-4 rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            Une erreur est survenue. Vérifiez les informations et réessayez.
+          </div>
+        )}
+        <ArticleForm
+          onSubmit={handleSubmit}
+          isSubmitting={createMutation.isPending}
+          submitLabel="Créer le brouillon"
         />
-        <div className="mx-auto w-full max-w-3xl px-4 py-6 md:px-6">
-          {createMutation.error && (
-            <div className="mb-4 rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              Une erreur est survenue. Vérifiez les informations et réessayez.
-            </div>
-          )}
-          <ArticleForm
-            onSubmit={handleSubmit}
-            isSubmitting={createMutation.isPending}
-            submitLabel="Créer le brouillon"
-          />
-        </div>
       </div>
-    </AppShell>
+    </div>
   );
 }

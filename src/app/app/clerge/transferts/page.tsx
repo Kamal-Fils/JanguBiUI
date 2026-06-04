@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { ErrorState } from '@/components/ui/error-state';
 import { SectionHeader } from '@/components/ui/section-header';
@@ -33,35 +32,33 @@ export default function ClergeTransfertsPage() {
   if (userLoading || !isClergy(user)) return null;
 
   return (
-    <AppShell>
-      <div className="flex flex-col">
-        <PageHeader
-          title="Transferts paroissiaux"
-          subtitle="Gérer les demandes de transfert de votre paroisse"
+    <div className="flex flex-col">
+      <PageHeader
+        title="Transferts paroissiaux"
+        subtitle="Gérer les demandes de transfert de votre paroisse"
+      />
+      <div className="mx-auto w-full max-w-3xl px-4 py-6 md:px-6">
+        <SectionHeader
+          title="Demandes reçues"
+          description={
+            data && data.count > 0
+              ? `${data.count} demande${data.count > 1 ? 's' : ''} au total`
+              : undefined
+          }
         />
-        <div className="mx-auto w-full max-w-3xl px-4 py-6 md:px-6">
-          <SectionHeader
-            title="Demandes reçues"
-            description={
-              data && data.count > 0
-                ? `${data.count} demande${data.count > 1 ? 's' : ''} au total`
-                : undefined
-            }
+        {isError ? (
+          <ErrorState
+            title="Impossible de charger les demandes"
+            description="Une erreur est survenue lors de la récupération des transferts."
+            onRetry={() => refetch()}
           />
-          {isError ? (
-            <ErrorState
-              title="Impossible de charger les demandes"
-              description="Une erreur est survenue lors de la récupération des transferts."
-              onRetry={() => refetch()}
-            />
-          ) : (
-            <AdminTransferList
-              transfers={data?.results ?? []}
-              isLoading={dataLoading}
-            />
-          )}
-        </div>
+        ) : (
+          <AdminTransferList
+            transfers={data?.results ?? []}
+            isLoading={dataLoading}
+          />
+        )}
       </div>
-    </AppShell>
+    </div>
   );
 }
