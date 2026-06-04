@@ -4,11 +4,20 @@ import { ArrowLeft, FileDown, Loader2, Paperclip, Send } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { Spinner } from '@/components/ui/spinner';
+import {
+  StatusTimeline,
+  type TimelineStep,
+} from '@/components/ui/status-timeline';
+
 import { useDocumentRequest } from '../api/get-document';
 import { useSubmitSupplement } from '../api/submit-supplement';
 import { formatDocumentType } from '../utils/format-document-type';
 
-import { DocumentStatusBadge } from './document-status-badge';
+import {
+  DOCUMENT_STATUS_CONFIG,
+  DocumentStatusBadge,
+} from './document-status-badge';
 
 interface DocumentDetailProps {
   documentId: string;
@@ -75,7 +84,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
       <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         {isLoading && (
           <div className="flex justify-center py-12">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            <Spinner />
           </div>
         )}
 
@@ -147,7 +156,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
             {data.status === 'info_requested' && !submittedSupplement && (
               <form
                 onSubmit={handleSupplementSubmit}
-                className="flex flex-col gap-3 rounded-xl border border-orange-500/30 bg-orange-500/5 p-4"
+                className="flex flex-col gap-3 rounded-xl border border-accent/30 bg-accent/5 p-4"
               >
                 <div>
                   <p className="text-sm font-semibold text-foreground">
@@ -181,7 +190,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
             )}
 
             {submittedSupplement && (
-              <div className="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-700 dark:text-green-300">
+              <div className="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
                 Vos informations ont été envoyées à la paroisse.
               </div>
             )}
@@ -230,29 +239,18 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
                 <h2 className="mb-3 text-sm font-semibold text-foreground">
                   Historique
                 </h2>
-                <ol className="flex flex-col gap-3">
-                  {data.status_logs.map((log, idx) => (
-                    <li
-                      key={`${log.to_status}-${idx}`}
-                      className="flex gap-3 rounded-xl border border-border bg-card p-3"
-                    >
-                      <div className="mt-1 size-2 shrink-0 rounded-full bg-primary" />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <DocumentStatusBadge status={log.to_status} />
-                          <span className="text-xs text-muted-foreground">
-                            {formatDateTime(log.created_at)}
-                          </span>
-                        </div>
-                        {log.comment && (
-                          <p className="mt-1.5 text-xs text-muted-foreground">
-                            {log.comment}
-                          </p>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ol>
+                <StatusTimeline
+                  steps={data.status_logs.map((log, idx, arr): TimelineStep => {
+                    const cfg = DOCUMENT_STATUS_CONFIG[log.to_status];
+                    return {
+                      label: cfg.label,
+                      tone: cfg.tone,
+                      state: idx === arr.length - 1 ? 'current' : 'done',
+                      timestamp: formatDateTime(log.created_at),
+                      description: log.comment || undefined,
+                    };
+                  })}
+                />
               </div>
             )}
           </div>

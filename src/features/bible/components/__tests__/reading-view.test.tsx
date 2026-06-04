@@ -68,7 +68,7 @@ describe('ReadingView', () => {
     render(<ReadingView {...defaultProps} />);
 
     await userEvent.click(
-      screen.getByRole('button', { name: /reduire la taille du texte/i }),
+      screen.getByRole('button', { name: /réduire la taille du texte/i }),
     );
 
     expect(screen.getByText('14')).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('ReadingView', () => {
     render(<ReadingView {...defaultProps} />);
 
     const decreaseBtn = screen.getByRole('button', {
-      name: /reduire la taille du texte/i,
+      name: /réduire la taille du texte/i,
     });
 
     // Click multiple times to try to go below 12

@@ -3,8 +3,9 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
 
-import { paths } from '@/config/paths';
+import { Spinner } from '@/components/ui/spinner';
 import { useUser } from '@/lib/auth';
+import { getRoleHomePath } from '@/lib/get-role-home-path';
 
 type LayoutProps = {
   children: ReactNode;
@@ -46,13 +47,25 @@ export const AuthLayout = ({ children }: LayoutProps) => {
   const searchParams = useSearchParams();
   const redirectTo = searchParams?.get('redirectTo');
 
+  // Owner unique de la redirection post-auth : on aligne sur getRoleHomePath
+  // (même destination que LoginPage → plus de course vers app.root).
   useEffect(() => {
     if (user.data) {
       router.replace(
-        `${redirectTo ? `${decodeURIComponent(redirectTo)}` : paths.app.root.getHref()}`,
+        redirectTo ? decodeURIComponent(redirectTo) : getRoleHomePath(user.data),
       );
     }
   }, [user.data, router, redirectTo]);
+
+  // Évite le flash du formulaire pour un utilisateur déjà connecté (ou en cours
+  // de résolution de session).
+  if (user.isLoading || user.data) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen">

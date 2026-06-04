@@ -1,14 +1,19 @@
 'use client';
 
-import { MapPin } from 'lucide-react';
+import { Clock, Eye, Newspaper } from 'lucide-react';
 import { useState } from 'react';
 
 import { PageHeader } from '@/components/layouts/page-header';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+import { MediaCard } from '@/components/ui/media-card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatFrDate } from '@/utils/format-date';
 
 import { useFeedArticles } from '../api/get-articles';
+import type { Article } from '../types';
 
-import { ArticleCard } from './article-card';
+import { ArticleTypeBadge } from './article-type-badge';
 import {
   ALL_SCOPE,
   NewsScopeFilter,
@@ -18,14 +23,14 @@ import {
 
 function ArticlesSkeleton() {
   return (
-    <div className="flex flex-col gap-3">
-      {Array.from({ length: 5 }).map((_, i) => (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="flex gap-3 rounded-xl border border-border bg-card p-3"
+          className="overflow-hidden rounded-xl border border-border bg-card"
         >
-          <Skeleton className="size-20 shrink-0 rounded-lg" />
-          <div className="flex-1 space-y-2">
+          <Skeleton className="aspect-video w-full rounded-none" />
+          <div className="space-y-2 p-4">
             <Skeleton className="h-3 w-1/3" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-3 w-2/3" />
@@ -36,13 +41,19 @@ function ArticlesSkeleton() {
   );
 }
 
-function EmptyState() {
+function articleMeta(article: Article) {
   return (
-    <div className="flex flex-col items-center gap-3 py-16 text-center">
-      <MapPin className="size-10 text-muted-foreground/40" />
-      <p className="text-sm text-muted-foreground">
-        Aucune actualité disponible.
-      </p>
+    <div className="flex items-center gap-3">
+      {article.published_at && (
+        <span className="flex items-center gap-1">
+          <Clock className="size-3" />
+          {formatFrDate(article.published_at, 'short')}
+        </span>
+      )}
+      <span className="flex items-center gap-1">
+        <Eye className="size-3" />
+        {article.views_count}
+      </span>
     </div>
   );
 }
@@ -51,32 +62,82 @@ export function ArticlesFeed() {
   // Fil AGRÉGÉ (Chantier 7b) filtrable par portée : « Tous » = l'agrégat inchangé,
   // sinon le filtre serveur (?scope_type=&scope_id=) restreint à la portée choisie.
   const [scope, setScope] = useState<ScopeFilterValue>(ALL_SCOPE);
-  const { data, isLoading, isError } = useFeedArticles({
+  const { data, isLoading, isError, refetch } = useFeedArticles({
     limit: 20,
     ...scopeFilterToParams(scope),
   });
+
+  const articles = data?.results ?? [];
+  const [featured, ...rest] = articles;
 
   return (
     <div className="flex flex-col">
       <PageHeader title="Actualités" subtitle="La vie de l'Église" />
 
-      <div className="mx-auto w-full max-w-2xl px-4 py-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         <div className="mb-4">
           <NewsScopeFilter value={scope} onChange={setScope} />
         </div>
+
         {isLoading ? (
           <ArticlesSkeleton />
         ) : isError ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">
-            Impossible de charger les actualités.
-          </p>
-        ) : !data?.results.length ? (
-          <EmptyState />
+          <ErrorState
+            title="Impossible de charger les actualités"
+            onRetry={() => refetch()}
+          />
+        ) : !articles.length ? (
+          <EmptyState
+            icon={<Newspaper />}
+            title="Aucune actualité"
+            description="Aucune actualité n'est disponible pour cette portée."
+          />
         ) : (
-          <div className="flex flex-col gap-3">
-            {data.results.map((article) => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
+          <div className="flex flex-col gap-4">
+            {/* Article à la une */}
+            <MediaCard
+              featured
+              href={`/app/actus/${featured.id}`}
+              image={featured.cover_image_url}
+              imageAlt={featured.title}
+              aspect="wide"
+              fallbackIcon={<Newspaper />}
+              overline={
+                <>
+                  <ArticleTypeBadge contentType={featured.content_type} />
+                  {featured.category && (
+                    <span className="text-[11px] font-medium text-muted-foreground">
+                      {featured.category.name}
+                    </span>
+                  )}
+                </>
+              }
+              title={featured.title}
+              excerpt={featured.excerpt ?? undefined}
+              meta={articleMeta(featured)}
+            />
+
+            {/* Reste — grille 2 colonnes en md+ */}
+            {rest.length > 0 && (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {rest.map((article) => (
+                  <MediaCard
+                    key={article.id}
+                    href={`/app/actus/${article.id}`}
+                    image={article.cover_image_url}
+                    imageAlt={article.title}
+                    aspect="video"
+                    fallbackIcon={<Newspaper />}
+                    overline={
+                      <ArticleTypeBadge contentType={article.content_type} />
+                    }
+                    title={article.title}
+                    excerpt={article.excerpt ?? undefined}
+                    meta={articleMeta(article)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

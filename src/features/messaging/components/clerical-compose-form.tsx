@@ -6,12 +6,25 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { useParishes } from '@/features/org/api/get-parishes';
+import { Input } from '@/components/ui/form/input';
+import { Select } from '@/components/ui/form/select';
+import { Textarea } from '@/components/ui/form/textarea';
 import { useUser } from '@/lib/auth';
 import { isEvequeOrAbove } from '@/lib/authorization';
 
 import { usePriests } from '../api/get-priests';
 import { useSendClericalMessage } from '../api/send-clerical-message';
+
+/**
+ * Option de paroisse passée en prop par la couche `app`.
+ * Le fetch des paroisses (`useParishes`) reste dans la page : une feature ne
+ * peut pas importer une autre feature (`org`). La page compose les deux.
+ */
+export interface ParishOption {
+  id: number;
+  name: string;
+  city: string;
+}
 
 const schema = z.object({
   subject: z.string().min(1, 'Sujet requis').max(200),
@@ -37,13 +50,20 @@ const SCOPE_OPTIONS = [
 
 interface ClericalComposeFormProps {
   onSuccess?: () => void;
+  /** Paroisses disponibles pour le scope `parish_clergy` (fournies par la page). */
+  parishes?: ParishOption[];
+  /** Indique si la liste des paroisses est en cours de chargement. */
+  parishesLoading?: boolean;
 }
 
-export function ClericalComposeForm({ onSuccess }: ClericalComposeFormProps) {
+export function ClericalComposeForm({
+  onSuccess,
+  parishes = [],
+  parishesLoading = false,
+}: ClericalComposeFormProps) {
   const { data: user } = useUser();
   const { mutate, isPending } = useSendClericalMessage({ onSuccess });
   const { data: priests = [] } = usePriests();
-  const { data: parishes = [] } = useParishes();
 
   const {
     register,
@@ -73,138 +93,86 @@ export function ClericalComposeForm({ onSuccess }: ClericalComposeFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
-      <div>
-        <label
-          htmlFor="recipient_scope"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Destinataires
-        </label>
-        <select
-          id="recipient_scope"
-          {...register('recipient_scope')}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {availableScopes.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-        {errors.recipient_scope && (
-          <p className="mt-1 text-xs text-red-500">
-            {errors.recipient_scope.message}
-          </p>
-        )}
-      </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <Select
+        label="Destinataires"
+        error={errors.recipient_scope}
+        registration={register('recipient_scope')}
+        options={availableScopes.map((opt) => ({
+          label: opt.label,
+          value: opt.value,
+        }))}
+      />
 
       {scope === 'individual' && (
-        <div>
-          <label
-            htmlFor="individual_recipient_id"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Destinataire
-          </label>
-          <select
-            id="individual_recipient_id"
-            {...register('individual_recipient_id', { valueAsNumber: true })}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">-- Choisir un prêtre --</option>
-            {priests.map((priest) => (
-              <option key={priest.id} value={priest.id}>
-                {priest.full_name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Destinataire"
+          registration={register('individual_recipient_id', {
+            valueAsNumber: true,
+          })}
+          options={[
+            { label: '— Choisir un prêtre —', value: '' },
+            ...priests.map((priest) => ({
+              label: priest.full_name,
+              value: priest.id,
+            })),
+          ]}
+        />
       )}
 
       {scope === 'parish_clergy' && (
-        <div>
-          <label
-            htmlFor="scope_id"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Paroisse
-          </label>
-          <select
-            id="scope_id"
-            {...register('scope_id', { valueAsNumber: true })}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">-- Choisir une paroisse --</option>
-            {parishes.map((parish) => (
-              <option key={parish.id} value={parish.id}>
-                {parish.name} — {parish.city}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label="Paroisse"
+          registration={register('scope_id', { valueAsNumber: true })}
+          options={[
+            {
+              label: parishesLoading
+                ? 'Chargement des paroisses…'
+                : '— Choisir une paroisse —',
+              value: '',
+            },
+            ...parishes.map((parish) => ({
+              label: `${parish.name} — ${parish.city}`,
+              value: parish.id,
+            })),
+          ]}
+        />
       )}
 
       {(scope === 'diocese_clergy' || scope === 'province_bishops') && (
-        <div>
-          <label
-            htmlFor="scope_id"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            {scope === 'diocese_clergy' ? 'ID diocèse' : 'ID province'}
-          </label>
-          <input
-            id="scope_id"
-            type="number"
-            {...register('scope_id', { valueAsNumber: true })}
-            placeholder={
-              scope === 'diocese_clergy' ? 'ID du diocèse' : 'ID de la province'
-            }
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <Input
+          type="number"
+          label={scope === 'diocese_clergy' ? 'ID diocèse' : 'ID province'}
+          placeholder={
+            scope === 'diocese_clergy' ? 'ID du diocèse' : 'ID de la province'
+          }
+          registration={register('scope_id', { valueAsNumber: true })}
+        />
       )}
 
-      <div>
-        <label
-          htmlFor="subject"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Sujet
-        </label>
-        <input
-          id="subject"
-          type="text"
-          {...register('subject')}
-          placeholder="Objet du message"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        {errors.subject && (
-          <p className="mt-1 text-xs text-red-500">{errors.subject.message}</p>
-        )}
-      </div>
+      <Input
+        type="text"
+        label="Sujet"
+        placeholder="Objet du message"
+        error={errors.subject}
+        registration={register('subject')}
+      />
 
-      <div>
-        <label
-          htmlFor="body"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Message
-        </label>
-        <textarea
-          id="body"
-          {...register('body')}
-          rows={6}
-          placeholder="Votre message…"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-        />
-        {errors.body && (
-          <p className="mt-1 text-xs text-red-500">{errors.body.message}</p>
-        )}
-      </div>
+      <Textarea
+        label="Message"
+        rows={6}
+        placeholder="Votre message…"
+        className="resize-none"
+        error={errors.body}
+        registration={register('body')}
+      />
 
-      <Button type="submit" disabled={isPending} className="w-full">
-        <Send className="mr-2 h-4 w-4" />
+      <Button
+        type="submit"
+        isLoading={isPending}
+        icon={<Send className="size-4" />}
+        className="w-full"
+      >
         {isPending ? 'Envoi…' : 'Envoyer'}
       </Button>
     </form>

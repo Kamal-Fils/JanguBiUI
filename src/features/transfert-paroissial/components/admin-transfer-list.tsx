@@ -1,9 +1,10 @@
 'use client';
 
-import { ArrowRight, CheckCircle, MapPin, XCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle, Inbox, MapPin, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
+import { Card } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -12,12 +13,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog/dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useNotifications } from '@/components/ui/notifications';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Spinner } from '@/components/ui/spinner';
+import { SkeletonCard } from '@/components/ui/skeleton';
 
-import { useAcknowledgeTransfer, useApproveTransfer, useRejectTransfer } from '../api/manage-transfer';
-import { TransferRequest, TRANSFER_STATUS_LABELS } from '../types';
+import {
+  useAcknowledgeTransfer,
+  useApproveTransfer,
+  useRejectTransfer,
+} from '../api/manage-transfer';
+import { TransferRequest } from '../types';
+
+import { TransferStatusBadge } from './transfer-status-badge';
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('fr-FR', {
@@ -34,36 +41,36 @@ function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
 
   const { mutate: approve, isPending: approving } = useApproveTransfer();
   const { mutate: reject, isPending: rejecting } = useRejectTransfer();
-  const { mutate: acknowledge, isPending: acknowledging } = useAcknowledgeTransfer();
+  const { mutate: acknowledge, isPending: acknowledging } =
+    useAcknowledgeTransfer();
 
   const canApprove = transfer.status === 'pending';
   const canAcknowledge = transfer.status === 'approved_by_origin';
-  const isTerminal = transfer.status === 'completed' || transfer.status === 'rejected';
+  const isTerminal =
+    transfer.status === 'completed' || transfer.status === 'rejected';
 
   return (
     <>
-      <div className="rounded-xl border border-border bg-card p-4">
+      <Card className="p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-              <MapPin className="size-3" />
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
               <span className="truncate">
                 {transfer.origin_parish_name ?? '—'}
               </span>
-              <ArrowRight className="size-3 shrink-0" />
+              <ArrowRight className="size-3.5 shrink-0" aria-hidden="true" />
               <span className="truncate">
                 {transfer.destination_parish_name ?? '—'}
               </span>
             </div>
-            <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-              {TRANSFER_STATUS_LABELS[transfer.status]}
-            </span>
+            <TransferStatusBadge status={transfer.status} />
             {transfer.reason && (
-              <p className="mt-1.5 text-xs italic text-muted-foreground line-clamp-2">
+              <p className="mt-2 line-clamp-2 text-xs italic text-muted-foreground">
                 « {transfer.reason} »
               </p>
             )}
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1.5 text-xs text-muted-foreground">
               {formatDate(transfer.created_at)}
             </p>
           </div>
@@ -74,23 +81,30 @@ function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
                 <>
                   <Button
                     size="sm"
+                    className="h-9"
+                    isLoading={approving}
+                    icon={<CheckCircle className="size-3.5" />}
                     onClick={() =>
                       approve(transfer.id, {
                         onSuccess: () =>
-                          addNotification({ type: 'success', title: 'Approuvé', message: 'La demande a été approuvée.' }),
+                          addNotification({
+                            type: 'success',
+                            title: 'Approuvé',
+                            message: 'La demande a été approuvée.',
+                          }),
                       })
                     }
                     disabled={approving}
                   >
-                    {approving ? <Spinner className="size-3.5" /> : <CheckCircle className="mr-1.5 size-3.5" />}
                     Approuver
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
+                    className="h-9"
+                    icon={<XCircle className="size-3.5" />}
                     onClick={() => setRejectOpen(true)}
                   >
-                    <XCircle className="mr-1.5 size-3.5" />
                     Refuser
                   </Button>
                 </>
@@ -98,22 +112,28 @@ function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
               {canAcknowledge && (
                 <Button
                   size="sm"
+                  className="h-9"
+                  isLoading={acknowledging}
+                  icon={<CheckCircle className="size-3.5" />}
                   onClick={() =>
                     acknowledge(transfer.id, {
                       onSuccess: () =>
-                        addNotification({ type: 'success', title: 'Accusé réception', message: 'La réception a été enregistrée.' }),
+                        addNotification({
+                          type: 'success',
+                          title: 'Accusé réception',
+                          message: 'La réception a été enregistrée.',
+                        }),
                     })
                   }
                   disabled={acknowledging}
                 >
-                  {acknowledging ? <Spinner className="size-3.5" /> : <CheckCircle className="mr-1.5 size-3.5" />}
                   Accuser réception
                 </Button>
               )}
             </div>
           )}
         </div>
-      </div>
+      </Card>
 
       <Dialog
         open={rejectOpen}
@@ -129,19 +149,30 @@ function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
               Le fidèle recevra une notification avec le motif du refus.
             </DialogDescription>
           </DialogHeader>
-          <textarea
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
-            rows={3}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-            placeholder="Motif du refus (requis)…"
-          />
+          <div className="space-y-2">
+            <label
+              htmlFor="reject-reason-textarea"
+              className="text-sm font-medium text-foreground"
+            >
+              Motif du refus <span className="text-destructive">*</span>
+            </label>
+            <textarea
+              id="reject-reason-textarea"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              rows={3}
+              required
+              className="flex min-h-[60px] w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Expliquez le motif du refus…"
+            />
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejectOpen(false)}>
               Annuler
             </Button>
             <Button
               variant="destructive"
+              isLoading={rejecting}
               disabled={!rejectReason.trim() || rejecting}
               onClick={() =>
                 reject(
@@ -150,13 +181,17 @@ function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
                     onSuccess: () => {
                       setRejectOpen(false);
                       setRejectReason('');
-                      addNotification({ type: 'success', title: 'Refus enregistré', message: 'La demande a été refusée.' });
+                      addNotification({
+                        type: 'success',
+                        title: 'Refus enregistré',
+                        message: 'La demande a été refusée.',
+                      });
                     },
                   },
                 )
               }
             >
-              {rejecting ? <Spinner className="size-4" /> : 'Confirmer le refus'}
+              Confirmer le refus
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -170,15 +205,15 @@ interface AdminTransferListProps {
   isLoading?: boolean;
 }
 
-export function AdminTransferList({ transfers, isLoading }: AdminTransferListProps) {
+export function AdminTransferList({
+  transfers,
+  isLoading,
+}: AdminTransferListProps) {
   if (isLoading) {
     return (
       <div className="space-y-3">
-        {[1, 2].map((i) => (
-          <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-2">
-            <Skeleton className="h-3 w-48" />
-            <Skeleton className="h-3 w-24" />
-          </div>
+        {[1, 2, 3].map((i) => (
+          <SkeletonCard key={i} />
         ))}
       </div>
     );
@@ -186,10 +221,11 @@ export function AdminTransferList({ transfers, isLoading }: AdminTransferListPro
 
   if (transfers.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 py-14 text-center">
-        <CheckCircle className="size-8 text-green-500/60" />
-        <p className="text-sm text-muted-foreground">Aucune demande de transfert.</p>
-      </div>
+      <EmptyState
+        icon={<Inbox aria-hidden="true" />}
+        title="Aucune demande de transfert"
+        description="Les demandes de transfert vers votre paroisse apparaîtront ici."
+      />
     );
   }
 

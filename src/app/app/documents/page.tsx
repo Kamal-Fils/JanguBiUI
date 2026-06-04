@@ -2,17 +2,17 @@
 
 import { Archive, FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
-import { cn } from '@/lib/utils';
+import { paths } from '@/config/paths';
 import { DocumentsList } from '@/features/documents/components/documents-list';
 import { VaultContent } from '@/features/documents/components/vault-content';
-import { paths } from '@/config/paths';
 import { useUser } from '@/lib/auth';
 import { isAdmin, isClergy } from '@/lib/authorization';
+import { cn } from '@/lib/utils';
 
 type Tab = 'requests' | 'vault';
 

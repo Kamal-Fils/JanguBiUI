@@ -8,7 +8,7 @@ export type MDPreviewProps = {
 export const MDPreview = ({ value = '' }: MDPreviewProps) => {
   return (
     <div
-      className="prose prose-slate w-full p-2"
+      className="prose prose-slate w-full max-w-none p-2 dark:prose-invert"
       dangerouslySetInnerHTML={{
         __html: DOMPurify.sanitize(parse(value) as string),
       }}

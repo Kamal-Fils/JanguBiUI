@@ -50,11 +50,11 @@ describe('ReadingsSwiper', () => {
     render(<ReadingsSwiper readings={mockReadings} fontSize={16} />);
 
     expect(
-      screen.getByRole('button', { name: 'Première Lecture' }),
+      screen.getByRole('tab', { name: 'Première Lecture' }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Psaume' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Psaume' })).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Évangile' }),
+      screen.getByRole('tab', { name: 'Évangile' }),
     ).toBeInTheDocument();
   });
 
@@ -113,14 +113,14 @@ describe('ReadingsSwiper', () => {
   test('first tab is active by default', () => {
     render(<ReadingsSwiper readings={mockReadings} fontSize={16} />);
 
-    const firstTab = screen.getByRole('button', { name: 'Première Lecture' });
+    const firstTab = screen.getByRole('tab', { name: 'Première Lecture' });
     expect(firstTab.className).toContain('text-primary');
   });
 
   test('clicking a tab does not throw', async () => {
     render(<ReadingsSwiper readings={mockReadings} fontSize={16} />);
 
-    const psalmeTab = screen.getByRole('button', { name: 'Psaume' });
+    const psalmeTab = screen.getByRole('tab', { name: 'Psaume' });
     await userEvent.click(psalmeTab);
     // scrollTo is not natively supported in jsdom, but the click must not throw
     expect(psalmeTab).toBeInTheDocument();

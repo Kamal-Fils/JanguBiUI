@@ -31,7 +31,7 @@ const scopeLabel: Record<string, string> = {
 
 function ArticleDetailSkeleton() {
   return (
-    <div className="mx-auto max-w-2xl px-4 py-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+    <div className="mx-auto max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
       <Skeleton className="mb-4 h-48 w-full rounded-xl" />
       <Skeleton className="mb-2 h-4 w-1/3" />
       <Skeleton className="mb-3 h-7 w-full" />
@@ -93,6 +93,7 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
               src={article.cover_image_url}
               alt={article.title}
               fill
+              unoptimized
               className="object-cover"
               priority
               sizes="(max-width: 512px) 100vw, 512px"
@@ -134,7 +135,7 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
           </div>
 
           <div
-            className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-p:text-foreground/90 prose-a:text-primary"
+            className="prose prose-sm max-w-reading text-foreground dark:prose-invert prose-headings:text-foreground prose-headings:font-serif prose-p:text-foreground/90 prose-a:text-primary"
             dangerouslySetInnerHTML={{
               __html: DOMPurify.sanitize(article.content),
             }}

@@ -146,9 +146,9 @@ export const Table = <Entry extends BaseEntity>({
 }: TableProps<Entry>) => {
   if (!data?.length) {
     return (
-      <div className="flex h-80 flex-col items-center justify-center bg-white text-gray-500">
+      <div className="flex h-80 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-background-surface/60 text-muted-foreground">
         <ArchiveX className="size-16" />
-        <h4>No Entries Found</h4>
+        <h4 className="text-sm font-medium">Aucun élément</h4>
       </div>
     );
   }

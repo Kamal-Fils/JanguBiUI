@@ -1,10 +1,12 @@
 'use client';
 
+import { HeartHandshake } from 'lucide-react';
 import { useState } from 'react';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useCampaigns } from '@/features/dons/api/get-campaigns';
 import { useMakeDonation } from '@/features/dons/api/make-donation';
 import { useUser } from '@/lib/auth';
@@ -81,15 +83,19 @@ export default function DonsPage() {
     <AppShell>
     <div className="flex flex-col">
       <PageHeader title="Dons & Quêtes" />
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="mx-auto w-full max-w-2xl flex-1 space-y-4 overflow-y-auto p-4 lg:max-w-3xl">
         {isLoading && (
-          <p className="text-sm text-gray-500 text-center py-6">Chargement…</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            Chargement…
+          </p>
         )}
 
         {data && data.results.length === 0 && (
-          <p className="text-sm text-gray-500 text-center py-6">
-            Aucune campagne active.
-          </p>
+          <EmptyState
+            icon={<HeartHandshake />}
+            title="Aucune campagne active"
+            description="Aucune quête ou campagne de don n'est ouverte pour le moment."
+          />
         )}
 
         {data &&
@@ -99,8 +105,8 @@ export default function DonsPage() {
               type="button"
               className={`w-full text-left rounded-lg border p-4 cursor-pointer transition-colors ${
                 selectedCampaignId === campaign.id
-                  ? 'border-blue-400 bg-blue-50'
-                  : 'border-gray-200 hover:border-blue-200'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-primary/40'
               }`}
               onClick={() =>
                 setSelectedCampaignId(
@@ -110,40 +116,40 @@ export default function DonsPage() {
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-800">
+                  <h3 className="text-sm font-medium text-foreground">
                     {campaign.title}
                   </h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {DONATION_TYPE_LABELS[campaign.donation_type] ??
                       campaign.donation_type}
                   </p>
                 </div>
                 {campaign.target_amount && (
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-muted-foreground">
                     Objectif :{' '}
                     {Number(campaign.target_amount).toLocaleString('fr-FR')} XOF
                   </span>
                 )}
               </div>
               {campaign.description && (
-                <p className="mt-2 text-xs text-gray-600 line-clamp-2">
+                <p className="mt-2 text-xs text-muted-foreground line-clamp-2">
                   {campaign.description}
                 </p>
               )}
-              <p className="mt-1 text-xs text-gray-400">
+              <p className="mt-1 text-xs text-muted-foreground">
                 {campaign.total_donations} don(s)
               </p>
             </button>
           ))}
 
-        <div className="rounded-lg border border-gray-200 p-4 space-y-3">
-          <h2 className="text-sm font-semibold text-gray-700">Faire un don</h2>
+        <div className="rounded-lg border border-border p-4 space-y-3">
+          <h2 className="text-sm font-semibold text-foreground">Faire un don</h2>
 
           {memberships.length > 0 && (
             <div>
               <label
                 htmlFor="beneficiary-select"
-                className="block text-xs font-medium text-gray-600 mb-1"
+                className="block text-xs font-medium text-muted-foreground mb-1"
               >
                 Bénéficiaire
               </label>
@@ -151,7 +157,7 @@ export default function DonsPage() {
                 id="beneficiary-select"
                 value={selectedChurchId ?? ''}
                 onChange={(e) => setChurchId(Number(e.target.value))}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full rounded-md border border-input px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {memberships.map((m) => (
                   <option key={m.id} value={m.church.id}>
@@ -166,7 +172,7 @@ export default function DonsPage() {
           <div>
             <label
               htmlFor="amount-input"
-              className="block text-xs font-medium text-gray-600 mb-1"
+              className="block text-xs font-medium text-muted-foreground mb-1"
             >
               Montant (XOF)
             </label>
@@ -177,14 +183,14 @@ export default function DonsPage() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Ex. 5000"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full rounded-md border border-input px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
 
           <div>
             <label
               htmlFor="provider-select"
-              className="block text-xs font-medium text-gray-600 mb-1"
+              className="block text-xs font-medium text-muted-foreground mb-1"
             >
               Méthode de paiement
             </label>
@@ -195,7 +201,7 @@ export default function DonsPage() {
                 setProvider(e.target.value);
                 setPaymentNotice(null);
               }}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full rounded-md border border-input px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {PAYMENT_PROVIDERS.map((p) => (
                 <option key={p.value} value={p.value} disabled={p.online}>
@@ -205,13 +211,13 @@ export default function DonsPage() {
               ))}
             </select>
             {paymentNotice && (
-              <p className="mt-1 text-xs text-amber-600" role="alert">
+              <p className="mt-1 text-xs text-warning" role="alert">
                 {paymentNotice}
               </p>
             )}
           </div>
 
-          <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
             <input
               type="checkbox"
               checked={isAnonymous}
@@ -222,7 +228,7 @@ export default function DonsPage() {
           </label>
 
           {selectedCampaignId && (
-            <p className="text-xs text-blue-600">
+            <p className="text-xs text-primary">
               Campagne sélectionnée :{' '}
               {data?.results.find((c) => c.id === selectedCampaignId)?.title}
             </p>

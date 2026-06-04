@@ -10,10 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-import { useChurches } from '../api/get-churches';
-import { useDioceses } from '../api/get-dioceses';
-import { useParishes } from '../api/get-parishes';
+import { useChurches } from '@/lib/org/get-churches';
+import { useDioceses } from '@/lib/org/get-dioceses';
+import { useParishes } from '@/lib/org/get-parishes';
 
 export interface SelectedChurch {
   churchId: number;

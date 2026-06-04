@@ -27,18 +27,34 @@ const responseSchema = z.object({
   results: z.array(adminUserSchema),
 });
 
-export const getAdminUsers = (
-  role?: string,
-): Promise<z.infer<typeof responseSchema>> =>
-  api
-    .get<unknown>('/v1/users/', { params: role ? { role } : undefined })
-    .then((data) => responseSchema.parse(data));
+export type AdminUsersResponse = z.infer<typeof responseSchema>;
 
-export const getAdminUsersQueryOptions = (role?: string) =>
+export type AdminUsersFilters = {
+  role?: string;
+  limit?: number;
+  offset?: number;
+};
+
+export const getAdminUsers = (
+  filters: AdminUsersFilters = {},
+): Promise<AdminUsersResponse> => {
+  const params: Record<string, string | number> = {};
+  if (filters.role) params.role = filters.role;
+  if (filters.limit !== undefined) params.limit = filters.limit;
+  if (filters.offset !== undefined) params.offset = filters.offset;
+
+  return api
+    .get<unknown>('/v1/users/', {
+      params: Object.keys(params).length ? params : undefined,
+    })
+    .then((data) => responseSchema.parse(data));
+};
+
+export const getAdminUsersQueryOptions = (filters: AdminUsersFilters = {}) =>
   queryOptions({
-    queryKey: ['admin-users', role ?? null],
-    queryFn: () => getAdminUsers(role),
+    queryKey: ['admin-users', filters],
+    queryFn: () => getAdminUsers(filters),
   });
 
-export const useAdminUsers = (role?: string) =>
-  useQuery(getAdminUsersQueryOptions(role));
+export const useAdminUsers = (filters: AdminUsersFilters = {}) =>
+  useQuery(getAdminUsersQueryOptions(filters));

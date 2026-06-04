@@ -76,8 +76,11 @@ export function EventForm({ onSuccess }: EventFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className={labelClass}>Titre *</label>
+        <label htmlFor="evt-title" className={labelClass}>
+          Titre *
+        </label>
         <input
+          id="evt-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className={inputClass}
@@ -87,8 +90,11 @@ export function EventForm({ onSuccess }: EventFormProps) {
       </div>
 
       <div>
-        <label className={labelClass}>Type</label>
+        <label htmlFor="evt-type" className={labelClass}>
+          Type
+        </label>
         <select
+          id="evt-type"
           value={eventType}
           onChange={(e) => setEventType(e.target.value)}
           className={inputClass}
@@ -102,8 +108,11 @@ export function EventForm({ onSuccess }: EventFormProps) {
       </div>
 
       <div>
-        <label className={labelClass}>Description</label>
+        <label htmlFor="evt-description" className={labelClass}>
+          Description
+        </label>
         <textarea
+          id="evt-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
@@ -114,8 +123,11 @@ export function EventForm({ onSuccess }: EventFormProps) {
 
       <div className="flex gap-3">
         <div className="flex-1">
-          <label className={labelClass}>Début *</label>
+          <label htmlFor="evt-start" className={labelClass}>
+            Début *
+          </label>
           <input
+            id="evt-start"
             type="datetime-local"
             value={startAt}
             onChange={(e) => setStartAt(e.target.value)}
@@ -124,11 +136,17 @@ export function EventForm({ onSuccess }: EventFormProps) {
           />
         </div>
         <div className="flex-1">
-          <label className={labelClass}>Fin *</label>
+          <label htmlFor="evt-end" className={labelClass}>
+            Fin *
+          </label>
           <input
+            id="evt-end"
             type="datetime-local"
             value={endAt}
-            onChange={(e) => { setEndAt(e.target.value); setDateError(''); }}
+            onChange={(e) => {
+              setEndAt(e.target.value);
+              setDateError('');
+            }}
             className={inputClass}
             required
           />
@@ -139,8 +157,11 @@ export function EventForm({ onSuccess }: EventFormProps) {
       )}
 
       <div>
-        <label className={labelClass}>Lieu *</label>
+        <label htmlFor="evt-location" className={labelClass}>
+          Lieu *
+        </label>
         <input
+          id="evt-location"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           className={inputClass}
@@ -150,8 +171,11 @@ export function EventForm({ onSuccess }: EventFormProps) {
       </div>
 
       <div>
-        <label className={labelClass}>Participants max (optionnel)</label>
+        <label htmlFor="evt-max" className={labelClass}>
+          Participants max (optionnel)
+        </label>
         <input
+          id="evt-max"
           type="number"
           min="1"
           value={maxParticipants}
@@ -167,7 +191,7 @@ export function EventForm({ onSuccess }: EventFormProps) {
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
       >
         {isPending && <Spinner className="size-4" />}
-        Publier l'événement
+        Publier l&apos;événement
       </button>
     </form>
   );

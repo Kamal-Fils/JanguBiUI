@@ -53,7 +53,7 @@ export const ResetPasswordForm = () => {
         </div>
         <NextLink
           href={paths.auth.forgotPassword.getHref()}
-          className="text-center text-sm font-medium text-blue-600 hover:text-blue-500"
+          className="text-center text-sm font-medium text-primary hover:text-primary/80"
         >
           Demander un nouveau lien
         </NextLink>
@@ -64,7 +64,7 @@ export const ResetPasswordForm = () => {
   if (done) {
     return (
       <div className="flex flex-col items-center gap-4 py-4 text-center">
-        <CheckCircle2 className="size-12 text-green-500" />
+        <CheckCircle2 className="size-12 text-success" />
         <p className="text-sm font-medium text-foreground">
           Mot de passe réinitialisé avec succès
         </p>

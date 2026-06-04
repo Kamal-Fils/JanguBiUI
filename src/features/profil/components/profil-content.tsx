@@ -6,9 +6,9 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { MembershipManager } from '@/components/org/membership-manager';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNotifications } from '@/components/ui/notifications';
-import { MembershipManager } from '@/features/org/components/membership-manager';
 import { useDeleteAccount, useLogout, useUser } from '@/lib/auth';
 import { isFidele } from '@/lib/authorization';
 

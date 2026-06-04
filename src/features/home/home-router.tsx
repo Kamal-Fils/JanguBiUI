@@ -3,8 +3,8 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { DailyMysteryCard } from '@/features/chapelet/components/daily-mystery-card';
 import { paths } from '@/config/paths';
+import { DailyMysteryCard } from '@/features/chapelet/components/daily-mystery-card';
 import { useUser } from '@/lib/auth';
 import { isAdmin, isClergy, isEvequeOrAbove, isFidele } from '@/lib/authorization';
 

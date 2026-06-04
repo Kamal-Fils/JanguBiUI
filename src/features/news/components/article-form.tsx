@@ -2,12 +2,14 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { ParishSelector } from '@/components/org/parish-selector';
 import { Button } from '@/components/ui/button/button';
 import { Spinner } from '@/components/ui/spinner';
 import { paths } from '@/config/paths';
+import { useDioceses } from '@/lib/org/get-dioceses';
 
 import { useCategories } from '../api/get-categories';
 import { ContentType } from '../types';
@@ -53,11 +55,13 @@ export function ArticleForm({
   const router = useRouter();
   const { data: categories = [], isLoading: categoriesLoading } =
     useCategories();
+  const { data: dioceses = [], isLoading: diocesesLoading } = useDioceses();
 
   const {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
@@ -165,15 +169,26 @@ export function ArticleForm({
             htmlFor="form-diocese-id"
             className="block text-sm font-medium text-foreground"
           >
-            ID Diocèse
+            Diocèse <span className="text-destructive">*</span>
           </label>
-          <input
+          <select
             id="form-diocese-id"
-            type="number"
             {...register('scope_diocese_id')}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-            placeholder="ID du diocèse"
-          />
+            disabled={diocesesLoading}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+          >
+            <option value="">Sélectionner un diocèse</option>
+            {dioceses.map((diocese) => (
+              <option key={diocese.id} value={diocese.id}>
+                {diocese.name}
+              </option>
+            ))}
+          </select>
+          {errors.scope_diocese_id && (
+            <p className="text-xs text-destructive">
+              {errors.scope_diocese_id.message}
+            </p>
+          )}
         </div>
       )}
 
@@ -183,15 +198,23 @@ export function ArticleForm({
             htmlFor="form-parish-id"
             className="block text-sm font-medium text-foreground"
           >
-            ID Paroisse
+            Paroisse <span className="text-destructive">*</span>
           </label>
-          <input
-            id="form-parish-id"
-            type="number"
-            {...register('scope_parish_id')}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-            placeholder="ID de la paroisse"
+          <Controller
+            control={control}
+            name="scope_parish_id"
+            render={({ field }) => (
+              <ParishSelector
+                value={field.value ?? null}
+                onChange={(parishId) => field.onChange(parishId)}
+              />
+            )}
           />
+          {errors.scope_parish_id && (
+            <p className="text-xs text-destructive">
+              {errors.scope_parish_id.message}
+            </p>
+          )}
         </div>
       )}
 

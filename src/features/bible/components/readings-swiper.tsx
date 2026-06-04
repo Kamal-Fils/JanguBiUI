@@ -3,7 +3,7 @@
 import DOMPurify from 'isomorphic-dompurify';
 import { useEffect, useRef, useState } from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/cn';
 
 import type { LiturgyReading } from '../api/get-liturgy-today';
 import {
@@ -48,7 +48,9 @@ function ReadingPanel({ reading, fontSize }: ReadingPanelProps) {
   return (
     <div className="px-4 py-6 md:px-6 lg:px-8">
       <header className="mb-5">
-        <h2 className={cn('text-lg font-semibold', accentClass)}>{label}</h2>
+        <h2 className={cn('font-serif text-xl font-bold', accentClass)}>
+          {label}
+        </h2>
         {titre && (
           <p className="mt-1.5 text-sm font-semibold italic text-foreground/90">
             {titre}
@@ -64,7 +66,7 @@ function ReadingPanel({ reading, fontSize }: ReadingPanelProps) {
       {/* Alléluia verse before the gospel (HTML) */}
       {versetEvangile && (
         <div
-          className="mb-5 rounded-xl border border-amber-500/20 bg-amber-50/50 px-4 py-3 dark:bg-amber-900/10 reading-content"
+          className="reading-content mb-5 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3"
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(versetEvangile),
           }}
@@ -83,16 +85,16 @@ function ReadingPanel({ reading, fontSize }: ReadingPanelProps) {
             Refrain
           </p>
           <div
-            className="text-sm font-medium leading-relaxed text-foreground reading-content"
+            className="reading-content text-sm font-medium leading-relaxed text-foreground"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(refrain) }}
           />
         </div>
       )}
 
-      {/* Main text */}
+      {/* Main text — mesure et interligne unifiés (cf. ReadingSurface) */}
       <div
-        className="prose prose-sm dark:prose-invert max-w-none pb-8 prose-p:text-foreground/80 prose-strong:text-foreground reading-content"
-        style={{ fontSize: `${fontSize}px`, lineHeight: 1.85 }}
+        className="reading-content prose prose-slate max-w-reading pb-8 dark:prose-invert prose-p:text-foreground/80 prose-strong:text-foreground"
+        style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}
         dangerouslySetInnerHTML={{
           __html: DOMPurify.sanitize(reading.text ?? ''),
         }}
@@ -111,29 +113,58 @@ export function ReadingsSwiper({ readings, fontSize }: ReadingsSwiperProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
 
+  // Détection du panneau visible via IntersectionObserver (plus de calcul
+  // d'index par frame de scroll, qui luttait contre le geste de l'utilisateur).
   useEffect(() => {
     const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      const idx = Math.round(el.scrollLeft / el.clientWidth);
-      setActiveIndex(idx);
-      const activeTab = tabsRef.current?.children[idx] as
-        | HTMLElement
-        | undefined;
-      activeTab?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center',
-      });
-    };
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
-  }, []);
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const panels = Array.from(
+      el.querySelectorAll<HTMLElement>('[data-panel-index]'),
+    );
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) {
+          const idx = Number((visible.target as HTMLElement).dataset.panelIndex);
+          if (!Number.isNaN(idx)) setActiveIndex(idx);
+        }
+      },
+      { root: el, threshold: [0.5, 0.75] },
+    );
+    panels.forEach((p) => observer.observe(p));
+    return () => observer.disconnect();
+  }, [readings.length]);
+
+  // Garde la pastille active visible dans la barre d'onglets.
+  useEffect(() => {
+    const tab = tabsRef.current?.children[activeIndex] as
+      | HTMLElement
+      | undefined;
+    tab?.scrollIntoView?.({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }, [activeIndex]);
 
   const goTo = (idx: number) => {
+    setActiveIndex(idx);
     const el = scrollRef.current;
     if (!el || typeof el.scrollTo !== 'function') return;
     el.scrollTo({ left: idx * el.clientWidth, behavior: 'smooth' });
+  };
+
+  const onTabKeyDown = (e: React.KeyboardEvent, i: number) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const next =
+      e.key === 'ArrowRight'
+        ? Math.min(readings.length - 1, i + 1)
+        : Math.max(0, i - 1);
+    goTo(next);
+    (tabsRef.current?.children[next] as HTMLElement | undefined)?.focus();
   };
 
   if (readings.length === 0) {
@@ -149,8 +180,9 @@ export function ReadingsSwiper({ readings, fontSize }: ReadingsSwiperProps) {
       {/* Tab bar */}
       <div
         ref={tabsRef}
-        className="sticky top-0 z-10 flex overflow-x-auto border-b border-border bg-background/95 backdrop-blur-md"
-        style={{ scrollbarWidth: 'none' }}
+        role="tablist"
+        aria-label="Lectures du jour"
+        className="scrollbar-none sticky top-0 z-10 flex overflow-x-auto border-b border-border bg-background/95 backdrop-blur-md"
       >
         {readings.map((r, i) => {
           const label = normalizeReadingLabel(r.type ?? '');
@@ -159,7 +191,13 @@ export function ReadingsSwiper({ readings, fontSize }: ReadingsSwiperProps) {
             <button
               key={r.id}
               type="button"
+              role="tab"
+              id={`reading-tab-${i}`}
+              aria-selected={isActive}
+              aria-controls={`reading-panel-${i}`}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => goTo(i)}
+              onKeyDown={(e) => onTabKeyDown(e, i)}
               className={cn(
                 'shrink-0 whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors',
                 isActive
@@ -176,16 +214,19 @@ export function ReadingsSwiper({ readings, fontSize }: ReadingsSwiperProps) {
       {/* Swipeable panels */}
       <div
         ref={scrollRef}
-        className="flex snap-x snap-mandatory overflow-x-scroll"
-        style={
-          {
-            scrollbarWidth: 'none',
-            WebkitOverflowScrolling: 'touch',
-          } as React.CSSProperties
-        }
+        className="scrollbar-none flex snap-x snap-mandatory overflow-x-scroll"
+        style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
       >
-        {readings.map((r) => (
-          <div key={r.id} className="w-full shrink-0 snap-start">
+        {readings.map((r, i) => (
+          <div
+            key={r.id}
+            data-panel-index={i}
+            role="tabpanel"
+            id={`reading-panel-${i}`}
+            aria-labelledby={`reading-tab-${i}`}
+            tabIndex={0}
+            className="w-full shrink-0 snap-start"
+          >
             <ReadingPanel reading={r} fontSize={fontSize} />
           </div>
         ))}

@@ -35,15 +35,15 @@ describe('normalizeReadingLabel', () => {
 
 describe('getReadingAccentClass', () => {
   test('returns violet for Psaume', () => {
-    expect(getReadingAccentClass('Psaume')).toContain('violet');
+    expect(getReadingAccentClass('Psaume')).toContain('accent');
   });
 
   test('returns amber for Évangile', () => {
-    expect(getReadingAccentClass('Évangile')).toContain('amber');
+    expect(getReadingAccentClass('Évangile')).toContain('primary');
   });
 
   test('returns cyan for Deuxième Lecture', () => {
-    expect(getReadingAccentClass('Deuxième Lecture')).toContain('cyan');
+    expect(getReadingAccentClass('Deuxième Lecture')).toContain('info');
   });
 
   test('returns primary fallback for first reading', () => {

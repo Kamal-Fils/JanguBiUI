@@ -1,18 +1,11 @@
 'use client';
 
-import {
-  Search,
-  ChevronRight,
-  Loader2,
-  ArrowLeft,
-  Minus,
-  Plus,
-  Bookmark,
-} from 'lucide-react';
+import { Search, ChevronRight, Loader2, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { FontSizeStepper } from '@/components/ui/font-size-stepper';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBooks, Book } from '@/features/bible/api/get-books';
 import { useInfiniteVerses } from '@/features/bible/api/get-verses';
@@ -28,13 +21,17 @@ function HighlightText({
   highlight: string;
   enabled: boolean;
 }) {
-  if (!enabled || !highlight.trim()) return <span>{text}</span>;
-  const regex = new RegExp(`(${highlight})`, 'gi');
-  const parts = text.split(regex);
+  const term = highlight.trim();
+  if (!enabled || !term) return <span>{text}</span>;
+  // Échapper les métacaractères regex (un terme « ( » ou « * » crashait).
+  const safe = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = text.split(new RegExp(`(${safe})`, 'gi'));
+  const lower = term.toLowerCase();
   return (
     <span>
       {parts.map((part, i) =>
-        regex.test(part) ? (
+        // Comparaison insensible à la casse (pas de regex.test /g stateful).
+        part.toLowerCase() === lower ? (
           <mark
             key={i}
             className="bg-primary/30 text-secondary-foreground font-medium rounded-sm px-1"
@@ -160,40 +157,12 @@ function VerseReadingSection({
           <ArrowLeft className="size-4" />
           Retour
         </Button>
-        <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={() => setFontSize((s) => Math.max(12, s - 2))}
-            aria-label="Reduire la taille du texte"
-          >
-            <Minus className="size-4" />
-          </Button>
-          <span className="min-w-8 text-center text-xs text-muted-foreground">
-            {fontSize}
-          </span>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={() => setFontSize((s) => Math.min(24, s + 2))}
-            aria-label="Augmenter la taille du texte"
-          >
-            <Plus className="size-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            aria-label="Marquer comme favori"
-          >
-            <Bookmark className="size-4" />
-          </Button>
-        </div>
+        <FontSizeStepper
+          value={fontSize}
+          onChange={setFontSize}
+          min={12}
+          max={24}
+        />
       </div>
 
       {/* Chapter content */}
@@ -212,7 +181,7 @@ function VerseReadingSection({
         <div className="flex flex-col gap-5">
           {allVerses.map((verse) => (
             <div key={verse.id} className="flex gap-3 items-start">
-              <span className="text-primary font-bold text-sm shrink-0 min-w-[1.75rem] pt-0.5 tabular-nums select-none">
+              <span className="text-primary font-bold text-sm shrink-0 min-w-7 pt-0.5 tabular-nums select-none">
                 {verse.number}
               </span>
               <span

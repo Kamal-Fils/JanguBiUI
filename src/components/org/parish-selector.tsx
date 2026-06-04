@@ -9,10 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-import { useDioceses } from '../api/get-dioceses';
-import { useParishes } from '../api/get-parishes';
-import { useProvinces } from '../api/get-provinces';
+import { useDioceses } from '@/lib/org/get-dioceses';
+import { useParishes } from '@/lib/org/get-parishes';
+import { useProvinces } from '@/lib/org/get-provinces';
 
 interface ParishSelectorProps {
   value?: number | null;

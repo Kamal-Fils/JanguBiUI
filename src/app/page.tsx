@@ -9,8 +9,10 @@ import { StatsSection } from '@/features/landing/components/stats-section';
 import { TestimonialsSection } from '@/features/landing/components/testimonials-section';
 
 const HomePage = () => {
+  // La landing conserve son identité nocturne (navy + étoiles) quel que soit
+  // le thème de l'app (désormais light-first) : on force le palette dark ici.
   return (
-    <>
+    <div className="dark bg-background text-foreground">
       <LandingNav />
       <main>
         <HeroSection />
@@ -22,7 +24,7 @@ const HomePage = () => {
         <CtaSection />
       </main>
       <LandingFooter />
-    </>
+    </div>
   );
 };
 

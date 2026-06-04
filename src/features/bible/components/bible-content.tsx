@@ -42,7 +42,7 @@ export function BibleContent() {
       />
       <div className="mx-auto w-full max-w-3xl p-4">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="mb-4 w-full overflow-x-auto flex-nowrap justify-start">
+          <TabsList className="mb-4 w-full overflow-x-auto flex-nowrap justify-between">
             <TabsTrigger value="aujourdhui">Aujourd&apos;hui</TabsTrigger>
             <TabsTrigger value="bible">Bible</TabsTrigger>
             <TabsTrigger value="messe">Messe</TabsTrigger>

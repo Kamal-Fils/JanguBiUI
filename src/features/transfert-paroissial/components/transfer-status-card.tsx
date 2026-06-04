@@ -1,31 +1,20 @@
 'use client';
 
-import { CheckCircle, Clock, MapPin, XCircle } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
-import { TransferRequest, TransferStatus, TRANSFER_STATUS_LABELS } from '../types';
+import { Card } from '@/components/ui/card';
+import {
+  StatusTimeline,
+  type TimelineStep,
+} from '@/components/ui/status-timeline';
 
-function getStatusIcon(status: TransferStatus): React.ReactNode {
-  switch (status) {
-    case 'pending':
-      return <Clock className="size-5 text-amber-500" />;
-    case 'approved_by_origin':
-      return <Clock className="size-5 text-blue-500" />;
-    case 'acknowledged_by_destination':
-      return <Clock className="size-5 text-blue-600" />;
-    case 'completed':
-      return <CheckCircle className="size-5 text-green-500" />;
-    case 'rejected':
-      return <XCircle className="size-5 text-destructive" />;
-  }
-}
+import { TransferRequest, TransferStatus } from '../types';
 
-const STATUS_BG: Record<TransferStatus, string> = {
-  pending: 'border-amber-200 bg-amber-50 dark:bg-amber-950/20',
-  approved_by_origin: 'border-blue-200 bg-blue-50 dark:bg-blue-950/20',
-  acknowledged_by_destination: 'border-blue-200 bg-blue-50 dark:bg-blue-950/20',
-  completed: 'border-green-200 bg-green-50 dark:bg-green-950/20',
-  rejected: 'border-destructive/30 bg-destructive/5',
-};
+import {
+  TRANSFER_PROGRESS_ORDER,
+  TRANSFER_STATUS_CONFIG,
+  TransferStatusBadge,
+} from './transfer-status-badge';
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('fr-FR', {
@@ -35,50 +24,111 @@ function formatDate(iso: string) {
   });
 }
 
+/**
+ * Construit les étapes de la timeline à partir du statut courant. Le workflow
+ * est linéaire (pending → approved_by_origin → acknowledged_by_destination →
+ * completed). Un refus remplace la dernière étape par un nœud d'erreur.
+ */
+function buildTimelineSteps(status: TransferStatus): TimelineStep[] {
+  if (status === 'rejected') {
+    const cfg = TRANSFER_STATUS_CONFIG.rejected;
+    return [
+      {
+        label: TRANSFER_STATUS_CONFIG.pending.label,
+        tone: TRANSFER_STATUS_CONFIG.pending.tone,
+        icon: TRANSFER_STATUS_CONFIG.pending.icon,
+        state: 'done',
+      },
+      {
+        label: cfg.label,
+        tone: cfg.tone,
+        icon: cfg.icon,
+        state: 'current',
+      },
+    ];
+  }
+
+  const currentIndex = TRANSFER_PROGRESS_ORDER.indexOf(status);
+  return TRANSFER_PROGRESS_ORDER.map((step, idx): TimelineStep => {
+    const cfg = TRANSFER_STATUS_CONFIG[step];
+    return {
+      label: cfg.label,
+      tone: cfg.tone,
+      icon: idx <= currentIndex ? cfg.icon : undefined,
+      state:
+        idx < currentIndex
+          ? 'done'
+          : idx === currentIndex
+            ? 'current'
+            : 'upcoming',
+    };
+  });
+}
+
 interface TransferStatusCardProps {
   transfer: TransferRequest;
 }
 
 export function TransferStatusCard({ transfer }: TransferStatusCardProps) {
+  const isRejected = transfer.status === 'rejected';
+  const isCompleted = transfer.status === 'completed';
+
   return (
-    <div className={`rounded-xl border p-4 ${STATUS_BG[transfer.status]}`}>
-      <div className="flex items-start gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-background">
-          {getStatusIcon(transfer.status)}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground">
-            {TRANSFER_STATUS_LABELS[transfer.status]}
-          </p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+    <Card variant="elevated" className="p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <TransferStatusBadge status={transfer.status} />
+          <p className="mt-2 text-xs text-muted-foreground">
             Demande soumise le {formatDate(transfer.created_at)}
           </p>
-          {transfer.origin_parish_name && (
-            <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="size-3" />
-              <span>
-                {transfer.origin_parish_name} → {transfer.destination_parish_name ?? '…'}
-              </span>
-            </div>
-          )}
-          {transfer.reason && (
-            <p className="mt-2 text-xs italic text-muted-foreground">
-              « {transfer.reason} »
-            </p>
-          )}
-          {transfer.status === 'rejected' && transfer.rejection_reason && (
-            <p className="mt-2 text-xs text-destructive">
-              Motif : {transfer.rejection_reason}
-            </p>
-          )}
         </div>
       </div>
 
-      {transfer.status === 'completed' && (
-        <p className="mt-3 text-xs font-medium text-green-700 text-center">
-          Votre transfert paroissial est effectif. Bienvenue dans votre nouvelle paroisse !
+      {transfer.origin_parish_name && (
+        <div className="mt-4 flex items-center gap-1.5 text-sm text-foreground">
+          <MapPin className="size-4 shrink-0 text-primary" aria-hidden="true" />
+          <span className="min-w-0">
+            <span className="font-medium">{transfer.origin_parish_name}</span>
+            <span className="mx-1.5 text-muted-foreground" aria-hidden="true">
+              →
+            </span>
+            <span className="font-medium">
+              {transfer.destination_parish_name ?? '…'}
+            </span>
+          </span>
+        </div>
+      )}
+
+      {transfer.reason && (
+        <p className="mt-3 text-sm italic text-muted-foreground">
+          « {transfer.reason} »
         </p>
       )}
-    </div>
+
+      {isRejected && transfer.rejection_reason && (
+        <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-destructive">
+            Motif du refus
+          </p>
+          <p className="mt-1 text-sm text-destructive/90">
+            {transfer.rejection_reason}
+          </p>
+        </div>
+      )}
+
+      <div className="mt-5 border-t border-border pt-5">
+        <p className="mb-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Suivi de la demande
+        </p>
+        <StatusTimeline steps={buildTimelineSteps(transfer.status)} />
+      </div>
+
+      {isCompleted && (
+        <div className="mt-4 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-center text-sm font-medium text-success">
+          Votre transfert paroissial est effectif. Bienvenue dans votre nouvelle
+          paroisse !
+        </div>
+      )}
+    </Card>
   );
 }

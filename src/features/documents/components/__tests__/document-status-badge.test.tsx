@@ -20,27 +20,34 @@ describe('DocumentStatusBadge', () => {
     });
   });
 
-  test('applies blue styling for submitted status', () => {
+  test('applies the info tone for submitted status', () => {
     render(<DocumentStatusBadge status="submitted" />);
     const badge = screen.getByText('Soumis');
-    expect(badge).toHaveClass('text-blue-600');
+    expect(badge).toHaveClass('text-info');
   });
 
-  test('applies green styling for validated status', () => {
+  test('applies the success tone for validated status', () => {
     render(<DocumentStatusBadge status="validated" />);
     const badge = screen.getByText('Validé');
-    expect(badge).toHaveClass('text-green-600');
+    expect(badge).toHaveClass('text-success');
   });
 
-  test('applies orange styling for info_requested status', () => {
+  test('applies the accent tone for info_requested status', () => {
     render(<DocumentStatusBadge status="info_requested" />);
     const badge = screen.getByText('Infos requises');
-    expect(badge).toHaveClass('text-orange-600');
+    expect(badge).toHaveClass('text-accent');
   });
 
-  test('applies destructive styling for rejected status', () => {
+  test('applies the destructive tone for rejected status', () => {
     render(<DocumentStatusBadge status="rejected" />);
     const badge = screen.getByText('Refusé');
     expect(badge).toHaveClass('text-destructive');
+  });
+
+  // La couleur n'est jamais le seul signal de statut (WCAG 1.4.1) : un libellé
+  // ET une icône accompagnent chaque ton.
+  test('renders an icon alongside the label', () => {
+    render(<DocumentStatusBadge status="validated" />);
+    expect(screen.getByText('Validé').querySelector('svg')).toBeInTheDocument();
   });
 });

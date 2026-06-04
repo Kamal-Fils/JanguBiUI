@@ -59,19 +59,25 @@ beforeEach(() => {
   }
   vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 
-  // Mock WebSocket for chat socket tests
-  vi.stubGlobal(
-    'WebSocket',
-    vi.fn(() => ({
-      onmessage: null,
-      onclose: null,
-      onerror: null,
-      onopen: null,
-      close: vi.fn(),
-      send: vi.fn(),
-      readyState: 1,
-    })),
-  );
+  // Mock WebSocket for chat socket tests — a real constructible class so
+  // `new WebSocket(url)` works in the async reconnect path (no unhandled
+  // rejections after teardown).
+  class WebSocketMock {
+    static readonly CONNECTING = 0;
+    static readonly OPEN = 1;
+    static readonly CLOSING = 2;
+    static readonly CLOSED = 3;
+    onmessage: ((event: unknown) => void) | null = null;
+    onclose: ((event: unknown) => void) | null = null;
+    onerror: ((event: unknown) => void) | null = null;
+    onopen: ((event: unknown) => void) | null = null;
+    readyState = WebSocketMock.OPEN;
+    close = vi.fn();
+    send = vi.fn();
+    addEventListener = vi.fn();
+    removeEventListener = vi.fn();
+  }
+  vi.stubGlobal('WebSocket', WebSocketMock);
 
   // Mock scrollIntoView for jsdom (chat-window uses bottomRef.current?.scrollIntoView)
   window.HTMLElement.prototype.scrollIntoView = vi.fn();

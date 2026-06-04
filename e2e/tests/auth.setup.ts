@@ -2,34 +2,26 @@ import { test as setup } from '@playwright/test';
 
 const authFile = 'e2e/.auth/user.json';
 
+// Auth e2e = login d'un utilisateur SEEDÉ déjà onboardé (onboarding_state=completed).
+// On évite le register → onboarding (sélection paroisse obligatoire) qui rendait
+// l'ancien setup fragile (et qui ne menait plus à /app/bible). Login direct via
+// l'UI actuelle → storageState authentifié réel, utilisable par tous les specs.
+//
+// Surchargeable par env si le seed change (cf. `make seed` / seed_demo).
+const EMAIL = process.env.E2E_USER_EMAIL ?? 'aminata.fall@jangubidev.sn';
+const PASSWORD = process.env.E2E_USER_PASSWORD ?? 'Jangu2024!';
+
 setup('authenticate', async ({ page }) => {
-  const email = `test-${Date.now()}@example.com`;
-  const password = 'Password123!';
-  const firstName = 'Jean';
-  const lastName = 'Dupont';
+  await page.goto('/auth/login');
 
-  await page.goto('/auth/register');
-
-  // registration:
-  await page.getByLabel(/prénom/i).fill(firstName);
-  await page.getByLabel(/nom/i).fill(lastName);
-  await page.getByLabel(/adresse email/i).fill(email);
-  await page.getByLabel(/téléphone/i).fill('+221700000000');
-  await page.getByLabel(/mot de passe$/i).fill(password);
-  await page.getByLabel(/confirmer le mot de passe/i).fill(password);
-  await page.getByRole('button', { name: /s'inscrire/i }).click();
-  await page.waitForURL('/app/bible');
-
-  // log out:
-  await page.getByRole('button', { name: /menu utilisateur/i }).click();
-  await page.getByRole('menuitem', { name: /se déconnecter/i }).click();
-  await page.waitForURL('/auth/login');
-
-  // log in:
-  await page.getByLabel(/adresse email/i).fill(email);
-  await page.getByLabel(/mot de passe/i).fill(password);
+  await page.getByLabel(/adresse email/i).fill(EMAIL);
+  await page.getByLabel(/mot de passe/i).fill(PASSWORD);
   await page.getByRole('button', { name: /se connecter/i }).click();
-  await page.waitForURL('/app/bible');
+
+  // Fidèle onboardé → redirige hors de /auth vers l'espace app (getRoleHomePath = /app).
+  await page.waitForURL((url) => url.pathname.startsWith('/app'), {
+    timeout: 15_000,
+  });
 
   await page.context().storageState({ path: authFile });
 });

@@ -1,16 +1,16 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { Button } from '@/components/ui/button/button';
-import { useAddMemberships } from '@/features/org/api/update-parish';
 import {
   ChurchCascadeSelector,
   type SelectedChurch,
-} from '@/features/org/components/church-cascade-selector';
-import { useUser } from '@/lib/auth';
+} from '@/components/org/church-cascade-selector';
+import { Button } from '@/components/ui/button/button';
+import { useLogout, useUser } from '@/lib/auth';
 import { getRoleHomePath } from '@/lib/get-role-home-path';
+import { useAddMemberships } from '@/lib/org/update-parish';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -24,10 +24,19 @@ export default function OnboardingPage() {
     },
   });
 
-  if (user && user.onboarding_state === 'completed') {
-    router.replace(getRoleHomePath(user));
-    return null;
-  }
+  const { mutate: logout } = useLogout({
+    onSuccess: () => router.replace('/auth/login'),
+  });
+
+  // Onboarding déjà terminé → on redirige (effet, pas pendant le render).
+  const completed = user?.onboarding_state === 'completed';
+  useEffect(() => {
+    if (completed && user) {
+      router.replace(getRoleHomePath(user));
+    }
+  }, [completed, user, router]);
+
+  if (completed) return null;
 
   const handleSelectionChange = (
     next: SelectedChurch[],
@@ -87,6 +96,17 @@ export default function OnboardingPage() {
             {isPending ? 'Enregistrement…' : 'Commencer'}
           </Button>
         </div>
+
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Ce n&apos;est pas vous ?{' '}
+          <button
+            type="button"
+            onClick={() => logout()}
+            className="font-medium text-primary hover:text-primary/80"
+          >
+            Se déconnecter
+          </button>
+        </p>
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 'use client';
 
 import { FileText, Wallet } from 'lucide-react';
-import Link from 'next/link';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { StatCard } from '@/components/ui/stat-card';
 
 import { useFideleDashboard } from '../api/get-fidele-dashboard';
 
@@ -16,32 +16,32 @@ export function FideleSummarySection() {
   const { data, isLoading, isError } = useFideleDashboard();
 
   if (isError) return null;
-  if (isLoading) return <Skeleton className="h-20 w-full rounded-xl" />;
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <Skeleton className="h-32 w-full rounded-xl" />
+        <Skeleton className="h-32 w-full rounded-xl" />
+      </div>
+    );
+  }
   if (!data) return null;
 
   return (
-    <section className="grid grid-cols-2 gap-3">
-      <Link
+    <section className="grid grid-cols-2 gap-3 sm:gap-4">
+      <StatCard
+        icon={<FileText />}
+        value={data.documents.in_progress}
+        label="Demandes en cours"
         href="/app/documents"
-        className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted"
-      >
-        <FileText className="size-4 text-amber-600" />
-        <span className="text-2xl font-bold tabular-nums text-amber-600">
-          {data.documents.in_progress}
-        </span>
-        <span className="text-xs text-muted-foreground">Demandes en cours</span>
-      </Link>
-
-      <Link
+        tone="gold"
+      />
+      <StatCard
+        icon={<Wallet />}
+        value={formatXof(data.donations.total)}
+        label="Mes dons"
         href="/app/dons"
-        className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted"
-      >
-        <Wallet className="size-4 text-emerald-600" />
-        <span className="text-2xl font-bold tabular-nums text-emerald-600">
-          {formatXof(data.donations.total)}
-        </span>
-        <span className="text-xs text-muted-foreground">Mes dons</span>
-      </Link>
+        tone="success"
+      />
     </section>
   );
 }

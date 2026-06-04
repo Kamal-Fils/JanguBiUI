@@ -34,7 +34,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   }, [queryClient]);
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <ErrorBoundary FallbackComponent={MainErrorFallback}>
         <QueryClientProvider client={queryClient}>
           {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}
