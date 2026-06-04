@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { useAdminArticleDetail } from '@/features/news/api/get-admin-article';
@@ -33,6 +33,11 @@ export default function EditArticlePage() {
     }
   }, [user, userLoading, router]);
 
+  useRegisterPageMeta({
+    title: "Modifier l'article",
+    subtitle: article?.title ?? 'Chargement…',
+  });
+
   if (userLoading || !canCreateArticle(user)) return null;
 
   const handleSubmit = (data: ArticleFormValues) => {
@@ -41,10 +46,6 @@ export default function EditArticlePage() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Modifier l'article"
-        subtitle={article?.title ?? 'Chargement…'}
-      />
       <div className="mx-auto w-full max-w-3xl px-4 py-6 md:px-6">
         {updateMutation.error && (
           <div className="mb-4 rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
