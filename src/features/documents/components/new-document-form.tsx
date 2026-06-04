@@ -19,6 +19,7 @@ import {
   ParishPicker,
   type PickedParish,
 } from '@/components/org/parish-picker';
+import { Button } from '@/components/ui/button/button';
 import { useUser } from '@/lib/auth';
 
 import { CreateDocumentInput, useCreateDocument } from '../api/create-document';
@@ -661,7 +662,10 @@ export function NewDocumentForm() {
                   Choisissez parmi vos paroisses ou recherchez la paroisse du
                   registre (le diocèse est déduit automatiquement).
                 </p>
-                <ParishPicker value={pickedParish} onChange={handlePickParish} />
+                <ParishPicker
+                  value={pickedParish}
+                  onChange={handlePickParish}
+                />
                 {errors.parish_id && (
                   <p className={errorClass} role="alert">
                     {errors.parish_id.message}
@@ -904,33 +908,29 @@ export function NewDocumentForm() {
 
           {/* Navigation buttons */}
           {step !== 'consent' ? (
-            <button
+            <Button
               type="button"
+              size="lg"
+              fullWidth
               onClick={handleNext}
-              disabled={step === 'attachments' && isUploading}
-              className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              isLoading={step === 'attachments' && isUploading}
+              icon={<ArrowRight className="size-4" />}
+              iconPosition="right"
             >
-              {step === 'attachments' && isUploading ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Téléversement…
-                </>
-              ) : (
-                <>
-                  Continuer
-                  <ArrowRight className="size-4" />
-                </>
-              )}
-            </button>
+              {step === 'attachments' && isUploading
+                ? 'Téléversement…'
+                : 'Continuer'}
+            </Button>
           ) : (
-            <button
+            <Button
               type="submit"
-              disabled={!watchedConsentGiven || isPending}
-              className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              size="lg"
+              fullWidth
+              isLoading={isPending}
+              disabled={!watchedConsentGiven}
             >
-              {isPending && <Loader2 className="size-4 animate-spin" />}
               {isPending ? 'Envoi en cours…' : 'Envoyer la demande'}
-            </button>
+            </Button>
           )}
         </form>
       </div>

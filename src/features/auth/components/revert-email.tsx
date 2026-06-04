@@ -5,6 +5,7 @@ import NextLink from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
+import { Button } from '@/components/ui/button/button';
 import { paths } from '@/config/paths';
 
 import { useRevertEmailChange } from '../api/revert-email';
@@ -73,12 +74,9 @@ export const RevertEmail = () => {
       <p className="text-sm font-medium text-foreground">
         Votre ancienne adresse email a été rétablie avec succès.
       </p>
-      <NextLink
-        href={paths.auth.login.getHref()}
-        className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
-      >
-        Se connecter
-      </NextLink>
+      <Button asChild size="lg">
+        <NextLink href={paths.auth.login.getHref()}>Se connecter</NextLink>
+      </Button>
     </div>
   );
 };

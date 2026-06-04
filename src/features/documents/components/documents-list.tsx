@@ -3,6 +3,7 @@
 import { ChevronRight, FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
 
+import { Button } from '@/components/ui/button/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -75,13 +76,12 @@ export function DocumentsList() {
             title="Aucune demande"
             description="Vos demandes de documents apparaîtront ici."
             action={
-              <Link
-                href="/app/documents/new"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft motion-reduce:transform-none"
-              >
-                <Plus className="size-4" />
-                Nouvelle demande
-              </Link>
+              <Button asChild size="lg">
+                <Link href="/app/documents/new">
+                  <Plus className="size-4" />
+                  Nouvelle demande
+                </Link>
+              </Button>
             }
           />
         )}

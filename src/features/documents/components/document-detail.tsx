@@ -1,9 +1,10 @@
 'use client';
 
-import { FileDown, Loader2, Paperclip, Send } from 'lucide-react';
+import { FileDown, Paperclip, Send } from 'lucide-react';
 import { useState } from 'react';
 
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { Button } from '@/components/ui/button/button';
 import { Spinner } from '@/components/ui/spinner';
 import {
   StatusTimeline,
@@ -161,18 +162,16 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
                   placeholder="Apportez les précisions demandées…"
                   className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
-                <button
+                <Button
                   type="submit"
-                  disabled={!supplement.trim() || isSubmitting}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                  size="lg"
+                  fullWidth
+                  isLoading={isSubmitting}
+                  disabled={!supplement.trim()}
+                  icon={<Send className="size-4" />}
                 >
-                  {isSubmitting ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Send className="size-4" />
-                  )}
                   {isSubmitting ? 'Envoi en cours…' : 'Envoyer le complément'}
-                </button>
+                </Button>
               </form>
             )}
 

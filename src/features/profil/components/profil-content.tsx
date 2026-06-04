@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { ThemeToggle } from '@/components/layouts/theme-toggle';
 import { MembershipManager } from '@/components/org/membership-manager';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button/button';
 import { useNotifications } from '@/components/ui/notifications';
 import { useDeleteAccount, useLogout, useUser } from '@/lib/auth';
 import { isFidele } from '@/lib/authorization';
@@ -258,14 +259,15 @@ export function ProfilContent() {
                 </p>
               )}
             </div>
-            <button
+            <Button
               type="submit"
-              disabled={isUpdating || isProfileSubmitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              size="lg"
+              fullWidth
+              isLoading={isUpdating}
+              disabled={isProfileSubmitting}
             >
-              {isUpdating && <Loader2 className="size-4 animate-spin" />}
               Enregistrer
-            </button>
+            </Button>
           </form>
         </SectionCard>
 
@@ -323,16 +325,14 @@ export function ProfilContent() {
                 </p>
               )}
             </div>
-            <button
+            <Button
               type="submit"
-              disabled={isChangingPassword}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              size="lg"
+              fullWidth
+              isLoading={isChangingPassword}
             >
-              {isChangingPassword && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
               Modifier le mot de passe
-            </button>
+            </Button>
           </form>
         </SectionCard>
 
