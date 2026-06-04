@@ -49,6 +49,16 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
                 Mot de passe oublié ?
               </NextLink>
             </div>
+            {login.isError && (
+              <p
+                role="alert"
+                className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive"
+              >
+                {login.error instanceof Error
+                  ? login.error.message
+                  : 'E-mail ou mot de passe incorrect.'}
+              </p>
+            )}
             <div>
               <Button
                 isLoading={login.isPending}

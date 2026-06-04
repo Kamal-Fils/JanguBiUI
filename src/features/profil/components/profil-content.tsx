@@ -1,15 +1,14 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, LogOut, MapPin, Trash2 } from 'lucide-react';
-import Link from 'next/link';
+import { Loader2, LogOut, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { MembershipManager } from '@/components/org/membership-manager';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNotifications } from '@/components/ui/notifications';
-import { paths } from '@/config/paths';
 import { useDeleteAccount, useLogout, useUser } from '@/lib/auth';
 import { isFidele } from '@/lib/authorization';
 
@@ -332,16 +331,10 @@ export function ProfilContent() {
           </form>
         </SectionCard>
 
-        {/* Transfert paroissial — fidèles uniquement */}
+        {/* Mes églises — gestion des appartenances (Chantier 7b) */}
         {isFidele(user) && (
-          <SectionCard title="Paroisse">
-            <Link
-              href={paths.app.transfert.getHref()}
-              className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-            >
-              <MapPin className="size-4 text-primary" />
-              Demander un transfert paroissial
-            </Link>
+          <SectionCard title="Mes églises">
+            <MembershipManager />
           </SectionCard>
         )}
 

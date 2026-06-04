@@ -1,17 +1,31 @@
 'use client';
 
-import { ArrowLeft, ChevronDown, ChevronUp, Loader2, Send } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowDown,
+  Check,
+  CheckCheck,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  Send,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
 import { useGetMessages } from '../api/get-messages';
 import { useMarkRead } from '../api/mark-read';
-import { useSendMessage } from '../api/send-message';
+import { OPTIMISTIC_ID_PREFIX, useSendMessage } from '../api/send-message';
 import { useChatSocket } from '../hooks/use-chat-socket';
 import type { Message } from '../types';
+
+import { ConnectionBanner } from './connection-banner';
+
+/** Tolérance (px) pour considérer que l'utilisateur est « collé en bas ». */
+const SCROLL_BOTTOM_THRESHOLD = 80;
 
 const LONG_MESSAGE_THRESHOLD = 200;
 const GROUP_TIME_GAP_MS = 3 * 60 * 1000; // 3 minutes
@@ -86,6 +100,47 @@ function getVerticalGap(position: MessagePosition): string {
   return position === 'alone' || position === 'last' ? 'mt-3' : 'mt-0.5';
 }
 
+function isOptimistic(message: Message): boolean {
+  return message.id.startsWith(OPTIMISTIC_ID_PREFIX);
+}
+
+// ── ReadReceipt ───────────────────────────────────────────────────────────────
+
+/**
+ * Indicateur d'accusé de lecture sur les messages sortants.
+ * - en cours d'envoi (optimiste) → simple coche atténuée + libellé masqué
+ * - envoyé non lu → simple coche
+ * - lu → double coche
+ * Le `title`/`aria-label` porte le sens (jamais la couleur/forme seule).
+ */
+function ReadReceipt({ message }: { message: Message }) {
+  if (isOptimistic(message)) {
+    return (
+      <Check
+        className="size-3 opacity-50"
+        aria-label="Envoi en cours"
+        role="img"
+      />
+    );
+  }
+  if (message.read_at) {
+    return (
+      <CheckCheck
+        className="size-3"
+        aria-label="Lu"
+        role="img"
+      />
+    );
+  }
+  return (
+    <Check
+      className="size-3"
+      aria-label="Envoyé"
+      role="img"
+    />
+  );
+}
+
 // ── MessageBubble ─────────────────────────────────────────────────────────────
 
 interface MessageBubbleProps {
@@ -153,7 +208,7 @@ function MessageBubble({
             type="button"
             onClick={onToggleExpand}
             className={cn(
-              'mt-1 flex items-center gap-1 text-[11px] font-medium',
+              'mt-1 flex items-center gap-1 rounded text-[11px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               message.is_mine
                 ? 'text-primary-foreground/70 hover:text-primary-foreground'
                 : 'text-muted-foreground hover:text-foreground',
@@ -173,19 +228,19 @@ function MessageBubble({
           </button>
         )}
 
-        {/* Timestamp — only on last message of group */}
+        {/* Timestamp + accusé de lecture — only on last message of group */}
         {isLast && (
-          <p
-            suppressHydrationWarning
+          <div
             className={cn(
-              'mt-1 text-right text-[10px]',
+              'mt-1 flex items-center justify-end gap-1 text-[10px]',
               message.is_mine
                 ? 'text-primary-foreground/60'
                 : 'text-muted-foreground',
             )}
           >
-            {formatTime(message.created_at)}
-          </p>
+            <span suppressHydrationWarning>{formatTime(message.created_at)}</span>
+            {message.is_mine && <ReadReceipt message={message} />}
+          </div>
         )}
       </div>
     </div>
@@ -201,20 +256,63 @@ export function ChatWindow({
   const router = useRouter();
   const [text, setText] = useState('');
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
+  const [showNewMessagePill, setShowNewMessagePill] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isAtBottomRef = useRef(true);
+  const hasScrolledOnceRef = useRef(false);
 
   const { data, isLoading } = useGetMessages(conversationId);
   const { mutate: send, isPending } = useSendMessage(conversationId);
   const { mutate: markRead } = useMarkRead(conversationId);
-  useChatSocket(conversationId);
+  const { status: socketStatus } = useChatSocket(conversationId);
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior) => {
+    bottomRef.current?.scrollIntoView({ behavior });
+    isAtBottomRef.current = true;
+    setShowNewMessagePill(false);
+  }, []);
+
+  // Suit la position de l'utilisateur : « collé en bas » ou non.
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distanceFromBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight;
+    const atBottom = distanceFromBottom <= SCROLL_BOTTOM_THRESHOLD;
+    isAtBottomRef.current = atBottom;
+    if (atBottom) setShowNewMessagePill(false);
+  }, []);
 
   useEffect(() => {
     markRead();
   }, [conversationId, markRead]);
 
+  const messageCount = data?.results.length ?? 0;
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [data?.results.length]);
+    if (messageCount === 0) return;
+    // Premier rendu : scroll instantané jusqu'en bas.
+    if (!hasScrolledOnceRef.current) {
+      hasScrolledOnceRef.current = true;
+      scrollToBottom('auto');
+      return;
+    }
+    // Nouveaux messages : on reste collé en bas si l'utilisateur y est,
+    // sinon on propose une pastille « Nouveau message ↓ ».
+    if (isAtBottomRef.current) {
+      scrollToBottom('smooth');
+    } else {
+      setShowNewMessagePill(true);
+    }
+  }, [messageCount, scrollToBottom]);
+
+  // Réinitialise l'état de scroll quand on change de conversation.
+  useEffect(() => {
+    hasScrolledOnceRef.current = false;
+    isAtBottomRef.current = true;
+    setShowNewMessagePill(false);
+  }, [conversationId]);
 
   function toggleMessageExpansion(messageId: string) {
     setExpandedMessages((previous) => {
@@ -250,7 +348,7 @@ export function ChatWindow({
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex size-8 items-center justify-center rounded-full hover:bg-muted md:hidden"
+          className="-ml-2 flex size-11 items-center justify-center rounded-full transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:hidden"
           aria-label="Retour"
         >
           <ArrowLeft className="size-5" />
@@ -267,34 +365,59 @@ export function ChatWindow({
         </div>
       </div>
 
+      {/* Bannière d'état temps réel */}
+      <ConnectionBanner status={socketStatus} />
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        {isLoading && (
-          <div className="flex justify-center py-8">
-            <Loader2 className="size-5 animate-spin text-muted-foreground" />
+      <div className="relative flex-1 overflow-hidden">
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          role="log"
+          aria-live="polite"
+          aria-label="Fil de la conversation"
+          aria-relevant="additions"
+          className="h-full overflow-y-auto p-4"
+        >
+          {isLoading && (
+            <div className="flex justify-center py-8">
+              <Loader2 className="size-5 animate-spin text-muted-foreground motion-reduce:animate-none" />
+            </div>
+          )}
+          {!isLoading && !messages.length && (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              Commencez la conversation…
+            </p>
+          )}
+          <div className="flex flex-col">
+            {messages.map((message, index) => {
+              const position = getMessagePosition(messages, index);
+              return (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  position={position}
+                  participantInitials={participantInitials}
+                  isExpanded={expandedMessages.has(message.id)}
+                  onToggleExpand={() => toggleMessageExpansion(message.id)}
+                />
+              );
+            })}
           </div>
-        )}
-        {!isLoading && !messages.length && (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            Commencez la conversation…
-          </p>
-        )}
-        <div className="flex flex-col">
-          {messages.map((message, index) => {
-            const position = getMessagePosition(messages, index);
-            return (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                position={position}
-                participantInitials={participantInitials}
-                isExpanded={expandedMessages.has(message.id)}
-                onToggleExpand={() => toggleMessageExpansion(message.id)}
-              />
-            );
-          })}
+          <div ref={bottomRef} />
         </div>
-        <div ref={bottomRef} />
+
+        {/* Pastille « Nouveau message ↓ » — n'interrompt pas la lecture */}
+        {showNewMessagePill && (
+          <button
+            type="button"
+            onClick={() => scrollToBottom('smooth')}
+            className="absolute bottom-3 left-1/2 flex min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-md transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:scale-100"
+          >
+            Nouveau message
+            <ArrowDown className="size-3.5" aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       {/* Input */}
@@ -312,17 +435,18 @@ export function ChatWindow({
             }
           }}
           placeholder="Votre message…"
+          aria-label="Votre message"
           rows={1}
-          className="max-h-[120px] flex-1 resize-none rounded-2xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="max-h-[120px] min-h-11 flex-1 resize-none rounded-2xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         <button
           type="submit"
           disabled={!text.trim() || isPending}
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm disabled:opacity-40"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-40"
           aria-label="Envoyer"
         >
           {isPending ? (
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
           ) : (
             <Send className="size-4" />
           )}

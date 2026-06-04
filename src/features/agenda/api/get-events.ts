@@ -29,14 +29,14 @@ const eventsResponseSchema = z.object({
 
 type EventsResponse = z.infer<typeof eventsResponseSchema>;
 
+// Le fil agenda est AGRÉGÉ côté back (event_list_for_user, C3b) : plus de filtre de
+// portée « ma paroisse ». Seul le type d'événement reste filtrable.
 type EventsParams = {
-  scope_type?: string;
   event_type?: string;
 };
 
 export const getEvents = (params?: EventsParams): Promise<EventsResponse> => {
   const query = new URLSearchParams();
-  if (params?.scope_type) query.set('scope_type', params.scope_type);
   if (params?.event_type) query.set('event_type', params.event_type);
   const qs = query.toString();
   return api

@@ -75,13 +75,13 @@ const PaginationPrevious = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to previous page"
+    aria-label="Page précédente"
     size="default"
     className={cn('gap-1 pl-2.5', className)}
     {...props}
   >
     <ChevronLeftIcon className="size-4" />
-    <span>Previous</span>
+    <span>Précédent</span>
   </PaginationLink>
 );
 PaginationPrevious.displayName = 'PaginationPrevious';
@@ -91,12 +91,12 @@ const PaginationNext = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to next page"
+    aria-label="Page suivante"
     size="default"
     className={cn('gap-1 pr-2.5', className)}
     {...props}
   >
-    <span>Next</span>
+    <span>Suivant</span>
     <ChevronRightIcon className="size-4" />
   </PaginationLink>
 );
@@ -112,7 +112,7 @@ const PaginationEllipsis = ({
     {...props}
   >
     <DotsHorizontalIcon className="size-4" />
-    <span className="sr-only">More pages</span>
+    <span className="sr-only">Plus de pages</span>
   </span>
 );
 PaginationEllipsis.displayName = 'PaginationEllipsis';
@@ -160,7 +160,7 @@ export const TablePagination = ({
             </PaginationLink>
           </PaginationItem>
         )}
-        <PaginationItem className="rounded-sm bg-gray-200">
+        <PaginationItem className="rounded-sm bg-muted">
           <PaginationLink href={createHref(currentPage)}>
             {currentPage}
           </PaginationLink>

@@ -98,8 +98,8 @@ export function AssistantChat() {
             </h1>
             <p className="text-xs text-muted-foreground">
               {isLoading
-                ? 'En train de repondre...'
-                : 'Bible, Chapelet, Pretres'}
+                ? 'En train de répondre…'
+                : 'Bible, Chapelet, Prêtres'}
             </p>
           </div>
         </div>
@@ -111,7 +111,13 @@ export function AssistantChat() {
           {messages.length === 0 ? (
             <EmptyState onSuggestion={handleSuggestion} />
           ) : (
-            <div className="flex flex-col gap-4 pt-4">
+            <div
+              className="flex flex-col gap-4 pt-4"
+              role="log"
+              aria-live="polite"
+              aria-relevant="additions"
+              aria-label="Conversation avec l'assistant"
+            >
               {messages.map((message) => (
                 <ChatMessage key={message.id} message={message} />
               ))}

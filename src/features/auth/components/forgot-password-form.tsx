@@ -39,7 +39,7 @@ export const ForgotPasswordForm = () => {
   return (
     <div className="flex flex-col gap-4">
       {submitted ? (
-        <div className="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-700 dark:text-green-300">
+        <div className="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
           Si cette adresse est enregistrée, vous recevrez un email sous peu.
         </div>
       ) : (
@@ -80,7 +80,7 @@ export const ForgotPasswordForm = () => {
       <div className="mt-2 text-center text-sm">
         <NextLink
           href={paths.auth.login.getHref()}
-          className="font-medium text-blue-600 hover:text-blue-500"
+          className="font-medium text-primary hover:text-primary/80"
         >
           Retour à la connexion
         </NextLink>

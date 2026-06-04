@@ -1,15 +1,18 @@
 'use client';
 
 import { AlertTriangle, Church, FileText, Users, Wallet } from 'lucide-react';
+import * as React from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { StatCard } from '@/components/ui/stat-card';
 
 import { useMyDioceseDashboard } from '../api/get-diocese-dashboard';
 
 function formatXof(amount: number): string {
   return `${Math.round(amount).toLocaleString('fr-FR')} FCFA`;
 }
+
+type StatTone = 'primary' | 'gold' | 'success' | 'info';
 
 /** Consolidation diocésaine de l'évêque (paroisses, fidèles, dons, alerte qualité). */
 export function DioceseStatsSection() {
@@ -19,21 +22,36 @@ export function DioceseStatsSection() {
   if (isLoading) return <Skeleton className="h-28 w-full rounded-xl" />;
   if (!data) return null;
 
-  const stats: Array<{ label: string; value: string | number; icon: typeof Users; color: string }> = [
-    { label: 'Paroisses', value: data.parishes_count, icon: Church, color: 'text-amber-600' },
+  const stats: Array<{
+    label: string;
+    value: string | number;
+    icon: React.ReactNode;
+    tone: StatTone;
+  }> = [
+    {
+      label: 'Paroisses',
+      value: data.parishes_count,
+      icon: <Church />,
+      tone: 'gold',
+    },
     {
       label: 'Fidèles',
       value: data.total_fideles.toLocaleString('fr-FR'),
-      icon: Users,
-      color: 'text-primary',
+      icon: <Users />,
+      tone: 'primary',
     },
     {
       label: 'Dons',
       value: formatXof(data.donations_total),
-      icon: Wallet,
-      color: 'text-emerald-600',
+      icon: <Wallet />,
+      tone: 'success',
     },
-    { label: 'Documents', value: data.pending_documents, icon: FileText, color: 'text-blue-600' },
+    {
+      label: 'Documents',
+      value: data.pending_documents,
+      icon: <FileText />,
+      tone: 'info',
+    },
   ];
 
   return (
@@ -43,27 +61,22 @@ export function DioceseStatsSection() {
       </h2>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4"
-            >
-              <Icon className={cn('size-4', stat.color)} />
-              <span className={cn('text-2xl font-bold tabular-nums', stat.color)}>
-                {stat.value}
-              </span>
-              <span className="text-xs text-muted-foreground">{stat.label}</span>
-            </div>
-          );
-        })}
+        {stats.map((stat) => (
+          <StatCard
+            key={stat.label}
+            icon={stat.icon}
+            value={stat.value}
+            label={stat.label}
+            tone={stat.tone}
+          />
+        ))}
       </div>
 
       {data.parishes_without_main_church > 0 && (
-        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/50 p-3 text-sm text-amber-800 dark:bg-amber-950/20 dark:text-amber-300">
-          <AlertTriangle className="size-4 flex-shrink-0" />
-          {data.parishes_without_main_church} paroisse(s) sans église principale — à corriger.
+        <div className="flex items-center gap-2 rounded-xl border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
+          <AlertTriangle className="size-4 shrink-0" />
+          {data.parishes_without_main_church} paroisse(s) sans église principale —
+          à corriger.
         </div>
       )}
     </section>

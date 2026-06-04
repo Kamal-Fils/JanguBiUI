@@ -4,7 +4,7 @@ import { http, HttpResponse } from 'msw';
 import { useRouter } from 'next/navigation';
 
 import { env } from '@/config/env';
-import { createDocumentRequest } from '@/testing/data-generators';
+import { createDocumentRequest, createUser } from '@/testing/data-generators';
 import { server } from '@/testing/mocks/server';
 import { renderApp } from '@/testing/test-utils';
 
@@ -22,18 +22,30 @@ vi.mocked(useRouter).mockReturnValue({
   prefetch: vi.fn(),
 } as never);
 
+// Paroisses d'appartenance du fidèle — proposées en tête par le picker (C7c).
+const MEMBERSHIPS = [
+  {
+    id: 1,
+    church: { id: 111, name: 'Église A' },
+    parish: { id: 11, name: 'Saint-Pierre' },
+    diocese: { id: 1, name: 'Diocèse de Dakar' },
+    is_primary: true,
+  },
+];
+
+function mockMe() {
+  server.use(
+    http.get(`${env.API_URL}/v1/auth/me/`, () =>
+      HttpResponse.json(createUser({ memberships: MEMBERSHIPS })),
+    ),
+  );
+}
+
 /**
- * Fills every required field across steps 1–4, skips the optional
- * attachments step 5, so the caller arrives at step 6 (Validation / consent)
- * where the submit button lives.
- *
- * Step 1 – type + reason
- * Step 2 – identity (first name, last name, date of birth, place of birth)
- * Step 3 – sacrament search (parents, parish, diocese, date, location)
- * Step 4 – contact (phone + email)
- * Step 5 – attachments (optional, skipped)
+ * Steps 1–2 : type+motif puis identité. Laisse l'utilisateur sur l'étape 3
+ * (recherche dans les registres / sélection de la paroisse).
  */
-async function navigateToConsent(user: ReturnType<typeof userEvent.setup>) {
+async function navigateToSearch(user: ReturnType<typeof userEvent.setup>) {
   // Step 1 — document type + reason
   await user.click(screen.getByRole('button', { name: 'Certificat de baptême' }));
   await user.click(screen.getByRole('button', { name: 'Usage personnel' }));
@@ -45,12 +57,20 @@ async function navigateToConsent(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/date de naissance/i), '2000-01-01');
   await user.type(screen.getByLabelText(/lieu de naissance/i), 'Dakar');
   await user.click(screen.getByRole('button', { name: /continuer/i }));
+}
 
-  // Step 3 — sacrament search
+/**
+ * Remplit toutes les étapes requises 1–4 et saute l'étape 5 (pièces jointes,
+ * optionnelle) pour arriver à l'étape 6 (Validation / consentement). La paroisse
+ * du registre est choisie via le picker (raccourci appartenance).
+ */
+async function navigateToConsent(user: ReturnType<typeof userEvent.setup>) {
+  await navigateToSearch(user);
+
+  // Step 3 — sacrament search (parents + paroisse via picker)
   await user.type(screen.getByLabelText(/nom du père/i), 'Dupont');
   await user.type(screen.getByLabelText(/nom de la mère/i), 'Martin');
-  await user.type(screen.getByLabelText(/paroisse du sacrement/i), 'Saint-Pierre');
-  await user.type(screen.getByLabelText(/diocèse/i), 'Dakar');
+  await user.click(await screen.findByRole('button', { name: /Saint-Pierre/ }));
   await user.type(screen.getByLabelText(/date approx/i), '2000');
   await user.type(screen.getByLabelText(/^lieu/i), 'Dakar');
   await user.click(screen.getByRole('button', { name: /continuer/i }));
@@ -68,6 +88,7 @@ describe('NewDocumentForm', () => {
   beforeEach(() => {
     mockRouterPush.mockReset();
     mockRouterBack.mockReset();
+    mockMe();
   });
 
   test('renders all document type selection cards on step 1', () => {
@@ -115,6 +136,57 @@ describe('NewDocumentForm', () => {
     });
   });
 
+  test('le picker propose les paroisses d’appartenance en tête (plus de saisie libre)', async () => {
+    const user = userEvent.setup();
+    renderApp(<NewDocumentForm />);
+    await navigateToSearch(user);
+
+    // Raccourci "Mes paroisses" présent…
+    expect(await screen.findByText('Mes paroisses')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Saint-Pierre/ }),
+    ).toBeInTheDocument();
+    // …et plus aucun champ texte libre "Diocèse".
+    expect(
+      screen.queryByPlaceholderText(/Diocèse de Dakar/),
+    ).not.toBeInTheDocument();
+  });
+
+  test('permet la recherche libre d’une autre paroisse du registre', async () => {
+    server.use(
+      http.get(`${env.API_URL}/v1/org/parishes/`, () =>
+        HttpResponse.json({
+          results: [
+            {
+              id: 99,
+              name: 'Cathédrale',
+              city: 'Kaolack',
+              address: '',
+              diocese: 9,
+              diocese_name: 'Diocèse de Kaolack',
+            },
+          ],
+        }),
+      ),
+    );
+
+    const user = userEvent.setup();
+    renderApp(<NewDocumentForm />);
+    await navigateToSearch(user);
+
+    await user.type(
+      screen.getByLabelText(/rechercher une paroisse/i),
+      'Cath',
+    );
+    await user.click(await screen.findByRole('button', { name: /Cathédrale/ }));
+
+    // État sélectionné : paroisse affichée + bouton "Changer".
+    expect(screen.getByText('Cathédrale')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /changer/i }),
+    ).toBeInTheDocument();
+  });
+
   test('"Envoyer la demande" appears on the final step and is disabled before consent', async () => {
     const user = userEvent.setup();
     renderApp(<NewDocumentForm />);
@@ -137,14 +209,15 @@ describe('NewDocumentForm', () => {
     ).toBeEnabled();
   });
 
-  test('sends POST with document_type value (not label) to /v1/documents/requests/', async () => {
-    const capturedBodies: unknown[] = [];
+  test('envoie UNIQUEMENT parish_id (FK), sans texte libre parish_name/diocese', async () => {
+    const capturedBodies: Array<Record<string, unknown>> = [];
     server.use(
       http.post(
         `${env.API_URL}/v1/documents/requests/`,
         async ({ request }) => {
-          const body = await request.json();
-          capturedBodies.push(body);
+          capturedBodies.push(
+            (await request.json()) as Record<string, unknown>,
+          );
           return HttpResponse.json(
             createDocumentRequest({ document_type: 'baptism', status: 'submitted' }),
             { status: 201 },
@@ -165,7 +238,11 @@ describe('NewDocumentForm', () => {
     expect(capturedBodies[0]).toMatchObject({
       document_type: 'baptism',
       consent_given: true,
+      parish_id: 11,
     });
+    // B5c : plus de texte libre parish_name/diocese dans le payload (FK seule).
+    expect(capturedBodies[0]).not.toHaveProperty('parish_name');
+    expect(capturedBodies[0]).not.toHaveProperty('diocese');
   });
 
   test('redirects to /app/documents after successful submission', async () => {

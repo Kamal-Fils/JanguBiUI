@@ -33,7 +33,7 @@ export function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden pt-20 text-center dark:bg-[linear-gradient(160deg,#07101A_0%,#0D1C2B_60%,#122236_100%)] "
+      className="relative flex min-h-dvh items-center justify-center overflow-hidden pt-20 text-center dark:bg-[linear-gradient(160deg,#07101A_0%,#0D1C2B_60%,#122236_100%)] "
     >
       <StarField />
 

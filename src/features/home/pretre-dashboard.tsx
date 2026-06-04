@@ -5,8 +5,7 @@ import Link from 'next/link';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
-import type { ClergicalMessage } from '@/features/messaging/api/get-clerical-inbox';
-import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
+import { ParishStatsSection } from '@/features/dashboard/components/parish-stats-section';
 import type { MassIntention } from '@/features/intentions/api/get-my-intentions';
 import { useParishIntentions } from '@/features/intentions/api/get-parish-intentions';
 import {
@@ -14,10 +13,11 @@ import {
   useCelebrateIntention,
 } from '@/features/intentions/api/manage-intentions';
 import { IntentionStatusBadge } from '@/features/intentions/components/intention-status-badge';
-import { cn } from '@/lib/utils';
-
+import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
+import type { ClergicalMessage } from '@/features/messaging/api/get-clerical-inbox';
 import { PastoralReflectionComposer } from '@/features/reflexion-pastorale/components/pastoral-reflection-composer';
-import { ParishStatsSection } from '@/features/dashboard/components/parish-stats-section';
+import { cn } from '@/utils/cn';
+
 
 import { WelcomeBanner } from './welcome-banner';
 
@@ -28,19 +28,19 @@ const QUICK_ACTIONS = [
     label: 'Intentions',
     href: paths.app.clerge.intentions.getHref(),
     icon: ScrollText,
-    className: 'bg-amber-500/10 text-amber-600',
+    className: 'bg-accent/15 text-accent',
   },
   {
     label: 'Messages',
     href: paths.app.clerge.messages.getHref(),
     icon: MessageSquare,
-    className: 'bg-blue-500/10 text-blue-600',
+    className: 'bg-info/10 text-info',
   },
   {
     label: 'Liturgie',
     href: paths.app.spirituelHeures.getHref(),
     icon: Clock,
-    className: 'bg-orange-500/10 text-orange-500',
+    className: 'bg-warning/10 text-warning',
   },
   {
     label: 'Spirituel',
@@ -66,14 +66,14 @@ function StatsRow({ pendingCount, unreadCount, loadingIntentions, loadingMessage
       value: pendingCount,
       isLoading: loadingIntentions,
       href: paths.app.clerge.intentions.getHref(),
-      color: 'text-amber-600',
+      color: 'text-accent',
     },
     {
       label: 'Non lus',
       value: unreadCount,
       isLoading: loadingMessages,
       href: paths.app.clerge.messages.getHref(),
-      color: 'text-blue-600',
+      color: 'text-info',
     },
   ] as const;
 
@@ -83,7 +83,7 @@ function StatsRow({ pendingCount, unreadCount, loadingIntentions, loadingMessage
         <Link
           key={stat.href}
           href={stat.href}
-          className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted"
+          className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4 shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft motion-reduce:transform-none"
         >
           {stat.isLoading ? (
             <Skeleton className="h-8 w-12" />
@@ -134,7 +134,7 @@ function PendingIntentionCard({ intention }: { intention: MassIntention }) {
             type="button"
             onClick={() => celebrate(intention.id)}
             disabled={celebrating}
-            className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-lg bg-success px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
           >
             <CheckCircle className="size-3.5" />
             Célébrée
@@ -168,7 +168,7 @@ function PendingIntentionsSection({ intentions, isLoading }: PendingIntentionsSe
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <ScrollText className="size-4 text-amber-500" />
+          <ScrollText className="size-4 text-accent" />
           Intentions à traiter
         </h2>
         <Link
@@ -189,7 +189,7 @@ function PendingIntentionsSection({ intentions, isLoading }: PendingIntentionsSe
 
       {!isLoading && preview.length === 0 && (
         <div className="rounded-xl border border-dashed border-border p-6 text-center">
-          <CheckCircle className="mx-auto mb-2 size-6 text-green-500/60" />
+          <CheckCircle className="mx-auto mb-2 size-6 text-success/60" />
           <p className="text-sm text-muted-foreground">
             Aucune intention en attente.
           </p>
@@ -226,7 +226,7 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Inbox className="size-4 text-blue-500" />
+          <Inbox className="size-4 text-info" />
           Messages récents
         </h2>
         <Link
@@ -257,7 +257,7 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
           href={paths.app.clerge.messages.getHref()}
           className={cn(
             'flex flex-col gap-0.5 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-muted',
-            !message.read_at && 'border-blue-200 bg-blue-50/30 dark:bg-blue-950/20',
+            !message.read_at && 'border-info/30 bg-info/5',
           )}
         >
           <div className="flex items-center justify-between gap-2">
@@ -265,7 +265,7 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
               {message.subject}
             </span>
             {!message.read_at && (
-              <span className="size-2 flex-shrink-0 rounded-full bg-blue-500" />
+              <span className="size-2 shrink-0 rounded-full bg-info" />
             )}
           </div>
           <p className="text-xs text-muted-foreground">{message.sender_email}</p>
@@ -287,7 +287,7 @@ export function PretreeDashboard() {
   const unreadCount = messages.filter((m) => !m.read_at).length;
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-6xl lg:px-8">
       <div className="flex flex-col gap-6">
         <WelcomeBanner />
 
@@ -307,7 +307,7 @@ export function PretreeDashboard() {
               <Link
                 key={action.href}
                 href={action.href}
-                className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-muted active:scale-[0.97]"
+                className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3 shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.97] motion-reduce:transform-none"
               >
                 <div
                   className={cn(

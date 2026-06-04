@@ -6,7 +6,7 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
 import { Link } from '@/components/ui/link/link';
-import { buildNavItems } from '@/config/nav-config';
+import { buildNavItems, isNavActive } from '@/config/nav-config';
 import { useLogout, useUser } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { useMessagingStore } from '@/stores/messaging-store';
@@ -57,9 +57,9 @@ function ThemeToggle({ className }: { className?: string }) {
     >
       {mounted ? (
         isDark ? (
-          <Sun className="size-5 shrink-0 text-yellow-500" />
+          <Sun className="size-5 shrink-0 text-warning" />
         ) : (
-          <Moon className="size-5 shrink-0 text-blue-500" />
+          <Moon className="size-5 shrink-0 text-info" />
         )
       ) : (
         <span className="size-5 shrink-0" aria-hidden="true" />
@@ -97,10 +97,7 @@ function DesktopSidebar({ messageBadge }: { messageBadge?: number }) {
       {/* Nav items */}
       <nav className="flex flex-1 flex-col gap-0.5 py-4 px-2">
         {navItems.map((item) => {
-          const isActive =
-            item.href === '/app' || item.href === '/app/admin'
-              ? pathname === item.href
-              : pathname.startsWith(item.href);
+          const isActive = isNavActive(pathname, item.href);
           const Icon = item.icon;
           const badge =
             item.label === 'Messages' && messageBadge && messageBadge > 0
@@ -111,11 +108,12 @@ function DesktopSidebar({ messageBadge }: { messageBadge?: number }) {
             <Link
               key={item.href}
               href={item.href}
+              title={item.label}
               className={cn(
                 'relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all',
                 'lg:justify-start justify-center',
                 isActive
-                  ? 'bg-primary/12 text-primary shadow-sm'
+                  ? 'bg-primary/12 text-primary shadow-soft-sm'
                   : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground',
               )}
               aria-current={isActive ? 'page' : undefined}
@@ -170,8 +168,8 @@ export function AppShell({ children, hideNav }: AppShellProps) {
         </div>
         {/* Notification bell — mobile only, fixed top-right */}
         {!hideNav && (
-          <div className="fixed right-3 top-3 z-40 md:hidden">
-            <NotificationBell className="size-10 rounded-full border border-border bg-background/90 shadow-sm backdrop-blur-sm px-0 py-0 justify-center" />
+          <div className="fixed right-3 top-3 z-50 md:hidden">
+            <NotificationBell className="size-10 rounded-full border border-border bg-background/90 shadow-sm backdrop-blur-sm p-0 justify-center" />
           </div>
         )}
       </div>

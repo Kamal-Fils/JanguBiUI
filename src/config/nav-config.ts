@@ -97,6 +97,15 @@ export const buildNavItems = (user: UserType | null | undefined): NavItem[] => {
   ];
 };
 
+/**
+ * Logique d'activation d'un lien de nav (partagée par la sidebar et la
+ * bottom-nav). Accueil/Admin = exact, le reste = préfixe.
+ */
+export const isNavActive = (pathname: string, href: string): boolean => {
+  if (href === '/app' || href === '/app/admin') return pathname === href;
+  return pathname.startsWith(href);
+};
+
 export const buildBottomNavItems = (
   user: UserType | null | undefined,
 ): NavItem[] => {
@@ -121,7 +130,7 @@ export const buildBottomNavItems = (
     ];
   }
 
-  // Fidèle — Spirituel + Documents dans la bottom nav, Agenda/Transfert via sidebar
+  // Fidèle — Spirituel + Documents dans la bottom nav, le reste via « Plus »
   return [
     ITEM_ACCUEIL,
     ITEM_ACTUS,
@@ -130,4 +139,16 @@ export const buildBottomNavItems = (
     ITEM_MESSAGES,
     ITEM_PROFIL,
   ];
+};
+
+/**
+ * Items présents dans la sidebar mais PAS dans la bottom-nav → exposés via une
+ * entrée « Plus » sur mobile pour éviter les routes orphelines (fidèle :
+ * Dons, Agenda, Transfert).
+ */
+export const buildOverflowNavItems = (
+  user: UserType | null | undefined,
+): NavItem[] => {
+  const bottomHrefs = new Set(buildBottomNavItems(user).map((i) => i.href));
+  return buildNavItems(user).filter((i) => !bottomHrefs.has(i.href));
 };

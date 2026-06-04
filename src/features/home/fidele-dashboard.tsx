@@ -1,12 +1,11 @@
 'use client';
 
-import { BookOpen, MessageCircle, Phone, ScrollText } from 'lucide-react';
+import { BookOpen, MessageCircle, ScrollText } from 'lucide-react';
 import Link from 'next/link';
 
-import { cn } from '@/lib/utils';
-
-import { PastoralReflectionWidget } from '@/features/reflexion-pastorale/components/pastoral-reflection-widget';
 import { FideleSummarySection } from '@/features/dashboard/components/fidele-summary-section';
+import { PastoralReflectionWidget } from '@/features/reflexion-pastorale/components/pastoral-reflection-widget';
+import { cn } from '@/utils/cn';
 
 import { MyIntentionsSection } from './my-intentions-section';
 import { ParishEventsSection } from './parish-events-section';
@@ -21,40 +20,34 @@ const QUICK_ACTIONS = [
     className: 'bg-primary/10 text-primary',
   },
   {
-    label: 'Allo-Prêtre',
-    href: '/app/allo-pretre',
-    icon: Phone,
-    className: 'bg-green-500/10 text-green-600',
-  },
-  {
     label: 'Intentions',
     href: '/app/intentions',
     icon: ScrollText,
-    className: 'bg-amber-500/10 text-amber-600',
+    className: 'bg-accent/15 text-accent',
   },
-  {
-    label: 'Assistant',
-    href: '/app/assistant',
-    icon: MessageCircle,
-    className: 'bg-purple-500/10 text-purple-600',
-  },
+  //{
+  //  label: 'Assistant',
+  //  href: '/app/assistant',
+  //  icon: MessageCircle,
+  //  className: 'bg-info/10 text-info',
+  //},
 ] as const;
 
 export function FideleDashboard() {
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-6xl lg:px-8">
       <div className="flex flex-col gap-6">
         <WelcomeBanner />
 
         {/* Quick actions */}
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {QUICK_ACTIONS.map((action) => {
             const Icon = action.icon;
             return (
               <Link
                 key={action.href}
                 href={action.href}
-                className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-muted active:scale-[0.97]"
+                className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3 shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.97] motion-reduce:transform-none"
               >
                 <div
                   className={cn(
@@ -72,11 +65,20 @@ export function FideleDashboard() {
           })}
         </div>
 
+        {/* Résumé (stats) — pleine largeur */}
         <FideleSummarySection />
-        <PastoralReflectionWidget />
-        <ParishNewsSection />
-        <ParishEventsSection />
-        <MyIntentionsSection />
+
+        {/* Bento : contenu principal (2/3) + colonne latérale (1/3) en desktop */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="flex flex-col gap-6 lg:col-span-2">
+            <ParishNewsSection />
+            <ParishEventsSection />
+          </div>
+          <div className="flex flex-col gap-6">
+            <PastoralReflectionWidget />
+            <MyIntentionsSection />
+          </div>
+        </div>
       </div>
     </div>
   );

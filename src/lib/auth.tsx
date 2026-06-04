@@ -63,6 +63,19 @@ export interface UserProfile {
   avatar?: string | null;
 }
 
+export interface OrgRef {
+  id: number;
+  name: string;
+}
+
+export interface Membership {
+  id: number;
+  church: OrgRef;
+  parish: OrgRef;
+  diocese: OrgRef;
+  is_primary: boolean;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -75,6 +88,11 @@ export interface User {
   is_admin: boolean;
   is_staff: boolean;
   profile: UserProfile;
+  // Multi-appartenance (Chantier 7b) — exposées par /me (singuliers conservés).
+  memberships?: Membership[];
+  church_ids?: number[];
+  parish_ids?: number[];
+  diocese_ids?: number[];
 }
 
 export interface AuthResponse {

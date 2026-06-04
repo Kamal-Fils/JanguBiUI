@@ -12,27 +12,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog/dialog';
+import { RoleBadge } from '@/components/ui/role-badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 
 import { PendingClergyAccount } from '../api/get-pending-clergy';
 import { useApproveClergy, useRejectClergyAccount } from '../api/validate-clergy-account';
-
-const ROLE_LABELS: Record<string, string> = {
-  pretre: 'Prêtre',
-  diacre: 'Diacre',
-  eveque: 'Évêque',
-  archeveque: 'Archevêque',
-  religieux: 'Religieux',
-};
-
-const ROLE_COLORS: Record<string, string> = {
-  pretre: 'bg-purple-100 text-purple-700',
-  diacre: 'bg-violet-100 text-violet-700',
-  eveque: 'bg-indigo-100 text-indigo-700',
-  archeveque: 'bg-blue-100 text-blue-700',
-  religieux: 'bg-teal-100 text-teal-700',
-};
 
 function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -54,11 +39,7 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
               <span className="font-semibold text-foreground truncate">
                 {fullName}
               </span>
-              <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${ROLE_COLORS[account.pastoral_role] ?? 'bg-gray-100 text-gray-600'}`}
-              >
-                {ROLE_LABELS[account.pastoral_role] ?? account.pastoral_role}
-              </span>
+              <RoleBadge role={account.pastoral_role} />
             </div>
             <p className="text-xs text-muted-foreground">{account.email}</p>
             {account.diocese_name && (
@@ -106,7 +87,11 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
               Un email de notification sera envoyé à {account.email}.
             </DialogDescription>
           </DialogHeader>
+          <label htmlFor="reject-reason" className="sr-only">
+            Motif du refus
+          </label>
           <textarea
+            id="reject-reason"
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
             rows={3}
@@ -167,8 +152,8 @@ export function PendingClergyList({ accounts, totalCount, isLoading }: PendingCl
   if (totalCount === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-14 text-center">
-        <div className="flex size-12 items-center justify-center rounded-full bg-green-500/10">
-          <CheckCircle className="size-6 text-green-500" />
+        <div className="flex size-12 items-center justify-center rounded-full bg-success/10">
+          <CheckCircle className="size-6 text-success" />
         </div>
         <p className="text-sm font-medium text-foreground">
           Aucun compte en attente

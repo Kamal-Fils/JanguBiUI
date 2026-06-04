@@ -48,8 +48,8 @@ describe('TodayTab', () => {
     renderApp(<TodayTab />);
 
     // ReadingsSwiper renders tab buttons with normalized labels
-    await screen.findByRole('button', { name: 'Première Lecture' });
-    expect(screen.getByRole('button', { name: 'Évangile' })).toBeInTheDocument();
+    await screen.findByRole('tab', { name: 'Première Lecture' });
+    expect(screen.getByRole('tab', { name: 'Évangile' })).toBeInTheDocument();
     expect(screen.getByText('Is 55, 10-11')).toBeInTheDocument();
     expect(screen.getByText('Mt 6, 7-15')).toBeInTheDocument();
   });
@@ -98,8 +98,8 @@ describe('TodayTab', () => {
     renderApp(<TodayTab />);
 
     // ReadingsSwiper renders tab buttons with normalized labels
-    await screen.findByRole('button', { name: 'Première Lecture' });
-    expect(screen.getByRole('button', { name: 'Évangile' })).toBeInTheDocument();
+    await screen.findByRole('tab', { name: 'Première Lecture' });
+    expect(screen.getByRole('tab', { name: 'Évangile' })).toBeInTheDocument();
     // Citations are rendered in the panels (all panels are in the DOM)
     expect(screen.getByText('Is 6, 1-8')).toBeInTheDocument();
     expect(screen.getByText('Lc 5, 1-11')).toBeInTheDocument();
@@ -118,7 +118,7 @@ describe('TodayTab', () => {
     renderApp(<TodayTab />);
 
     // Wait for swiper tabs to appear then click the second one
-    const psaumeTab = await screen.findByRole('button', { name: 'Psaume' });
+    const psaumeTab = await screen.findByRole('tab', { name: 'Psaume' });
     await userEvent.click(psaumeTab);
     // scrollTo is not supported in jsdom but the click must not throw
     expect(psaumeTab).toBeInTheDocument();

@@ -1,9 +1,10 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Calendar, Minus, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
+import { FontSizeStepper } from '@/components/ui/font-size-stepper';
 import { useLiturgyToday } from '@/features/bible/api/get-liturgy-today';
 import { DailyMysteryCard } from '@/features/chapelet/components/daily-mystery-card';
 
@@ -74,28 +75,13 @@ export function TodayTab() {
 
       {/* Font size controls */}
       {!isLoading && readings.length > 0 && (
-        <div className="flex items-center justify-end gap-1 px-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7"
-            onClick={() => setFontSize((s) => Math.max(12, s - 2))}
-            aria-label="Réduire la taille du texte"
-          >
-            <Minus className="size-3.5" />
-          </Button>
-          <span className="min-w-6 text-center text-xs text-muted-foreground">
-            {fontSize}
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7"
-            onClick={() => setFontSize((s) => Math.min(24, s + 2))}
-            aria-label="Augmenter la taille du texte"
-          >
-            <Plus className="size-3.5" />
-          </Button>
+        <div className="flex items-center justify-end px-1">
+          <FontSizeStepper
+            value={fontSize}
+            onChange={setFontSize}
+            min={12}
+            max={24}
+          />
         </div>
       )}
 

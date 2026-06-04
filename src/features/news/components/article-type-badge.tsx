@@ -1,24 +1,13 @@
-import { Badge } from '@/components/ui/badge/badge';
-import { cn } from '@/utils/cn';
+import { Pill } from '@/components/ui/pill';
 
 import { ContentType } from '../types';
 
-const CONTENT_TYPE_CONFIG: Record<
-  ContentType,
-  { label: string; className: string }
-> = {
-  announcement: {
-    label: 'Annonce',
-    className: 'bg-blue-100 text-blue-800 border-blue-200',
-  },
-  article: {
-    label: 'Article',
-    className: 'bg-gray-100 text-gray-800 border-gray-200',
-  },
-  pastoral_letter: {
-    label: 'Lettre Pastorale',
-    className: 'bg-purple-100 text-purple-800 border-purple-200',
-  },
+type Tone = 'primary' | 'gold' | 'muted';
+
+const CONTENT_TYPE_CONFIG: Record<ContentType, { label: string; tone: Tone }> = {
+  announcement: { label: 'Annonce', tone: 'primary' },
+  article: { label: 'Article', tone: 'muted' },
+  pastoral_letter: { label: 'Lettre Pastorale', tone: 'gold' },
 };
 
 interface ArticleTypeBadgeProps {
@@ -33,14 +22,11 @@ export function ArticleTypeBadge({
   const config =
     contentType && contentType in CONTENT_TYPE_CONFIG
       ? CONTENT_TYPE_CONFIG[contentType as ContentType]
-      : { label: contentType ?? 'Article', className: '' };
+      : { label: contentType ?? 'Article', tone: 'muted' as Tone };
 
   return (
-    <Badge
-      variant="outline"
-      className={cn('text-[10px] font-medium', config.className, className)}
-    >
+    <Pill tone={config.tone} className={className}>
       {config.label}
-    </Badge>
+    </Pill>
   );
 }

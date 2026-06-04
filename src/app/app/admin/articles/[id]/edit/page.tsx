@@ -65,6 +65,14 @@ export default function EditArticlePage() {
             <div className="py-20 text-center text-sm text-muted-foreground">
               Article introuvable.
             </div>
+          ) : article.scope_type === 'church' ? (
+            // Le formulaire admin gère global/diocèse/paroisse. La portée « église »
+            // (Chantier 3a) n'est pas éditable ici — on l'exclut explicitement
+            // (narrow le type scope_type pour ArticleForm, et évite toute corruption).
+            <div className="py-20 text-center text-sm text-muted-foreground">
+              Les articles de portée « église » ne sont pas éditables depuis cette
+              interface.
+            </div>
           ) : (
             <ArticleForm
               defaultValues={{

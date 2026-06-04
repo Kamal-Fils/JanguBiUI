@@ -69,7 +69,7 @@ export function AcceptInvitationContent({
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 text-center shadow-sm">
-          <CheckCircle className="mx-auto mb-4 size-12 text-green-500" />
+          <CheckCircle className="mx-auto mb-4 size-12 text-success" />
           <h1 className="text-xl font-bold text-foreground">
             Invitation acceptée !
           </h1>

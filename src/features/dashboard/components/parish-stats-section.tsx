@@ -1,15 +1,18 @@
 'use client';
 
 import { FileText, ScrollText, Users, Wallet } from 'lucide-react';
+import * as React from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { StatCard } from '@/components/ui/stat-card';
 
 import { useMyParishDashboard } from '../api/get-parish-dashboard';
 
 function formatXof(amount: number): string {
   return `${Math.round(amount).toLocaleString('fr-FR')} FCFA`;
 }
+
+type StatTone = 'primary' | 'gold' | 'success' | 'info';
 
 /**
  * Synthèse paroissiale du curé : total de fidèles + flux de dons + files d'attente.
@@ -22,30 +25,35 @@ export function ParishStatsSection() {
   if (isLoading) return <Skeleton className="h-28 w-full rounded-xl" />;
   if (!data) return null;
 
-  const stats: Array<{ label: string; value: string | number; icon: typeof Users; color: string }> = [
+  const stats: Array<{
+    label: string;
+    value: string | number;
+    icon: React.ReactNode;
+    tone: StatTone;
+  }> = [
     {
       label: 'Fidèles',
       value: data.total_fideles.toLocaleString('fr-FR'),
-      icon: Users,
-      color: 'text-primary',
+      icon: <Users />,
+      tone: 'primary',
     },
     {
       label: 'Dons (année)',
       value: formatXof(data.donation_flow_year.total),
-      icon: Wallet,
-      color: 'text-emerald-600',
+      icon: <Wallet />,
+      tone: 'success',
     },
     {
       label: 'Documents',
       value: data.pending_documents,
-      icon: FileText,
-      color: 'text-amber-600',
+      icon: <FileText />,
+      tone: 'gold',
     },
     {
       label: 'Intentions',
       value: data.pending_intentions,
-      icon: ScrollText,
-      color: 'text-blue-600',
+      icon: <ScrollText />,
+      tone: 'info',
     },
   ];
 
@@ -56,25 +64,19 @@ export function ParishStatsSection() {
       </h2>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4"
-            >
-              <Icon className={cn('size-4', stat.color)} />
-              <span className={cn('text-2xl font-bold tabular-nums', stat.color)}>
-                {stat.value}
-              </span>
-              <span className="text-xs text-muted-foreground">{stat.label}</span>
-            </div>
-          );
-        })}
+        {stats.map((stat) => (
+          <StatCard
+            key={stat.label}
+            icon={stat.icon}
+            value={stat.value}
+            label={stat.label}
+            tone={stat.tone}
+          />
+        ))}
       </div>
 
       {data.donation_flow_year.by_type.length > 0 && (
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-soft-sm">
           <h3 className="mb-2 text-xs font-semibold text-muted-foreground">
             Flux de dons par type (année)
           </h3>
@@ -85,7 +87,9 @@ export function ParishStatsSection() {
                 className="flex items-center justify-between text-sm"
               >
                 <span className="text-foreground">{row.donation_type}</span>
-                <span className="font-medium tabular-nums">{formatXof(row.total)}</span>
+                <span className="font-medium tabular-nums">
+                  {formatXof(row.total)}
+                </span>
               </li>
             ))}
           </ul>

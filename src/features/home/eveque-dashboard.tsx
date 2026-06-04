@@ -5,11 +5,11 @@ import Link from 'next/link';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
-import { useAdminArticles } from '@/features/news/api/get-admin-articles';
-import { useParishes } from '@/features/org/api/get-parishes';
-import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
 import { DioceseStatsSection } from '@/features/dashboard/components/diocese-stats-section';
-import { cn } from '@/lib/utils';
+import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
+import { useAdminArticles } from '@/features/news/api/get-admin-articles';
+import { useParishes } from '@/lib/org/get-parishes';
+import { cn } from '@/utils/cn';
 
 import { WelcomeBanner } from './welcome-banner';
 
@@ -20,31 +20,31 @@ const QUICK_ACTIONS = [
     label: 'Messages',
     href: paths.app.clerge.messages.getHref(),
     icon: MessageSquare,
-    className: 'bg-blue-500/10 text-blue-600',
+    className: 'bg-info/10 text-info',
   },
   {
     label: 'Articles',
     href: paths.app.admin.articles.getHref(),
     icon: FileText,
-    className: 'bg-emerald-500/10 text-emerald-600',
+    className: 'bg-success/10 text-success',
   },
   {
     label: 'Inviter',
     href: paths.app.admin.users.invite.getHref(),
     icon: Users,
-    className: 'bg-violet-500/10 text-violet-600',
+    className: 'bg-primary/10 text-primary',
   },
   {
     label: 'Liturgie',
     href: paths.app.spirituelHeures.getHref(),
     icon: Clock,
-    className: 'bg-orange-500/10 text-orange-500',
+    className: 'bg-warning/10 text-warning',
   },
   {
     label: 'Paroisses',
     href: paths.app.admin.org.getHref(),
     icon: Church,
-    className: 'bg-amber-500/10 text-amber-600',
+    className: 'bg-accent/15 text-accent',
   },
   {
     label: 'Spirituel',
@@ -79,21 +79,21 @@ function StatsRow({
       value: parishCount,
       isLoading: loadingParishes,
       href: paths.app.admin.org.getHref(),
-      color: 'text-amber-600',
+      color: 'text-accent',
     },
     {
       label: 'Non lus',
       value: unreadCount,
       isLoading: loadingMessages,
       href: paths.app.clerge.messages.getHref(),
-      color: 'text-blue-600',
+      color: 'text-info',
     },
     {
       label: 'Brouillons',
       value: draftCount,
       isLoading: loadingArticles,
       href: paths.app.admin.articles.getHref(),
-      color: 'text-emerald-600',
+      color: 'text-success',
     },
   ] as const;
 
@@ -103,7 +103,7 @@ function StatsRow({
         <Link
           key={stat.href}
           href={stat.href}
-          className="flex flex-col gap-1 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-muted"
+          className="flex flex-col gap-1 rounded-xl border border-border bg-card p-3 shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft motion-reduce:transform-none"
         >
           {stat.isLoading ? (
             <Skeleton className="h-7 w-10" />
@@ -133,7 +133,7 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Inbox className="size-4 text-blue-500" />
+          <Inbox className="size-4 text-info" />
           Messages récents
         </h2>
         <Link href={paths.app.clerge.messages.getHref()} className="text-xs text-primary hover:underline">
@@ -159,12 +159,12 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
           href={paths.app.clerge.messages.getHref()}
           className={cn(
             'flex flex-col gap-0.5 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-muted',
-            !message.read_at && 'border-blue-200 bg-blue-50/30 dark:bg-blue-950/20',
+            !message.read_at && 'border-info/30 bg-info/5',
           )}
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm font-medium text-foreground line-clamp-1">{message.subject}</span>
-            {!message.read_at && <span className="size-2 flex-shrink-0 rounded-full bg-blue-500" />}
+            {!message.read_at && <span className="size-2 shrink-0 rounded-full bg-info" />}
           </div>
           <p className="text-xs text-muted-foreground">{message.sender_email}</p>
         </Link>
@@ -187,7 +187,7 @@ function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <FileText className="size-4 text-emerald-500" />
+          <FileText className="size-4 text-success" />
           Articles à publier
         </h2>
         <div className="flex items-center gap-3">
@@ -243,7 +243,7 @@ export function EvequeeDashboard() {
   const draftCount = draftsData?.count ?? 0;
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-6xl lg:px-8">
       <div className="flex flex-col gap-6">
         <WelcomeBanner />
 
@@ -266,7 +266,7 @@ export function EvequeeDashboard() {
               <Link
                 key={action.href}
                 href={action.href}
-                className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-muted active:scale-[0.97]"
+                className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3 shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.97] motion-reduce:transform-none"
               >
                 <div className={cn('flex size-9 items-center justify-center rounded-xl', action.className)}>
                   <Icon className="size-4" />

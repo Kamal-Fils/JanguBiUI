@@ -1,20 +1,22 @@
 'use client';
 
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRightLeft } from 'lucide-react';
 import Link from 'next/link';
 
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { useNotifications } from '@/components/ui/notifications';
-import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonCard } from '@/components/ui/skeleton';
+import { paths } from '@/config/paths';
 import { useMyTransfer } from '@/features/transfert-paroissial/api/get-my-transfer';
 import { TransferRequestForm } from '@/features/transfert-paroissial/components/transfer-request-form';
 import { TransferStatusCard } from '@/features/transfert-paroissial/components/transfer-status-card';
-import { paths } from '@/config/paths';
 
 export default function TransfertPage() {
   const { addNotification } = useNotifications();
-  const { data: transfer, isLoading } = useMyTransfer();
+  const { data: transfer, isLoading, isError, refetch } = useMyTransfer();
 
   function handleTransferSuccess() {
     addNotification({
@@ -33,9 +35,9 @@ export default function TransfertPage() {
           action={
             <Link
               href={paths.app.profil.getHref()}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+              className="flex h-11 items-center gap-1.5 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <ArrowLeft className="size-4" />
+              <ArrowLeft className="size-4" aria-hidden="true" />
               Profil
             </Link>
           }
@@ -43,16 +45,24 @@ export default function TransfertPage() {
 
         <div className="mx-auto w-full max-w-2xl px-4 py-6 md:px-6">
           {isLoading ? (
-            <div className="space-y-3">
-              <Skeleton className="h-24 w-full rounded-xl" />
-            </div>
+            <SkeletonCard />
+          ) : isError ? (
+            <ErrorState
+              title="Impossible de charger votre demande"
+              description="Une erreur est survenue lors de la récupération de votre transfert."
+              onRetry={() => refetch()}
+            />
           ) : transfer ? (
             <div className="space-y-6">
               <TransferStatusCard transfer={transfer} />
               {transfer.status === 'rejected' && (
-                <div>
-                  <p className="mb-4 text-sm text-muted-foreground">
-                    Votre demande a été refusée. Vous pouvez en soumettre une nouvelle.
+                <div className="space-y-4">
+                  <h2 className="font-serif text-lg font-bold tracking-tight text-foreground">
+                    Soumettre une nouvelle demande
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Votre demande a été refusée. Vous pouvez en soumettre une
+                    nouvelle ci-dessous.
                   </p>
                   <TransferRequestForm onSuccess={handleTransferSuccess} />
                 </div>
@@ -60,10 +70,11 @@ export default function TransfertPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              <p className="text-sm text-muted-foreground">
-                Vous n&apos;avez aucune demande de transfert en cours. Sélectionnez
-                votre nouvelle paroisse et soumettez votre demande ci-dessous.
-              </p>
+              <EmptyState
+                icon={<ArrowRightLeft aria-hidden="true" />}
+                title="Aucune demande en cours"
+                description="Sélectionnez votre nouvelle paroisse et soumettez votre demande de transfert ci-dessous."
+              />
               <TransferRequestForm onSuccess={handleTransferSuccess} />
             </div>
           )}

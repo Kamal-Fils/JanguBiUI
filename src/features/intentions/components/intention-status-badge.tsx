@@ -1,25 +1,48 @@
-const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  pending: { label: 'En attente', className: 'bg-yellow-100 text-yellow-700' },
-  accepted: { label: 'Acceptée', className: 'bg-blue-100 text-blue-700' },
+import {
+  CalendarCheck,
+  CalendarClock,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+  XCircle,
+} from 'lucide-react';
+
+import { StatusBadge, type StatusConfig } from '@/components/ui/status-badge';
+
+/**
+ * Mapping unique statut → libellé/ton/icône pour les intentions de messe.
+ * Co-localisé dans la feature (le kit `StatusBadge` reste agnostique).
+ * La couleur n'est jamais le seul signal : icône + libellé → WCAG 1.4.1.
+ */
+export const INTENTION_STATUS_CONFIG: Record<string, StatusConfig> = {
+  pending: { label: 'En attente', tone: 'warning', icon: <Clock /> },
+  accepted: { label: 'Acceptée', tone: 'info', icon: <CheckCircle2 /> },
   date_proposed: {
     label: 'Date proposée',
-    className: 'bg-purple-100 text-purple-700',
+    tone: 'accent',
+    icon: <CalendarClock />,
   },
-  confirmed: { label: 'Confirmée', className: 'bg-indigo-100 text-indigo-700' },
-  celebrated: { label: 'Célébrée', className: 'bg-green-100 text-green-700' },
-  declined: { label: 'Refusée', className: 'bg-red-100 text-red-700' },
+  confirmed: {
+    label: 'Confirmée',
+    tone: 'progress',
+    icon: <CalendarCheck />,
+  },
+  celebrated: { label: 'Célébrée', tone: 'success', icon: <Sparkles /> },
+  declined: { label: 'Refusée', tone: 'danger', icon: <XCircle /> },
 };
 
-export function IntentionStatusBadge({ status }: { status: string }) {
-  const config = STATUS_CONFIG[status] ?? {
+interface IntentionStatusBadgeProps {
+  status: string;
+  className?: string;
+}
+
+export function IntentionStatusBadge({
+  status,
+  className,
+}: IntentionStatusBadgeProps) {
+  const config: StatusConfig = INTENTION_STATUS_CONFIG[status] ?? {
     label: status,
-    className: 'bg-gray-100 text-gray-600',
+    tone: 'neutral',
   };
-  return (
-    <span
-      className={`text-xs px-2 py-0.5 rounded-full font-medium ${config.className}`}
-    >
-      {config.label}
-    </span>
-  );
+  return <StatusBadge {...config} className={className} />;
 }

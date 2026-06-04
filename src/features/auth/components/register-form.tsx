@@ -96,7 +96,7 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
         <div className="text-sm">
           <NextLink
             href={paths.auth.login.getHref(redirectTo)}
-            className="font-medium text-blue-600 hover:text-blue-500"
+            className="font-medium text-primary hover:text-primary/80"
           >
             Se connecter
           </NextLink>

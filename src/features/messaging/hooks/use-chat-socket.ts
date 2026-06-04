@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   clearAccessToken,
@@ -14,6 +14,19 @@ import { useUser } from '@/lib/auth';
 import { Message, MessagesResponse, messageSchema } from '../types';
 
 const RECONNECT_DELAYS = [1000, 3000, 10000];
+
+/**
+ * État de la connexion temps réel, exposé à l'UI pour afficher une bannière.
+ * - `connecting`  : première tentative d'ouverture du socket
+ * - `online`      : socket ouvert, messages en direct
+ * - `reconnecting`: le socket a été coupé, nouvelle tentative en cours
+ * - `offline`     : aucune connexion (token absent / session expirée)
+ */
+export type ChatSocketStatus =
+  | 'connecting'
+  | 'online'
+  | 'reconnecting'
+  | 'offline';
 
 // WebSocket close codes used by the backend for auth rejection
 const AUTH_CLOSE_CODES = new Set([4001, 4003]);
@@ -57,6 +70,7 @@ export function useChatSocket(conversationId: string) {
   const attemptRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const unmountedRef = useRef(false);
+  const [status, setStatus] = useState<ChatSocketStatus>('connecting');
 
   // Keep latest userId available inside the WS handlers without resubscribing
   useEffect(() => {
@@ -68,6 +82,7 @@ export function useChatSocket(conversationId: string) {
 
     unmountedRef.current = false;
     attemptRef.current = 0;
+    setStatus('connecting');
 
     const wsBase = resolveWsBase();
 
@@ -76,8 +91,11 @@ export function useChatSocket(conversationId: string) {
 
       // Always connect with a valid, fresh access token
       const token = await getFreshToken();
+      // Le composant a pu être démonté pendant l'await → ne touche plus au state.
+      if (unmountedRef.current) return;
       if (!token) {
         // No valid token — cannot establish WS; redirect to login
+        setStatus('offline');
         clearAccessToken();
         clearRefreshToken();
         const redirectTo = encodeURIComponent(window.location.pathname);
@@ -86,12 +104,10 @@ export function useChatSocket(conversationId: string) {
       }
 
       const url = `${wsBase}/ws/messaging/conversations/${conversationId}/?token=${encodeURIComponent(token)}`;
-      console.debug('[chat-ws] connecting', { conversationId });
       const ws = new WebSocket(url);
       wsRef.current = ws;
 
       ws.onmessage = (event) => {
-        console.debug('[chat-ws] frame received', event.data);
         try {
           const payload = JSON.parse(event.data as string) as {
             type: string;
@@ -124,17 +140,19 @@ export function useChatSocket(conversationId: string) {
       };
 
       ws.onopen = () => {
-        console.debug('[chat-ws] open', { conversationId });
         attemptRef.current = 0;
+        setStatus('online');
       };
 
       ws.onclose = async (event) => {
-        console.debug('[chat-ws] close', {
-          code: event.code,
-          reason: event.reason,
-          wasClean: event.wasClean,
-        });
         if (unmountedRef.current) return;
+
+        const isAuthClose = AUTH_CLOSE_CODES.has(event.code);
+
+        // Sur fermeture auth, on tente un refresh silencieux : statut neutre
+        // (`connecting`) plutôt qu'un flash « Reconnexion… » trompeur. Le statut
+        // `reconnecting` est réservé aux coupures réseau (close codes non-auth).
+        setStatus(isAuthClose ? 'connecting' : 'reconnecting');
 
         const delay = RECONNECT_DELAYS[attemptRef.current] ?? 10000;
         attemptRef.current = Math.min(
@@ -142,18 +160,23 @@ export function useChatSocket(conversationId: string) {
           RECONNECT_DELAYS.length - 1,
         );
 
-        if (AUTH_CLOSE_CODES.has(event.code)) {
+        if (isAuthClose) {
           // Auth rejection from server — try refreshing before reconnecting
           try {
             await tryRefreshAccess();
           } catch {
+            // Le composant a pu être démonté pendant l'await.
+            if (unmountedRef.current) return;
             // Refresh failed — session dead, redirect to login
+            setStatus('offline');
             clearAccessToken();
             clearRefreshToken();
             const redirectTo = encodeURIComponent(window.location.pathname);
             window.location.href = `/auth/login?redirectTo=${redirectTo}`;
             return;
           }
+          // Le composant a pu être démonté pendant le refresh réussi.
+          if (unmountedRef.current) return;
         }
 
         timerRef.current = setTimeout(() => void connect(), delay);
@@ -175,5 +198,5 @@ export function useChatSocket(conversationId: string) {
     };
   }, [conversationId, queryClient]);
 
-  return wsRef;
+  return { wsRef, status };
 }

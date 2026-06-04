@@ -4,2288 +4,8861 @@
  */
 
 export interface paths {
-  '/api/v1/availability/available/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/agenda/events/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liste des événements (scopée aux appartenances de l'utilisateur) */
+        get: operations["v1_agenda_events_list"];
+        put?: never;
+        /** Créer un événement (clergé ou admin) */
+        post: operations["v1_agenda_events_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get available ministers for a specific date and service */
-    get: operations['v1_availability_available_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/availability/calendar/{slug}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/agenda/events/{event_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'un événement */
+        get: operations["v1_agenda_events_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get a minister's availability calendar for a specific month */
-    get: operations['v1_availability_calendar_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/availability/ministers/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/agenda/events/{event_id}/register/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** S'inscrire à un événement */
+        post: operations["v1_agenda_events_register_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** List all active ministers */
-    get: operations['v1_availability_ministers_list'];
-    put?: never;
-    /** Create a new minister profile */
-    post: operations['v1_availability_ministers_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/availability/ministers/{slug}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/agenda/events/{event_id}/registrations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liste des inscrits (autorité sur la portée de l'événement) */
+        get: operations["v1_agenda_events_registrations_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get minister details */
-    get: operations['v1_availability_ministers_retrieve'];
-    /** Update minister details */
-    put: operations['v1_availability_ministers_update'];
-    post?: never;
-    /** Delete minister profile */
-    delete: operations['v1_availability_ministers_destroy'];
-    options?: never;
-    head?: never;
-    /** Partially update minister details */
-    patch: operations['v1_availability_ministers_partial_update'];
-    trace?: never;
-  };
-  '/api/v1/availability/ministers/{slug}/available/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/jwt/login/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Connexion JWT
+         * @description Authentifie l'utilisateur et retourne un access token (60 min) et un refresh token (7 jours). Le compte doit être actif ET l'email vérifié.
+         */
+        post: operations["v1_auth_jwt_login_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get available slots for a minister on a specific date */
-    get: operations['v1_availability_ministers_available_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/availability/ministers/{slug}/weekly/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/jwt/logout/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Déconnexion (appareil courant)
+         * @description Blackliste le refresh token fourni. L'access token reste valide jusqu'à son expiration naturelle (60 min max). Pour révoquer tous les appareils, utiliser /logout-all/.
+         */
+        post: operations["v1_auth_jwt_logout_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get minister weekly availability */
-    get: operations['v1_availability_ministers_weekly_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/availability/parishes/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/jwt/logout-all/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Déconnexion de tous les appareils
+         * @description Invalide TOUS les JWT actifs de l'utilisateur via rotation du jwt_key. Utile en cas de suspicion de compromission.
+         */
+        post: operations["v1_auth_jwt_logout_all_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** List all active parishes */
-    get: operations['v1_availability_parishes_list'];
-    put?: never;
-    /** Create a new parish */
-    post: operations['v1_availability_parishes_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/availability/parishes/{slug}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/jwt/refresh/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Renouvellement du access token
+         * @description Échange un refresh token valide contre un nouveau access token.
+         */
+        post: operations["v1_auth_jwt_refresh_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get parish details */
-    get: operations['v1_availability_parishes_retrieve'];
-    /** Update parish details */
-    put: operations['v1_availability_parishes_update'];
-    post?: never;
-    /** Delete parish */
-    delete: operations['v1_availability_parishes_destroy'];
-    options?: never;
-    head?: never;
-    /** Partially update parish details */
-    patch: operations['v1_availability_parishes_partial_update'];
-    trace?: never;
-  };
-  '/api/v1/availability/services/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Profil utilisateur connecté
+         * @description Retourne les données complètes de l'utilisateur authentifié (ID, email, rôle, etc.).
+         */
+        get: operations["v1_auth_me_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** List all active service types */
-    get: operations['v1_availability_services_list'];
-    put?: never;
-    /** Create a new service type */
-    post: operations['v1_availability_services_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/availability/services/{slug}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/books/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all books with optional testament filter and name search
+         * @description Returns paginated list of all books, optionally filtered by testament and searched by name.
+         */
+        get: operations["v1_bible_books_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get service type details */
-    get: operations['v1_availability_services_retrieve'];
-    /** Update service type */
-    put: operations['v1_availability_services_update'];
-    post?: never;
-    /** Delete service type */
-    delete: operations['v1_availability_services_destroy'];
-    options?: never;
-    head?: never;
-    /** Partially update service type */
-    patch: operations['v1_availability_services_partial_update'];
-    trace?: never;
-  };
-  '/api/v1/bible/books/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/books/{book_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get book metadata
+         * @description Returns metadata for a specific book, optionally expanding chapters.
+         */
+        get: operations["v1_bible_books_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * List all books with optional testament filter and name search
-     * @description Returns paginated list of all books, optionally filtered by testament and searched by name.
-     */
-    get: operations['v1_bible_books_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/bible/books/{book_id}/chapters/{chapter_number}/verses/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/books/{book_id}/chapters/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List chapters for a specific book
+         * @description Returns list of chapters for a book.
+         */
+        get: operations["v1_bible_books_chapters_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * List verses for a specific chapter
-     * @description Returns list of verses for a specific chapter.
-     */
-    get: operations['v1_bible_books_chapters_verses_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/bible/search/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/books/{book_id}/chapters/{chapter_number}/verses/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List verses for a specific chapter
+         * @description Returns list of verses for a specific chapter.
+         */
+        get: operations["v1_bible_books_chapters_verses_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Lexical and hybrid search across all verses
-     * @description Search endpoint using lexical/hybrid search.
-     */
-    get: operations['v1_bible_search_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/bible/testaments/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/daily-texts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get paginated list of AELF daily texts
+         * @description Returns AELF daily texts.
+         */
+        get: operations["v1_bible_daily_texts_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * List testaments with nested books
-     * @description Returns the lists of testaments (Ancien & Nouveau) with nested books.
-     */
-    get: operations['v1_bible_testaments_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/bible/testaments/{testament_slug}/books/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/homilenotes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List mes notes d'homélie */
+        get: operations["v1_bible_homilenotes_list"];
+        put?: never;
+        /** Créer une note d'homélie (DIACRE+) */
+        post: operations["v1_bible_homilenotes_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * List all books for a specific testament
-     * @description Returns all books for a given testament.
-     */
-    get: operations['v1_bible_testaments_books_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/errors/trigger/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/homilenotes/{note_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Récupérer une note d'homélie */
+        get: operations["v1_bible_homilenotes_retrieve"];
+        put?: never;
+        post?: never;
+        /** Supprimer une note d'homélie */
+        delete: operations["v1_bible_homilenotes_destroy"];
+        options?: never;
+        head?: never;
+        /** Modifier une note d'homélie */
+        patch: operations["v1_bible_homilenotes_partial_update"];
+        trace?: never;
     };
-    get: operations['v1_errors_trigger_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/errors/trigger/exception/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/import/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Trigger background import of Bible texts
+         * @description Admin-only endpoint to trigger a background import.
+         */
+        post: operations["v1_bible_import_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations['v1_errors_trigger_exception_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/errors/trigger/unique/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/lectio/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liste mes sessions Lectio Divina */
+        get: operations["v1_bible_lectio_list"];
+        put?: never;
+        /** Créer ou mettre à jour une session Lectio Divina */
+        post: operations["v1_bible_lectio_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations['v1_errors_trigger_unique_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/files/upload/direct/finish/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/reading-plans/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liste les plans de lecture publiés */
+        get: operations["v1_bible_reading_plans_list"];
+        put?: never;
+        /** Créer un plan de lecture (PRETRE+) */
+        post: operations["v1_bible_reading_plans_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations['v1_files_upload_direct_finish_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/files/upload/direct/local/{file_id}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/reading-plans/{plan_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'un plan de lecture */
+        get: operations["v1_bible_reading_plans_retrieve"];
+        put?: never;
+        /** Publier un plan de lecture */
+        post: operations["v1_bible_reading_plans_create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations['v1_files_upload_direct_local_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/files/upload/direct/start/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/reading-plans/{plan_id}/publish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'un plan de lecture */
+        get: operations["v1_bible_reading_plans_publish_retrieve"];
+        put?: never;
+        /** Publier un plan de lecture */
+        post: operations["v1_bible_reading_plans_publish_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations['v1_files_upload_direct_start_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/files/upload/standard/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/search/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lexical and hybrid search across all verses
+         * @description Search endpoint using lexical/hybrid search.
+         */
+        get: operations["v1_bible_search_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations['v1_files_upload_standard_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/liturgy/date/{date_str}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/testaments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List testaments with nested books
+         * @description Returns the lists of testaments (Ancien & Nouveau) with nested books.
+         */
+        get: operations["v1_bible_testaments_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Get Liturgical data for a specific date
-     * @description Retrieve the liturgical texts for a specific date (YYYY-MM-DD).
-     *             If the data is not available locally, this endpoint returns a 404.
-     */
-    get: operations['v1_liturgy_date_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/liturgy/offices/{id}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/bible/testaments/{testament_slug}/books/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all books for a specific testament
+         * @description Returns all books for a given testament.
+         */
+        get: operations["v1_bible_testaments_books_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Get details of a specific Office (e.g., Lauds)
-     * @description Retrieve a specific Office by its ID.
-     *             Returns the hymns, psalms, and intercessions associated with that office.
-     */
-    get: operations['v1_liturgy_offices_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/liturgy/readings/{id}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/clergy-accounts/invitations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les invitations clergé */
+        get: operations["v1_clergy_accounts_invitations_list"];
+        put?: never;
+        /** Créer une invitation clergé */
+        post: operations["v1_clergy_accounts_invitations_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Get details of a specific Mass Reading
-     * @description Retrieve a specific Reading (e.g., the Gospel) by its ID.
-     *             This includes any matched local Bible verses (cross-references).
-     */
-    get: operations['v1_liturgy_readings_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/liturgy/today/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/clergy-accounts/invitations/{invitation_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'une invitation */
+        get: operations["v1_clergy_accounts_invitations_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Get today's Liturgical data (Mass Readings, Offices)
-     * @description Retrieve the official liturgical texts for the CURRENT day (in the 'romain' zone).
-     *             This includes the 'Mass' readings (First Reading, Gospel, etc.) and the
-     *             Liturgy of the Hours text blocks (Lauds, Vespers, Compline, etc.).
-     */
-    get: operations['v1_liturgy_today_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/rag/query/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/clergy-accounts/invitations/{invitation_id}/revoke/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Révoquer une invitation */
+        post: operations["v1_clergy_accounts_invitations_revoke_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Ask a question to the AI assistant using RAG (Retrieval-Augmented Generation) */
-    post: operations['v1_rag_query_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/rosary/day/{day}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/clergy-accounts/invitations/accept/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accepter une invitation (utilisateur connecté) */
+        post: operations["v1_clergy_accounts_invitations_accept_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Get rosary prayers for a specific day of the week
-     * @description Fetches the Rosary Group assigned to a given weekday, along with the introductory
-     *             and concluding standalone prayers.
-     *
-     *             **Day mapping (0-6):**
-     *             0: Monday (Joyeux)
-     *             1: Tuesday (Douloureux)
-     *             2: Wednesday (Glorieux)
-     *             3: Thursday (Lumineux)
-     *             4: Friday (Douloureux)
-     *             5: Saturday (Joyeux)
-     *             6: Sunday (Glorieux)
-     */
-    get: operations['v1_rosary_day_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/rosary/groups/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/clergy-accounts/invitations/validate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Valider un token d'invitation (public)
+         * @description Public endpoint — validates token and returns invitation details (no auth required).
+         */
+        get: operations["v1_clergy_accounts_invitations_validate_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * List all rosary groups (Mysteries)
-     * @description Returns a list of all Rosary Groups (Joyeux, Lumineux, Douloureux, Glorieux).
-     *
-     *             **What is a Rosary Group?**
-     *             In the Catholic tradition, the Rosary is a meditative prayer based on the life of Jesus Christ.
-     *             It is divided into 4 groups called 'Mysteries'. Each group contains 5 specific events
-     *             (e.g., 'The Annunciation' is the 1st Joyful Mystery).
-     */
-    get: operations['v1_rosary_groups_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/rosary/groups/{slug}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/dashboards/diocese/{diocese_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tableau de bord diocésain (évêque) */
+        get: operations["v1_dashboards_diocese_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Get details of a specific rosary group by slug
-     * @description Retrieve a specific Rosary Group (e.g., 'joyeux') and its 5 mysteries.
-     *
-     *             **Structure of a Mystery (Dizaine/Decade):**
-     *             When praying a mystery, the believer meditates on the event (often reading a short scripture),
-     *             then recites a specific sequence of prayers:
-     *             1. One 'Our Father' (Notre Père)
-     *             2. Ten 'Hail Mary's (Je vous salue Marie) - This is why it's called a 'decade' or 'dizaine'.
-     *             3. One 'Glory Be' (Gloire au Père)
-     *             4. (Optional) The Fatima Prayer
-     *
-     *             The API returns this exact sequential order of prayers under each mystery.
-     */
-    get: operations['v1_rosary_groups_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/rosary/mysteries/{id}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/dashboards/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tableau de bord du fidèle (vue personnelle) */
+        get: operations["v1_dashboards_me_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Get details of a specific Mystery (Dizaine)
-     * @description Retrieve a specific Mystery by its ID, complete with its scriptural meditation
-     *             and the full sequence of prayers (1 Our Father, 10 Hail Marys, etc.) that
-     *             compose its 'decade'.
-     */
-    get: operations['v1_rosary_mysteries_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/rosary/prayers/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/dashboards/my-diocese/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tableau de bord de mon diocèse (évêque connecté) */
+        get: operations["v1_dashboards_my_diocese_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * List all foundational standalone prayers
-     * @description Retrieve all foundational pieces used in the Rosary, such as the 'Our Father',
-     *             the 'Apostles Creed' (Je crois en Dieu), or the 'Fatima Prayer'.
-     */
-    get: operations['v1_rosary_prayers_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/rosary/search/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/dashboards/my-parish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tableau de bord de ma paroisse (curé connecté) */
+        get: operations["v1_dashboards_my_parish_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Search within rosary prayers using text match */
-    get: operations['v1_rosary_search_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/rosary/today/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/dashboards/parish/{parish_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tableau de bord d'une paroisse (total fidèles, flux de dons, files) */
+        get: operations["v1_dashboards_parish_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Get today's rosary prayers along with standalone prayers
-     * @description Fetches the Rosary Group assigned to the current day of the week, along with the introductory
-     *             and concluding prayers.
-     *
-     *             **Daily Tradition:**
-     *             - Monday & Saturday: Joyful Mysteries (Joyeux)
-     *             - Tuesday & Friday: Sorrowful Mysteries (Douloureux)
-     *             - Wednesday & Sunday: Glorious Mysteries (Glorieux)
-     *             - Thursday: Luminous Mysteries (Lumineux)
-     *
-     *             This endpoint also returns `standalone_prayers` (like the Apostles' Creed or the Hail Holy Queen)
-     *             which are recited at the very beginning and very end of the entire Rosary.
-     */
-    get: operations['v1_rosary_today_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/rosary/vector_search/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/documents/admin/requests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister toutes les demandes (admin) */
+        get: operations["v1_documents_admin_requests_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Search within rosary prayers using vector embeddings
-     * @description Stub endpoint for future RAG implementation via pgvector.
-     */
-    get: operations['v1_rosary_vector_search_list'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/users/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/documents/admin/requests/{request_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'une demande (admin) */
+        get: operations["v1_documents_admin_requests_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations['v1_users_retrieve'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/users/{user_id}/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/documents/admin/requests/{request_id}/deposit/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Déposer le document final (admin) */
+        post: operations["v1_documents_admin_requests_deposit_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations['v1_users_retrieve_2'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/users/{user_id}/update/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/documents/admin/requests/{request_id}/logs/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historique des statuts (admin) */
+        get: operations["v1_documents_admin_requests_logs_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations['v1_users_update_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/users/create/': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/documents/admin/requests/{request_id}/notes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les notes internes (admin) */
+        get: operations["v1_documents_admin_requests_notes_list"];
+        put?: never;
+        /** Ajouter une note interne (admin) */
+        post: operations["v1_documents_admin_requests_notes_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations['v1_users_create_create'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
+    "/api/v1/documents/admin/requests/{request_id}/reject/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rejeter une demande (admin) */
+        post: operations["v1_documents_admin_requests_reject_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/admin/requests/{request_id}/request-info/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Demander un complément d'information (admin) */
+        post: operations["v1_documents_admin_requests_request_info_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/admin/requests/{request_id}/start-verification/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Démarrer la vérification (admin) */
+        post: operations["v1_documents_admin_requests_start_verification_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/admin/requests/{request_id}/validate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Valider une demande (admin) */
+        post: operations["v1_documents_admin_requests_validate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/requests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister mes demandes de document */
+        get: operations["v1_documents_requests_list"];
+        put?: never;
+        /** Créer une demande de document */
+        post: operations["v1_documents_requests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/requests/{request_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'une demande de document */
+        get: operations["v1_documents_requests_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/requests/{request_id}/supplement/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Soumettre un complément d'information */
+        post: operations["v1_documents_requests_supplement_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/donations/{donation_id}/confirm/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirmer manuellement un don en espèces (autorité paroisse) */
+        post: operations["v1_donations_confirm_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/donations/campaigns/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les campagnes actives */
+        get: operations["v1_donations_campaigns_list"];
+        put?: never;
+        /** Créer une campagne de dons (clergé) */
+        post: operations["v1_donations_campaigns_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/donations/donate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Faire un don */
+        post: operations["v1_donations_donate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/donations/my/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mes dons */
+        get: operations["v1_donations_my_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/errors/trigger/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["v1_errors_trigger_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/errors/trigger/exception/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["v1_errors_trigger_exception_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/files/upload/direct/finish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Finaliser un upload direct */
+        post: operations["v1_files_upload_direct_finish_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/files/upload/direct/local/{file_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload local pour le mode direct (dev uniquement) */
+        post: operations["v1_files_upload_direct_local_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/files/upload/direct/start/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Démarrer un upload direct (presigned URL) */
+        post: operations["v1_files_upload_direct_start_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/files/upload/standard/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload standard (multipart/form-data) */
+        post: operations["v1_files_upload_standard_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/date/{date_str}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liturgie pour une date spécifique */
+        get: operations["v1_liturgy_date_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/offices/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'un office liturgique */
+        get: operations["v1_liturgy_offices_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/readings/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'une lecture de messe */
+        get: operations["v1_liturgy_readings_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/today/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liturgie du jour complet (messe + offices) */
+        get: operations["v1_liturgy_today_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/v1/complies/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Office de la Liturgie des Heures (clergé uniquement)
+         * @description Base for the 7 Liturgy of the Hours endpoints (clergy-only).
+         */
+        get: operations["v1_liturgy_v1_complies_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/v1/informations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Informations sur la date liturgique
+         * @description Common date/zone parsing and AELF auto-sync for liturgy endpoints.
+         */
+        get: operations["v1_liturgy_v1_informations_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/v1/laudes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Office de la Liturgie des Heures (clergé uniquement)
+         * @description Base for the 7 Liturgy of the Hours endpoints (clergy-only).
+         */
+        get: operations["v1_liturgy_v1_laudes_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/v1/lectures/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Office de la Liturgie des Heures (clergé uniquement)
+         * @description Base for the 7 Liturgy of the Hours endpoints (clergy-only).
+         */
+        get: operations["v1_liturgy_v1_lectures_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/v1/messes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lectures de la Messe du jour
+         * @description Common date/zone parsing and AELF auto-sync for liturgy endpoints.
+         */
+        get: operations["v1_liturgy_v1_messes_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/v1/none/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Office de la Liturgie des Heures (clergé uniquement)
+         * @description Base for the 7 Liturgy of the Hours endpoints (clergy-only).
+         */
+        get: operations["v1_liturgy_v1_none_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/v1/sexte/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Office de la Liturgie des Heures (clergé uniquement)
+         * @description Base for the 7 Liturgy of the Hours endpoints (clergy-only).
+         */
+        get: operations["v1_liturgy_v1_sexte_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/v1/tierce/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Office de la Liturgie des Heures (clergé uniquement)
+         * @description Base for the 7 Liturgy of the Hours endpoints (clergy-only).
+         */
+        get: operations["v1_liturgy_v1_tierce_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/liturgy/v1/vepres/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Office de la Liturgie des Heures (clergé uniquement)
+         * @description Base for the 7 Liturgy of the Hours endpoints (clergy-only).
+         */
+        get: operations["v1_liturgy_v1_vepres_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mass-intentions/{intention_id}/accept/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accepter une intention de messe */
+        post: operations["v1_mass_intentions_accept_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mass-intentions/{intention_id}/celebrate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marquer une intention comme célébrée */
+        post: operations["v1_mass_intentions_celebrate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mass-intentions/{intention_id}/decline/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refuser une intention de messe */
+        post: operations["v1_mass_intentions_decline_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mass-intentions/{intention_id}/propose-date/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Proposer une date de célébration */
+        post: operations["v1_mass_intentions_propose_date_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mass-intentions/my/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mes intentions de messe (fidèle) */
+        get: operations["v1_mass_intentions_my_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mass-intentions/parish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Intentions de la paroisse (prêtre) */
+        get: operations["v1_mass_intentions_parish_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mass-intentions/submit/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Soumettre une intention de messe */
+        post: operations["v1_mass_intentions_submit_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/blocks/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister mes blocages */
+        get: operations["v1_messaging_blocks_list"];
+        put?: never;
+        /** Bloquer un utilisateur */
+        post: operations["v1_messaging_blocks_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/blocks/{block_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Débloquer un utilisateur */
+        delete: operations["v1_messaging_blocks_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/clerical/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Envoyer un message inter-clergé */
+        post: operations["v1_messaging_clerical_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/clerical/{message_id}/read/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marquer un message inter-clergé comme lu */
+        post: operations["v1_messaging_clerical_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/clerical/inbox/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Messages inter-clergé reçus */
+        get: operations["v1_messaging_clerical_inbox_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/clerical/sent/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Messages inter-clergé envoyés */
+        get: operations["v1_messaging_clerical_sent_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/conversations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister mes conversations */
+        get: operations["v1_messaging_conversations_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/conversations/{conversation_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Récupérer le détail d'une conversation */
+        get: operations["v1_messaging_conversations_retrieve"];
+        put?: never;
+        post?: never;
+        /** Supprimer une conversation */
+        delete: operations["v1_messaging_conversations_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/conversations/{conversation_id}/archive/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Archiver une conversation */
+        post: operations["v1_messaging_conversations_archive_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/conversations/{conversation_id}/cgu/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accepter les CGU de messagerie */
+        post: operations["v1_messaging_conversations_cgu_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/conversations/{conversation_id}/export/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les exports d'une conversation */
+        get: operations["v1_messaging_conversations_export_list"];
+        put?: never;
+        /** Demander l'export d'une conversation */
+        post: operations["v1_messaging_conversations_export_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/conversations/{conversation_id}/messages/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les messages d'une conversation */
+        get: operations["v1_messaging_conversations_messages_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/conversations/{conversation_id}/messages/send/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Envoyer un message */
+        post: operations["v1_messaging_conversations_messages_send_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/conversations/{conversation_id}/read/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marquer les messages comme lus */
+        post: operations["v1_messaging_conversations_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/conversations/create/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Démarrer une conversation avec un prêtre */
+        post: operations["v1_messaging_conversations_create_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/messages/{message_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Supprimer un message */
+        delete: operations["v1_messaging_messages_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/messages/{message_id}/react/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Réagir à un message */
+        post: operations["v1_messaging_messages_react_create"];
+        /** Supprimer une réaction */
+        delete: operations["v1_messaging_messages_react_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/notifications/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister mes notifications */
+        get: operations["v1_messaging_notifications_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/notifications/{notification_id}/read/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marquer une notification comme lue */
+        post: operations["v1_messaging_notifications_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/priest-profile/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Créer un profil prêtre */
+        post: operations["v1_messaging_priest_profile_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/priest-profile/cgu/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accepter les CGU prêtre */
+        post: operations["v1_messaging_priest_profile_cgu_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/priest-profile/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Mettre à jour le profil prêtre */
+        patch: operations["v1_messaging_priest_profile_me_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/messaging/priests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les prêtres disponibles */
+        get: operations["v1_messaging_priests_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Feed global — articles publiés pour toute l'Église du Sénégal */
+        get: operations["v1_news_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/{article_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'un article publié */
+        get: operations["v1_news_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/admin/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** [Admin] Lister tous les articles (tous statuts) */
+        get: operations["v1_news_admin_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/admin/{article_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** [Admin] Détail d'un article (tous statuts) */
+        get: operations["v1_news_admin_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/admin/{article_id}/delete/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** [Admin] Supprimer un article (brouillon ou dépublié uniquement) */
+        delete: operations["v1_news_admin_delete_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/admin/{article_id}/publish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** [Admin] Publier un article */
+        post: operations["v1_news_admin_publish_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/admin/{article_id}/unpublish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** [Admin] Dépublier un article */
+        post: operations["v1_news_admin_unpublish_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/admin/{article_id}/update/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** [Admin] Modifier un article */
+        patch: operations["v1_news_admin_update_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/news/admin/create/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** [Admin] Créer un article */
+        post: operations["v1_news_admin_create_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les catégories d'articles actives */
+        get: operations["v1_news_categories_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/diocese/{diocese_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Articles publiés d'un diocèse */
+        get: operations["v1_news_diocese_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/feed/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fil d'actualités agrégé (toutes mes portées)
+         * @description Fil d'actualités AGRÉGÉ de l'utilisateur connecté (Chantier 7b) :
+         *     global ∪ église ∪ paroisse ∪ diocèse de toutes ses appartenances (C3a).
+         */
+        get: operations["v1_news_feed_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/my-parish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Articles de ma paroisse (paroisse principale du profil)
+         * @description Articles de la paroisse principale du fidèle connecté.
+         */
+        get: operations["v1_news_my_parish_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/parish/{parish_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Articles publiés d'une paroisse */
+        get: operations["v1_news_parish_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/org/churches/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les églises (filtrable par paroisse) */
+        get: operations["v1_org_churches_list"];
+        put?: never;
+        /** Créer une église (admin de la paroisse) */
+        post: operations["v1_org_churches_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/org/churches/{church_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'une église */
+        get: operations["v1_org_churches_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/org/deaneries/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les doyennés (filtrable par diocèse) */
+        get: operations["v1_org_deaneries_list"];
+        put?: never;
+        /** Créer un doyenné (admin du diocèse) */
+        post: operations["v1_org_deaneries_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/org/dioceses/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les diocèses */
+        get: operations["v1_org_dioceses_list"];
+        put?: never;
+        /** Créer un diocèse (super_admin) */
+        post: operations["v1_org_dioceses_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/org/parishes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister/rechercher les paroisses (toutes paroisses) — picker documents */
+        get: operations["v1_org_parishes_list"];
+        put?: never;
+        /** Créer une paroisse (super_admin) */
+        post: operations["v1_org_parishes_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/org/parishes/{parish_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'une paroisse */
+        get: operations["v1_org_parishes_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/org/provinces/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les provinces */
+        get: operations["v1_org_provinces_list"];
+        put?: never;
+        /** Créer une province (super_admin) */
+        post: operations["v1_org_provinces_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rag/query/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ask a question to the AI assistant using RAG (Retrieval-Augmented Generation) */
+        post: operations["v1_rag_query_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rosary/community/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liste des chapelets communautaires actifs */
+        get: operations["v1_rosary_community_list"];
+        put?: never;
+        /** Initier un chapelet communautaire (clergé seulement) */
+        post: operations["v1_rosary_community_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rosary/community/{rosary_id}/end/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Terminer un chapelet communautaire (initiateur seulement) */
+        post: operations["v1_rosary_community_end_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rosary/community/{rosary_id}/intentions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Soumettre une intention de prière */
+        post: operations["v1_rosary_community_intentions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rosary/community/{rosary_id}/join/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rejoindre un chapelet communautaire */
+        post: operations["v1_rosary_community_join_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rosary/day/{day}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get rosary prayers for a specific day of the week
+         * @description Fetches the Rosary Group assigned to a given weekday, along with the introductory
+         *             and concluding standalone prayers.
+         *
+         *             **Day mapping (0-6):**
+         *             0: Monday (Joyeux)
+         *             1: Tuesday (Douloureux)
+         *             2: Wednesday (Glorieux)
+         *             3: Thursday (Lumineux)
+         *             4: Friday (Douloureux)
+         *             5: Saturday (Joyeux)
+         *             6: Sunday (Glorieux)
+         */
+        get: operations["v1_rosary_day_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rosary/groups/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all rosary groups (Mysteries)
+         * @description Returns a list of all Rosary Groups (Joyeux, Lumineux, Douloureux, Glorieux).
+         *
+         *             **What is a Rosary Group?**
+         *             In the Catholic tradition, the Rosary is a meditative prayer based on the life of Jesus Christ.
+         *             It is divided into 4 groups called 'Mysteries'. Each group contains 5 specific events
+         *             (e.g., 'The Annunciation' is the 1st Joyful Mystery).
+         */
+        get: operations["v1_rosary_groups_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rosary/groups/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get details of a specific rosary group by slug
+         * @description Retrieve a specific Rosary Group (e.g., 'joyeux') and its 5 mysteries.
+         *
+         *             **Structure of a Mystery (Dizaine/Decade):**
+         *             When praying a mystery, the believer meditates on the event (often reading a short scripture),
+         *             then recites a specific sequence of prayers:
+         *             1. One 'Our Father' (Notre Père)
+         *             2. Ten 'Hail Mary's (Je vous salue Marie) - This is why it's called a 'decade' or 'dizaine'.
+         *             3. One 'Glory Be' (Gloire au Père)
+         *             4. (Optional) The Fatima Prayer
+         *
+         *             The API returns this exact sequential order of prayers under each mystery.
+         */
+        get: operations["v1_rosary_groups_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rosary/mysteries/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get details of a specific Mystery (Dizaine)
+         * @description Retrieve a specific Mystery by its ID, complete with its scriptural meditation
+         *             and the full sequence of prayers (1 Our Father, 10 Hail Marys, etc.) that
+         *             compose its 'decade'.
+         */
+        get: operations["v1_rosary_mysteries_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rosary/prayers/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all foundational standalone prayers
+         * @description Retrieve all foundational pieces used in the Rosary, such as the 'Our Father',
+         *             the 'Apostles Creed' (Je crois en Dieu), or the 'Fatima Prayer'.
+         */
+        get: operations["v1_rosary_prayers_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rosary/search/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search within rosary prayers using text match */
+        get: operations["v1_rosary_search_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rosary/today/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get today's rosary prayers along with standalone prayers
+         * @description Fetches the Rosary Group assigned to the current day of the week, along with the introductory
+         *             and concluding prayers.
+         *
+         *             **Daily Tradition:**
+         *             - Monday & Saturday: Joyful Mysteries (Joyeux)
+         *             - Tuesday & Friday: Sorrowful Mysteries (Douloureux)
+         *             - Wednesday & Sunday: Glorious Mysteries (Glorieux)
+         *             - Thursday: Luminous Mysteries (Lumineux)
+         *
+         *             This endpoint also returns `standalone_prayers` (like the Apostles' Creed or the Hail Holy Queen)
+         *             which are recited at the very beginning and very end of the entire Rosary.
+         */
+        get: operations["v1_rosary_today_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tv/categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List TV categories */
+        get: operations["v1_tv_categories_list"];
+        put?: never;
+        /** Create TV category (admin) */
+        post: operations["v1_tv_categories_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tv/categories/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get TV category */
+        get: operations["v1_tv_categories_retrieve"];
+        /** Update TV category (admin) */
+        put: operations["v1_tv_categories_update"];
+        post?: never;
+        /** Delete TV category (admin) */
+        delete: operations["v1_tv_categories_destroy"];
+        options?: never;
+        head?: never;
+        /** Partial update TV category (admin) */
+        patch: operations["v1_tv_categories_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/tv/videos/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List TV videos */
+        get: operations["v1_tv_videos_list"];
+        put?: never;
+        /** Create TV video (admin) */
+        post: operations["v1_tv_videos_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tv/videos/{video_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get TV video */
+        get: operations["v1_tv_videos_retrieve"];
+        /** Update TV video (admin) */
+        put: operations["v1_tv_videos_update"];
+        post?: never;
+        /** Delete TV video (admin) */
+        delete: operations["v1_tv_videos_destroy"];
+        options?: never;
+        head?: never;
+        /** Partial update TV video (admin) */
+        patch: operations["v1_tv_videos_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/users/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Liste des utilisateurs
+         * @description Accessible aux staff et admin uniquement.
+         */
+        get: operations["v1_users_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{user_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'un utilisateur */
+        get: operations["v1_users_retrieve_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{user_id}/audit-logs/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Journal d'audit d'un utilisateur */
+        get: operations["v1_users_audit_logs_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{user_id}/delete/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Suppression soft d'un utilisateur
+         * @description Désactive et anonymise le compte. Les commandes sont conservées.
+         */
+        delete: operations["v1_users_delete_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{user_id}/hard-delete/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Suppression définitive d'un utilisateur
+         * @description IRRÉVERSIBLE. Réservé aux administrateurs. L'audit log est conservé.
+         */
+        delete: operations["v1_users_hard_delete_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{user_id}/toggle-active/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Activer ou désactiver un compte */
+        patch: operations["v1_users_toggle_active_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/users/admin/create/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Créer un compte staff ou admin
+         * @description Crée un compte immédiatement actif et vérifié. Un mot de passe temporaire est généré et envoyé par email. Accessible aux administrateurs uniquement.
+         */
+        post: operations["v1_users_admin_create_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/email/change/confirm/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirmation du changement d'email (OTP)
+         * @description **Paramètres d'entrée (JSON Body)** : `otp_code`. Valide le code OTP reçu sur la nouvelle adresse. En cas de succès : l'email est mis à jour, tous les tokens JWT sont rotés (déconnexion de tous les appareils), et une notification est envoyée à l'ancienne adresse avec un lien de réversion.
+         */
+        post: operations["v1_users_email_change_confirm_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/email/change/request/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Demande de changement d'email (Sudo Mode)
+         * @description Initie le changement d'adresse email. **Paramètres d'entrée (JSON Body)** : `new_email`, `current_password`. Exige la vérification du mot de passe actuel (Sudo Mode). Envoie un code OTP à 6 chiffres à la **nouvelle** adresse uniquement. Le code expire après 10 minutes.
+         */
+        post: operations["v1_users_email_change_request_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/email/change/revert/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Réversion d'urgence du changement d'email
+         * @description Accessible sans authentification (l'attaquant a pu changer le mot de passe). Restaure l'ancienne adresse, invalide le mot de passe, révoque toutes les sessions. Lien valable 7 jours.
+         */
+        post: operations["v1_users_email_change_revert_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mon profil */
+        get: operations["v1_users_me_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/me/delete/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Supprimer mon compte (soft)
+         * @description Désactive et anonymise le compte. Les données de commandes sont conservées.
+         */
+        delete: operations["v1_users_me_delete_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/me/memberships/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ajouter une ou plusieurs appartenances (onboarding « set d'églises ») */
+        post: operations["v1_users_me_memberships_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/me/memberships/{membership_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Retirer une de mes appartenances */
+        delete: operations["v1_users_me_memberships_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/me/memberships/{membership_id}/set-primary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Définir une de mes appartenances comme principale */
+        patch: operations["v1_users_me_memberships_set_primary_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/users/me/update/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Mettre à jour mon profil
+         * @description Met à jour les informations du profil de l'utilisateur connecté. Note : Les données du compte (email, rôle, mot de passe) ne peuvent PAS être modifiées ici. Le schéma des champs acceptés pour `profile` varie selon le rôle (Particulier ou Pro).
+         */
+        patch: operations["v1_users_me_update_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/users/password/change/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Changement de mot de passe (Sud Mode)
+         * @description Change le mot de passe de l'utilisateur connecté. **Paramètres d'entrée (JSON Body)** : `current_password`, `new_password`. Exige le mot de passe actuel (Sudo Mode). En cas de succès, TOUS les tokens JWT actifs sont invalidés (déconnexion globale).
+         */
+        post: operations["v1_users_password_change_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/password/reset/confirm/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirmation de la réinitialisation
+         * @description Applique le nouveau mot de passe. **Paramètres d'entrée (JSON Body)** : `token`, `new_password`. Le token est à usage unique et expire après 20 minutes.
+         */
+        post: operations["v1_users_password_reset_confirm_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/password/reset/request/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Demande de réinitialisation de mot de passe
+         * @description Initie la procédure de récupération de compte. **Paramètres d'entrée (JSON Body)** : `email`. Envoie un lien de réinitialisation si l'email est enregistré. La réponse est identique que l'email existe ou non (anti-énumération) et inclut un délai factice pour prévenir les Timing Attacks.
+         */
+        post: operations["v1_users_password_reset_request_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/register/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Inscription fidèle
+         * @description Crée un compte fidèle (auto-inscription publique). Le compte est inactif jusqu'à la vérification de l'email. Un email de vérification est envoyé immédiatement.
+         */
+        post: operations["v1_users_register_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/role-assignments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister les affectations de rôle (scopé au périmètre de l'appelant) */
+        get: operations["v1_users_role_assignments_list"];
+        put?: never;
+        /** Attribuer un rôle scopé à un utilisateur (dans son propre périmètre) */
+        post: operations["v1_users_role_assignments_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/role-assignments/{assignment_id}/revoke/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Révoquer une affectation de rôle */
+        post: operations["v1_users_role_assignments_revoke_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/verify-email/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Activer le compte via le lien email
+         * @description Valide le token reçu par email et active le compte. Le token est à usage unique (anti-replay) et expire après 24h.
+         */
+        post: operations["v1_users_verify_email_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    /** @description Serializer for external AELF resources (audio/youtube). */
-    AelfResource: {
-      /** Format: uri */
-      audio_url?: string | null;
-      /** Format: uri */
-      youtube_url?: string | null;
+    schemas: {
+        /** @description Serializer for external AELF resources (audio/youtube). */
+        AelfResource: {
+            /** Format: uri */
+            audio_url?: string | null;
+            /** Format: uri */
+            youtube_url?: string | null;
+        };
+        ArticleCategoryOutput: {
+            readonly id: number;
+            /** Nom */
+            name: string;
+            slug: string;
+            /** Icône */
+            icon?: string;
+            /** Couleur hex */
+            color?: string;
+            /** Ordre d'affichage */
+            display_order?: number;
+        };
+        ArticleCreateInput: {
+            title: string;
+            content: string;
+            category_id: number;
+            /** @default article */
+            content_type: components["schemas"]["ContentTypeD15Enum"];
+            /** @default  */
+            excerpt: string;
+            cover_image_id?: number | null;
+            /** @default global */
+            scope_type: components["schemas"]["ScopeType349Enum"];
+            scope_parish_id?: number | null;
+            scope_diocese_id?: number | null;
+            scope_church_id?: number | null;
+        };
+        ArticleDetailOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Titre */
+            title: string;
+            slug: string;
+            /** Résumé court */
+            excerpt?: string;
+            /** Contenu */
+            content: string;
+            readonly cover_image_url: string | null;
+            readonly category: components["schemas"]["ArticleCategoryOutput"];
+            readonly author_name: string;
+            /** Type de contenu */
+            content_type?: components["schemas"]["ContentTypeD15Enum"];
+            readonly content_type_label: string;
+            /** Portée */
+            scope_type?: components["schemas"]["ScopeType349Enum"];
+            readonly scope_type_label: string;
+            readonly scope_parish_id: number | null;
+            readonly scope_diocese_id: number | null;
+            readonly scope_church_id: number | null;
+            /** Statut */
+            status?: components["schemas"]["Status4b8Enum"];
+            readonly status_label: string;
+            /** Nombre de vues */
+            views_count?: number;
+            /**
+             * Publié le
+             * Format: date-time
+             */
+            published_at?: string | null;
+            /**
+             * Dépublié le
+             * Format: date-time
+             */
+            unpublished_at?: string | null;
+            readonly unpublished_by_name: string | null;
+            /** Motif de dépublication */
+            unpublish_reason?: string;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        ArticleListOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Titre */
+            title: string;
+            slug: string;
+            /** Résumé court */
+            excerpt?: string;
+            readonly cover_image_url: string | null;
+            readonly category: components["schemas"]["ArticleCategoryOutput"];
+            readonly author_name: string;
+            /** Type de contenu */
+            content_type?: components["schemas"]["ContentTypeD15Enum"];
+            readonly content_type_label: string;
+            /** Portée */
+            scope_type?: components["schemas"]["ScopeType349Enum"];
+            readonly scope_type_label: string;
+            readonly scope_parish_id: number | null;
+            readonly scope_diocese_id: number | null;
+            readonly scope_church_id: number | null;
+            /** Statut */
+            status?: components["schemas"]["Status4b8Enum"];
+            readonly status_label: string;
+            /** Nombre de vues */
+            views_count?: number;
+            /**
+             * Publié le
+             * Format: date-time
+             */
+            published_at?: string | null;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        ArticleUnpublishInput: {
+            /** @default  */
+            reason: string;
+        };
+        AttachmentOutput: {
+            readonly id: number;
+            attachment_type?: components["schemas"]["AttachmentTypeEnum"];
+            readonly attachment_type_label: string;
+            label?: string;
+            readonly file_url: string | null;
+            readonly file_name: string;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        /**
+         * @description * `user_supporting` - Justificatif fidèle
+         *     * `parish_final` - Document final paroisse
+         * @enum {string}
+         */
+        AttachmentTypeEnum: "user_supporting" | "parish_final";
+        BlockCreateInput: {
+            /** Format: uuid */
+            blocked_user_id: string;
+        };
+        BlockOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly blocked_id: string;
+            readonly blocked_name: string;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        BookDetailOutput: {
+            readonly id: number;
+            name: string;
+            slug: string;
+            order: number;
+            readonly testament: string;
+            verse_count?: number;
+            readonly chapter_count: number;
+            readonly chapters: components["schemas"]["ChapterMetadataOutput"][];
+        };
+        BookMetadataOutput: {
+            readonly id: number;
+            name: string;
+            slug: string;
+            order: number;
+            readonly testament: string;
+            verse_count?: number;
+            readonly chapter_count: number;
+        };
+        CampaignCreateInput: {
+            title: string;
+            /** @default  */
+            description: string;
+            donation_type: components["schemas"]["DonationTypeEnum"];
+            /** Format: decimal */
+            target_amount?: string | null;
+            /** @default global */
+            scope_type: string;
+            scope_id?: number | null;
+            parish_id?: number | null;
+            church_id?: number | null;
+        };
+        CampaignOutput: {
+            readonly id: number;
+            title: string;
+            description?: string;
+            donation_type: components["schemas"]["DonationTypeEnum"];
+            /** Format: decimal */
+            target_amount?: string | null;
+            currency?: string;
+            scope_type?: string;
+            scope_id?: number | null;
+            parish?: number | null;
+            church?: number | null;
+            is_active?: boolean;
+            /** Format: date-time */
+            starts_at?: string;
+            /** Format: date-time */
+            ends_at?: string | null;
+            /** Format: email */
+            readonly created_by_email: string | null;
+            readonly total_donations: number;
+        };
+        Category: {
+            readonly id: number;
+            name: string;
+            readonly slug: string;
+            order?: number;
+            is_clergy_only?: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        ChapterMetadataOutput: {
+            number: number;
+            name?: string;
+            verse_count?: number;
+        };
+        ChurchCreateInput: {
+            parish_id: number;
+            name: string;
+            /** @default succursale */
+            church_type: components["schemas"]["ChurchTypeEnum"];
+            /** @default false */
+            is_main: boolean;
+            /** @default  */
+            city: string;
+            /** @default  */
+            address: string;
+        };
+        ChurchOutput: {
+            readonly id: number;
+            /** Nom */
+            name: string;
+            /** Type d'église */
+            church_type?: components["schemas"]["ChurchTypeEnum"];
+            readonly church_type_label: string;
+            /**
+             * Église principale
+             * @description L'église paroissiale principale. Une seule par paroisse.
+             */
+            is_main?: boolean;
+            /** Ville */
+            city?: string;
+            /** Adresse */
+            address?: string;
+            /** Format: decimal */
+            latitude?: string | null;
+            /** Format: decimal */
+            longitude?: string | null;
+            /** Active */
+            is_active?: boolean;
+            /** Paroisse */
+            parish: number;
+            readonly parish_name: string;
+        };
+        /**
+         * @description * `paroissiale` - Église paroissiale
+         *     * `succursale` - Succursale
+         *     * `chapelle` - Chapelle
+         *     * `station` - Station / Mission
+         * @enum {string}
+         */
+        ChurchTypeEnum: "paroissiale" | "succursale" | "chapelle" | "station";
+        ClergicalMessageOutput: {
+            readonly id: number;
+            /** Format: email */
+            readonly sender_email: string;
+            /** Portée */
+            recipient_scope?: components["schemas"]["RecipientScopeEnum"];
+            /**
+             * ID de la portée
+             * @description ID de la paroisse, du diocèse ou de la province selon recipient_scope.
+             */
+            scope_id?: number | null;
+            readonly recipient_email: string | null;
+            /** Sujet */
+            subject: string;
+            /** Corps */
+            body: string;
+            /**
+             * Lu le
+             * Format: date-time
+             */
+            read_at?: string | null;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        ClergicalMessageSendInput: {
+            subject: string;
+            body: string;
+            recipient_scope: components["schemas"]["RecipientScopeEnum"];
+            scope_id?: number | null;
+            individual_recipient_id?: number | null;
+        };
+        CommunityRosaryInput: {
+            mystery_group_id?: number | null;
+            /** @default  */
+            intention: string;
+        };
+        CommunityRosaryOutput: {
+            id: number;
+            readonly initiator_email: string;
+            readonly mystery_group_name: string;
+            intention: string;
+            status: string;
+            current_decade: number;
+            /** Format: date-time */
+            started_at: string;
+        };
+        /**
+         * @description * `announcement` - Annonce
+         *     * `article` - Article
+         *     * `pastoral_letter` - Lettre Pastorale
+         * @enum {string}
+         */
+        ContentTypeD15Enum: "announcement" | "article" | "pastoral_letter";
+        ConversationCreateInput: {
+            /** Format: uuid */
+            priest_user_id: string;
+        };
+        ConversationOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly participant_a: components["schemas"]["ConversationParticipant"];
+            readonly participant_b: components["schemas"]["ConversationParticipant"];
+            readonly last_message: string;
+            /** Format: date-time */
+            last_message_at?: string | null;
+            is_archived?: boolean;
+            /** Format: date-time */
+            cgu_accepted_by_a?: string | null;
+            /** Format: date-time */
+            cgu_accepted_by_b?: string | null;
+            /** Format: date-time */
+            scheduled_purge_at?: string | null;
+            /** @default 0 */
+            unread_count: number;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        ConversationParticipant: {
+            /** Format: uuid */
+            id: string;
+            readonly full_name: string;
+            /** Format: email */
+            email: string;
+        };
+        DailyTextOutput: {
+            /** Format: date */
+            date: string;
+            category: string;
+            title?: string;
+            content: string;
+            /** Format: uri */
+            source_url?: string | null;
+            local_matches?: unknown;
+        };
+        DeaneryCreateInput: {
+            name: string;
+            diocese_id: number;
+            /** Format: uuid */
+            dean_id?: string | null;
+        };
+        DeaneryOutput: {
+            readonly id: number;
+            /** Nom */
+            name: string;
+            /** Diocèse */
+            diocese: number;
+            readonly diocese_name: string;
+            /**
+             * Doyen
+             * Format: uuid
+             */
+            dean?: string | null;
+            readonly dean_email: string | null;
+        };
+        DepositDocumentInput: {
+            file_id: number;
+            /** @default Document officiel */
+            label: string;
+        };
+        DioceseCreateInput: {
+            name: string;
+            code: string;
+            province_id: number;
+        };
+        DioceseOutput: {
+            readonly id: number;
+            /** Nom */
+            name: string;
+            code: string;
+            province: number;
+            readonly province_name: string;
+        };
+        DocumentRequestCreateInput: {
+            document_type: components["schemas"]["DocumentTypeEnum"];
+            reason: components["schemas"]["ReasonEnum"];
+            /** @default  */
+            reason_free: string;
+            requester_last_name: string;
+            requester_first_names: string;
+            /** Format: date */
+            date_of_birth: string;
+            place_of_birth: string;
+            contact_phone: string;
+            /** Format: email */
+            contact_email: string;
+            /** @default  */
+            registered_last_name: string;
+            /** @default  */
+            registered_first_names: string;
+            father_last_name: string;
+            mother_last_name: string;
+            parish_name: string;
+            diocese: string;
+            parish_id?: number | null;
+            sacrament_approximate_date: string;
+            sacrament_location: string;
+            /** @default  */
+            additional_info: string;
+            document_details?: {
+                [key: string]: string;
+            };
+            consent_given: boolean;
+            attachment_file_id?: number | null;
+        };
+        DocumentRequestDetailOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            reference: string;
+            document_type: components["schemas"]["DocumentTypeEnum"];
+            readonly document_type_label: string;
+            reason: components["schemas"]["ReasonEnum"];
+            readonly reason_label: string;
+            reason_free?: string;
+            status?: components["schemas"]["Status165Enum"];
+            readonly status_label: string;
+            rejection_reason?: string;
+            readonly assigned_to_name: string | null;
+            requester_last_name: string;
+            requester_first_names: string;
+            /** Format: email */
+            readonly requester_email: string;
+            /** Format: date */
+            date_of_birth: string;
+            place_of_birth: string;
+            contact_phone: string;
+            /** Format: email */
+            contact_email: string;
+            registered_last_name?: string;
+            registered_first_names?: string;
+            father_last_name: string;
+            mother_last_name: string;
+            parish_name: string;
+            diocese: string;
+            sacrament_approximate_date: string;
+            sacrament_location: string;
+            additional_info?: string;
+            document_details?: unknown;
+            consent_given?: boolean;
+            readonly status_logs: components["schemas"]["StatusLogOutput"][];
+            readonly attachments: components["schemas"]["AttachmentOutput"][];
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        DocumentRequestListOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            reference: string;
+            document_type: components["schemas"]["DocumentTypeEnum"];
+            readonly document_type_label: string;
+            reason: components["schemas"]["ReasonEnum"];
+            status?: components["schemas"]["Status165Enum"];
+            readonly status_label: string;
+            requester_last_name: string;
+            requester_first_names: string;
+            /** Format: email */
+            readonly requester_email: string;
+            parish_name: string;
+            diocese: string;
+            target_parish?: number | null;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        DocumentRequestSupplementInput: {
+            additional_info?: string;
+            document_details?: {
+                [key: string]: string;
+            };
+        };
+        /**
+         * @description * `baptism` - Certificat de baptême
+         *     * `first_communion` - Attestation de première communion
+         *     * `confirmation` - Attestation de confirmation
+         *     * `religious_marriage` - Attestation de mariage religieux
+         *     * `godparent` - Attestation parrain / marraine
+         * @enum {string}
+         */
+        DocumentTypeEnum: "baptism" | "first_communion" | "confirmation" | "religious_marriage" | "godparent";
+        DonationConfirmInput: {
+            /** @default  */
+            payment_reference: string;
+        };
+        DonationMakeInput: {
+            campaign_id?: number | null;
+            /** Format: decimal */
+            amount: string;
+            payment_provider: components["schemas"]["PaymentProviderEnum"];
+            /** @default false */
+            is_anonymous: boolean;
+            /** @default  */
+            note: string;
+            church_id?: number | null;
+            parish_id?: number | null;
+            /** @default  */
+            anonymous_donor_name: string;
+            /** @default  */
+            anonymous_donor_phone: string;
+        };
+        DonationOutput: {
+            readonly id: number;
+            readonly campaign_title: string | null;
+            /** Format: decimal */
+            amount: string;
+            currency?: string;
+            payment_provider: components["schemas"]["PaymentProviderEnum"];
+            status?: components["schemas"]["DonationOutputStatusEnum"];
+            is_anonymous?: boolean;
+            note?: string;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        /**
+         * @description * `pending` - En attente
+         *     * `confirmed` - Confirmé
+         *     * `failed` - Échoué
+         *     * `canceled` - Annulé
+         *     * `refunded` - Remboursé
+         * @enum {string}
+         */
+        DonationOutputStatusEnum: "pending" | "confirmed" | "failed" | "canceled" | "refunded";
+        /**
+         * @description * `sunday_collection` - Quête du dimanche
+         *     * `church_tithe` - Denier de l'Église
+         *     * `mass_intention_offering` - Offrande de messe
+         *     * `special_project` - Projet spécial
+         *     * `free_donation` - Don libre
+         * @enum {string}
+         */
+        DonationTypeEnum: "sunday_collection" | "church_tithe" | "mass_intention_offering" | "special_project" | "free_donation";
+        ErrorResponse: {
+            detail: string;
+        };
+        EventInput: {
+            title: string;
+            /** @default  */
+            description: string;
+            event_type: components["schemas"]["EventTypeEnum"];
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+            /** @default  */
+            location: string;
+            /** @default global */
+            scope_type: components["schemas"]["EventInputScopeTypeEnum"];
+            scope_id?: number | null;
+            scope_church_id?: number | null;
+            max_participants?: number | null;
+        };
+        /**
+         * @description * `global` - global
+         *     * `diocese` - diocese
+         *     * `parish` - parish
+         *     * `church` - church
+         * @enum {string}
+         */
+        EventInputScopeTypeEnum: "global" | "diocese" | "parish" | "church";
+        EventOutput: {
+            id: number;
+            title: string;
+            description: string;
+            event_type: string;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+            location: string;
+            scope_type: string;
+            readonly scope_id: string;
+            scope_parish_id: number | null;
+            scope_diocese_id: number | null;
+            scope_church_id: number | null;
+            max_participants: number | null;
+            readonly organizer_email: string;
+            readonly registration_count: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        /**
+         * @description * `mass` - mass
+         *     * `conference` - conference
+         *     * `retreat` - retreat
+         *     * `ordination` - ordination
+         *     * `other` - other
+         * @enum {string}
+         */
+        EventTypeEnum: "mass" | "conference" | "retreat" | "ordination" | "other";
+        ExportOutput: {
+            readonly id: number;
+            readonly json_url: string | null;
+            readonly pdf_url: string | null;
+            /** Format: date-time */
+            completed_at?: string | null;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        Group: {
+            readonly id: number;
+            name: string;
+            slug: string;
+            /** Format: uri */
+            readonly audio_file: string;
+            readonly mysteries: string;
+        };
+        HomilieNoteInput: {
+            passage_start_id: number;
+            passage_end_id?: number | null;
+            content: string;
+        };
+        HomilieNoteOutput: {
+            id: number;
+            passage_start_id: number;
+            passage_end_id: number | null;
+            content: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        Input: {
+            filename: string;
+            source: string;
+        };
+        IntentionInput: {
+            text: string;
+        };
+        /**
+         * @description * `for_deceased` - Pour un défunt
+         *     * `for_living` - Pour un vivant
+         *     * `for_occasion` - Pour une occasion
+         *     * `for_community` - Pour la communauté
+         * @enum {string}
+         */
+        IntentionTypeEnum: "for_deceased" | "for_living" | "for_occasion" | "for_community";
+        InternalNoteCreateInput: {
+            content: string;
+        };
+        InternalNoteOutput: {
+            readonly id: number;
+            readonly author_name: string;
+            content: string;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        InvitationAcceptInput: {
+            /** Format: uuid */
+            token: string;
+        };
+        InvitationCreateInput: {
+            /** Format: email */
+            email: string;
+            first_name: string;
+            last_name: string;
+            pastoral_role: components["schemas"]["PastoralRoleEnum"];
+            diocese_id?: number | null;
+            /** @description Paroisse cible (prêtre/diacre). */
+            parish_id?: number | null;
+            /** @description Église cible (diacre). */
+            church_id?: number | null;
+        };
+        InvitationOutput: {
+            readonly id: number;
+            /** Format: uuid */
+            readonly token: string;
+            /** Format: email */
+            email: string;
+            /** Prénom */
+            first_name: string;
+            /** Nom */
+            last_name: string;
+            /** Rôle pastoral */
+            pastoral_role: string;
+            readonly diocese_name: string;
+            /** Statut */
+            status?: components["schemas"]["InvitationOutputStatusEnum"];
+            readonly status_label: string;
+            readonly created_by_name: string | null;
+            /**
+             * Expire le
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        /**
+         * @description * `pending` - En attente
+         *     * `accepted` - Acceptée
+         *     * `revoked` - Révoquée
+         *     * `expired` - Expirée
+         * @enum {string}
+         */
+        InvitationOutputStatusEnum: "pending" | "accepted" | "revoked" | "expired";
+        LectioDivinaInput: {
+            passage_id: number;
+            /** @default  */
+            lectio: string;
+            /** @default  */
+            meditatio: string;
+            /** @default  */
+            oratio: string;
+            /** @default  */
+            contemplatio: string;
+        };
+        LectioDivinaOutput: {
+            id: number;
+            passage_id: number;
+            lectio: string;
+            meditatio: string;
+            oratio: string;
+            contemplatio: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        /**
+         * @description Main serializer aggregating all data for a specific liturgical date.
+         *     Includes nested resources, readings, and offices if prefetched.
+         */
+        LiturgicalDate: {
+            readonly id: number;
+            /** Format: date */
+            date: string;
+            zone: string;
+            day_name?: string;
+            season?: string;
+            mystery?: string;
+            notes?: string;
+            readonly resource: components["schemas"]["AelfResource"];
+            readonly readings: string;
+            readonly offices: string;
+        };
+        MassIntentionDeclineInput: {
+            /** @default  */
+            notes: string;
+        };
+        MassIntentionOutput: {
+            readonly id: number;
+            intention_type: components["schemas"]["IntentionTypeEnum"];
+            intention_text: string;
+            status?: components["schemas"]["MassIntentionOutputStatusEnum"];
+            /** Format: email */
+            readonly requestor_email: string;
+            /** Format: email */
+            readonly pretre_email: string | null;
+            readonly parish_name: string | null;
+            /** Format: date */
+            proposed_date?: string | null;
+            /** Format: date */
+            celebration_date?: string | null;
+            notes?: string;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `pending` - En attente
+         *     * `accepted` - Acceptée
+         *     * `date_proposed` - Date proposée
+         *     * `confirmed` - Confirmée
+         *     * `celebrated` - Célébrée
+         *     * `declined` - Refusée
+         * @enum {string}
+         */
+        MassIntentionOutputStatusEnum: "pending" | "accepted" | "date_proposed" | "confirmed" | "celebrated" | "declined";
+        MassIntentionProposeDateInput: {
+            /** Format: date */
+            proposed_date: string;
+        };
+        MassIntentionSubmitInput: {
+            intention_type: components["schemas"]["IntentionTypeEnum"];
+            intention_text: string;
+            parish_id?: number | null;
+        };
+        MembershipCreateInput: {
+            /** @description Lot d'IDs d'églises (cascade onboarding). La 1re devient principale. */
+            church_ids?: number[];
+            /** @description ID d'une seule église. */
+            church_id?: number;
+            /** @default false */
+            is_primary: boolean;
+        };
+        /** @description Appartenance exposée dans /me : église + paroisse + diocèse + flag principal. */
+        MembershipMe: {
+            readonly id: number;
+            readonly church: components["schemas"]["OrgRef"];
+            readonly parish: components["schemas"]["OrgRef"];
+            readonly diocese: components["schemas"]["OrgRef"];
+            readonly is_primary: boolean;
+        };
+        MessageAttachmentOutput: {
+            readonly id: number;
+            readonly url: string;
+            readonly file_name: string;
+        };
+        MessageOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly sender_id: string;
+            readonly sender_name: string;
+            content?: string;
+            content_type?: components["schemas"]["MessageOutputContentTypeEnum"];
+            /** Format: uuid */
+            client_message_id?: string | null;
+            /** Format: uuid */
+            readonly reply_to_id: string | null;
+            /** Format: date-time */
+            read_at?: string | null;
+            /** Format: date-time */
+            deleted_at?: string | null;
+            readonly is_deleted: boolean;
+            readonly reactions: components["schemas"]["MessageReactionOutput"][];
+            readonly attachments: components["schemas"]["MessageAttachmentOutput"][];
+            /** Format: date-time */
+            created_at?: string;
+        };
+        /**
+         * @description * `text` - Texte
+         *     * `media` - Média
+         *     * `system` - Système
+         * @enum {string}
+         */
+        MessageOutputContentTypeEnum: "text" | "media" | "system";
+        MessageReactionOutput: {
+            readonly id: number;
+            /** Format: uuid */
+            readonly user_id: string;
+            emoji: string;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        MessageSendInput: {
+            content: string;
+            /** Format: uuid */
+            client_message_id?: string | null;
+            /** Format: uuid */
+            reply_to_id?: string | null;
+        };
+        MonProfil: {
+            readonly id: number;
+            /** Format: email */
+            readonly email: string;
+            readonly phone_number: string;
+            readonly role: string;
+            /** @description Rôle pastoral (clergé) ou null. */
+            readonly pastoral_role: string | null;
+            /** @description pending_email | pending_parish | completed. */
+            readonly onboarding_state: string;
+            readonly is_active: boolean;
+            readonly is_verified: boolean;
+            readonly is_admin: boolean;
+            readonly is_staff: boolean;
+            readonly diocese: components["schemas"]["OrgRef"] | null;
+            readonly province: components["schemas"]["OrgRef"] | null;
+            /** @description Objet profil. `primary_parish` y est exposé en {id, name} | null. */
+            profile: {
+                [key: string]: unknown;
+            };
+            /** @description Toutes les appartenances (principale en tête). */
+            readonly memberships: components["schemas"]["MembershipMe"][];
+            /** @description IDs des églises. */
+            readonly church_ids: number[];
+            /** @description IDs des paroisses (distincts). */
+            readonly parish_ids: number[];
+            /** @description IDs des diocèses (distincts). */
+            readonly diocese_ids: number[];
+        };
+        Mystery: {
+            readonly id: number;
+            order: number;
+            title: string;
+            /** @description Scripture reading or meditation for the mystery */
+            meditation?: string | null;
+            /** Format: uri */
+            readonly audio_file: string;
+            /** @description Duration in seconds */
+            audio_duration?: number | null;
+            readonly prayers: string;
+        };
+        NotificationOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            event_type: string;
+            payload?: unknown;
+            is_read?: boolean;
+            /** Format: date-time */
+            read_at?: string | null;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        /** @description Serializer for Liturgy of the Hours texts. */
+        Office: {
+            readonly id: number;
+            office_type: string;
+            /** @description Hymn text */
+            hymn?: string;
+            /** @description List of psalms/canticles objects */
+            psalms?: unknown;
+            /** @description Main canticle (Benedictus/Magnificat/Nunc Dimittis) */
+            canticle?: string;
+            /** @description Short readings and responsories */
+            readings?: unknown;
+            /** @description Intercessions text */
+            intercessions?: string;
+            /** @description Any additional unmodified data */
+            raw_metadata?: unknown;
+        };
+        /** @description Référence légère {id, name} vers une entité territoriale. */
+        OrgRef: {
+            readonly id: number;
+            readonly name: string;
+        };
+        ParishCreateInput: {
+            name: string;
+            diocese_id: number;
+            /** @default  */
+            city: string;
+            /** @default  */
+            address: string;
+        };
+        ParishOutput: {
+            readonly id: number;
+            /** Nom */
+            name: string;
+            /** Ville */
+            city?: string;
+            /** Adresse */
+            address?: string;
+            /** Diocèse */
+            diocese: number;
+            readonly diocese_name: string;
+            readonly province_id: number;
+            readonly province_name: string;
+        };
+        /**
+         * @description * `pretre` - pretre
+         *     * `diacre` - diacre
+         *     * `religieux` - religieux
+         *     * `eveque` - eveque
+         *     * `archeveque` - archeveque
+         * @enum {string}
+         */
+        PastoralRoleEnum: "pretre" | "diacre" | "religieux" | "eveque" | "archeveque";
+        PatchedArticleUpdateInput: {
+            title?: string;
+            excerpt?: string;
+            content?: string;
+            category_id?: number;
+            cover_image_id?: number | null;
+        };
+        PatchedCategory: {
+            readonly id?: number;
+            name?: string;
+            readonly slug?: string;
+            order?: number;
+            is_clergy_only?: boolean;
+            /** Format: date-time */
+            readonly created_at?: string;
+            /** Format: date-time */
+            readonly updated_at?: string;
+        };
+        PatchedHomilieNoteInput: {
+            passage_start_id?: number;
+            passage_end_id?: number | null;
+            content?: string;
+        };
+        PatchedMeUpdateInput: {
+            first_name?: string;
+            last_name?: string;
+            title?: components["schemas"]["TitleEnum"];
+            /** Format: date */
+            date_of_birth?: string | null;
+            phone?: string;
+            primary_parish?: number | null;
+            /** Format: uri */
+            avatar?: string | null;
+        };
+        PatchedPriestProfileUpdateInput: {
+            accepts_pastoral_chat?: boolean;
+            ordination_year?: number;
+            bio?: string;
+        };
+        PatchedVideoCreateUpdate: {
+            title?: string;
+            /** Format: uri */
+            youtube_url?: string;
+            category_slug?: string;
+            is_live?: boolean;
+            is_pinned_live?: boolean;
+        };
+        /**
+         * @description * `wave` - Wave
+         *     * `orange_money` - Orange Money
+         *     * `free_money` - Free Money
+         *     * `cash` - Espèces
+         * @enum {string}
+         */
+        PaymentProviderEnum: "wave" | "orange_money" | "free_money" | "cash";
+        Prayer: {
+            readonly id: number;
+            type: components["schemas"]["TypeEnum"];
+            readonly type_display: string;
+            language?: string;
+            text: string;
+        };
+        PriestProfileCreateInput: {
+            /** Format: uuid */
+            user_id: string;
+        };
+        PriestProfileOutput: {
+            readonly id: number;
+            /** Format: uuid */
+            readonly user_id: string;
+            readonly full_name: string;
+            /** Format: email */
+            readonly email: string;
+            accepts_pastoral_chat?: boolean;
+            /** Format: date-time */
+            cgu_accepted_at?: string | null;
+            ordination_year?: number | null;
+            bio?: string;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        ProvinceCreateInput: {
+            name: string;
+            code: string;
+            /** @default Senegal */
+            country: string;
+        };
+        ProvinceOutput: {
+            readonly id: number;
+            /** Nom */
+            name: string;
+            code: string;
+            /** Pays */
+            country?: string;
+        };
+        RagQuery: {
+            /** @description The question or prompt to ask the assistant (e.g., 'Quel mystère aujourd'hui et as-tu un prêtre dispo à Mbour ?') */
+            query: string;
+        };
+        RagResponse: {
+            /** @description The generated response from the LLM. */
+            answer: string;
+            /** @description The raw context retrieved from the database. */
+            context: string;
+            /** @description The metadata showing how the LLM routed the question. */
+            intent: {
+                [key: string]: unknown;
+            };
+        };
+        ReactInput: {
+            emoji: string;
+        };
+        /** @description Serializer for Mass readings. */
+        Reading: {
+            readonly id: number;
+            type: string;
+            citation?: string;
+            text: string;
+            raw_metadata?: unknown;
+            readonly matched_verses: components["schemas"]["VerseOutput"][];
+        };
+        ReadingPlanInput: {
+            title: string;
+            /** @default  */
+            description: string;
+        };
+        ReadingPlanOutput: {
+            id: number;
+            title: string;
+            description: string;
+            is_published: boolean;
+            readonly author_email: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        /**
+         * @description * `religious_marriage` - Mariage religieux
+         *     * `godparent` - Parrain / marraine
+         *     * `catechism` - Inscription catéchèse
+         *     * `parish_file` - Dossier paroissial
+         *     * `personal` - Usage personnel
+         *     * `other` - Autre
+         * @enum {string}
+         */
+        ReasonEnum: "religious_marriage" | "godparent" | "catechism" | "parish_file" | "personal" | "other";
+        /**
+         * @description * `individual` - Individuel
+         *     * `parish_clergy` - Clergé de la paroisse
+         *     * `diocese_clergy` - Clergé du diocèse
+         *     * `province_bishops` - Évêques de la province
+         * @enum {string}
+         */
+        RecipientScopeEnum: "individual" | "parish_clergy" | "diocese_clergy" | "province_bishops";
+        RegistrationOutput: {
+            id: number;
+            readonly user_email: string;
+            /** Format: date-time */
+            registered_at: string;
+        };
+        RejectInput: {
+            reason: string;
+        };
+        RoleAssignmentCreateInput: {
+            /** Format: uuid */
+            user_id: string;
+            role: components["schemas"]["RoleEnum"];
+            scope: components["schemas"]["ScopeEnum"];
+            province_id?: number | null;
+            diocese_id?: number | null;
+            parish_id?: number | null;
+            church_id?: number | null;
+            /** @default false */
+            is_principal: boolean;
+            /** @default  */
+            note: string;
+        };
+        RoleAssignmentOutput: {
+            readonly id: number;
+            /**
+             * Utilisateur
+             * Format: uuid
+             */
+            user: string;
+            /** Format: email */
+            readonly user_email: string;
+            /** Rôle / capacité */
+            role: components["schemas"]["RoleEnum"];
+            /** Niveau de portée */
+            scope: components["schemas"]["ScopeEnum"];
+            province?: number | null;
+            /** Diocèse */
+            diocese?: number | null;
+            /** Paroisse */
+            parish?: number | null;
+            /** Église */
+            church?: number | null;
+            readonly scope_target_id: number | null;
+            /**
+             * Titulaire principal
+             * @description Curé principal de la paroisse / responsable principal de l'église.
+             */
+            is_principal?: boolean;
+            /** Active */
+            is_active?: boolean;
+            /**
+             * Date de début
+             * Format: date
+             */
+            start_date?: string | null;
+            /**
+             * Date de fin
+             * Format: date
+             */
+            end_date?: string | null;
+            note?: string;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        /**
+         * @description * `super_admin` - Super Admin
+         *     * `province_admin` - Admin Province
+         *     * `diocese_admin` - Admin Diocèse
+         *     * `parish_admin` - Admin Paroisse
+         *     * `church_admin` - Admin Église
+         *     * `fidele` - Fidèle
+         * @enum {string}
+         */
+        RoleEnum: "super_admin" | "province_admin" | "diocese_admin" | "parish_admin" | "church_admin" | "fidele";
+        RosaryDay: {
+            readonly id: number;
+            weekday: components["schemas"]["WeekdayEnum"];
+            readonly weekday_display: string;
+            readonly group: components["schemas"]["Group"];
+        };
+        /**
+         * @description * `global` - Global
+         *     * `province` - Province
+         *     * `diocese` - Diocèse
+         *     * `parish` - Paroisse
+         *     * `church` - Église
+         * @enum {string}
+         */
+        ScopeEnum: "global" | "province" | "diocese" | "parish" | "church";
+        /**
+         * @description * `global` - Global (toute l'Église du Sénégal)
+         *     * `diocese` - Diocèse
+         *     * `parish` - Paroisse
+         *     * `church` - Église
+         * @enum {string}
+         */
+        ScopeType349Enum: "global" | "diocese" | "parish" | "church";
+        /** @description Shape of search results grouped by book. */
+        SearchBookGroupOutput: {
+            book: components["schemas"]["SearchBookMetadataOutput"];
+            matches: components["schemas"]["SearchMatchOutput"][];
+        };
+        /** @description Shape of book metadata returned by search service. */
+        SearchBookMetadataOutput: {
+            id: number;
+            name: string;
+            slug: string;
+            order: number;
+            testament: string;
+        };
+        /** @description Shape of the search result specific to a matching verse. */
+        SearchMatchOutput: {
+            verse: components["schemas"]["SearchVerseOutput"];
+            /** @default false */
+            no_internal_source: boolean;
+            /** Format: double */
+            score?: number;
+        };
+        /** @description Extends PrayerSerializer to show rank from full text search. */
+        SearchPrayer: {
+            readonly id: number;
+            type: components["schemas"]["TypeEnum"];
+            readonly type_display: string;
+            language?: string;
+            text: string;
+            /** Format: double */
+            readonly rank: number;
+        };
+        SearchVerseOutput: {
+            id: number;
+            number: number;
+            chapter: {
+                [key: string]: unknown;
+            };
+            text: string;
+        };
+        /**
+         * @description * `submitted` - Soumise
+         *     * `under_verification` - En vérification
+         *     * `info_requested` - Complément demandé
+         *     * `validated` - Validée
+         *     * `rejected` - Rejetée
+         *     * `document_deposited` - Document déposé
+         * @enum {string}
+         */
+        Status165Enum: "submitted" | "under_verification" | "info_requested" | "validated" | "rejected" | "document_deposited";
+        /**
+         * @description * `draft` - Brouillon
+         *     * `published` - Publié
+         *     * `unpublished` - Dépublié
+         * @enum {string}
+         */
+        Status4b8Enum: "draft" | "published" | "unpublished";
+        StatusActionWithCommentInput: {
+            /** @default  */
+            comment: string;
+        };
+        StatusLogOutput: {
+            readonly id: number;
+            from_status?: string;
+            to_status: string;
+            readonly changed_by_name: string | null;
+            comment?: string;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        TestamentWithBooksOutput: {
+            slug: string;
+            name: string;
+            order?: number;
+            readonly books: {
+                [key: string]: unknown;
+            }[];
+        };
+        /**
+         * @description * `MR` - MR
+         *     * `MRS` - MRS
+         * @enum {string}
+         */
+        TitleEnum: "MR" | "MRS";
+        TodayRosaryOutput: {
+            day: components["schemas"]["RosaryDay"];
+            standalone_prayers: components["schemas"]["Prayer"][];
+        };
+        /**
+         * @description * `SIGN_OF_CROSS` - Sign of Cross
+         *     * `CREED` - Apostles Creed
+         *     * `OUR_FATHER` - Our Father
+         *     * `HAIL_MARY` - Hail Mary
+         *     * `GLORY_BE` - Glory Be
+         *     * `FATIMA` - Fatima Prayer
+         *     * `HOLY_QUEEN` - Hail Holy Queen
+         *     * `FINAL_PRAYER` - Final Prayer
+         *     * `OTHER` - Other
+         * @enum {string}
+         */
+        TypeEnum: "SIGN_OF_CROSS" | "CREED" | "OUR_FATHER" | "HAIL_MARY" | "GLORY_BE" | "FATIMA" | "HOLY_QUEEN" | "FINAL_PRAYER" | "OTHER";
+        UserJwtLoginInput: {
+            /** Format: email */
+            email: string;
+            password: string;
+        };
+        UserJwtLoginOutput: {
+            access: string;
+            refresh: string;
+            user: components["schemas"]["UserJwtLoginUser"];
+        };
+        UserJwtLoginUser: {
+            id: number;
+            /** Format: email */
+            email: string;
+            role: string;
+            is_admin: boolean;
+        };
+        UserJwtLogoutInput: {
+            /** @description Refresh token à blacklister. */
+            refresh: string;
+        };
+        UserJwtRefreshInput: {
+            refresh: string;
+        };
+        UserJwtRefreshOutput: {
+            access: string;
+            refresh?: string;
+        };
+        UserListItem: {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string;
+            phone_number: string;
+            role: string;
+            is_active: boolean;
+            is_verified: boolean;
+            is_admin: boolean;
+            readonly date_joined: string;
+            readonly user_profile: string;
+        };
+        UserListPaginatedResponse: {
+            limit: number;
+            offset: number;
+            count: number;
+            /** Format: uri */
+            next: string | null;
+            /** Format: uri */
+            previous: string | null;
+            results: components["schemas"]["UserListItem"][];
+        };
+        VerseOutput: {
+            readonly id: number;
+            number: number;
+            text: string;
+        };
+        VideoCreateUpdate: {
+            title?: string;
+            /** Format: uri */
+            youtube_url: string;
+            category_slug: string;
+            is_live?: boolean;
+            is_pinned_live?: boolean;
+        };
+        VideoList: {
+            readonly id: number;
+            title?: string;
+            /** Format: uri */
+            youtube_url: string;
+            readonly youtube_id: string;
+            readonly embed_url: string;
+            readonly category: components["schemas"]["Category"];
+            is_live?: boolean;
+            is_pinned_live?: boolean;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `0` - Monday
+         *     * `1` - Tuesday
+         *     * `2` - Wednesday
+         *     * `3` - Thursday
+         *     * `4` - Friday
+         *     * `5` - Saturday
+         *     * `6` - Sunday
+         * @enum {integer}
+         */
+        WeekdayEnum: 0 | 1 | 2 | 3 | 4 | 5 | 6;
     };
-    BookMetadataOutput: {
-      readonly id: number;
-      name: string;
-      slug: string;
-      order: number;
-      readonly testament: string;
-      verse_count?: number;
-      readonly chapter_count: number;
-    };
-    Group: {
-      readonly id: number;
-      name: string;
-      slug: string;
-      /** Format: uri */
-      readonly audio_file: string;
-      readonly mysteries: string;
-    };
-    /**
-     * @description Main serializer aggregating all data for a specific liturgical date.
-     *     Includes nested resources, readings, and offices if prefetched.
-     */
-    LiturgicalDate: {
-      readonly id: number;
-      /** Format: date */
-      date: string;
-      zone: string;
-      day_name?: string;
-      season?: string;
-      mystery?: string;
-      notes?: string;
-      readonly resource: components['schemas']['AelfResource'];
-      readonly readings: string;
-      readonly offices: string;
-    };
-    MinisterDetail: {
-      readonly id: number;
-      first_name: string;
-      last_name: string;
-      readonly slug: string;
-      /** Format: uri */
-      photo?: string | null;
-      role?: components['schemas']['RoleEnum'];
-      readonly role_display: string;
-      readonly parish: components['schemas']['Parish'];
-      parish_id: number;
-      user_id?: number | null;
-      bio?: string;
-      is_active?: boolean;
-      readonly weekly_availabilities: string;
-    };
-    MinisterList: {
-      readonly id: number;
-      first_name: string;
-      last_name: string;
-      readonly slug: string;
-      /** Format: uri */
-      photo?: string | null;
-      role?: components['schemas']['RoleEnum'];
-      readonly role_display: string;
-      readonly parish: components['schemas']['Parish'];
-      parish_id: number;
-      user_id?: number | null;
-      is_active?: boolean;
-    };
-    MonthCalendar: {
-      available_days: string[];
-      full_days: string[];
-      partial_days: string[];
-    };
-    Mystery: {
-      readonly id: number;
-      order: number;
-      title: string;
-      /** @description Scripture reading or meditation for the mystery */
-      meditation?: string | null;
-      /** Format: uri */
-      readonly audio_file: string;
-      /** @description Duration in seconds */
-      audio_duration?: number | null;
-      readonly prayers: string;
-    };
-    /** @description Serializer for Liturgy of the Hours texts. */
-    Office: {
-      readonly id: number;
-      office_type: string;
-      /** @description Hymn text */
-      hymn?: string;
-      /** @description List of psalms/canticles objects */
-      psalms?: unknown;
-      /** @description Main canticle (Benedictus/Magnificat/Nunc Dimittis) */
-      canticle?: string;
-      /** @description Short readings and responsories */
-      readings?: unknown;
-      /** @description Intercessions text */
-      intercessions?: string;
-      /** @description Any additional unmodified data */
-      raw_metadata?: unknown;
-    };
-    PaginatedMinisterListList: {
-      /** @example 123 */
-      count: number;
-      /**
-       * Format: uri
-       * @example http://api.example.org/accounts/?offset=400&limit=100
-       */
-      next?: string | null;
-      /**
-       * Format: uri
-       * @example http://api.example.org/accounts/?offset=200&limit=100
-       */
-      previous?: string | null;
-      results: components['schemas']['MinisterList'][];
-    };
-    PaginatedParishList: {
-      /** @example 123 */
-      count: number;
-      /**
-       * Format: uri
-       * @example http://api.example.org/accounts/?offset=400&limit=100
-       */
-      next?: string | null;
-      /**
-       * Format: uri
-       * @example http://api.example.org/accounts/?offset=200&limit=100
-       */
-      previous?: string | null;
-      results: components['schemas']['Parish'][];
-    };
-    PaginatedServiceTypeList: {
-      /** @example 123 */
-      count: number;
-      /**
-       * Format: uri
-       * @example http://api.example.org/accounts/?offset=400&limit=100
-       */
-      next?: string | null;
-      /**
-       * Format: uri
-       * @example http://api.example.org/accounts/?offset=200&limit=100
-       */
-      previous?: string | null;
-      results: components['schemas']['ServiceType'][];
-    };
-    PaginatedWeeklyAvailabilityList: {
-      /** @example 123 */
-      count: number;
-      /**
-       * Format: uri
-       * @example http://api.example.org/accounts/?offset=400&limit=100
-       */
-      next?: string | null;
-      /**
-       * Format: uri
-       * @example http://api.example.org/accounts/?offset=200&limit=100
-       */
-      previous?: string | null;
-      results: components['schemas']['WeeklyAvailability'][];
-    };
-    Parish: {
-      readonly id: number;
-      name: string;
-      readonly slug: string;
-      address?: string;
-      city: string;
-      country?: string;
-      /** Format: decimal */
-      latitude?: string | null;
-      /** Format: decimal */
-      longitude?: string | null;
-      is_active?: boolean;
-    };
-    PatchedMinisterDetail: {
-      readonly id?: number;
-      first_name?: string;
-      last_name?: string;
-      readonly slug?: string;
-      /** Format: uri */
-      photo?: string | null;
-      role?: components['schemas']['RoleEnum'];
-      readonly role_display?: string;
-      readonly parish?: components['schemas']['Parish'];
-      parish_id?: number;
-      user_id?: number | null;
-      bio?: string;
-      is_active?: boolean;
-      readonly weekly_availabilities?: string;
-    };
-    PatchedParish: {
-      readonly id?: number;
-      name?: string;
-      readonly slug?: string;
-      address?: string;
-      city?: string;
-      country?: string;
-      /** Format: decimal */
-      latitude?: string | null;
-      /** Format: decimal */
-      longitude?: string | null;
-      is_active?: boolean;
-    };
-    PatchedServiceType: {
-      readonly id?: number;
-      name?: string;
-      readonly slug?: string;
-      description?: string;
-      duration_minutes?: number;
-    };
-    Prayer: {
-      readonly id: number;
-      type: components['schemas']['TypeEnum'];
-      readonly type_display: string;
-      language?: string;
-      text: string;
-    };
-    RagQuery: {
-      /** @description The question or prompt to ask the assistant (e.g., 'Quel mystère aujourd'hui et as-tu un prêtre dispo à Mbour ?') */
-      query: string;
-    };
-    RagResponse: {
-      /** @description The generated response from the LLM. */
-      answer: string;
-      /** @description The raw context retrieved from the database. */
-      context: string;
-      /** @description The metadata showing how the LLM routed the question. */
-      intent: {
-        [key: string]: unknown;
-      };
-    };
-    /** @description Serializer for Mass readings. */
-    Reading: {
-      readonly id: number;
-      type: string;
-      citation?: string;
-      text: string;
-      raw_metadata?: unknown;
-      readonly matched_verses: components['schemas']['VerseOutput'][];
-    };
-    /**
-     * @description * `PRIEST` - Priest
-     *     * `SISTER` - Sister
-     *     * `DEACON` - Deacon
-     *     * `RELIGIOUS` - Religious
-     *     * `BISHOP` - Bishop
-     * @enum {string}
-     */
-    RoleEnum: 'PRIEST' | 'SISTER' | 'DEACON' | 'RELIGIOUS' | 'BISHOP';
-    RosaryDay: {
-      readonly id: number;
-      weekday: components['schemas']['WeekdayEnum'];
-      readonly weekday_display: string;
-      readonly group: components['schemas']['Group'];
-    };
-    /** @description Shape of search results grouped by book. */
-    SearchBookGroupOutput: {
-      book: components['schemas']['SearchBookMetadataOutput'];
-      matches: components['schemas']['SearchMatchOutput'][];
-    };
-    /** @description Shape of book metadata returned by search service. */
-    SearchBookMetadataOutput: {
-      id: number;
-      name: string;
-      slug: string;
-      order: number;
-      testament: string;
-    };
-    /** @description Shape of the search result specific to a matching verse. */
-    SearchMatchOutput: {
-      verse: components['schemas']['SearchVerseOutput'];
-      /** @default false */
-      no_internal_source: boolean;
-      /** Format: double */
-      score?: number;
-    };
-    /** @description Extends PrayerSerializer to show rank from full text search. */
-    SearchPrayer: {
-      readonly id: number;
-      type: components['schemas']['TypeEnum'];
-      readonly type_display: string;
-      language?: string;
-      text: string;
-      /** Format: double */
-      readonly rank: number;
-    };
-    SearchVerseOutput: {
-      id: number;
-      number: number;
-      chapter: {
-        [key: string]: unknown;
-      };
-      text: string;
-    };
-    ServiceType: {
-      readonly id: number;
-      name: string;
-      readonly slug: string;
-      description?: string;
-      duration_minutes?: number;
-    };
-    Slot: {
-      /** Format: time */
-      start: string;
-      /** Format: time */
-      end: string;
-      service: string;
-      service_name: string;
-    };
-    TestamentWithBooksOutput: {
-      slug: string;
-      name: string;
-      order?: number;
-      readonly books: {
-        [key: string]: unknown;
-      }[];
-    };
-    TodayRosaryOutput: {
-      day: components['schemas']['RosaryDay'];
-      standalone_prayers: components['schemas']['Prayer'][];
-    };
-    /**
-     * @description * `SIGN_OF_CROSS` - Sign of Cross
-     *     * `CREED` - Apostles Creed
-     *     * `OUR_FATHER` - Our Father
-     *     * `HAIL_MARY` - Hail Mary
-     *     * `GLORY_BE` - Glory Be
-     *     * `FATIMA` - Fatima Prayer
-     *     * `HOLY_QUEEN` - Hail Holy Queen
-     *     * `FINAL_PRAYER` - Final Prayer
-     *     * `OTHER` - Other
-     * @enum {string}
-     */
-    TypeEnum:
-      | 'SIGN_OF_CROSS'
-      | 'CREED'
-      | 'OUR_FATHER'
-      | 'HAIL_MARY'
-      | 'GLORY_BE'
-      | 'FATIMA'
-      | 'HOLY_QUEEN'
-      | 'FINAL_PRAYER'
-      | 'OTHER';
-    VerseOutput: {
-      readonly id: number;
-      number: number;
-      text: string;
-    };
-    /**
-     * @description * `0` - Monday
-     *     * `1` - Tuesday
-     *     * `2` - Wednesday
-     *     * `3` - Thursday
-     *     * `4` - Friday
-     *     * `5` - Saturday
-     *     * `6` - Sunday
-     * @enum {integer}
-     */
-    WeekdayEnum: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-    WeeklyAvailability: {
-      readonly id: number;
-      weekday: components['schemas']['WeekdayEnum'];
-      readonly weekday_display: string;
-      /** Format: time */
-      start_time: string;
-      /** Format: time */
-      end_time: string;
-      readonly service_type: components['schemas']['ServiceType'];
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  v1_availability_available_list: {
-    parameters: {
-      query: {
-        date: string;
-        service: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['MinisterList'][];
-        };
-      };
-    };
-  };
-  v1_availability_calendar_retrieve: {
-    parameters: {
-      query: {
-        month: string;
-      };
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['MonthCalendar'];
-        };
-      };
-    };
-  };
-  v1_availability_ministers_list: {
-    parameters: {
-      query?: {
-        is_active?: boolean;
-        /** @description Number of results to return per page. */
-        limit?: number;
-        /** @description The initial index from which to return the results. */
-        offset?: number;
-        parish__slug?: string;
-        /**
-         * @description * `PRIEST` - Priest
-         *     * `SISTER` - Sister
-         *     * `DEACON` - Deacon
-         *     * `RELIGIOUS` - Religious
-         *     * `BISHOP` - Bishop
-         */
-        role?: 'BISHOP' | 'DEACON' | 'PRIEST' | 'RELIGIOUS' | 'SISTER';
-        /** @description A search term. */
-        search?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PaginatedMinisterListList'];
-        };
-      };
-    };
-  };
-  v1_availability_ministers_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['MinisterList'];
-        'multipart/form-data': components['schemas']['MinisterList'];
-        'application/x-www-form-urlencoded': components['schemas']['MinisterList'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['MinisterList'];
-        };
-      };
-    };
-  };
-  v1_availability_ministers_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['MinisterDetail'];
-        };
-      };
-    };
-  };
-  v1_availability_ministers_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['MinisterDetail'];
-        'multipart/form-data': components['schemas']['MinisterDetail'];
-        'application/x-www-form-urlencoded': components['schemas']['MinisterDetail'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['MinisterDetail'];
-        };
-      };
-    };
-  };
-  v1_availability_ministers_destroy: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_availability_ministers_partial_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: {
-      content: {
-        'application/json': components['schemas']['PatchedMinisterDetail'];
-        'multipart/form-data': components['schemas']['PatchedMinisterDetail'];
-        'application/x-www-form-urlencoded': components['schemas']['PatchedMinisterDetail'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['MinisterDetail'];
-        };
-      };
-    };
-  };
-  v1_availability_ministers_available_list: {
-    parameters: {
-      query: {
-        date: string;
-      };
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Slot'][];
-        };
-      };
-    };
-  };
-  v1_availability_ministers_weekly_list: {
-    parameters: {
-      query?: {
-        /** @description Number of results to return per page. */
-        limit?: number;
-        /** @description The initial index from which to return the results. */
-        offset?: number;
-        /** @description A search term. */
-        search?: string;
-      };
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PaginatedWeeklyAvailabilityList'];
-        };
-      };
-    };
-  };
-  v1_availability_parishes_list: {
-    parameters: {
-      query?: {
-        city?: string;
-        city__icontains?: string;
-        is_active?: boolean;
-        /** @description Number of results to return per page. */
-        limit?: number;
-        /** @description The initial index from which to return the results. */
-        offset?: number;
-        /** @description A search term. */
-        search?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PaginatedParishList'];
-        };
-      };
-    };
-  };
-  v1_availability_parishes_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['Parish'];
-        'multipart/form-data': components['schemas']['Parish'];
-        'application/x-www-form-urlencoded': components['schemas']['Parish'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Parish'];
-        };
-      };
-    };
-  };
-  v1_availability_parishes_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Parish'];
-        };
-      };
-    };
-  };
-  v1_availability_parishes_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['Parish'];
-        'multipart/form-data': components['schemas']['Parish'];
-        'application/x-www-form-urlencoded': components['schemas']['Parish'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Parish'];
-        };
-      };
-    };
-  };
-  v1_availability_parishes_destroy: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_availability_parishes_partial_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: {
-      content: {
-        'application/json': components['schemas']['PatchedParish'];
-        'multipart/form-data': components['schemas']['PatchedParish'];
-        'application/x-www-form-urlencoded': components['schemas']['PatchedParish'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Parish'];
-        };
-      };
-    };
-  };
-  v1_availability_services_list: {
-    parameters: {
-      query?: {
-        /** @description Number of results to return per page. */
-        limit?: number;
-        /** @description The initial index from which to return the results. */
-        offset?: number;
-        /** @description A search term. */
-        search?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PaginatedServiceTypeList'];
-        };
-      };
-    };
-  };
-  v1_availability_services_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ServiceType'];
-        'multipart/form-data': components['schemas']['ServiceType'];
-        'application/x-www-form-urlencoded': components['schemas']['ServiceType'];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['ServiceType'];
-        };
-      };
-    };
-  };
-  v1_availability_services_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['ServiceType'];
-        };
-      };
-    };
-  };
-  v1_availability_services_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ServiceType'];
-        'multipart/form-data': components['schemas']['ServiceType'];
-        'application/x-www-form-urlencoded': components['schemas']['ServiceType'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['ServiceType'];
-        };
-      };
-    };
-  };
-  v1_availability_services_destroy: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_availability_services_partial_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: {
-      content: {
-        'application/json': components['schemas']['PatchedServiceType'];
-        'multipart/form-data': components['schemas']['PatchedServiceType'];
-        'application/x-www-form-urlencoded': components['schemas']['PatchedServiceType'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['ServiceType'];
-        };
-      };
-    };
-  };
-  v1_bible_books_list: {
-    parameters: {
-      query?: {
-        /** @description Number of results to return per page. */
-        limit?: number;
-        /** @description The initial index from which to return the results. */
-        offset?: number;
-        search?: string | null;
-        testament?: string | null;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['BookMetadataOutput'][];
-        };
-      };
-    };
-  };
-  v1_bible_books_chapters_verses_list: {
-    parameters: {
-      query?: {
-        excerpt?: boolean;
-        /** @description Number of results to return per page. */
-        limit?: number;
-        /** @description The initial index from which to return the results. */
-        offset?: number;
-        verses?: string | null;
-      };
-      header?: never;
-      path: {
-        book_id: number;
-        chapter_number: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['VerseOutput'][];
-        };
-      };
-    };
-  };
-  v1_bible_search_list: {
-    parameters: {
-      query: {
-        book_slug?: string | null;
-        chapter_number?: number | null;
-        hybrid?: boolean;
-        limit?: number;
-        q: string;
-        testament?: string | null;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['SearchBookGroupOutput'][];
-        };
-      };
-    };
-  };
-  v1_bible_testaments_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['TestamentWithBooksOutput'][];
-        };
-      };
-    };
-  };
-  v1_bible_testaments_books_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        testament_slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['BookMetadataOutput'][];
-        };
-      };
-    };
-  };
-  v1_errors_trigger_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_errors_trigger_exception_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_errors_trigger_unique_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_files_upload_direct_finish_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_files_upload_direct_local_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        file_id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_files_upload_direct_start_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_files_upload_standard_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_liturgy_date_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        date_str: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['LiturgicalDate'];
-        };
-      };
-    };
-  };
-  v1_liturgy_offices_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Office'];
-        };
-      };
-    };
-  };
-  v1_liturgy_readings_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Reading'];
-        };
-      };
-    };
-  };
-  v1_liturgy_today_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['LiturgicalDate'];
-        };
-      };
-    };
-  };
-  v1_rag_query_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['RagQuery'];
-        'multipart/form-data': components['schemas']['RagQuery'];
-        'application/x-www-form-urlencoded': components['schemas']['RagQuery'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['RagResponse'];
-        };
-      };
-    };
-  };
-  v1_rosary_day_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        day: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['TodayRosaryOutput'];
-        };
-      };
-    };
-  };
-  v1_rosary_groups_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Group'][];
-        };
-      };
-    };
-  };
-  v1_rosary_groups_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slug: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Group'];
-        };
-      };
-    };
-  };
-  v1_rosary_mysteries_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Mystery'];
-        };
-      };
-    };
-  };
-  v1_rosary_prayers_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Prayer'][];
-        };
-      };
-    };
-  };
-  v1_rosary_search_list: {
-    parameters: {
-      query?: {
-        /** @description Search query */
-        q?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['SearchPrayer'][];
-        };
-      };
-    };
-  };
-  v1_rosary_today_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['TodayRosaryOutput'];
-        };
-      };
-    };
-  };
-  v1_rosary_vector_search_list: {
-    parameters: {
-      query?: {
-        /** @description Semantic search query */
-        q?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['SearchPrayer'][];
-        };
-      };
-    };
-  };
-  v1_users_retrieve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_users_retrieve_2: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        user_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_users_update_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        user_id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  v1_users_create_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description No response body */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
+    v1_agenda_events_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by event type */
+                event_type?: string;
+                limit?: number;
+                offset?: number;
+                /** @description Only future events (default true) */
+                upcoming_only?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOutput"][];
+                };
+            };
+        };
+    };
+    v1_agenda_events_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventInput"];
+                "multipart/form-data": components["schemas"]["EventInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOutput"];
+                };
+            };
+        };
+    };
+    v1_agenda_events_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventOutput"];
+                };
+            };
+        };
+    };
+    v1_agenda_events_register_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_agenda_events_registrations_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistrationOutput"][];
+                };
+            };
+        };
+    };
+    v1_auth_jwt_login_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserJwtLoginInput"];
+                "multipart/form-data": components["schemas"]["UserJwtLoginInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["UserJwtLoginInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserJwtLoginOutput"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    v1_auth_jwt_logout_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserJwtLogoutInput"];
+                "multipart/form-data": components["schemas"]["UserJwtLogoutInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["UserJwtLogoutInput"];
+            };
+        };
+        responses: {
+            /** @description Déconnexion réussie */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    v1_auth_jwt_logout_all_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Tous les appareils déconnectés */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_auth_jwt_refresh_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserJwtRefreshInput"];
+                "multipart/form-data": components["schemas"]["UserJwtRefreshInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["UserJwtRefreshInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserJwtRefreshOutput"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    v1_auth_me_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonProfil"];
+                };
+            };
+        };
+    };
+    v1_bible_books_list: {
+        parameters: {
+            query?: {
+                /** @description Number of results to return per page. */
+                limit?: number;
+                /** @description The initial index from which to return the results. */
+                offset?: number;
+                search?: string | null;
+                testament?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookMetadataOutput"][];
+                };
+            };
+        };
+    };
+    v1_bible_books_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Pass 'chapters' to include chapters metadata */
+                expand?: string;
+            };
+            header?: never;
+            path: {
+                book_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_bible_books_chapters_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                book_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChapterMetadataOutput"][];
+                };
+            };
+        };
+    };
+    v1_bible_books_chapters_verses_list: {
+        parameters: {
+            query?: {
+                excerpt?: boolean;
+                /** @description Number of results to return per page. */
+                limit?: number;
+                /** @description The initial index from which to return the results. */
+                offset?: number;
+                source?: string | null;
+                verses?: string | null;
+            };
+            header?: never;
+            path: {
+                book_id: number;
+                chapter_number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerseOutput"][];
+                };
+            };
+        };
+    };
+    v1_bible_daily_texts_list: {
+        parameters: {
+            query?: {
+                /** @description Number of results to return per page. */
+                limit?: number;
+                /** @description The initial index from which to return the results. */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyTextOutput"][];
+                };
+            };
+        };
+    };
+    v1_bible_homilenotes_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomilieNoteOutput"][];
+                };
+            };
+        };
+    };
+    v1_bible_homilenotes_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HomilieNoteInput"];
+                "multipart/form-data": components["schemas"]["HomilieNoteInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["HomilieNoteInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomilieNoteOutput"];
+                };
+            };
+        };
+    };
+    v1_bible_homilenotes_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                note_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomilieNoteOutput"];
+                };
+            };
+        };
+    };
+    v1_bible_homilenotes_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                note_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_bible_homilenotes_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                note_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedHomilieNoteInput"];
+                "multipart/form-data": components["schemas"]["PatchedHomilieNoteInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedHomilieNoteInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HomilieNoteOutput"];
+                };
+            };
+        };
+    };
+    v1_bible_import_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_bible_lectio_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LectioDivinaOutput"][];
+                };
+            };
+        };
+    };
+    v1_bible_lectio_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LectioDivinaInput"];
+                "multipart/form-data": components["schemas"]["LectioDivinaInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["LectioDivinaInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LectioDivinaOutput"];
+                };
+            };
+        };
+    };
+    v1_bible_reading_plans_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingPlanOutput"][];
+                };
+            };
+        };
+    };
+    v1_bible_reading_plans_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadingPlanInput"];
+                "multipart/form-data": components["schemas"]["ReadingPlanInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReadingPlanInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingPlanOutput"];
+                };
+            };
+        };
+    };
+    v1_bible_reading_plans_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingPlanOutput"];
+                };
+            };
+        };
+    };
+    v1_bible_reading_plans_create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingPlanOutput"];
+                };
+            };
+        };
+    };
+    v1_bible_reading_plans_publish_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingPlanOutput"];
+                };
+            };
+        };
+    };
+    v1_bible_reading_plans_publish_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingPlanOutput"];
+                };
+            };
+        };
+    };
+    v1_bible_search_list: {
+        parameters: {
+            query: {
+                book_slug?: string | null;
+                chapter_number?: number | null;
+                hybrid?: boolean;
+                limit?: number;
+                q: string;
+                source?: string | null;
+                testament?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchBookGroupOutput"][];
+                };
+            };
+        };
+    };
+    v1_bible_testaments_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestamentWithBooksOutput"][];
+                };
+            };
+        };
+    };
+    v1_bible_testaments_books_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                testament_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookMetadataOutput"][];
+                };
+            };
+        };
+    };
+    v1_clergy_accounts_invitations_list: {
+        parameters: {
+            query?: {
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Offset de pagination */
+                offset?: number;
+                /** @description Filtrer par statut */
+                status?: "accepted" | "expired" | "pending" | "revoked";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationOutput"][];
+                };
+            };
+        };
+    };
+    v1_clergy_accounts_invitations_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationCreateInput"];
+                "multipart/form-data": components["schemas"]["InvitationCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["InvitationCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationOutput"];
+                };
+            };
+        };
+    };
+    v1_clergy_accounts_invitations_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationOutput"];
+                };
+            };
+        };
+    };
+    v1_clergy_accounts_invitations_revoke_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationOutput"];
+                };
+            };
+        };
+    };
+    v1_clergy_accounts_invitations_accept_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationAcceptInput"];
+                "multipart/form-data": components["schemas"]["InvitationAcceptInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["InvitationAcceptInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationOutput"];
+                };
+            };
+        };
+    };
+    v1_clergy_accounts_invitations_validate_retrieve: {
+        parameters: {
+            query?: {
+                /** @description UUID du token d'invitation */
+                token?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationOutput"];
+                };
+            };
+        };
+    };
+    v1_dashboards_diocese_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                diocese_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    v1_dashboards_me_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    v1_dashboards_my_diocese_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    v1_dashboards_my_parish_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    v1_dashboards_parish_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                parish_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    v1_documents_admin_requests_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par agent assigné */
+                assigned_to_id?: number;
+                /** @description Filtrer par type de document */
+                document_type?: string;
+                /** @description Nombre de résultats (défaut 20) */
+                limit?: number;
+                /** @description Décalage pagination */
+                offset?: number;
+                /** @description Filtrer par nom de paroisse */
+                parish_name?: string;
+                /** @description Recherche textuelle */
+                search?: string;
+                /** @description Filtrer par statut */
+                status?: "document_deposited" | "info_requested" | "rejected" | "submitted" | "under_verification" | "validated";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestListOutput"][];
+                };
+            };
+        };
+    };
+    v1_documents_admin_requests_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_documents_admin_requests_deposit_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DepositDocumentInput"];
+                "multipart/form-data": components["schemas"]["DepositDocumentInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["DepositDocumentInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_documents_admin_requests_logs_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusLogOutput"][];
+                };
+            };
+        };
+    };
+    v1_documents_admin_requests_notes_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InternalNoteOutput"][];
+                };
+            };
+        };
+    };
+    v1_documents_admin_requests_notes_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InternalNoteCreateInput"];
+                "multipart/form-data": components["schemas"]["InternalNoteCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["InternalNoteCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InternalNoteOutput"];
+                };
+            };
+        };
+    };
+    v1_documents_admin_requests_reject_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectInput"];
+                "multipart/form-data": components["schemas"]["RejectInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["RejectInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_documents_admin_requests_request_info_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["StatusActionWithCommentInput"];
+                "multipart/form-data": components["schemas"]["StatusActionWithCommentInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["StatusActionWithCommentInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_documents_admin_requests_start_verification_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_documents_admin_requests_validate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_documents_requests_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par type de document */
+                document_type?: string;
+                /** @description Nombre de résultats (défaut 20) */
+                limit?: number;
+                /** @description Décalage pagination */
+                offset?: number;
+                /** @description Filtrer par nom de paroisse */
+                parish_name?: string;
+                /** @description Recherche textuelle */
+                search?: string;
+                /** @description Filtrer par statut */
+                status?: "document_deposited" | "info_requested" | "rejected" | "submitted" | "under_verification" | "validated";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestListOutput"][];
+                };
+            };
+        };
+    };
+    v1_documents_requests_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentRequestCreateInput"];
+                "multipart/form-data": components["schemas"]["DocumentRequestCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["DocumentRequestCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_documents_requests_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_documents_requests_supplement_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DocumentRequestSupplementInput"];
+                "multipart/form-data": components["schemas"]["DocumentRequestSupplementInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["DocumentRequestSupplementInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_donations_confirm_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                donation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DonationConfirmInput"];
+                "multipart/form-data": components["schemas"]["DonationConfirmInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["DonationConfirmInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DonationOutput"];
+                };
+            };
+        };
+    };
+    v1_donations_campaigns_list: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignOutput"][];
+                };
+            };
+        };
+    };
+    v1_donations_campaigns_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampaignCreateInput"];
+                "multipart/form-data": components["schemas"]["CampaignCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["CampaignCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignOutput"];
+                };
+            };
+        };
+    };
+    v1_donations_donate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DonationMakeInput"];
+                "multipart/form-data": components["schemas"]["DonationMakeInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["DonationMakeInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DonationOutput"];
+                };
+            };
+        };
+    };
+    v1_donations_my_list: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DonationOutput"][];
+                };
+            };
+        };
+    };
+    v1_errors_trigger_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_errors_trigger_exception_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_files_upload_direct_finish_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id?: number;
+                    };
+                };
+            };
+        };
+    };
+    v1_files_upload_direct_local_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id?: number;
+                    };
+                };
+            };
+        };
+    };
+    v1_files_upload_direct_start_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id?: number;
+                        url?: string;
+                    };
+                };
+            };
+        };
+    };
+    v1_files_upload_standard_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id?: number;
+                    };
+                };
+            };
+        };
+    };
+    v1_liturgy_date_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                date_str: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LiturgicalDate"];
+                };
+            };
+        };
+    };
+    v1_liturgy_offices_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Office"];
+                };
+            };
+        };
+    };
+    v1_liturgy_readings_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Reading"];
+                };
+            };
+        };
+    };
+    v1_liturgy_today_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LiturgicalDate"];
+                };
+            };
+        };
+    };
+    v1_liturgy_v1_complies_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Date YYYY-MM-DD (défaut: aujourd'hui) */
+                date?: string;
+                /** @description Zone liturgique (défaut: afrique) */
+                zone?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Office"];
+                };
+            };
+        };
+    };
+    v1_liturgy_v1_informations_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Date YYYY-MM-DD */
+                date?: string;
+                /** @description Zone liturgique */
+                zone?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LiturgicalDate"];
+                };
+            };
+        };
+    };
+    v1_liturgy_v1_laudes_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Date YYYY-MM-DD (défaut: aujourd'hui) */
+                date?: string;
+                /** @description Zone liturgique (défaut: afrique) */
+                zone?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Office"];
+                };
+            };
+        };
+    };
+    v1_liturgy_v1_lectures_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Date YYYY-MM-DD (défaut: aujourd'hui) */
+                date?: string;
+                /** @description Zone liturgique (défaut: afrique) */
+                zone?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Office"];
+                };
+            };
+        };
+    };
+    v1_liturgy_v1_messes_list: {
+        parameters: {
+            query?: {
+                /** @description Date YYYY-MM-DD */
+                date?: string;
+                /** @description Zone liturgique */
+                zone?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Reading"][];
+                };
+            };
+        };
+    };
+    v1_liturgy_v1_none_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Date YYYY-MM-DD (défaut: aujourd'hui) */
+                date?: string;
+                /** @description Zone liturgique (défaut: afrique) */
+                zone?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Office"];
+                };
+            };
+        };
+    };
+    v1_liturgy_v1_sexte_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Date YYYY-MM-DD (défaut: aujourd'hui) */
+                date?: string;
+                /** @description Zone liturgique (défaut: afrique) */
+                zone?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Office"];
+                };
+            };
+        };
+    };
+    v1_liturgy_v1_tierce_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Date YYYY-MM-DD (défaut: aujourd'hui) */
+                date?: string;
+                /** @description Zone liturgique (défaut: afrique) */
+                zone?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Office"];
+                };
+            };
+        };
+    };
+    v1_liturgy_v1_vepres_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Date YYYY-MM-DD (défaut: aujourd'hui) */
+                date?: string;
+                /** @description Zone liturgique (défaut: afrique) */
+                zone?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Office"];
+                };
+            };
+        };
+    };
+    v1_mass_intentions_accept_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intention_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MassIntentionOutput"];
+                };
+            };
+        };
+    };
+    v1_mass_intentions_celebrate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intention_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MassIntentionOutput"];
+                };
+            };
+        };
+    };
+    v1_mass_intentions_decline_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intention_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MassIntentionDeclineInput"];
+                "multipart/form-data": components["schemas"]["MassIntentionDeclineInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["MassIntentionDeclineInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MassIntentionOutput"];
+                };
+            };
+        };
+    };
+    v1_mass_intentions_propose_date_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intention_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MassIntentionProposeDateInput"];
+                "multipart/form-data": components["schemas"]["MassIntentionProposeDateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["MassIntentionProposeDateInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MassIntentionOutput"];
+                };
+            };
+        };
+    };
+    v1_mass_intentions_my_list: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MassIntentionOutput"][];
+                };
+            };
+        };
+    };
+    v1_mass_intentions_parish_list: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MassIntentionOutput"][];
+                };
+            };
+        };
+    };
+    v1_mass_intentions_submit_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MassIntentionSubmitInput"];
+                "multipart/form-data": components["schemas"]["MassIntentionSubmitInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["MassIntentionSubmitInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MassIntentionOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_blocks_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlockOutput"][];
+                };
+            };
+        };
+    };
+    v1_messaging_blocks_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BlockCreateInput"];
+                "multipart/form-data": components["schemas"]["BlockCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["BlockCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlockOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_blocks_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                block_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_messaging_clerical_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClergicalMessageSendInput"];
+                "multipart/form-data": components["schemas"]["ClergicalMessageSendInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ClergicalMessageSendInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClergicalMessageOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_clerical_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClergicalMessageOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_clerical_inbox_list: {
+        parameters: {
+            query?: {
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Offset de pagination */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClergicalMessageOutput"][];
+                };
+            };
+        };
+    };
+    v1_messaging_clerical_sent_list: {
+        parameters: {
+            query?: {
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Offset de pagination */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClergicalMessageOutput"][];
+                };
+            };
+        };
+    };
+    v1_messaging_conversations_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationOutput"][];
+                };
+            };
+        };
+    };
+    v1_messaging_conversations_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_conversations_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_messaging_conversations_archive_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_conversations_cgu_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_conversations_export_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportOutput"][];
+                };
+            };
+        };
+    };
+    v1_messaging_conversations_export_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExportOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_conversations_messages_list: {
+        parameters: {
+            query?: {
+                /** @description Charger les messages avant cet identifiant (pagination curseur) */
+                before_id?: string;
+                /** @description Nombre de messages à retourner (max 100, défaut 30) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageOutput"][];
+                };
+            };
+        };
+    };
+    v1_messaging_conversations_messages_send_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageSendInput"];
+                "multipart/form-data": components["schemas"]["MessageSendInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["MessageSendInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_conversations_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_messaging_conversations_create_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConversationCreateInput"];
+                "multipart/form-data": components["schemas"]["ConversationCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ConversationCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_messages_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_messaging_messages_react_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReactInput"];
+                "multipart/form-data": components["schemas"]["ReactInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReactInput"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_messaging_messages_react_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_messaging_notifications_list: {
+        parameters: {
+            query?: {
+                /** @description Si true, retourne uniquement les notifications non lues */
+                unread_only?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationOutput"][];
+                };
+            };
+        };
+    };
+    v1_messaging_notifications_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                notification_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_priest_profile_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PriestProfileCreateInput"];
+                "multipart/form-data": components["schemas"]["PriestProfileCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PriestProfileCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriestProfileOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_priest_profile_cgu_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriestProfileOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_priest_profile_me_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedPriestProfileUpdateInput"];
+                "multipart/form-data": components["schemas"]["PatchedPriestProfileUpdateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedPriestProfileUpdateInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriestProfileOutput"];
+                };
+            };
+        };
+    };
+    v1_messaging_priests_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriestProfileOutput"][];
+                };
+            };
+        };
+    };
+    v1_news_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par slug de catégorie */
+                category?: string;
+                /** @description Nombre de résultats (défaut 20) */
+                limit?: number;
+                /** @description Décalage pagination */
+                offset?: number;
+                /** @description Recherche dans le titre */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleListOutput"][];
+                };
+            };
+        };
+    };
+    v1_news_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                article_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_news_admin_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par slug catégorie */
+                category?: string;
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Décalage pagination */
+                offset?: number;
+                /** @description Filtrer par portée */
+                scope_type?: "church" | "diocese" | "global" | "parish";
+                /** @description Recherche dans le titre */
+                search?: string;
+                /** @description Filtrer par statut */
+                status?: "draft" | "published" | "unpublished";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleListOutput"][];
+                };
+            };
+        };
+    };
+    v1_news_admin_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                article_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_news_admin_delete_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                article_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_news_admin_publish_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                article_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_news_admin_unpublish_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                article_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ArticleUnpublishInput"];
+                "multipart/form-data": components["schemas"]["ArticleUnpublishInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ArticleUnpublishInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_news_admin_update_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                article_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedArticleUpdateInput"];
+                "multipart/form-data": components["schemas"]["PatchedArticleUpdateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedArticleUpdateInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_news_admin_create_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArticleCreateInput"];
+                "multipart/form-data": components["schemas"]["ArticleCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ArticleCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_news_categories_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleCategoryOutput"][];
+                };
+            };
+        };
+    };
+    v1_news_diocese_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par slug de catégorie */
+                category?: string;
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Décalage pagination */
+                offset?: number;
+                /** @description Recherche dans le titre */
+                search?: string;
+            };
+            header?: never;
+            path: {
+                diocese_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleListOutput"][];
+                };
+            };
+        };
+    };
+    v1_news_feed_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par slug de catégorie */
+                category?: string;
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Décalage pagination */
+                offset?: number;
+                /** @description Recherche dans le titre */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleListOutput"][];
+                };
+            };
+        };
+    };
+    v1_news_my_parish_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par slug de catégorie */
+                category?: string;
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Décalage pagination */
+                offset?: number;
+                /** @description Recherche dans le titre */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleListOutput"][];
+                };
+            };
+        };
+    };
+    v1_news_parish_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par slug de catégorie */
+                category?: string;
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Décalage pagination */
+                offset?: number;
+                /** @description Recherche dans le titre */
+                search?: string;
+            };
+            header?: never;
+            path: {
+                parish_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleListOutput"][];
+                };
+            };
+        };
+    };
+    v1_org_churches_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par paroisse ID */
+                parish?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChurchOutput"][];
+                };
+            };
+        };
+    };
+    v1_org_churches_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChurchCreateInput"];
+                "multipart/form-data": components["schemas"]["ChurchCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ChurchCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChurchOutput"];
+                };
+            };
+        };
+    };
+    v1_org_churches_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                church_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChurchOutput"];
+                };
+            };
+        };
+    };
+    v1_org_deaneries_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par diocèse ID */
+                diocese?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeaneryOutput"][];
+                };
+            };
+        };
+    };
+    v1_org_deaneries_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeaneryCreateInput"];
+                "multipart/form-data": components["schemas"]["DeaneryCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["DeaneryCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeaneryOutput"];
+                };
+            };
+        };
+    };
+    v1_org_dioceses_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par province ID */
+                province?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DioceseOutput"][];
+                };
+            };
+        };
+    };
+    v1_org_dioceses_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DioceseCreateInput"];
+                "multipart/form-data": components["schemas"]["DioceseCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["DioceseCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DioceseOutput"];
+                };
+            };
+        };
+    };
+    v1_org_parishes_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par ville (dédié) */
+                city?: string;
+                /** @description Filtrer par diocèse ID */
+                diocese?: number;
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Offset de pagination */
+                offset?: number;
+                /** @description Recherche par nom ou ville */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParishOutput"][];
+                };
+            };
+        };
+    };
+    v1_org_parishes_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParishCreateInput"];
+                "multipart/form-data": components["schemas"]["ParishCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ParishCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParishOutput"];
+                };
+            };
+        };
+    };
+    v1_org_parishes_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                parish_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParishOutput"];
+                };
+            };
+        };
+    };
+    v1_org_provinces_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProvinceOutput"][];
+                };
+            };
+        };
+    };
+    v1_org_provinces_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProvinceCreateInput"];
+                "multipart/form-data": components["schemas"]["ProvinceCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ProvinceCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProvinceOutput"];
+                };
+            };
+        };
+    };
+    v1_rag_query_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RagQuery"];
+                "multipart/form-data": components["schemas"]["RagQuery"];
+                "application/x-www-form-urlencoded": components["schemas"]["RagQuery"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RagResponse"];
+                };
+            };
+        };
+    };
+    v1_rosary_community_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunityRosaryOutput"][];
+                };
+            };
+        };
+    };
+    v1_rosary_community_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CommunityRosaryInput"];
+                "multipart/form-data": components["schemas"]["CommunityRosaryInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["CommunityRosaryInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunityRosaryOutput"];
+                };
+            };
+        };
+    };
+    v1_rosary_community_end_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rosary_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunityRosaryOutput"];
+                };
+            };
+        };
+    };
+    v1_rosary_community_intentions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rosary_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IntentionInput"];
+                "multipart/form-data": components["schemas"]["IntentionInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["IntentionInput"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_rosary_community_join_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rosary_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunityRosaryOutput"];
+                };
+            };
+        };
+    };
+    v1_rosary_day_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                day: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TodayRosaryOutput"];
+                };
+            };
+        };
+    };
+    v1_rosary_groups_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Group"][];
+                };
+            };
+        };
+    };
+    v1_rosary_groups_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Group"];
+                };
+            };
+        };
+    };
+    v1_rosary_mysteries_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Mystery"];
+                };
+            };
+        };
+    };
+    v1_rosary_prayers_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Prayer"][];
+                };
+            };
+        };
+    };
+    v1_rosary_search_list: {
+        parameters: {
+            query?: {
+                /** @description Search query */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchPrayer"][];
+                };
+            };
+        };
+    };
+    v1_rosary_today_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TodayRosaryOutput"];
+                };
+            };
+        };
+    };
+    v1_tv_categories_list: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"][];
+                };
+            };
+        };
+    };
+    v1_tv_categories_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Category"];
+                "multipart/form-data": components["schemas"]["Category"];
+                "application/x-www-form-urlencoded": components["schemas"]["Category"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"];
+                };
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_tv_categories_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_tv_categories_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Category"];
+                "multipart/form-data": components["schemas"]["Category"];
+                "application/x-www-form-urlencoded": components["schemas"]["Category"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"];
+                };
+            };
+        };
+    };
+    v1_tv_categories_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_tv_categories_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCategory"];
+                "multipart/form-data": components["schemas"]["PatchedCategory"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedCategory"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"];
+                };
+            };
+        };
+    };
+    v1_tv_videos_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by category slug */
+                category?: string;
+                is_live?: "false" | "true";
+                is_pinned_live?: "false" | "true";
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoList"][];
+                };
+            };
+        };
+    };
+    v1_tv_videos_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VideoCreateUpdate"];
+                "multipart/form-data": components["schemas"]["VideoCreateUpdate"];
+                "application/x-www-form-urlencoded": components["schemas"]["VideoCreateUpdate"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoList"];
+                };
+            };
+        };
+    };
+    v1_tv_videos_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoList"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_tv_videos_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VideoCreateUpdate"];
+                "multipart/form-data": components["schemas"]["VideoCreateUpdate"];
+                "application/x-www-form-urlencoded": components["schemas"]["VideoCreateUpdate"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoList"];
+                };
+            };
+        };
+    };
+    v1_tv_videos_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_tv_videos_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedVideoCreateUpdate"];
+                "multipart/form-data": components["schemas"]["PatchedVideoCreateUpdate"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedVideoCreateUpdate"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoList"];
+                };
+            };
+        };
+    };
+    v1_users_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par email */
+                email?: string;
+                /** @description Filtrer par statut actif */
+                is_active?: boolean;
+                /** @description Filtrer par statut de vérification email */
+                is_verified?: boolean;
+                /** @description Nombre d'éléments par page */
+                limit?: number;
+                /** @description Index de début */
+                offset?: number;
+                /** @description Filtrer par rôle (super_admin, province_admin, diocese_admin, parish_admin, church_admin, fidele) */
+                role?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserListPaginatedResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    v1_users_retrieve_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_audit_logs_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_delete_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_hard_delete_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_toggle_active_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_admin_create_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_email_change_confirm_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
+        responses: {
+            /** @description Email officiellement changé, reconnexion requise */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Code incorrect ou expiré */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Compte/IP verrouillé suite à trop d'échecs */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_email_change_request_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
+        responses: {
+            /** @description OTP envoyé à la nouvelle adresse */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Mot de passe incorrect ou email déjà utilisé */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Trop de tentatives (Rate limiting IP/User) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_email_change_revert_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Email restauré, réinitialisation du mot de passe requise */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Lien invalide ou expiré */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_me_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonProfil"];
+                };
+            };
+        };
+    };
+    v1_users_me_delete_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Compte supprimé */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_me_memberships_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MembershipCreateInput"];
+                "multipart/form-data": components["schemas"]["MembershipCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["MembershipCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MembershipMe"][];
+                };
+            };
+        };
+    };
+    v1_users_me_memberships_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                membership_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_me_memberships_set_primary_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                membership_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MembershipMe"];
+                };
+            };
+        };
+    };
+    v1_users_me_update_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedMeUpdateInput"];
+                "multipart/form-data": components["schemas"]["PatchedMeUpdateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedMeUpdateInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonProfil"];
+                };
+            };
+        };
+    };
+    v1_users_password_change_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
+        responses: {
+            /** @description Mot de passe changé */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Mot de passe actuel incorrect ou nouveau trop faible */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_password_reset_confirm_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
+        responses: {
+            /** @description Mot de passe réinitialisé */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token invalide / expiré ou mot de passe trop faible */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_password_reset_request_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
+        responses: {
+            /** @description Email envoyé si l'adresse est connue */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_register_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
+        responses: {
+            /** @description Compte créé, email de vérification envoyé */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Données invalides ou email déjà utilisé */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_users_role_assignments_list: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par utilisateur */
+                user?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleAssignmentOutput"][];
+                };
+            };
+        };
+    };
+    v1_users_role_assignments_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoleAssignmentCreateInput"];
+                "multipart/form-data": components["schemas"]["RoleAssignmentCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["RoleAssignmentCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleAssignmentOutput"];
+                };
+            };
+        };
+    };
+    v1_users_role_assignments_revoke_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleAssignmentOutput"];
+                };
+            };
+        };
+    };
+    v1_users_verify_email_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Compte activé avec succès */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Token invalide ou expiré */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
 }

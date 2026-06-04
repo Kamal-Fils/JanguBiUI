@@ -3,6 +3,7 @@
 import { Calendar, MapPin, Trash2, Users, X } from 'lucide-react';
 import { useState } from 'react';
 
+import { Card } from '@/components/ui/card/card';
 import { useNotifications } from '@/components/ui/notifications';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
@@ -22,9 +23,9 @@ export const EVENT_TYPE_LABELS: Record<string, string> = {
 
 const EVENT_TYPE_COLORS: Record<string, string> = {
   mass: 'bg-primary/10 text-primary',
-  conference: 'bg-blue-500/10 text-blue-600',
-  retreat: 'bg-teal-500/10 text-teal-600',
-  ordination: 'bg-amber-500/10 text-amber-600',
+  conference: 'bg-info/10 text-info',
+  retreat: 'bg-success/10 text-success',
+  ordination: 'bg-accent/15 text-accent',
   other: 'bg-muted text-muted-foreground',
 };
 
@@ -88,7 +89,7 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
   const isPendingAction = registering || unregistering;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <Card variant="elevated" className="p-4">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-foreground leading-snug">{event.title}</h3>
@@ -107,7 +108,8 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
               type="button"
               onClick={handleDelete}
               disabled={deleting}
-              className="rounded-lg p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+              aria-label="Supprimer l'événement"
+              className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 motion-reduce:transition-none"
             >
               <Trash2 className="size-3.5" />
             </button>
@@ -118,14 +120,18 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
                 type="button"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="rounded-lg px-2 py-0.5 text-[10px] font-semibold bg-destructive text-destructive-foreground disabled:opacity-50"
+                aria-label={
+                  deleting ? 'Suppression en cours' : 'Confirmer la suppression'
+                }
+                className="flex min-h-9 items-center rounded-lg bg-destructive px-2 text-[10px] font-semibold text-destructive-foreground transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 motion-reduce:transition-none"
               >
                 {deleting ? <Spinner className="size-3" /> : 'Supprimer'}
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmDelete(false)}
-                className="rounded-lg p-1 text-muted-foreground hover:bg-muted"
+                aria-label="Annuler la suppression"
+                className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
               >
                 <X className="size-3.5" />
               </button>
@@ -165,7 +171,7 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
         onClick={handleRegistration}
         disabled={isPendingAction || (isFull && !event.is_registered)}
         className={cn(
-          'flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-colors disabled:opacity-50',
+          'flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 motion-reduce:transition-none',
           event.is_registered
             ? 'bg-muted text-foreground hover:bg-destructive/10 hover:text-destructive'
             : 'bg-primary text-primary-foreground hover:bg-primary/90',
@@ -174,6 +180,6 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
         {isPendingAction && <Spinner className="size-4" />}
         {event.is_registered ? 'Annuler mon inscription' : isFull ? 'Complet' : "S'inscrire"}
       </button>
-    </div>
+    </Card>
   );
 }

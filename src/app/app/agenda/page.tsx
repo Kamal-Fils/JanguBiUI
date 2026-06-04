@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EventCard } from '@/features/agenda/components/event-card';
 import { useEvents } from '@/features/agenda/api/get-events';
+import { EventCard } from '@/features/agenda/components/event-card';
 import { cn } from '@/lib/utils';
 
 const EVENT_TYPE_FILTERS = [
