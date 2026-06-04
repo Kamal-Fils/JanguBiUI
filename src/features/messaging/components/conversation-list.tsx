@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/lib/auth';
 import { useMessagingStore } from '@/stores/messaging-store';
@@ -94,13 +95,17 @@ export function ConversationList() {
               Vos conversations
             </p>
           </div>
-          <Link
-            href="/app/messages/new"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20"
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="shrink-0 rounded-full bg-primary/10 text-primary hover:bg-primary/20"
             aria-label="Nouvelle conversation"
           >
-            <SquarePen className="size-4" />
-          </Link>
+            <Link href="/app/messages/new">
+              <SquarePen className="size-4" />
+            </Link>
+          </Button>
         </div>
       </header>
 

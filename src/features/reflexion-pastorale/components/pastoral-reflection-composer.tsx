@@ -3,6 +3,7 @@
 import { CheckCircle, Pencil, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { Button } from '@/components/ui/button/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useMyTodayReflection } from '../api/get-my-reflection';
@@ -67,13 +68,15 @@ export function PastoralReflectionComposer() {
           Réflexion pastorale du jour
         </h2>
         {!isEditing && (
-          <button
+          <Button
             type="button"
+            variant="link"
+            size="sm"
             onClick={handleStartEditing}
-            className="rounded text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="h-auto p-0"
           >
             {existing ? 'Modifier' : 'Rédiger'}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -93,23 +96,25 @@ export function PastoralReflectionComposer() {
               {content.length}/{MAX_CHARS}
             </span>
             <div className="flex gap-2">
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={handleCancel}
-                className="flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+                icon={<X className="size-3.5" />}
+                className="text-xs"
               >
-                <X className="size-3.5" />
                 Annuler
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={handleSave}
                 disabled={isPending || !content.trim()}
-                className="flex min-h-[44px] items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 motion-reduce:transition-none"
+                isLoading={isPending}
+                icon={<CheckCircle className="size-3.5" />}
+                className="text-xs"
               >
-                <CheckCircle className="size-3.5" />
                 {isPending ? 'Enregistrement…' : 'Publier'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
