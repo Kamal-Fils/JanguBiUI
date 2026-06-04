@@ -1,9 +1,9 @@
 'use client';
 
-import { ArrowLeft, FileDown, Loader2, Paperclip, Send } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { FileDown, Loader2, Paperclip, Send } from 'lucide-react';
 import { useState } from 'react';
 
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Spinner } from '@/components/ui/spinner';
 import {
   StatusTimeline,
@@ -42,13 +42,14 @@ function formatDateTime(iso: string): string {
 }
 
 export function DocumentDetail({ documentId }: DocumentDetailProps) {
-  const router = useRouter();
   const { data, isLoading, isError } = useDocumentRequest(documentId);
   const [supplement, setSupplement] = useState('');
   const [submittedSupplement, setSubmittedSupplement] = useState(false);
 
   const { mutate: submitSupplement, isPending: isSubmitting } =
     useSubmitSupplement(documentId);
+
+  useRegisterPageMeta({ title: 'Demande de document' });
 
   function handleSupplementSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -67,20 +68,6 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
 
   return (
     <div className="flex flex-col">
-      <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="flex size-8 items-center justify-center rounded-full hover:bg-muted"
-          aria-label="Retour"
-        >
-          <ArrowLeft className="size-5" />
-        </button>
-        <span className="text-sm font-semibold text-foreground">
-          Détail de la demande
-        </span>
-      </div>
-
       <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         {isLoading && (
           <div className="flex justify-center py-12">

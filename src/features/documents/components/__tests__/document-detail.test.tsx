@@ -1,7 +1,6 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
-import { useRouter } from 'next/navigation';
 
 import { env } from '@/config/env';
 import { createDocumentRequest } from '@/testing/data-generators';
@@ -10,22 +9,7 @@ import { renderApp } from '@/testing/test-utils';
 
 import { DocumentDetail } from '../document-detail';
 
-const mockRouterBack = vi.fn();
-
-vi.mocked(useRouter).mockReturnValue({
-  back: mockRouterBack,
-  push: vi.fn(),
-  replace: vi.fn(),
-  refresh: vi.fn(),
-  forward: vi.fn(),
-  prefetch: vi.fn(),
-} as never);
-
 describe('DocumentDetail', () => {
-  beforeEach(() => {
-    mockRouterBack.mockReset();
-  });
-
   test('shows loading spinner while fetching', async () => {
     server.use(
       http.get(`${env.API_URL}/v1/documents/requests/1/`, async () => {
@@ -164,27 +148,5 @@ describe('DocumentDetail', () => {
     renderApp(<DocumentDetail documentId="999" />);
 
     await screen.findByText(/impossible de charger cette demande/i);
-  });
-
-  test('back button calls router.back()', async () => {
-    server.use(
-      http.get(`${env.API_URL}/v1/documents/requests/1/`, () =>
-        HttpResponse.json({
-          ...createDocumentRequest({
-            id: '1',
-            status: 'submitted',
-            document_type: 'Baptême',
-          }),
-          status_logs: [],
-        }),
-      ),
-    );
-
-    renderApp(<DocumentDetail documentId="1" />);
-
-    await screen.findByText('Baptême');
-    await userEvent.click(screen.getByRole('button', { name: /retour/i }));
-
-    expect(mockRouterBack).toHaveBeenCalledOnce();
   });
 });
