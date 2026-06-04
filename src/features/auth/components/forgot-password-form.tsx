@@ -1,12 +1,12 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
 import NextLink from 'next/link';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { Button } from '@/components/ui/button/button';
 import { paths } from '@/config/paths';
 import { useRequestPasswordReset } from '@/lib/auth';
 
@@ -66,14 +66,15 @@ export const ForgotPasswordForm = () => {
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
-            disabled={!isValid || isPending}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            size="lg"
+            fullWidth
+            isLoading={isPending}
+            disabled={!isValid}
           >
-            {isPending && <Loader2 className="size-4 animate-spin" />}
             {isPending ? 'Envoi en cours…' : 'Envoyer le lien'}
-          </button>
+          </Button>
         </form>
       )}
 
