@@ -30,16 +30,17 @@ import { useToggleUserActive } from '@/features/users/api/toggle-user-active';
 import { useUser } from '@/lib/auth';
 import { canManageUsers, isSuperAdmin } from '@/lib/authorization';
 
-// Filtres sur la dimension admin (`role`). « Prêtres » a été retiré : 'pretre'
-// est une valeur PASTORALE (pastoral_role), jamais un `role` — l'envoyer en
-// ?role=pretre filtrait sur le mauvais champ et ne renvoyait aucun compte. Le
-// filtre par identité pastorale arrivera avec F3b (param pastoral_role dédié).
-const FILTER_ROLES = [
-  { value: '', label: 'Tous' },
-  { value: 'super_admin', label: 'Super Admin' },
-  { value: 'parish_admin', label: 'Paroisse' },
-  { value: 'fidele', label: 'Fidèles' },
-];
+// Filtres mixtes (F3b) : dimension admin (`role`) ET identité pastorale
+// (`pastoral_role`). Chaque option porte son `param` → le clergé se filtre par
+// pastoral_role (le bon champ ; ?role=pretre ne renverrait rien, role ∈ admin).
+const FILTER_OPTIONS = [
+  { value: '', label: 'Tous', param: 'role' },
+  { value: 'super_admin', label: 'Super Admin', param: 'role' },
+  { value: 'parish_admin', label: 'Paroisse', param: 'role' },
+  { value: 'pretre', label: 'Prêtres', param: 'pastoral_role' },
+  { value: 'eveque', label: 'Évêques', param: 'pastoral_role' },
+  { value: 'fidele', label: 'Fidèles', param: 'role' },
+] as const;
 
 const PAGE_SIZE = 20;
 
@@ -93,8 +94,15 @@ export default function AdminUsersPage() {
 
   const { data: currentUser } = useUser();
 
+  const selected =
+    FILTER_OPTIONS.find((o) => o.value === roleFilter) ?? FILTER_OPTIONS[0];
   const { data, isLoading } = useAdminUsers({
-    role: roleFilter || undefined,
+    role:
+      selected.param === 'role' && selected.value ? selected.value : undefined,
+    pastoral_role:
+      selected.param === 'pastoral_role' && selected.value
+        ? selected.value
+        : undefined,
     limit: PAGE_SIZE,
     offset,
   });
@@ -127,7 +135,16 @@ export default function AdminUsersPage() {
     },
     {
       header: 'Rôle',
-      cell: (u) => <RoleBadge role={u.role} />,
+      // Dimension admin (role) + identité pastorale (pastoral_role) si clergé :
+      // un curé = « Paroisse » + « Prêtre » ; un vicaire = « Fidèle » + « Prêtre ».
+      cell: (u) => (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <RoleBadge role={u.role} />
+          {u.pastoral_role && u.pastoral_role !== 'fidele' && (
+            <RoleBadge role={u.pastoral_role} />
+          )}
+        </div>
+      ),
     },
     {
       header: 'Statut',
@@ -166,7 +183,7 @@ export default function AdminUsersPage() {
       }
       toolbar={
         <FilterPills
-          options={FILTER_ROLES}
+          options={FILTER_OPTIONS.map(({ value, label }) => ({ value, label }))}
           value={roleFilter}
           onChange={handleRoleChange}
           ariaLabel="Filtrer par rôle"

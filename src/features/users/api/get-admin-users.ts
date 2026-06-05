@@ -8,6 +8,7 @@ const adminUserSchema = z.object({
   email: z.string().email(),
   phone_number: z.string(),
   role: z.string(),
+  pastoral_role: z.string().nullable().optional(),
   is_active: z.boolean(),
   is_verified: z.boolean(),
   date_joined: z.string().nullable().optional(),
@@ -31,6 +32,7 @@ export type AdminUsersResponse = z.infer<typeof responseSchema>;
 
 export type AdminUsersFilters = {
   role?: string;
+  pastoral_role?: string;
   limit?: number;
   offset?: number;
 };
@@ -40,6 +42,7 @@ export const getAdminUsers = (
 ): Promise<AdminUsersResponse> => {
   const params: Record<string, string | number> = {};
   if (filters.role) params.role = filters.role;
+  if (filters.pastoral_role) params.pastoral_role = filters.pastoral_role;
   if (filters.limit !== undefined) params.limit = filters.limit;
   if (filters.offset !== undefined) params.offset = filters.offset;
 
