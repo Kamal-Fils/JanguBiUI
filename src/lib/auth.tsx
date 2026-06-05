@@ -15,19 +15,18 @@ import {
   setRefreshToken,
 } from './api-client';
 
+// Dimension 1 — capacité d'administration digitale. Reflète le champ `role`
+// du backend (apps.users.enums.UserRole) : il ne contient JAMAIS une valeur
+// pastorale. L'identité clergé vit dans `pastoral_role` (dimension 2).
 export type UserRole =
   | 'super_admin'
   | 'province_admin'
   | 'diocese_admin'
   | 'parish_admin'
   | 'church_admin'
-  | 'fidele'
-  | 'archeveque'
-  | 'eveque'
-  | 'pretre'
-  | 'diacre'
-  | 'religieux';
+  | 'fidele';
 
+// Dimension 2 — identité dans l'Église. Reflète `pastoral_role` (nullable).
 export type PastoralRole =
   | 'fidele'
   | 'religieux'
@@ -46,7 +45,10 @@ export const ADMIN_ROLES: UserRole[] = [
   'church_admin',
 ];
 
-export const CLERGY_ROLES: UserRole[] = [
+// Clergé = sous-ensemble pastoral (exclut 'fidele', qui est pastoral mais laïc).
+// Typé PastoralRole[] : ces valeurs se comparent à `user.pastoral_role`, jamais
+// à `user.role`.
+export const CLERGY_ROLES: PastoralRole[] = [
   'archeveque',
   'eveque',
   'pretre',

@@ -10,7 +10,10 @@ import {
   randText as _text,
 } from '@ngneat/falso';
 
-const randNumber = ({ min = 0, max = 1000 }: { min?: number; max?: number } = {}) =>
+const randNumber = ({
+  min = 0,
+  max = 1000,
+}: { min?: number; max?: number } = {}) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
 const randPastDate = () => _pastDate();
@@ -26,17 +29,23 @@ import type {
   ArticleDetail,
   ArticleCategory,
 } from '@/features/news/types';
-import type { User, UserRole } from '@/lib/auth';
+import type { PastoralRole, User, UserRole } from '@/lib/auth';
 
 // ----------------------------------------------------------------
 // User
 // ----------------------------------------------------------------
 
+// Contrat réel de /v1/auth/me/ : les deux dimensions sont des champs SÉPARÉS.
+// `role` (UserRole) = capacité d'administration digitale (jamais une valeur
+// pastorale). `pastoral_role` (PastoralRole | null) = identité dans l'Église.
+// Un fidèle laïc inscrit normalement a role='fidele' et pastoral_role=null
+// (cf. backend user_register_fidele). Le clergé porte pastoral_role.
 export const createUser = (overrides?: Partial<User>): User => ({
   id: randUuid(),
   email: randEmail(),
   phone_number: randPhoneNumber(),
   role: 'fidele' as UserRole,
+  pastoral_role: null,
   onboarding_state: 'completed',
   is_active: true,
   is_verified: true,
@@ -57,6 +66,19 @@ export const createAdminUser = (overrides?: Partial<User>): User =>
   createUser({
     role: 'parish_admin',
     is_admin: true,
+    ...overrides,
+  });
+
+// Clergé : identité pastorale dans `pastoral_role`, `role` reste 'fidele' tant
+// que le clergé n'est pas aussi administrateur digital (le curé peut cumuler une
+// RoleAssignment, mais ça ne change pas `role`). Reflète le contrat réel de /me.
+export const createClergyUser = (
+  pastoral_role: PastoralRole = 'pretre',
+  overrides?: Partial<User>,
+): User =>
+  createUser({
+    role: 'fidele' as UserRole,
+    pastoral_role,
     ...overrides,
   });
 
@@ -268,4 +290,3 @@ export const createRosaryDay = (overrides?: Partial<RosaryDay>): RosaryDay => ({
   },
   ...overrides,
 });
-
