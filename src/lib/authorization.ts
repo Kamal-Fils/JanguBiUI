@@ -69,19 +69,24 @@ export const canManageUsers = (user: User | null | undefined): boolean =>
 export const canManageTV = (user: User | null | undefined): boolean =>
   isSuperAdmin(user);
 
-// Clergy checks
-export const isClergy = (user: User | null | undefined): boolean =>
-  user ? CLERGY_ROLES.includes(user.role) : false;
+// Clergy checks — l'identité pastorale vit dans `pastoral_role` (jamais `role`).
+export const isClergy = (user: User | null | undefined): boolean => {
+  const pastoral = user?.pastoral_role;
+  return pastoral ? CLERGY_ROLES.includes(pastoral) : false;
+};
 
 export const isPretre = (user: User | null | undefined): boolean =>
-  user?.role === 'pretre';
+  user?.pastoral_role === 'pretre';
 
 export const isDiacre = (user: User | null | undefined): boolean =>
-  user?.role === 'diacre';
+  user?.pastoral_role === 'diacre';
 
 export const isEvequeOrAbove = (user: User | null | undefined): boolean =>
-  user ? (['eveque', 'archeveque'] as UserRole[]).includes(user.role) : false;
+  user?.pastoral_role === 'eveque' || user?.pastoral_role === 'archeveque';
 
+// Pastoral = clergé (via pastoral_role) OU fidèle laïc (via role, dimension
+// admin où 'fidele' = « pas un administrateur »). Les deux sous-helpers lisent
+// désormais le bon champ, donc la composition reste correcte.
 export const isPastoralRole = (user: User | null | undefined): boolean =>
   isClergy(user) || isFidele(user);
 

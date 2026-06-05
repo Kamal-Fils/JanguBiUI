@@ -1,8 +1,16 @@
 import type { StatusTone } from '@/components/ui/status-badge';
-import type { UserRole } from '@/lib/auth';
+import type { PastoralRole, UserRole } from '@/lib/auth';
+
+/**
+ * Clé d'affichage = les deux dimensions réunies. `RoleBadge` libelle aussi bien
+ * un rôle admin (`role`) qu'une identité pastorale (`pastoral_role`), donc la map
+ * couvre l'union UserRole | PastoralRole (et non le seul UserRole, désormais
+ * restreint aux 6 valeurs admin).
+ */
+type RoleKey = UserRole | PastoralRole;
 
 /** Libellés FR canoniques des rôles (source unique — remplace 3 maps dupliquées). */
-export const ROLE_LABELS: Record<UserRole, string> = {
+export const ROLE_LABELS: Record<RoleKey, string> = {
   super_admin: 'Super Admin',
   province_admin: 'Province',
   diocese_admin: 'Diocèse',
@@ -17,7 +25,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 /** Couleur sémantique (tokenisée) associée à chaque rôle. */
-export const ROLE_TONES: Record<UserRole, StatusTone> = {
+export const ROLE_TONES: Record<RoleKey, StatusTone> = {
   super_admin: 'danger',
   province_admin: 'accent',
   diocese_admin: 'warning',
