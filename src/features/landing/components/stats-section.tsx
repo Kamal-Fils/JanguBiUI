@@ -72,7 +72,7 @@ export function StatsSection() {
               <div className="mb-1.5 font-serif text-4xl font-bold text-primary lg:text-5xl">
                 <StatCounter stat={stat} />
               </div>
-              <p className="text-[0.6875rem] font-semibold uppercase tracking-widest text-foreground/40">
+              <p className="text-[0.6875rem] font-semibold uppercase tracking-widest text-muted-foreground">
                 {stat.label}
               </p>
             </div>

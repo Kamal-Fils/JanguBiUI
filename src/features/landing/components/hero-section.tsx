@@ -98,7 +98,7 @@ export function HeroSection() {
             <span className="text-[0.875rem] tracking-[.05em] text-accent">
               ★★★★★
             </span>
-            <span className="text-[0.8125rem] text-foreground/40">
+            <span className="text-[0.8125rem] text-muted-foreground">
               <strong className="text-foreground/80">4.8</strong> ·{' '}
               <strong className="text-foreground/80">2 400+</strong> fidèles ·{' '}
               <strong className="text-foreground/80">50+</strong> paroisses
