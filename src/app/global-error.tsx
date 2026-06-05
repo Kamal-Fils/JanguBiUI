@@ -68,7 +68,7 @@ export default function GlobalError({
             }}
           >
             Nos équipes ont été notifiées automatiquement. Vous pouvez réessayer
-            ou revenir à l'accueil.
+            ou revenir à l&apos;accueil.
           </p>
           <button
             type="button"
