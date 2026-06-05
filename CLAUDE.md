@@ -24,7 +24,7 @@ yarn check-types  # tsc --noEmit
 > `next/core-web-vitals`. La règle **anti-palette** (`no-restricted-syntax`) interdit
 > la palette Tailwind brute (`bg-blue-500`…) hors `src/features/landing` (dark forcé).
 
-API backend : `http://localhost:8000/api/v1/`
+API backend : `http://localhost:8001/api/v1/`
 
 ---
 

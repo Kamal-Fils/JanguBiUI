@@ -151,7 +151,10 @@ export function LandingNav() {
             ))}
             <div className="flex flex-col gap-3 pt-2">
               {!mounted || isUserLoading ? (
-                <div className="h-10 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden />
+                <div
+                  className="h-10 w-full rounded-md bg-muted/40 animate-pulse"
+                  aria-hidden
+                />
               ) : user ? (
                 <Button asChild className="w-full">
                   <Link href={paths.app.root.getHref()} onClick={closeDrawer}>
@@ -161,12 +164,18 @@ export function LandingNav() {
               ) : (
                 <>
                   <Button variant="outline" asChild className="w-full">
-                    <Link href={paths.auth.login.getHref()} onClick={closeDrawer}>
+                    <Link
+                      href={paths.auth.login.getHref()}
+                      onClick={closeDrawer}
+                    >
                       Se connecter
                     </Link>
                   </Button>
                   <Button asChild className="w-full">
-                    <Link href={paths.auth.register.getHref()} onClick={closeDrawer}>
+                    <Link
+                      href={paths.auth.register.getHref()}
+                      onClick={closeDrawer}
+                    >
                       Créer un compte
                     </Link>
                   </Button>
