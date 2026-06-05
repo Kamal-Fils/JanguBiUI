@@ -13,7 +13,7 @@ function CheckItem({ children }: { children: React.ReactNode }) {
 
 function NewsMockup() {
   return (
-    <div className="overflow-hidden rounded-[20px] border border-border shadow-[0_24px_64px_rgba(0,0,0,.4)]">
+    <div className="overflow-hidden rounded-[20px] border border-border shadow-[0_24px_64px_rgba(20,40,80,.14)] dark:shadow-[0_24px_64px_rgba(0,0,0,.4)]">
       <div className="bg-background-surface p-5">
         <h3 className="mb-4 border-b border-border pb-3 font-serif text-[0.9375rem] font-semibold text-foreground">
           Actualités paroissiales
@@ -34,9 +34,9 @@ function NewsMockup() {
             meta: 'Hier',
           },
           {
-            dot: 'bg-emerald-500',
+            dot: 'bg-success',
             scope: 'Paroisse Saint-Joseph',
-            scopeColor: 'text-emerald-500',
+            scopeColor: 'text-success',
             title: 'Retraite de carême — inscription ouverte',
             meta: '3 mai · 9h00',
           },
@@ -73,7 +73,7 @@ function NewsMockup() {
 
 function ChatMockup() {
   return (
-    <div className="overflow-hidden rounded-[20px] border border-border shadow-[0_24px_64px_rgba(0,0,0,.4)]">
+    <div className="overflow-hidden rounded-[20px] border border-border shadow-[0_24px_64px_rgba(20,40,80,.14)] dark:shadow-[0_24px_64px_rgba(0,0,0,.4)]">
       <div className="flex flex-col bg-background-surface">
         <div className="flex items-center gap-3 border-b border-border bg-background px-4 py-3.5">
           <div className="flex size-[34px] shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-lg">
@@ -135,7 +135,7 @@ function ChatMockup() {
 
 function DocsMockup() {
   return (
-    <div className="overflow-hidden rounded-[20px] border border-border shadow-[0_24px_64px_rgba(0,0,0,.4)]">
+    <div className="overflow-hidden rounded-[20px] border border-border shadow-[0_24px_64px_rgba(20,40,80,.14)] dark:shadow-[0_24px_64px_rgba(0,0,0,.4)]">
       <div className="bg-background-surface p-5">
         <h3 className="mb-4 border-b border-border pb-3 font-serif text-[0.9375rem] font-semibold text-foreground">
           Mes contributions &amp; demandes
@@ -146,16 +146,14 @@ function DocsMockup() {
             type: 'Don — Rénovation chapelle',
             sub: 'Paroisse Saint-Joseph · 25 000 FCFA',
             badge: 'Reçu',
-            badgeClass:
-              'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
+            badgeClass: 'bg-success/15 text-success border border-success/30',
           },
           {
             icon: '🪣',
             type: 'Quête dominicale',
             sub: 'Dimanche 28 avril · 5 000 FCFA',
             badge: 'Envoyée',
-            badgeClass:
-              'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
+            badgeClass: 'bg-success/15 text-success border border-success/30',
           },
           {
             icon: '📄',

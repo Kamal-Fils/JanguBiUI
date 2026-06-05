@@ -20,5 +20,12 @@ export function StarField() {
     };
   }, []);
 
-  return <div ref={ref} className="pointer-events-none absolute inset-0" />;
+  // Motif nocturne : visible uniquement en thème sombre. En clair le héros
+  // s'appuie sur le dégradé papier + le halo bleu (pas d'étoiles sur fond clair).
+  return (
+    <div
+      ref={ref}
+      className="pointer-events-none absolute inset-0 hidden dark:block"
+    />
+  );
 }
