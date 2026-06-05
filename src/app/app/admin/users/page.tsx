@@ -27,7 +27,8 @@ import {
   type AdminUser,
 } from '@/features/users/api/get-admin-users';
 import { useToggleUserActive } from '@/features/users/api/toggle-user-active';
-import { canManageUsers } from '@/lib/authorization';
+import { useUser } from '@/lib/auth';
+import { canManageUsers, isSuperAdmin } from '@/lib/authorization';
 
 const FILTER_ROLES = [
   { value: '', label: 'Tous' },
@@ -41,7 +42,8 @@ const PAGE_SIZE = 20;
 
 function userName(u: AdminUser): string {
   if (u.user_profile) {
-    const full = `${u.user_profile.first_name} ${u.user_profile.last_name}`.trim();
+    const full =
+      `${u.user_profile.first_name} ${u.user_profile.last_name}`.trim();
     if (full) return full;
   }
   return u.email;
@@ -85,6 +87,8 @@ function ToggleActiveButton({ user }: { user: AdminUser }) {
 export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState('');
   const [offset, setOffset] = useState(0);
+
+  const { data: currentUser } = useUser();
 
   const { data, isLoading } = useAdminUsers({
     role: roleFilter || undefined,
@@ -146,11 +150,16 @@ export default function AdminUsersPage() {
       subtitle="Gérer les comptes et leur accès à la plateforme"
       allow={canManageUsers}
       headerAction={
-        <Button asChild size="sm">
-          <Link href={paths.app.admin.users.invite.getHref()}>
-            + Inviter clergé
-          </Link>
-        </Button>
+        // V1 (REQ-USER-03) : seul super_admin crée des comptes. On masque le
+        // bouton pour les autres admins (diocèse/province) → plus de dead-end
+        // (la page d'invitation est gardée par canManageClergy, qui les rejette).
+        isSuperAdmin(currentUser) ? (
+          <Button asChild size="sm">
+            <Link href={paths.app.admin.users.invite.getHref()}>
+              + Inviter clergé
+            </Link>
+          </Button>
+        ) : undefined
       }
       toolbar={
         <FilterPills
