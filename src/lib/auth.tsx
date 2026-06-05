@@ -61,7 +61,8 @@ export interface UserProfile {
   last_name: string;
   title?: string;
   phone?: string;
-  primary_parish?: number | null;
+  // /me renvoie la paroisse principale en {id, name} | null (et non un id brut).
+  primary_parish?: OrgRef | null;
   avatar?: string | null;
 }
 
@@ -90,6 +91,10 @@ export interface User {
   is_admin: boolean;
   is_staff: boolean;
   profile: UserProfile;
+  // Hiérarchie territoriale dérivée de l'appartenance principale — /me les
+  // renvoie au niveau racine en {id, name} | null.
+  diocese?: OrgRef | null;
+  province?: OrgRef | null;
   // Multi-appartenance (Chantier 7b) — exposées par /me (singuliers conservés).
   memberships?: Membership[];
   church_ids?: number[];

@@ -30,11 +30,14 @@ import { useToggleUserActive } from '@/features/users/api/toggle-user-active';
 import { useUser } from '@/lib/auth';
 import { canManageUsers, isSuperAdmin } from '@/lib/authorization';
 
+// Filtres sur la dimension admin (`role`). « Prêtres » a été retiré : 'pretre'
+// est une valeur PASTORALE (pastoral_role), jamais un `role` — l'envoyer en
+// ?role=pretre filtrait sur le mauvais champ et ne renvoyait aucun compte. Le
+// filtre par identité pastorale arrivera avec F3b (param pastoral_role dédié).
 const FILTER_ROLES = [
   { value: '', label: 'Tous' },
   { value: 'super_admin', label: 'Super Admin' },
   { value: 'parish_admin', label: 'Paroisse' },
-  { value: 'pretre', label: 'Prêtres' },
   { value: 'fidele', label: 'Fidèles' },
 ];
 
