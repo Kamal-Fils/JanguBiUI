@@ -51,6 +51,8 @@ export const createUser = (overrides?: Partial<User>): User => ({
   is_verified: true,
   is_admin: false,
   is_staff: false,
+  diocese: null,
+  province: null,
   profile: {
     first_name: randFirstName(),
     last_name: randLastName(),
