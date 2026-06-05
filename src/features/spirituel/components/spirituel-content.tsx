@@ -3,7 +3,8 @@
 import { BookOpen, ChevronRight, Clock, Flame, Tv2 } from 'lucide-react';
 import Link from 'next/link';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { ContentContainer } from '@/components/layouts/content-container';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { paths } from '@/config/paths';
 import { cn } from '@/utils/cn';
 
@@ -64,13 +65,14 @@ const sections = [
 ];
 
 export function SpirituelContent() {
+  useRegisterPageMeta({
+    title: 'Spiritualité',
+    subtitle: "Nourriture de l'âme au quotidien",
+  });
+
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Spiritualité"
-        subtitle="Nourriture de l'âme au quotidien"
-      />
-      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         <div className="flex flex-col gap-3">
           {sections.map((section) => {
             const Icon = section.icon;
@@ -101,7 +103,7 @@ export function SpirituelContent() {
             );
           })}
         </div>
-      </div>
+      </ContentContainer>
     </div>
   );
 }

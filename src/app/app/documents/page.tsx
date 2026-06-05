@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
-import { PageHeader } from '@/components/layouts/page-header';
+import { ContentContainer } from '@/components/layouts/content-container';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { paths } from '@/config/paths';
 import { DocumentsList } from '@/features/documents/components/documents-list';
 import { VaultContent } from '@/features/documents/components/vault-content';
@@ -32,18 +32,18 @@ export default function DocumentsPage() {
     }
   }, [user, isLoading, router]);
 
+  useRegisterPageMeta({
+    title: 'Documents',
+    subtitle: 'Vos demandes et documents officiels',
+  });
+
   if (isLoading) return null;
   if (isAdmin(user) && !isClergy(user)) return null;
 
   return (
-    <AppShell>
+    <>
       <div className="flex flex-col">
-        <PageHeader
-          title="Documents"
-          subtitle="Vos demandes et documents officiels"
-        />
-
-        <div className="mx-auto w-full max-w-2xl px-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+        <ContentContainer>
           {/* Tabs */}
           <div className="mb-5 flex gap-1 rounded-xl bg-muted p-1">
             {TABS.map((tab) => {
@@ -67,9 +67,9 @@ export default function DocumentsPage() {
             })}
           </div>
 
-          {activeTab === 'requests' && <DocumentsList hideHeader />}
+          {activeTab === 'requests' && <DocumentsList />}
           {activeTab === 'vault' && <VaultContent />}
-        </div>
+        </ContentContainer>
       </div>
 
       {activeTab === 'requests' && (
@@ -81,6 +81,6 @@ export default function DocumentsPage() {
           <Plus className="size-6" />
         </Link>
       )}
-    </AppShell>
+    </>
   );
 }

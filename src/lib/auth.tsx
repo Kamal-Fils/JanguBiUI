@@ -15,19 +15,18 @@ import {
   setRefreshToken,
 } from './api-client';
 
+// Dimension 1 — capacité d'administration digitale. Reflète le champ `role`
+// du backend (apps.users.enums.UserRole) : il ne contient JAMAIS une valeur
+// pastorale. L'identité clergé vit dans `pastoral_role` (dimension 2).
 export type UserRole =
   | 'super_admin'
   | 'province_admin'
   | 'diocese_admin'
   | 'parish_admin'
   | 'church_admin'
-  | 'fidele'
-  | 'archeveque'
-  | 'eveque'
-  | 'pretre'
-  | 'diacre'
-  | 'religieux';
+  | 'fidele';
 
+// Dimension 2 — identité dans l'Église. Reflète `pastoral_role` (nullable).
 export type PastoralRole =
   | 'fidele'
   | 'religieux'
@@ -46,7 +45,10 @@ export const ADMIN_ROLES: UserRole[] = [
   'church_admin',
 ];
 
-export const CLERGY_ROLES: UserRole[] = [
+// Clergé = sous-ensemble pastoral (exclut 'fidele', qui est pastoral mais laïc).
+// Typé PastoralRole[] : ces valeurs se comparent à `user.pastoral_role`, jamais
+// à `user.role`.
+export const CLERGY_ROLES: PastoralRole[] = [
   'archeveque',
   'eveque',
   'pretre',
@@ -59,7 +61,8 @@ export interface UserProfile {
   last_name: string;
   title?: string;
   phone?: string;
-  primary_parish?: number | null;
+  // /me renvoie la paroisse principale en {id, name} | null (et non un id brut).
+  primary_parish?: OrgRef | null;
   avatar?: string | null;
 }
 
@@ -88,6 +91,10 @@ export interface User {
   is_admin: boolean;
   is_staff: boolean;
   profile: UserProfile;
+  // Hiérarchie territoriale dérivée de l'appartenance principale — /me les
+  // renvoie au niveau racine en {id, name} | null.
+  diocese?: OrgRef | null;
+  province?: OrgRef | null;
   // Multi-appartenance (Chantier 7b) — exposées par /me (singuliers conservés).
   memberships?: Membership[];
   church_ids?: number[];

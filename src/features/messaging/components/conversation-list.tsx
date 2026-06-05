@@ -4,8 +4,8 @@ import { MessageCircle, Search, SquarePen } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/lib/auth';
 import { useMessagingStore } from '@/stores/messaging-store';
@@ -83,19 +83,31 @@ export function ConversationList() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Messages"
-        subtitle="Vos conversations"
-        action={
-          <Link
-            href="/app/messages/new"
-            className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+      {/* En-tête custom (vue messagerie exemptée du shell header — plein écran).
+          Pas de cloche ici : la cloche flottante (routes !meta) la sert déjà. */}
+      <header className="sticky top-0 z-40 border-b border-border bg-background-surface/90 px-4 py-3.5 backdrop-blur-md">
+        <div className="flex items-center justify-between gap-3 pr-12 md:pr-0">
+          <div className="min-w-0">
+            <h1 className="truncate font-serif text-xl font-bold tracking-tight text-foreground">
+              Messages
+            </h1>
+            <p className="truncate text-sm text-muted-foreground">
+              Vos conversations
+            </p>
+          </div>
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="shrink-0 rounded-full bg-primary/10 text-primary hover:bg-primary/20"
             aria-label="Nouvelle conversation"
           >
-            <SquarePen className="size-4" />
-          </Link>
-        }
-      />
+            <Link href="/app/messages/new">
+              <SquarePen className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </header>
 
       <div className="sticky top-[57px] z-10 border-b border-border bg-background px-4 py-2">
         <div className="relative">
@@ -128,8 +140,11 @@ export function ConversationList() {
         <div className="flex flex-col divide-y divide-border">
           {data.results.map((conv) => {
             const participantName = getParticipantName(conv, currentUserId);
-            const hasActivity = conv.last_message_at != null || conv.unread_count > 0;
-            const lastContent = conv.last_message?.content ?? (hasActivity ? '...' : 'Aucun message');
+            const hasActivity =
+              conv.last_message_at != null || conv.unread_count > 0;
+            const lastContent =
+              conv.last_message?.content ??
+              (hasActivity ? '...' : 'Aucun message');
             const lastAt = conv.last_message?.sent_at ?? conv.last_message_at;
 
             return (

@@ -1,24 +1,31 @@
-import type { User } from '../auth';
+import type { PastoralRole, User, UserRole } from '../auth';
 import {
   canCreateArticle,
+  canManageClergy,
   canManageTV,
   canManageUsers,
   canProcessDocuments,
   canPublishArticle,
   canUnpublishArticle,
   isAdmin,
+  isClergy,
+  isDiacre,
   isDioceseAdminOrAbove,
+  isEvequeOrAbove,
   isFidele,
   isParishLevelAdmin,
+  isPastoralRole,
+  isPretre,
   isProvinceAdminOrAbove,
   isSuperAdmin,
 } from '../authorization';
 
-function makeUser(role: User['role']): User {
+function makeUser(role: UserRole): User {
   return {
     id: '1',
     email: `${role}@test.com`,
     role,
+    pastoral_role: null,
     onboarding_state: 'completed',
     is_active: true,
     is_verified: true,
@@ -28,12 +35,29 @@ function makeUser(role: User['role']): User {
   };
 }
 
+// Contrat réel de /me : un membre du clergé a role='fidele' (dimension admin)
+// et son identité pastorale dans `pastoral_role`. `role` ne vaut JAMAIS une
+// valeur pastorale côté backend. C'est ce contrat que les helpers doivent lire.
+function makeClergy(
+  pastoral_role: PastoralRole,
+  role: UserRole = 'fidele',
+): User {
+  return { ...makeUser(role), pastoral_role };
+}
+
 const superAdmin = makeUser('super_admin');
 const provinceAdmin = makeUser('province_admin');
 const dioceseAdmin = makeUser('diocese_admin');
 const parishAdmin = makeUser('parish_admin');
 const churchAdmin = makeUser('church_admin');
 const fidele = makeUser('fidele');
+
+// Clergé selon le vrai contrat (pastoral_role porteur, role='fidele').
+const religieux = makeClergy('religieux');
+const diacre = makeClergy('diacre');
+const pretre = makeClergy('pretre');
+const eveque = makeClergy('eveque');
+const archeveque = makeClergy('archeveque');
 
 describe('isAdmin', () => {
   test('returns true for all admin roles', () => {
@@ -143,5 +167,90 @@ describe('TV management permissions', () => {
     expect(canManageTV(provinceAdmin)).toBe(false);
     expect(canManageTV(fidele)).toBe(false);
     expect(canManageTV(null)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Dimension pastorale — l'identité clergé vit dans `pastoral_role`, jamais dans
+// `role`. Ces tests encodent le contrat réel de /me ; ils échouent tant que les
+// helpers lisent `user.role` (F2 les recâble sur `user.pastoral_role`).
+// ---------------------------------------------------------------------------
+
+describe('isClergy (pastoral_role)', () => {
+  test('true for the four clergy tiers + religieux, read from pastoral_role', () => {
+    expect(isClergy(religieux)).toBe(true);
+    expect(isClergy(diacre)).toBe(true);
+    expect(isClergy(pretre)).toBe(true);
+    expect(isClergy(eveque)).toBe(true);
+    expect(isClergy(archeveque)).toBe(true);
+  });
+
+  test('false for a plain fidele and for digital admins without pastoral_role', () => {
+    expect(isClergy(fidele)).toBe(false);
+    expect(isClergy(superAdmin)).toBe(false);
+    expect(isClergy(parishAdmin)).toBe(false);
+    expect(isClergy(null)).toBe(false);
+  });
+
+  test('a curé who is also parish_admin is still clergy via pastoral_role', () => {
+    expect(isClergy(makeClergy('pretre', 'parish_admin'))).toBe(true);
+  });
+});
+
+describe('isPretre / isDiacre (pastoral_role)', () => {
+  test('isPretre true only for pastoral_role=pretre', () => {
+    expect(isPretre(pretre)).toBe(true);
+    expect(isPretre(diacre)).toBe(false);
+    expect(isPretre(eveque)).toBe(false);
+    expect(isPretre(fidele)).toBe(false);
+    expect(isPretre(null)).toBe(false);
+  });
+
+  test('isDiacre true only for pastoral_role=diacre', () => {
+    expect(isDiacre(diacre)).toBe(true);
+    expect(isDiacre(pretre)).toBe(false);
+    expect(isDiacre(fidele)).toBe(false);
+  });
+});
+
+describe('isEvequeOrAbove (pastoral_role)', () => {
+  test('true for eveque and archeveque only', () => {
+    expect(isEvequeOrAbove(eveque)).toBe(true);
+    expect(isEvequeOrAbove(archeveque)).toBe(true);
+    expect(isEvequeOrAbove(pretre)).toBe(false);
+    expect(isEvequeOrAbove(diacre)).toBe(false);
+    expect(isEvequeOrAbove(fidele)).toBe(false);
+    expect(isEvequeOrAbove(superAdmin)).toBe(false);
+  });
+});
+
+describe('isPastoralRole', () => {
+  test('true for clergy (via pastoral_role) and for lay fidele (via role)', () => {
+    expect(isPastoralRole(pretre)).toBe(true);
+    expect(isPastoralRole(eveque)).toBe(true);
+    expect(isPastoralRole(religieux)).toBe(true);
+    expect(isPastoralRole(fidele)).toBe(true);
+  });
+
+  test('false for a pure digital admin (no pastoral identity)', () => {
+    expect(isPastoralRole(superAdmin)).toBe(false);
+    expect(isPastoralRole(provinceAdmin)).toBe(false);
+    expect(isPastoralRole(null)).toBe(false);
+  });
+});
+
+describe('canManageClergy', () => {
+  test('true for super_admin (role) and for eveque/archeveque (pastoral_role)', () => {
+    expect(canManageClergy(superAdmin)).toBe(true);
+    expect(canManageClergy(eveque)).toBe(true);
+    expect(canManageClergy(archeveque)).toBe(true);
+  });
+
+  test('false for priests, deacons, lay faithful and lower admins', () => {
+    expect(canManageClergy(pretre)).toBe(false);
+    expect(canManageClergy(diacre)).toBe(false);
+    expect(canManageClergy(fidele)).toBe(false);
+    expect(canManageClergy(dioceseAdmin)).toBe(false);
+    expect(canManageClergy(null)).toBe(false);
   });
 });

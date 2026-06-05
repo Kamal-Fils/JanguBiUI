@@ -3,7 +3,9 @@
 import { Clock, Eye, Newspaper } from 'lucide-react';
 import { useState } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { ContentContainer } from '@/components/layouts/content-container';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { Card } from '@/components/ui/card/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { MediaCard } from '@/components/ui/media-card';
@@ -25,17 +27,14 @@ function ArticlesSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="overflow-hidden rounded-xl border border-border bg-card"
-        >
+        <Card key={i} variant="elevated" className="overflow-hidden">
           <Skeleton className="aspect-video w-full rounded-none" />
           <div className="space-y-2 p-4">
             <Skeleton className="h-3 w-1/3" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-3 w-2/3" />
           </div>
-        </div>
+        </Card>
       ))}
     </div>
   );
@@ -70,11 +69,11 @@ export function ArticlesFeed() {
   const articles = data?.results ?? [];
   const [featured, ...rest] = articles;
 
+  useRegisterPageMeta({ title: 'Actualités', subtitle: "La vie de l'Église" });
+
   return (
     <div className="flex flex-col">
-      <PageHeader title="Actualités" subtitle="La vie de l'Église" />
-
-      <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         <div className="mb-4">
           <NewsScopeFilter value={scope} onChange={setScope} />
         </div>
@@ -140,7 +139,7 @@ export function ArticlesFeed() {
             )}
           </div>
         )}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

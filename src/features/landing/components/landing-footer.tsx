@@ -24,14 +24,14 @@ export function LandingFooter() {
               <LogoMark />
               Jàngu Bi
             </div>
-            <p className="max-w-[26ch] text-[0.875rem] leading-relaxed text-foreground/40">
+            <p className="max-w-[26ch] text-[0.875rem] leading-relaxed text-muted-foreground">
               L&apos;Église du Sénégal dans votre poche.
             </p>
           </div>
 
           {/* Fonctionnalités */}
           <div>
-            <p className="mb-4 text-[0.625rem] font-bold uppercase tracking-[.1em] text-foreground/20">
+            <p className="mb-4 text-[0.625rem] font-bold uppercase tracking-[.1em] text-muted-foreground">
               Fonctionnalités
             </p>
             <ul className="flex flex-col gap-2.5">
@@ -46,7 +46,7 @@ export function LandingFooter() {
                 <li key={item}>
                   <a
                     href="#"
-                    className="text-[0.875rem] text-foreground/40 transition-colors hover:text-primary"
+                    className="text-[0.875rem] text-muted-foreground transition-colors hover:text-primary"
                   >
                     {item}
                   </a>
@@ -57,7 +57,7 @@ export function LandingFooter() {
 
           {/* Paroisses */}
           <div>
-            <p className="mb-4 text-[0.625rem] font-bold uppercase tracking-[.1em] text-foreground/20">
+            <p className="mb-4 text-[0.625rem] font-bold uppercase tracking-[.1em] text-muted-foreground">
               Paroisses
             </p>
             <ul className="flex flex-col gap-2.5">
@@ -65,7 +65,7 @@ export function LandingFooter() {
                 <li key={item}>
                   <a
                     href="#"
-                    className="text-[0.875rem] text-foreground/40 transition-colors hover:text-primary"
+                    className="text-[0.875rem] text-muted-foreground transition-colors hover:text-primary"
                   >
                     {item}
                   </a>
@@ -76,7 +76,7 @@ export function LandingFooter() {
 
           {/* Légal */}
           <div>
-            <p className="mb-4 text-[0.625rem] font-bold uppercase tracking-[.1em] text-foreground/20">
+            <p className="mb-4 text-[0.625rem] font-bold uppercase tracking-[.1em] text-muted-foreground">
               Légal
             </p>
             <ul className="flex flex-col gap-2.5">
@@ -84,7 +84,7 @@ export function LandingFooter() {
                 <li key={item}>
                   <a
                     href="#"
-                    className="text-[0.875rem] text-foreground/40 transition-colors hover:text-primary"
+                    className="text-[0.875rem] text-muted-foreground transition-colors hover:text-primary"
                   >
                     {item}
                   </a>
@@ -95,7 +95,7 @@ export function LandingFooter() {
         </div>
 
         <hr className="mb-6 border-border" />
-        <p className="text-[0.75rem] text-foreground/20">
+        <p className="text-[0.75rem] text-muted-foreground">
           © 2026 Jàngu Bi · Fait avec ❤️ pour l&apos;Église catholique du
           Sénégal
         </p>

@@ -3,8 +3,7 @@
 import { HeartHandshake } from 'lucide-react';
 import { useState } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useCampaigns } from '@/features/dons/api/get-campaigns';
@@ -79,10 +78,10 @@ export default function DonsPage() {
     });
   };
 
+  useRegisterPageMeta({ title: 'Dons & Quêtes' });
+
   return (
-    <AppShell>
     <div className="flex flex-col">
-      <PageHeader title="Dons & Quêtes" />
       <div className="mx-auto w-full max-w-2xl flex-1 space-y-4 overflow-y-auto p-4 lg:max-w-3xl">
         {isLoading && (
           <p className="py-6 text-center text-sm text-muted-foreground">
@@ -143,7 +142,9 @@ export default function DonsPage() {
           ))}
 
         <div className="rounded-lg border border-border p-4 space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">Faire un don</h2>
+          <h2 className="text-sm font-semibold text-foreground">
+            Faire un don
+          </h2>
 
           {memberships.length > 0 && (
             <div>
@@ -244,6 +245,5 @@ export default function DonsPage() {
         </div>
       </div>
     </div>
-    </AppShell>
   );
 }

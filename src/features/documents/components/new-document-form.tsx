@@ -15,10 +15,13 @@ import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import {
   ParishPicker,
   type PickedParish,
 } from '@/components/org/parish-picker';
+import { Button } from '@/components/ui/button/button';
+import { Card } from '@/components/ui/card/card';
 import { useUser } from '@/lib/auth';
 
 import { CreateDocumentInput, useCreateDocument } from '../api/create-document';
@@ -271,12 +274,12 @@ function AttachmentStep({
       )}
 
       {isUploading && (
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+        <Card variant="elevated" className="flex items-center gap-3 px-4 py-3">
           <Loader2 className="size-5 animate-spin text-primary" />
           <span className="text-sm text-muted-foreground">
             Téléversement en cours…
           </span>
-        </div>
+        </Card>
       )}
 
       {fileName && !isUploading && (
@@ -461,18 +464,20 @@ export function NewDocumentForm() {
   return (
     <div className="flex flex-col">
       <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={
             stepIndex === 0
               ? () => router.back()
               : () => setStepIndex((i) => i - 1)
           }
-          className="flex size-8 items-center justify-center rounded-full hover:bg-muted"
+          className="rounded-full hover:bg-muted"
           aria-label="Retour"
         >
           <ArrowLeft className="size-5" />
-        </button>
+        </Button>
         <span className="text-sm font-semibold text-foreground">
           Nouvelle demande
         </span>
@@ -493,7 +498,7 @@ export function NewDocumentForm() {
         Étape {stepIndex + 1} sur {STEPS.length} — {STEP_LABELS[step]}
       </p>
 
-      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
           {/* Step 1 — Type */}
           {step === 'type' && (
@@ -661,7 +666,10 @@ export function NewDocumentForm() {
                   Choisissez parmi vos paroisses ou recherchez la paroisse du
                   registre (le diocèse est déduit automatiquement).
                 </p>
-                <ParishPicker value={pickedParish} onChange={handlePickParish} />
+                <ParishPicker
+                  value={pickedParish}
+                  onChange={handlePickParish}
+                />
                 {errors.parish_id && (
                   <p className={errorClass} role="alert">
                     {errors.parish_id.message}
@@ -833,7 +841,7 @@ export function NewDocumentForm() {
           {/* Step 6 — Consent */}
           {step === 'consent' && (
             <>
-              <div className="rounded-xl border border-border bg-card p-4">
+              <Card variant="elevated" className="p-4">
                 <h3 className="mb-2 font-semibold text-foreground">
                   Récapitulatif
                 </h3>
@@ -871,7 +879,7 @@ export function NewDocumentForm() {
                     </dd>
                   </div>
                 </dl>
-              </div>
+              </Card>
               <button
                 type="button"
                 onClick={() => setValue('consent_given', !watchedConsentGiven)}
@@ -904,36 +912,32 @@ export function NewDocumentForm() {
 
           {/* Navigation buttons */}
           {step !== 'consent' ? (
-            <button
+            <Button
               type="button"
+              size="lg"
+              fullWidth
               onClick={handleNext}
-              disabled={step === 'attachments' && isUploading}
-              className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              isLoading={step === 'attachments' && isUploading}
+              icon={<ArrowRight className="size-4" />}
+              iconPosition="right"
             >
-              {step === 'attachments' && isUploading ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Téléversement…
-                </>
-              ) : (
-                <>
-                  Continuer
-                  <ArrowRight className="size-4" />
-                </>
-              )}
-            </button>
+              {step === 'attachments' && isUploading
+                ? 'Téléversement…'
+                : 'Continuer'}
+            </Button>
           ) : (
-            <button
+            <Button
               type="submit"
-              disabled={!watchedConsentGiven || isPending}
-              className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              size="lg"
+              fullWidth
+              isLoading={isPending}
+              disabled={!watchedConsentGiven}
             >
-              {isPending && <Loader2 className="size-4 animate-spin" />}
               {isPending ? 'Envoi en cours…' : 'Envoyer la demande'}
-            </button>
+            </Button>
           )}
         </form>
-      </div>
+      </ContentContainer>
     </div>
   );
 }

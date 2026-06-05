@@ -8,6 +8,7 @@ import {
   Home,
   MessageCircle,
   Newspaper,
+  ShieldCheck,
   User,
 } from 'lucide-react';
 
@@ -53,7 +54,11 @@ const ITEM_MESSAGES: NavItem = {
   href: '/app/messages',
   icon: MessageCircle,
 };
-const ITEM_PROFIL: NavItem = { label: 'Profil', href: '/app/profil', icon: User };
+const ITEM_PROFIL: NavItem = {
+  label: 'Profil',
+  href: '/app/profil',
+  icon: User,
+};
 const ITEM_DONS: NavItem = {
   label: 'Dons',
   href: '/app/dons',
@@ -72,15 +77,43 @@ const ITEM_ACCUEIL_ADMIN: NavItem = {
   icon: Home,
   adminOnly: true,
 };
+// Passerelle vers les outils admin pour un membre du clergé qui est AUSSI
+// administrateur digital (ex. curé = pretre + parish_admin). Sa home reste
+// pastorale (cf. home-router) ; cette entrée lui donne accès à l'admin sans
+// quitter sa nav clergé. Libellé distinct de l'« Accueil » admin.
+const ITEM_ADMIN: NavItem = {
+  label: 'Administration',
+  href: '/app/admin',
+  icon: ShieldCheck,
+  adminOnly: true,
+};
 
 export const buildNavItems = (user: UserType | null | undefined): NavItem[] => {
-  // Admin roles and clergy roles are disjoint — the !isClergy guard is defensive
+  // Les deux dimensions (role admin / pastoral_role) sont INDÉPENDANTES : un curé
+  // peut être à la fois parish_admin et pretre. Le guard `!isClergy` est donc
+  // porteur (pas « défensif ») — il aiguille un tel utilisateur vers la nav
+  // clergé (home pastorale), tandis qu'il accède à l'admin via ITEM_ADMIN.
   if (isAdmin(user) && !isClergy(user)) {
-    return [ITEM_ACCUEIL_ADMIN, ITEM_ACTUS, ITEM_SPIRITUEL, ITEM_MESSAGES, ITEM_PROFIL];
+    return [
+      ITEM_ACCUEIL_ADMIN,
+      ITEM_ACTUS,
+      ITEM_SPIRITUEL,
+      ITEM_MESSAGES,
+      ITEM_PROFIL,
+    ];
   }
 
   if (isClergy(user)) {
-    return [ITEM_ACCUEIL, ITEM_ACTUS, ITEM_SPIRITUEL, ITEM_CLERGE, ITEM_MESSAGES, ITEM_PROFIL];
+    return [
+      ITEM_ACCUEIL,
+      ITEM_ACTUS,
+      ITEM_SPIRITUEL,
+      ITEM_CLERGE,
+      // Clergé qui est aussi admin digital → passerelle vers l'admin.
+      ...(isAdmin(user) ? [ITEM_ADMIN] : []),
+      ITEM_MESSAGES,
+      ITEM_PROFIL,
+    ];
   }
 
   // Fidèle

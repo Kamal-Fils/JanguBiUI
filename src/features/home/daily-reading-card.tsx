@@ -4,6 +4,7 @@ import { BookOpen, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card/card';
 
 const todayReadings = [
   { label: '1ère Lecture', ref: 'Isaïe 55, 10-11', type: 'lecture' },
@@ -13,7 +14,7 @@ const todayReadings = [
 
 export function DailyReadingCard() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+    <Card variant="elevated" className="overflow-hidden">
       {/* Gold accent strip */}
       <div className="h-0.5 bg-gradient-to-r from-gold via-gold/50 to-transparent" />
 
@@ -59,6 +60,6 @@ export function DailyReadingCard() {
           </Link>
         ))}
       </div>
-    </div>
+    </Card>
   );
 }

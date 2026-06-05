@@ -89,7 +89,7 @@ export function BottomNav({ messageBadge }: BottomNavProps) {
             <button
               type="button"
               onClick={() => setMoreOpen(true)}
-              aria-label="Plus d'options"
+              aria-label="Menu"
               className={cn(
                 'relative flex flex-1 min-w-0 flex-col items-center gap-0.5 px-1 py-1.5 transition-colors',
                 overflowActive
@@ -111,7 +111,7 @@ export function BottomNav({ messageBadge }: BottomNavProps) {
                   overflowActive ? 'font-semibold' : 'font-medium',
                 )}
               >
-                Plus
+                Menu
               </span>
             </button>
             <DrawerContent
@@ -119,7 +119,7 @@ export function BottomNav({ messageBadge }: BottomNavProps) {
               className="rounded-t-2xl pb-[max(1.5rem,env(safe-area-inset-bottom))]"
             >
               <DrawerHeader className="px-0 text-left">
-                <DrawerTitle className="font-serif">Plus d&apos;options</DrawerTitle>
+                <DrawerTitle className="font-serif">Menu</DrawerTitle>
               </DrawerHeader>
               <div className="grid grid-cols-3 gap-2.5">
                 {overflow.map((item) => {

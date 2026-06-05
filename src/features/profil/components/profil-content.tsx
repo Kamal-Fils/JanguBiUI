@@ -6,8 +6,10 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { ThemeToggle } from '@/components/layouts/theme-toggle';
 import { MembershipManager } from '@/components/org/membership-manager';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button/button';
 import { useNotifications } from '@/components/ui/notifications';
 import { useDeleteAccount, useLogout, useUser } from '@/lib/auth';
 import { isFidele } from '@/lib/authorization';
@@ -133,12 +135,16 @@ export function ProfilContent() {
     });
 
   const { mutate: logout, isPending: isLoggingOut } = useLogout({
-    onSuccess: () => { window.location.href = '/auth/login'; },
+    onSuccess: () => {
+      window.location.href = '/auth/login';
+    },
   });
 
   const { mutate: deleteAccount, isPending: isDeletingAccount } =
     useDeleteAccount({
-      onSuccess: () => { window.location.href = '/auth/login'; },
+      onSuccess: () => {
+        window.location.href = '/auth/login';
+      },
     });
 
   function onProfileSubmit(data: ProfileFormValues) {
@@ -253,14 +259,15 @@ export function ProfilContent() {
                 </p>
               )}
             </div>
-            <button
+            <Button
               type="submit"
-              disabled={isUpdating || isProfileSubmitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              size="lg"
+              fullWidth
+              isLoading={isUpdating}
+              disabled={isProfileSubmitting}
             >
-              {isUpdating && <Loader2 className="size-4 animate-spin" />}
               Enregistrer
-            </button>
+            </Button>
           </form>
         </SectionCard>
 
@@ -318,16 +325,14 @@ export function ProfilContent() {
                 </p>
               )}
             </div>
-            <button
+            <Button
               type="submit"
-              disabled={isChangingPassword}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              size="lg"
+              fullWidth
+              isLoading={isChangingPassword}
             >
-              {isChangingPassword && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
               Modifier le mot de passe
-            </button>
+            </Button>
           </form>
         </SectionCard>
 
@@ -338,32 +343,46 @@ export function ProfilContent() {
           </SectionCard>
         )}
 
+        {/* Apparence — bascule thème (parité mobile ; la sidebar la porte sur
+            desktop). md:hidden : évite un 2e toggle sur le Profil desktop. */}
+        <div className="md:hidden">
+          <SectionCard title="Apparence">
+            <ThemeToggle
+              className="w-full justify-start border border-border bg-card"
+              labelClassName="block"
+            />
+          </SectionCard>
+        </div>
+
         {/* Session section */}
         <SectionCard title="Session">
           <div className="flex flex-col gap-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              fullWidth
               onClick={() => logout()}
               disabled={isLoggingOut}
-              className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+              icon={<LogOut className="size-4" />}
+              className="justify-start"
             >
-              <LogOut className="size-4" />
               Se déconnecter
-            </button>
+            </Button>
           </div>
         </SectionCard>
 
         {/* Danger zone */}
         <SectionCard title="Zone de danger">
           {!showDeleteConfirm ? (
-            <button
+            <Button
               type="button"
+              variant="destructive"
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10"
+              icon={<Trash2 className="size-4" />}
+              className="border border-destructive/30 bg-destructive/5 text-destructive shadow-none hover:bg-destructive/10"
             >
-              <Trash2 className="size-4" />
               Supprimer mon compte
-            </button>
+            </Button>
           ) : (
             <div className="space-y-3">
               <p className="text-sm font-medium text-destructive">
@@ -371,24 +390,23 @@ export function ProfilContent() {
                 données seront supprimés.
               </p>
               <div className="flex gap-2">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                  className="flex-1"
                 >
                   Annuler
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="destructive"
                   onClick={() => deleteAccount()}
-                  disabled={isDeletingAccount}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
+                  isLoading={isDeletingAccount}
+                  className="flex-1"
                 >
-                  {isDeletingAccount && (
-                    <Loader2 className="size-4 animate-spin" />
-                  )}
                   Confirmer
-                </button>
+                </Button>
               </div>
             </div>
           )}

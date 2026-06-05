@@ -1,9 +1,7 @@
 'use client';
 
-import { LogOut, Moon, Sun } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
 
 import { Link } from '@/components/ui/link/link';
 import { buildNavItems, isNavActive } from '@/config/nav-config';
@@ -11,13 +9,15 @@ import { useLogout, useUser } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { useMessagingStore } from '@/stores/messaging-store';
 
+import { AppHeader } from './app-header';
 import { BottomNav } from './bottom-nav';
 import { NotificationBell } from './notification-bell';
 import { OnboardingGuard } from './onboarding-guard';
+import { PageMetaProvider, usePageMetaValue } from './page-meta';
+import { ThemeToggle } from './theme-toggle';
 
 interface AppShellProps {
   children: React.ReactNode;
-  hideNav?: boolean;
 }
 
 function CrossIcon({ className }: { className?: string }) {
@@ -31,43 +31,6 @@ function CrossIcon({ className }: { className?: string }) {
       <rect x="10" y="2" width="4" height="20" rx="2" />
       <rect x="2" y="8" width="20" height="4" rx="2" />
     </svg>
-  );
-}
-
-function ThemeToggle({ className }: { className?: string }) {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isDark = mounted && resolvedTheme === 'dark';
-
-  return (
-    <button
-      type="button"
-      onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      className={cn(
-        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-muted/70 lg:justify-start justify-center',
-        className,
-      )}
-      aria-label={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
-      suppressHydrationWarning
-    >
-      {mounted ? (
-        isDark ? (
-          <Sun className="size-5 shrink-0 text-warning" />
-        ) : (
-          <Moon className="size-5 shrink-0 text-info" />
-        )
-      ) : (
-        <span className="size-5 shrink-0" aria-hidden="true" />
-      )}
-      <span className="hidden lg:block" suppressHydrationWarning>
-        {mounted ? (isDark ? 'Mode clair' : 'Mode sombre') : ''}
-      </span>
-    </button>
   );
 }
 
@@ -138,7 +101,7 @@ function DesktopSidebar({ messageBadge }: { messageBadge?: number }) {
       {/* Notifications + Theme + Logout */}
       <div className="shrink-0 border-t border-border p-2 flex flex-col gap-0.5">
         <NotificationBell className="w-full" />
-        <ThemeToggle className="w-full" />
+        <ThemeToggle className="w-full lg:justify-start justify-center" />
         <button
           type="button"
           onClick={() => logout()}
@@ -153,26 +116,35 @@ function DesktopSidebar({ messageBadge }: { messageBadge?: number }) {
   );
 }
 
-export function AppShell({ children, hideNav }: AppShellProps) {
-  const totalUnread = useMessagingStore((s) => s.totalUnread);
-
+export function AppShell({ children }: AppShellProps) {
   return (
     <OnboardingGuard>
-      <div className="flex min-h-dvh bg-background">
-        {!hideNav && <DesktopSidebar messageBadge={totalUnread} />}
-        <div className="flex flex-1 flex-col min-w-0">
-          <main className={!hideNav ? 'flex-1 pb-20 md:pb-0' : 'flex-1'}>
-            {children}
-          </main>
-          {!hideNav && <BottomNav messageBadge={totalUnread} />}
-        </div>
-        {/* Notification bell — mobile only, fixed top-right */}
-        {!hideNav && (
-          <div className="fixed right-3 top-3 z-50 md:hidden">
-            <NotificationBell className="size-10 rounded-full border border-border bg-background/90 shadow-sm backdrop-blur-sm p-0 justify-center" />
-          </div>
-        )}
-      </div>
+      <PageMetaProvider>
+        <AppShellLayout>{children}</AppShellLayout>
+      </PageMetaProvider>
     </OnboardingGuard>
+  );
+}
+
+function AppShellLayout({ children }: AppShellProps) {
+  const totalUnread = useMessagingStore((s) => s.totalUnread);
+  const meta = usePageMetaValue();
+
+  return (
+    <div className="flex min-h-dvh bg-background">
+      <DesktopSidebar messageBadge={totalUnread} />
+      <div className="flex flex-1 flex-col min-w-0">
+        <AppHeader />
+        <main className="flex-1 pb-20 md:pb-0">{children}</main>
+        <BottomNav messageBadge={totalUnread} />
+      </div>
+      {/* Cloche flottante mobile — uniquement pour les pages NON migrées : les
+          pages migrées affichent la cloche dans l'app-bar de AppHeader. */}
+      {!meta && (
+        <div className="fixed right-3 top-3 z-50 md:hidden">
+          <NotificationBell className="size-10 rounded-full border border-border bg-background/90 shadow-sm backdrop-blur-sm p-0 justify-center" />
+        </div>
+      )}
+    </div>
   );
 }

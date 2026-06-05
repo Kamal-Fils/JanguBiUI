@@ -12,7 +12,7 @@ export interface paths {
             cookie?: never;
         };
         /** Liste des événements (scopée aux appartenances de l'utilisateur) */
-        get: operations["v1_agenda_events_list"];
+        get: operations["v1_agenda_events_retrieve"];
         put?: never;
         /** Créer un événement (clergé ou admin) */
         post: operations["v1_agenda_events_create"];
@@ -30,7 +30,7 @@ export interface paths {
             cookie?: never;
         };
         /** Détail d'un événement */
-        get: operations["v1_agenda_events_retrieve"];
+        get: operations["v1_agenda_events_retrieve_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -50,7 +50,8 @@ export interface paths {
         put?: never;
         /** S'inscrire à un événement */
         post: operations["v1_agenda_events_register_create"];
-        delete?: never;
+        /** Annuler son inscription à un événement */
+        delete: operations["v1_agenda_events_register_destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -64,7 +65,7 @@ export interface paths {
             cookie?: never;
         };
         /** Liste des inscrits (autorité sur la portée de l'événement) */
-        get: operations["v1_agenda_events_registrations_list"];
+        get: operations["v1_agenda_events_registrations_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -644,7 +645,7 @@ export interface paths {
             cookie?: never;
         };
         /** Lister toutes les demandes (admin) */
-        get: operations["v1_documents_admin_requests_list"];
+        get: operations["v1_documents_admin_requests_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -661,7 +662,7 @@ export interface paths {
             cookie?: never;
         };
         /** Détail d'une demande (admin) */
-        get: operations["v1_documents_admin_requests_retrieve"];
+        get: operations["v1_documents_admin_requests_retrieve_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -798,7 +799,7 @@ export interface paths {
             cookie?: never;
         };
         /** Lister mes demandes de document */
-        get: operations["v1_documents_requests_list"];
+        get: operations["v1_documents_requests_retrieve"];
         put?: never;
         /** Créer une demande de document */
         post: operations["v1_documents_requests_create"];
@@ -816,7 +817,7 @@ export interface paths {
             cookie?: never;
         };
         /** Détail d'une demande de document */
-        get: operations["v1_documents_requests_retrieve"];
+        get: operations["v1_documents_requests_retrieve_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1781,7 +1782,7 @@ export interface paths {
             cookie?: never;
         };
         /** Feed global — articles publiés pour toute l'Église du Sénégal */
-        get: operations["v1_news_list"];
+        get: operations["v1_news_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1798,7 +1799,7 @@ export interface paths {
             cookie?: never;
         };
         /** Détail d'un article publié */
-        get: operations["v1_news_retrieve"];
+        get: operations["v1_news_retrieve_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1815,7 +1816,7 @@ export interface paths {
             cookie?: never;
         };
         /** [Admin] Lister tous les articles (tous statuts) */
-        get: operations["v1_news_admin_list"];
+        get: operations["v1_news_admin_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1832,7 +1833,7 @@ export interface paths {
             cookie?: never;
         };
         /** [Admin] Détail d'un article (tous statuts) */
-        get: operations["v1_news_admin_retrieve"];
+        get: operations["v1_news_admin_retrieve_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1951,7 +1952,7 @@ export interface paths {
             cookie?: never;
         };
         /** Articles publiés d'un diocèse */
-        get: operations["v1_news_diocese_list"];
+        get: operations["v1_news_diocese_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1968,11 +1969,11 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Fil d'actualités agrégé (toutes mes portées)
+         * Fil d'actualités agrégé (toutes mes portées, filtrable par portée)
          * @description Fil d'actualités AGRÉGÉ de l'utilisateur connecté (Chantier 7b) :
          *     global ∪ église ∪ paroisse ∪ diocèse de toutes ses appartenances (C3a).
          */
-        get: operations["v1_news_feed_list"];
+        get: operations["v1_news_feed_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1992,7 +1993,7 @@ export interface paths {
          * Articles de ma paroisse (paroisse principale du profil)
          * @description Articles de la paroisse principale du fidèle connecté.
          */
-        get: operations["v1_news_my_parish_list"];
+        get: operations["v1_news_my_parish_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2009,7 +2010,7 @@ export interface paths {
             cookie?: never;
         };
         /** Articles publiés d'une paroisse */
-        get: operations["v1_news_parish_list"];
+        get: operations["v1_news_parish_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2026,7 +2027,7 @@ export interface paths {
             cookie?: never;
         };
         /** Lister les églises (filtrable par paroisse) */
-        get: operations["v1_org_churches_list"];
+        get: operations["v1_org_churches_retrieve"];
         put?: never;
         /** Créer une église (admin de la paroisse) */
         post: operations["v1_org_churches_create"];
@@ -2044,7 +2045,7 @@ export interface paths {
             cookie?: never;
         };
         /** Détail d'une église */
-        get: operations["v1_org_churches_retrieve"];
+        get: operations["v1_org_churches_retrieve_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2079,7 +2080,7 @@ export interface paths {
             cookie?: never;
         };
         /** Lister les diocèses */
-        get: operations["v1_org_dioceses_list"];
+        get: operations["v1_org_dioceses_retrieve"];
         put?: never;
         /** Créer un diocèse (super_admin) */
         post: operations["v1_org_dioceses_create"];
@@ -2097,7 +2098,7 @@ export interface paths {
             cookie?: never;
         };
         /** Lister/rechercher les paroisses (toutes paroisses) — picker documents */
-        get: operations["v1_org_parishes_list"];
+        get: operations["v1_org_parishes_retrieve"];
         put?: never;
         /** Créer une paroisse (super_admin) */
         post: operations["v1_org_parishes_create"];
@@ -2115,7 +2116,7 @@ export interface paths {
             cookie?: never;
         };
         /** Détail d'une paroisse */
-        get: operations["v1_org_parishes_retrieve"];
+        get: operations["v1_org_parishes_retrieve_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2132,7 +2133,7 @@ export interface paths {
             cookie?: never;
         };
         /** Lister les provinces */
-        get: operations["v1_org_provinces_list"];
+        get: operations["v1_org_provinces_retrieve"];
         put?: never;
         /** Créer une province (super_admin) */
         post: operations["v1_org_provinces_create"];
@@ -3328,9 +3329,7 @@ export interface components {
             registered_first_names: string;
             father_last_name: string;
             mother_last_name: string;
-            parish_name: string;
-            diocese: string;
-            parish_id?: number | null;
+            parish_id: number;
             sacrament_approximate_date: string;
             sacrament_location: string;
             /** @default  */
@@ -3341,6 +3340,10 @@ export interface components {
             consent_given: boolean;
             attachment_file_id?: number | null;
         };
+        /**
+         * @description B5c — nom de paroisse + diocèse affichés depuis la FK target_parish ; repli sur
+         *     le texte stocké pour les demandes orphelines legacy (FK NULL).
+         */
         DocumentRequestDetailOutput: {
             /** Format: uuid */
             readonly id: string;
@@ -3368,8 +3371,8 @@ export interface components {
             registered_first_names?: string;
             father_last_name: string;
             mother_last_name: string;
-            parish_name: string;
-            diocese: string;
+            readonly parish_name: string;
+            readonly diocese: string;
             sacrament_approximate_date: string;
             sacrament_location: string;
             additional_info?: string;
@@ -3382,6 +3385,10 @@ export interface components {
             /** Format: date-time */
             readonly updated_at: string;
         };
+        /**
+         * @description B5c — nom de paroisse + diocèse affichés depuis la FK target_parish ; repli sur
+         *     le texte stocké pour les demandes orphelines legacy (FK NULL).
+         */
         DocumentRequestListOutput: {
             /** Format: uuid */
             readonly id: string;
@@ -3395,8 +3402,8 @@ export interface components {
             requester_first_names: string;
             /** Format: email */
             readonly requester_email: string;
-            parish_name: string;
-            diocese: string;
+            readonly parish_name: string;
+            readonly diocese: string;
             target_parish?: number | null;
             /** Format: date-time */
             created_at?: string;
@@ -3515,6 +3522,7 @@ export interface components {
             max_participants: number | null;
             readonly organizer_email: string;
             readonly registration_count: string;
+            readonly is_registered: boolean;
             /** Format: date-time */
             created_at: string;
         };
@@ -3852,6 +3860,70 @@ export interface components {
         OrgRef: {
             readonly id: number;
             readonly name: string;
+        };
+        PaginatedArticleListOutputList: {
+            limit: number;
+            offset: number;
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["ArticleListOutput"][];
+        };
+        PaginatedChurchOutputList: {
+            limit: number;
+            offset: number;
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["ChurchOutput"][];
+        };
+        PaginatedDioceseOutputList: {
+            limit: number;
+            offset: number;
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["DioceseOutput"][];
+        };
+        PaginatedDocumentRequestListOutputList: {
+            limit: number;
+            offset: number;
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["DocumentRequestListOutput"][];
+        };
+        PaginatedEventOutputList: {
+            limit: number;
+            offset: number;
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["EventOutput"][];
+        };
+        PaginatedParishOutputList: {
+            limit: number;
+            offset: number;
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["ParishOutput"][];
+        };
+        PaginatedProvinceOutputList: {
+            limit: number;
+            offset: number;
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["ProvinceOutput"][];
+        };
+        PaginatedRegistrationOutputList: {
+            limit: number;
+            offset: number;
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["RegistrationOutput"][];
         };
         ParishCreateInput: {
             name: string;
@@ -4334,7 +4406,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    v1_agenda_events_list: {
+    v1_agenda_events_retrieve: {
         parameters: {
             query?: {
                 /** @description Filter by event type */
@@ -4355,7 +4427,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EventOutput"][];
+                    "application/json": components["schemas"]["PaginatedEventOutputList"];
                 };
             };
         };
@@ -4385,7 +4457,7 @@ export interface operations {
             };
         };
     };
-    v1_agenda_events_retrieve: {
+    v1_agenda_events_retrieve_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -4426,7 +4498,27 @@ export interface operations {
             };
         };
     };
-    v1_agenda_events_registrations_list: {
+    v1_agenda_events_register_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_agenda_events_registrations_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -4442,7 +4534,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RegistrationOutput"][];
+                    "application/json": components["schemas"]["PaginatedRegistrationOutputList"];
                 };
             };
         };
@@ -5339,7 +5431,7 @@ export interface operations {
             };
         };
     };
-    v1_documents_admin_requests_list: {
+    v1_documents_admin_requests_retrieve: {
         parameters: {
             query?: {
                 /** @description Filtrer par agent assigné */
@@ -5368,12 +5460,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DocumentRequestListOutput"][];
+                    "application/json": components["schemas"]["PaginatedDocumentRequestListOutputList"];
                 };
             };
         };
     };
-    v1_documents_admin_requests_retrieve: {
+    v1_documents_admin_requests_retrieve_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -5586,7 +5678,7 @@ export interface operations {
             };
         };
     };
-    v1_documents_requests_list: {
+    v1_documents_requests_retrieve: {
         parameters: {
             query?: {
                 /** @description Filtrer par type de document */
@@ -5613,7 +5705,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DocumentRequestListOutput"][];
+                    "application/json": components["schemas"]["PaginatedDocumentRequestListOutputList"];
                 };
             };
         };
@@ -5643,7 +5735,7 @@ export interface operations {
             };
         };
     };
-    v1_documents_requests_retrieve: {
+    v1_documents_requests_retrieve_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -7007,7 +7099,7 @@ export interface operations {
             };
         };
     };
-    v1_news_list: {
+    v1_news_retrieve: {
         parameters: {
             query?: {
                 /** @description Filtrer par slug de catégorie */
@@ -7030,12 +7122,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleListOutput"][];
+                    "application/json": components["schemas"]["PaginatedArticleListOutputList"];
                 };
             };
         };
     };
-    v1_news_retrieve: {
+    v1_news_retrieve_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -7056,7 +7148,7 @@ export interface operations {
             };
         };
     };
-    v1_news_admin_list: {
+    v1_news_admin_retrieve: {
         parameters: {
             query?: {
                 /** @description Filtrer par slug catégorie */
@@ -7083,12 +7175,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleListOutput"][];
+                    "application/json": components["schemas"]["PaginatedArticleListOutputList"];
                 };
             };
         };
     };
-    v1_news_admin_retrieve: {
+    v1_news_admin_retrieve_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -7248,7 +7340,7 @@ export interface operations {
             };
         };
     };
-    v1_news_diocese_list: {
+    v1_news_diocese_retrieve: {
         parameters: {
             query?: {
                 /** @description Filtrer par slug de catégorie */
@@ -7273,12 +7365,44 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleListOutput"][];
+                    "application/json": components["schemas"]["PaginatedArticleListOutputList"];
                 };
             };
         };
     };
-    v1_news_feed_list: {
+    v1_news_feed_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par slug de catégorie */
+                category?: string;
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Décalage pagination */
+                offset?: number;
+                /** @description ID de l'entité de portée (requis pour diocese/parish/church) */
+                scope_id?: number;
+                /** @description Filtrer le fil par portée (borné aux appartenances de l'utilisateur) */
+                scope_type?: "church" | "diocese" | "global" | "parish";
+                /** @description Recherche dans le titre */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedArticleListOutputList"];
+                };
+            };
+        };
+    };
+    v1_news_my_parish_retrieve: {
         parameters: {
             query?: {
                 /** @description Filtrer par slug de catégorie */
@@ -7301,40 +7425,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleListOutput"][];
+                    "application/json": components["schemas"]["PaginatedArticleListOutputList"];
                 };
             };
         };
     };
-    v1_news_my_parish_list: {
-        parameters: {
-            query?: {
-                /** @description Filtrer par slug de catégorie */
-                category?: string;
-                /** @description Nombre de résultats */
-                limit?: number;
-                /** @description Décalage pagination */
-                offset?: number;
-                /** @description Recherche dans le titre */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ArticleListOutput"][];
-                };
-            };
-        };
-    };
-    v1_news_parish_list: {
+    v1_news_parish_retrieve: {
         parameters: {
             query?: {
                 /** @description Filtrer par slug de catégorie */
@@ -7359,14 +7455,18 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ArticleListOutput"][];
+                    "application/json": components["schemas"]["PaginatedArticleListOutputList"];
                 };
             };
         };
     };
-    v1_org_churches_list: {
+    v1_org_churches_retrieve: {
         parameters: {
             query?: {
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Offset de pagination */
+                offset?: number;
                 /** @description Filtrer par paroisse ID */
                 parish?: number;
             };
@@ -7381,7 +7481,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ChurchOutput"][];
+                    "application/json": components["schemas"]["PaginatedChurchOutputList"];
                 };
             };
         };
@@ -7411,7 +7511,7 @@ export interface operations {
             };
         };
     };
-    v1_org_churches_retrieve: {
+    v1_org_churches_retrieve_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -7479,9 +7579,13 @@ export interface operations {
             };
         };
     };
-    v1_org_dioceses_list: {
+    v1_org_dioceses_retrieve: {
         parameters: {
             query?: {
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Offset de pagination */
+                offset?: number;
                 /** @description Filtrer par province ID */
                 province?: number;
             };
@@ -7496,7 +7600,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DioceseOutput"][];
+                    "application/json": components["schemas"]["PaginatedDioceseOutputList"];
                 };
             };
         };
@@ -7526,7 +7630,7 @@ export interface operations {
             };
         };
     };
-    v1_org_parishes_list: {
+    v1_org_parishes_retrieve: {
         parameters: {
             query?: {
                 /** @description Filtrer par ville (dédié) */
@@ -7551,7 +7655,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ParishOutput"][];
+                    "application/json": components["schemas"]["PaginatedParishOutputList"];
                 };
             };
         };
@@ -7581,7 +7685,7 @@ export interface operations {
             };
         };
     };
-    v1_org_parishes_retrieve: {
+    v1_org_parishes_retrieve_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -7602,9 +7706,14 @@ export interface operations {
             };
         };
     };
-    v1_org_provinces_list: {
+    v1_org_provinces_retrieve: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Nombre de résultats */
+                limit?: number;
+                /** @description Offset de pagination */
+                offset?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -7616,7 +7725,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProvinceOutput"][];
+                    "application/json": components["schemas"]["PaginatedProvinceOutputList"];
                 };
             };
         };

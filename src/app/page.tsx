@@ -9,10 +9,12 @@ import { StatsSection } from '@/features/landing/components/stats-section';
 import { TestimonialsSection } from '@/features/landing/components/testimonials-section';
 
 const HomePage = () => {
-  // La landing conserve son identité nocturne (navy + étoiles) quel que soit
-  // le thème de l'app (désormais light-first) : on force le palette dark ici.
+  // La landing suit le thème (clair/sombre) piloté par next-themes : le bouton
+  // de bascule de la nav agit donc réellement. En clair → « Sacred Editorial
+  // day » (papier/ivoire, encre navy, accents or/cyan) ; en sombre → identité
+  // nocturne (navy profond + champ d'étoiles). Plus de palette forcée ici.
   return (
-    <div className="dark bg-background text-foreground">
+    <div className="bg-background text-foreground">
       <LandingNav />
       <main>
         <HeroSection />

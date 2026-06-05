@@ -3,7 +3,8 @@
 import { Play, Tv } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { ContentContainer } from '@/components/layouts/content-container';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterPills } from '@/components/ui/filter-pills';
 import { Spinner } from '@/components/ui/spinner';
@@ -78,11 +79,14 @@ export function TvContent() {
     ...(cats?.results.map((c) => ({ value: c.slug, label: c.name })) ?? []),
   ];
 
+  useRegisterPageMeta({
+    title: 'TV Catholique',
+    subtitle: 'Chaînes et programmes',
+  });
+
   return (
     <div className="flex flex-col">
-      <PageHeader title="TV Catholique" subtitle="Chaînes et programmes" />
-
-      <div className="mx-auto w-full max-w-6xl p-4">
+      <ContentContainer width="wide">
         <div className="mb-4">
           <FilterPills
             options={filterOptions}
@@ -109,7 +113,7 @@ export function TvContent() {
             ))}
           </div>
         )}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

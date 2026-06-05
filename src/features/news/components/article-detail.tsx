@@ -1,10 +1,12 @@
 'use client';
 
 import DOMPurify from 'isomorphic-dompurify';
-import { ArrowLeft, Clock, Eye, User } from 'lucide-react';
+import { Clock, Eye, User } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { Button } from '@/components/ui/button/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useArticleDetail } from '../api/get-article';
@@ -53,39 +55,31 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
   const router = useRouter();
   const { data: article, isLoading, isError } = useArticleDetail(articleId);
 
+  useRegisterPageMeta({
+    title: article?.title ?? 'Article',
+    showHeading: false,
+  });
+
   if (isLoading) return <ArticleDetailSkeleton />;
 
   if (isError || !article) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
         <p className="text-sm text-muted-foreground">Article introuvable.</p>
-        <button
+        <Button
           type="button"
+          variant="link"
+          size="sm"
           onClick={() => router.back()}
-          className="text-sm text-primary underline underline-offset-2"
         >
           Retour
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
     <article className="flex flex-col">
-      <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="flex size-8 items-center justify-center rounded-full hover:bg-muted"
-          aria-label="Retour"
-        >
-          <ArrowLeft className="size-5" />
-        </button>
-        <span className="truncate text-sm font-semibold text-foreground">
-          {article.title}
-        </span>
-      </div>
-
       <div className="mx-auto w-full max-w-2xl md:max-w-3xl lg:max-w-5xl">
         {article.cover_image_url && (
           <div className="relative h-52 w-full overflow-hidden">

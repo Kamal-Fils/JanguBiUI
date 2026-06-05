@@ -1,9 +1,12 @@
 'use client';
 
-import { ArrowLeft, FileDown, Loader2, Paperclip, Send } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { FileDown, Paperclip, Send } from 'lucide-react';
 import { useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { Button } from '@/components/ui/button/button';
+import { Card } from '@/components/ui/card/card';
 import { Spinner } from '@/components/ui/spinner';
 import {
   StatusTimeline,
@@ -42,13 +45,14 @@ function formatDateTime(iso: string): string {
 }
 
 export function DocumentDetail({ documentId }: DocumentDetailProps) {
-  const router = useRouter();
   const { data, isLoading, isError } = useDocumentRequest(documentId);
   const [supplement, setSupplement] = useState('');
   const [submittedSupplement, setSubmittedSupplement] = useState(false);
 
   const { mutate: submitSupplement, isPending: isSubmitting } =
     useSubmitSupplement(documentId);
+
+  useRegisterPageMeta({ title: 'Demande de document', showHeading: false });
 
   function handleSupplementSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -67,21 +71,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
 
   return (
     <div className="flex flex-col">
-      <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="flex size-8 items-center justify-center rounded-full hover:bg-muted"
-          aria-label="Retour"
-        >
-          <ArrowLeft className="size-5" />
-        </button>
-        <span className="text-sm font-semibold text-foreground">
-          Détail de la demande
-        </span>
-      </div>
-
-      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         {isLoading && (
           <div className="flex justify-center py-12">
             <Spinner />
@@ -124,7 +114,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
               </div>
             )}
 
-            <div className="rounded-xl border border-border bg-card p-4">
+            <Card variant="elevated" className="p-4">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Date de la demande
               </p>
@@ -151,7 +141,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
                   </p>
                 </>
               )}
-            </div>
+            </Card>
 
             {data.status === 'info_requested' && !submittedSupplement && (
               <form
@@ -174,18 +164,16 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
                   placeholder="Apportez les précisions demandées…"
                   className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
-                <button
+                <Button
                   type="submit"
-                  disabled={!supplement.trim() || isSubmitting}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                  size="lg"
+                  fullWidth
+                  isLoading={isSubmitting}
+                  disabled={!supplement.trim()}
+                  icon={<Send className="size-4" />}
                 >
-                  {isSubmitting ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Send className="size-4" />
-                  )}
                   {isSubmitting ? 'Envoi en cours…' : 'Envoyer le complément'}
-                </button>
+                </Button>
               </form>
             )}
 
@@ -255,7 +243,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
             )}
           </div>
         )}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 
+import { Button } from '@/components/ui/button/button';
 import { useNotifications } from '@/components/ui/notifications';
-import { Spinner } from '@/components/ui/spinner';
 
 import { CreateEventInput, useCreateEvent } from '../api/create-event';
 
@@ -39,7 +39,7 @@ export function EventForm({ onSuccess }: EventFormProps) {
       addNotification({
         type: 'success',
         title: 'Événement créé',
-        message: 'L\'événement a été publié.',
+        message: "L'événement a été publié.",
       });
       setTitle('');
       setDescription('');
@@ -152,9 +152,7 @@ export function EventForm({ onSuccess }: EventFormProps) {
           />
         </div>
       </div>
-      {dateError && (
-        <p className="text-xs text-destructive">{dateError}</p>
-      )}
+      {dateError && <p className="text-xs text-destructive">{dateError}</p>}
 
       <div>
         <label htmlFor="evt-location" className={labelClass}>
@@ -185,14 +183,15 @@ export function EventForm({ onSuccess }: EventFormProps) {
         />
       </div>
 
-      <button
+      <Button
         type="submit"
-        disabled={isPending || !title || !startAt || !endAt || !location}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+        size="lg"
+        fullWidth
+        isLoading={isPending}
+        disabled={!title || !startAt || !endAt || !location}
       >
-        {isPending && <Spinner className="size-4" />}
         Publier l&apos;événement
-      </button>
+      </Button>
     </form>
   );
 }

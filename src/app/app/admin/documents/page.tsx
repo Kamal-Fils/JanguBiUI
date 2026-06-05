@@ -3,8 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { useAdminDocuments } from '@/features/documents/api/get-admin-documents';
 import { AdminDocumentList } from '@/features/documents/components/admin-document-list';
 import { DocumentStatus } from '@/features/documents/types';
@@ -36,38 +35,37 @@ export default function AdminDocumentsPage() {
     statusFilter ? { status: statusFilter } : undefined,
   );
 
+  useRegisterPageMeta({
+    title: 'Demandes de documents',
+    subtitle: 'Traiter les demandes de documents ecclésiastiques',
+  });
+
   if (isLoading || !canProcessDocuments(user)) return null;
 
   return (
-    <AppShell>
-      <div className="flex flex-col">
-        <PageHeader
-          title="Demandes de documents"
-          subtitle="Traiter les demandes de documents ecclésiastiques"
-        />
-        <div className="mx-auto w-full max-w-4xl px-4 py-6 md:px-6">
-          <div className="mb-4 flex flex-wrap gap-2">
-            {STATUS_FILTERS.map((f) => (
-              <button
-                key={f.value}
-                onClick={() => setStatusFilter(f.value)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  statusFilter === f.value
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-
-          <AdminDocumentList
-            documents={data?.results ?? []}
-            isLoading={docsLoading}
-          />
+    <div className="flex flex-col">
+      <div className="mx-auto w-full max-w-4xl px-4 py-6 md:px-6">
+        <div className="mb-4 flex flex-wrap gap-2">
+          {STATUS_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setStatusFilter(f.value)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                statusFilter === f.value
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
+
+        <AdminDocumentList
+          documents={data?.results ?? []}
+          isLoading={docsLoading}
+        />
       </div>
-    </AppShell>
+    </div>
   );
 }

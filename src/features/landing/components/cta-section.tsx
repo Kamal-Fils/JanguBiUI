@@ -51,7 +51,7 @@ export function CtaSection() {
         <div className="mb-8 flex flex-wrap justify-center gap-3.5">
           <a
             href="#"
-            className="flex min-w-[168px] items-center gap-3 rounded-[14px] border border-foreground/20 bg-white px-6 py-3.5 transition-all hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(255,255,255,.12)]"
+            className="flex min-w-[168px] items-center gap-3 rounded-[14px] border border-foreground/20 bg-white px-6 py-3.5 transition-all hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(20,40,80,.12)] dark:hover:shadow-[0_16px_40px_rgba(255,255,255,.12)]"
           >
             <AppleIcon />
             <div className="flex flex-col text-left">
@@ -65,7 +65,7 @@ export function CtaSection() {
           </a>
           <a
             href="#"
-            className="flex min-w-[168px] items-center gap-3 rounded-[14px] border border-foreground/20 bg-white px-6 py-3.5 transition-all hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(255,255,255,.12)]"
+            className="flex min-w-[168px] items-center gap-3 rounded-[14px] border border-foreground/20 bg-white px-6 py-3.5 transition-all hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(20,40,80,.12)] dark:hover:shadow-[0_16px_40px_rgba(255,255,255,.12)]"
           >
             <GoogleIcon />
             <div className="flex flex-col text-left">
@@ -88,7 +88,7 @@ export function CtaSection() {
           ].map(({ Icon, label }) => (
             <span
               key={label}
-              className="flex items-center gap-1.5 text-[0.75rem] font-medium text-primary/70"
+              className="flex items-center gap-1.5 text-[0.75rem] font-medium text-muted-foreground"
             >
               <Icon className="size-3.5" />
               {label}
