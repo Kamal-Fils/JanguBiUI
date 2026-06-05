@@ -49,7 +49,7 @@ export function PourQuiSection() {
           {CARDS.map(({ Icon, title, description, cta }) => (
             <div
               key={title}
-              className="group rounded-[20px] border border-border bg-background p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-[0_0_48px_rgba(112,203,255,.25)]"
+              className="group rounded-[20px] border border-border bg-background p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-[0_16px_40px_rgba(20,40,80,.12)] dark:hover:shadow-[0_0_48px_rgba(112,203,255,.25)]"
             >
               <div className="mb-5 flex size-[52px] items-center justify-center rounded-[14px] border border-primary/20 bg-primary/10 text-primary">
                 <Icon className="size-6" />

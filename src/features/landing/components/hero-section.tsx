@@ -33,7 +33,7 @@ export function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-dvh items-center justify-center overflow-hidden pt-20 text-center dark:bg-[linear-gradient(160deg,#07101A_0%,#0D1C2B_60%,#122236_100%)] "
+      className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-[linear-gradient(160deg,hsl(var(--background))_0%,hsl(var(--background-surface))_55%,hsl(var(--secondary))_100%)] pt-20 text-center dark:bg-[linear-gradient(160deg,#07101A_0%,#0D1C2B_60%,#122236_100%)]"
     >
       <StarField />
 
@@ -65,7 +65,7 @@ export function HeroSection() {
           <div className="mb-11 flex flex-wrap justify-center gap-3.5">
             <a
               href="#"
-              className="flex min-w-[168px] items-center gap-3 rounded-[14px] border border-foreground/20 bg-white px-6 py-3 transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(255,255,255,.12)]"
+              className="flex min-w-[168px] items-center gap-3 rounded-[14px] border border-foreground/20 bg-white px-6 py-3 transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(20,40,80,.12)] dark:hover:shadow-[0_16px_40px_rgba(255,255,255,.12)]"
             >
               <AppleIcon />
               <div className="flex flex-col text-left">
@@ -79,7 +79,7 @@ export function HeroSection() {
             </a>
             <a
               href="#"
-              className="flex min-w-[168px] items-center gap-3 rounded-[14px] border border-foreground/20 bg-white px-6 py-3 transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(255,255,255,.12)]"
+              className="flex min-w-[168px] items-center gap-3 rounded-[14px] border border-foreground/20 bg-white px-6 py-3 transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(20,40,80,.12)] dark:hover:shadow-[0_16px_40px_rgba(255,255,255,.12)]"
             >
               <GoogleIcon />
               <div className="flex flex-col text-left">
@@ -98,7 +98,7 @@ export function HeroSection() {
             <span className="text-[0.875rem] tracking-[.05em] text-accent">
               ★★★★★
             </span>
-            <span className="text-[0.8125rem] text-foreground/40">
+            <span className="text-[0.8125rem] text-muted-foreground">
               <strong className="text-foreground/80">4.8</strong> ·{' '}
               <strong className="text-foreground/80">2 400+</strong> fidèles ·{' '}
               <strong className="text-foreground/80">50+</strong> paroisses
