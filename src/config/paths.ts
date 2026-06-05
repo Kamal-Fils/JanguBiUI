@@ -50,6 +50,7 @@ export const paths = {
     newDocument: { getHref: () => '/app/documents/new' },
     document: { getHref: (id: string) => `/app/documents/${id}` },
     agenda: { getHref: () => '/app/agenda' },
+    agendaEvent: { getHref: (id: number | string) => `/app/agenda/${id}` },
     profil: { getHref: () => '/app/profil' },
     transfert: { getHref: () => '/app/transfert' },
     clerge: {
