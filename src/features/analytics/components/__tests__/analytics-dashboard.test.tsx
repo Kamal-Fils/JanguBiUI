@@ -49,9 +49,30 @@ const payload: Analytics = {
   ranking: [{ id: 1, name: 'Paroisse A', total: 15000, count: 3 }],
 };
 
+const ACTIVITY_URL = `${env.API_URL}/v1/dashboards/analytics/activity/`;
+const activityPayload = {
+  level: 'diocese',
+  grain: 'parish',
+  rows: [
+    {
+      id: 1,
+      name: 'Paroisse A',
+      donations_total: 15000,
+      fideles: 12,
+      documents_pending: 2,
+      intentions_pending: 1,
+    },
+  ],
+  documents: { by_status: [], pending: 2, total: 5 },
+  intentions: { by_status: [], pending: 1, total: 3 },
+};
+
 describe('AnalyticsDashboard', () => {
   test('affiche les KPIs scopés au périmètre', async () => {
-    server.use(http.get(ANALYTICS_URL, () => HttpResponse.json(payload)));
+    server.use(
+      http.get(ANALYTICS_URL, () => HttpResponse.json(payload)),
+      http.get(ACTIVITY_URL, () => HttpResponse.json(activityPayload)),
+    );
 
     renderApp(<AnalyticsDashboard />);
 
@@ -61,6 +82,15 @@ describe('AnalyticsDashboard', () => {
     expect(screen.getByText('40%')).toBeInTheDocument(); // taux Denier
     expect(screen.getByText('1/4')).toBeInTheDocument(); // paroisses actives
     expect(screen.getByText('+50%')).toBeInTheDocument(); // delta période
+
+    // Incrément 2 : matrice d'activité + files en souffrance.
+    expect(
+      await screen.findByText(/Matrice d.activité par paroisse/),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Documents en attente')).toBeInTheDocument();
+    expect(
+      screen.getByText('Intentions de messe en attente'),
+    ).toBeInTheDocument();
   });
 
   test('403 (clergé sans périmètre) → état vide explicite', async () => {
