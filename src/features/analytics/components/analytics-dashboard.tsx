@@ -15,6 +15,8 @@ import { cn } from '@/lib/utils';
 import { useAnalytics, type AnalyticsFilters } from '../api/get-analytics';
 import { formatXof } from '../utils/format';
 
+import { ActivitySection } from './activity-section';
+
 const ChartsSkeleton = () => (
   <div className="grid gap-4 lg:grid-cols-3">
     <Skeleton className="h-[280px] lg:col-span-2" />
@@ -283,6 +285,9 @@ export function AnalyticsDashboard() {
         ) : (
           <AnalyticsCharts data={data} />
         )}
+
+        {/* Matrice d'activité + files en souffrance (incrément 2) */}
+        {!isLoading && data && <ActivitySection filters={filters} />}
       </div>
     </ContentContainer>
   );
