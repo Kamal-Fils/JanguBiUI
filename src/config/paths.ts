@@ -55,6 +55,7 @@ export const paths = {
     transfert: { getHref: () => '/app/transfert' },
     clerge: {
       root: { getHref: () => '/app/clerge' },
+      analytique: { getHref: () => '/app/clerge/analytique' },
       intentions: { getHref: () => '/app/clerge/intentions' },
       messages: { getHref: () => '/app/clerge/messages' },
       transferts: { getHref: () => '/app/clerge/transferts' },
