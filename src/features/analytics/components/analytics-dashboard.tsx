@@ -189,6 +189,45 @@ export function AnalyticsDashboard() {
               onChange={(v) => set({ provider: v || undefined })}
               options={PROVIDER_OPTIONS}
             />
+            {/* Drill-down spatial : on descend dans une sous-entité du périmètre
+                (diocèse→paroisse, province→diocèse). Au grain « église » (curé)
+                il n'y a plus de descente → on n'affiche pas le sélecteur. */}
+            {data &&
+              data.ranking_level !== 'church' &&
+              data.ranking.length > 0 && (
+                <Select
+                  ariaLabel="Zoom géographique"
+                  value={String(filters.parish ?? filters.diocese ?? '')}
+                  onChange={(v) => {
+                    const id = v ? Number(v) : undefined;
+                    if (data.ranking_level === 'parish')
+                      set({ parish: id, diocese: undefined });
+                    else set({ diocese: id, parish: undefined });
+                  }}
+                  options={[
+                    {
+                      value: '',
+                      label:
+                        data.ranking_level === 'parish'
+                          ? 'Toutes paroisses'
+                          : 'Tous diocèses',
+                    },
+                    ...data.ranking.map((r) => ({
+                      value: String(r.id),
+                      label: r.name ?? '—',
+                    })),
+                  ]}
+                />
+              )}
+            {(filters.parish || filters.diocese) && (
+              <button
+                type="button"
+                onClick={() => set({ parish: undefined, diocese: undefined })}
+                className="rounded-full border border-input px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                ↑ Remonter
+              </button>
+            )}
             {data?.entity && (
               <span className="ml-auto text-sm text-muted-foreground">
                 {LEVEL_LABEL[data.level]} · {data.entity.name}
