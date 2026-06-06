@@ -280,6 +280,15 @@ async function fetchApi<T>(
     throw new ApiError(message, response.status);
   }
 
+  // 204 No Content (ex. DELETE) ou corps vide → pas de JSON à parser
+  // (response.json() lèverait « Unexpected end of JSON input »).
+  if (
+    response.status === 204 ||
+    response.headers.get('content-length') === '0'
+  ) {
+    return null as T;
+  }
+
   return response.json();
 }
 
