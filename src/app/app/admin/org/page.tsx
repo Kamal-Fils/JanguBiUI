@@ -4,6 +4,7 @@ import { Building2, MapPin } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { AdminPageLayout } from '@/components/layouts/admin-page-layout';
+import { ParishActions } from '@/components/org/parish-actions';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterPills } from '@/components/ui/filter-pills';
@@ -146,6 +147,13 @@ function ParishesSection({
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
         ),
+    },
+    {
+      header: 'Actions',
+      isAction: true,
+      headClassName: 'text-right',
+      className: 'text-right',
+      cell: (p) => <ParishActions parish={p} />,
     },
   ];
 
