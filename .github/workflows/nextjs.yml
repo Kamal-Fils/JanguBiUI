@@ -81,6 +81,9 @@ jobs:
   build-docker:
     needs: lint-and-typecheck
     # ↑ Lance seulement si lint + types + build sont OK
+    # Et uniquement sur push (branches + tags), jamais sur PR : pas de push
+    # DockerHub sur PR (secrets indispo sur forks, {{branch}} vide → tag invalide).
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
 
     steps:
@@ -105,10 +108,11 @@ jobs:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/jangubi-frontend
           # ↑ Différence clé vs backend : jangubi-frontend (pas jangubi-backend)
           tags: |
+            type=ref,event=branch
+            type=ref,event=tag
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=raw,value={{branch}}-{{sha}}
-            type=sha
+            type=sha,prefix=sha-
 
       - name: Build and push
         uses: docker/build-push-action@f72b3cf665d7d5fe435407befecb40d10b4266d2 #v7.2.0
@@ -132,3 +136,33 @@ jobs:
 
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  trigger-deploy:
+    needs: build-docker
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Calculer le tag
+        id: tag
+        run: |
+          SHA=$(echo "${{ github.sha }}" | head -c 7)
+          BRANCH="${{ github.ref_name }}"
+          echo "value=${BRANCH}-${SHA}" >> $GITHUB_OUTPUT
+
+      - name: Déclencher le deploy
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.DEPLOY_TOKEN }}
+          script: |
+            const tag = '${{ steps.tag.outputs.value }}'
+            const ref = '${{ github.ref_name }}'
+
+            await github.rest.repos.createDispatchEvent({
+              owner: 'Kamal-Fils',
+              repo: 'infrastructure',
+              event_type: 'deploy-frontend',
+              client_payload: { tag, ref, sha: '${{ github.sha }}' }
+            })
+
+            console.log(`✅ Deploy frontend déclenché — tag: ${tag}`)
