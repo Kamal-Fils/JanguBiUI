@@ -1,0 +1,168 @@
+name: CI/CD JanguBi Frontend
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - stage
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - develop
+      - stage
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ═══════════════════════════════════════════════
+  # JOB 1 : Qualité du code
+  # Lint + TypeScript + Build check
+  # ═══════════════════════════════════════════════
+  lint-and-typecheck:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e #v4.3.0
+        with:
+          node-version: '22'
+      
+      - name: Installer yarn
+        run: npm install -g yarn
+        # npm est toujours disponible avec Node
+        # Cette commande rend yarn disponible globalement
+        # Simple, fiable, compatible avec act et GitHub Actions
+
+      - name: Cache yarn
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
+        with:
+          path: /.cache/yarn
+          key: yarn-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            yarn-
+        # Cache géré manuellement APRÈS que yarn existe
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        # --frozen-lockfile = échoue si yarn.lock ne correspond pas
+        # Garantit des versions exactes et reproductibles en CI
+
+      - name: Run ESLint
+        run: yarn lint
+        # Vérifie le style et les erreurs évidentes
+
+      - name: TypeScript check
+        run: yarn check-types
+        # Vérifie les types sans compiler
+        # Équivalent de mypy pour Python
+
+      - name: Build Next.js
+        # Vérifie que l'app compile entièrement
+        # Si une page est cassée → détecté ici avant le Docker build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          NEXT_TELEMETRY_DISABLED: 1
+          # ↑ Désactive l'envoi de données à Vercel pendant le build CI
+        run: yarn build
+
+  # ═══════════════════════════════════════════════
+  # JOB 2 : Build image Docker + Push Docker Hub
+  # Identique au backend, adapté au frontend
+  # ═══════════════════════════════════════════════
+  build-docker:
+    needs: lint-and-typecheck
+    # ↑ Lance seulement si lint + types + build sont OK
+    # Et uniquement sur push (branches + tags), jamais sur PR : pas de push
+    # DockerHub sur PR (secrets indispo sur forks, {{branch}} vide → tag invalide).
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 #v6.0.3
+        with:
+          fetch-depth: 0
+          # ↑ Historique complet pour git describe → tags 1.2.3-0003-g69c9beb
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@22b48a429f10e1de233237b5c534c9c3d2e41597 #v4.1.0
+
+      - name: Login to DockerHub
+        uses: docker/login-action@946f94de75ea52995b6aa1e54fd3e0aeed6cc573 #v4.2.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker metadata (tags + labels)
+        id: meta
+        uses: docker/metadata-action@3caf19fbe3db1a1a6a8bdce189e09ac0ed35d513 #v6.1.0
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/jangubi-frontend
+          # ↑ Différence clé vs backend : jangubi-frontend (pas jangubi-backend)
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-
+
+      - name: Build and push
+        uses: docker/build-push-action@f72b3cf665d7d5fe435407befecb40d10b4266d2 #v7.2.0
+        with:
+          context: .
+          file: Dockerfile
+          # ↑ Différence vs backend : Dockerfile à la racine (pas docker/Dockerfile)
+          # Pas de "target:" → Docker utilise le dernier stage (runner)
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+          # ↑ Différence majeure vs backend
+          #   Next.js intègre ces variables AU BUILD (pas au runtime)
+          #   Elles doivent être passées comme ARG dans le Dockerfile
+          #   → C'est pourquoi ton Dockerfile a des ARG/ENV pour ces valeurs
+
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  trigger-deploy:
+    needs: build-docker
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Calculer le tag
+        id: tag
+        run: |
+          SHA=$(echo "${{ github.sha }}" | head -c 7)
+          BRANCH="${{ github.ref_name }}"
+          echo "value=${BRANCH}-${SHA}" >> $GITHUB_OUTPUT
+
+      - name: Déclencher le deploy
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.DEPLOY_TOKEN }}
+          script: |
+            const tag = '${{ steps.tag.outputs.value }}'
+            const ref = '${{ github.ref_name }}'
+
+            await github.rest.repos.createDispatchEvent({
+              owner: 'Kamal-Fils',
+              repo: 'infrastructure',
+              event_type: 'deploy-frontend',
+              client_payload: { tag, ref, sha: '${{ github.sha }}' }
+            })
+
+            console.log(`✅ Deploy frontend déclenché — tag: ${tag}`)

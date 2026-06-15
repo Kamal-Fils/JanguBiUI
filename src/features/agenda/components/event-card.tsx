@@ -1,57 +1,25 @@
 'use client';
 
 import { Calendar, MapPin, Trash2, Users, X } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
 import { Card } from '@/components/ui/card/card';
 import { useNotifications } from '@/components/ui/notifications';
 import { Spinner } from '@/components/ui/spinner';
+import { paths } from '@/config/paths';
 import { cn } from '@/lib/utils';
 
 import { useDeleteEvent } from '../api/delete-event';
 import type { Event } from '../api/get-events';
 import { useRegisterEvent } from '../api/register-event';
 import { useUnregisterEvent } from '../api/unregister-event';
-
-export const EVENT_TYPE_LABELS: Record<string, string> = {
-  mass: 'Messe',
-  conference: 'Conférence',
-  retreat: 'Retraite',
-  ordination: 'Ordination',
-  other: 'Autre',
-};
-
-const EVENT_TYPE_COLORS: Record<string, string> = {
-  mass: 'bg-primary/10 text-primary',
-  conference: 'bg-info/10 text-info',
-  retreat: 'bg-success/10 text-success',
-  ordination: 'bg-accent/15 text-accent',
-  other: 'bg-muted text-muted-foreground',
-};
-
-function formatEventDate(start: Date, end: Date): string {
-  const sameDay = start.toDateString() === end.toDateString();
-  const dateStr = start.toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  });
-  const startTime = start.toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  const endTime = end.toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  if (sameDay) return `${dateStr} · ${startTime} – ${endTime}`;
-  const endDateStr = end.toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-  });
-  return `${dateStr} ${startTime} – ${endDateStr} ${endTime}`;
-}
+import {
+  EVENT_TYPE_COLORS,
+  EVENT_TYPE_LABELS,
+  formatEventDate,
+} from '../utils';
 
 interface EventCardProps {
   event: Event;
@@ -114,9 +82,12 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
     <Card variant="elevated" className="p-4">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-foreground leading-snug">
-            {event.title}
-          </h3>
+          <Link
+            href={paths.app.agendaEvent.getHref(event.id)}
+            className="font-semibold text-foreground leading-snug transition-colors hover:text-primary focus-visible:outline-none focus-visible:underline"
+          >
+            <h3>{event.title}</h3>
+          </Link>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span

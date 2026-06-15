@@ -1,5 +1,6 @@
 import {
   ArrowLeftRight,
+  BarChart3,
   BookOpen,
   Calendar,
   Church,
@@ -70,6 +71,15 @@ const ITEM_CLERGE: NavItem = {
   icon: Church,
   clergyOnly: true,
 };
+// Tableau de bord analytique (dons + fidèles) scopé au périmètre du responsable.
+// Affiché pour tout le clergé ; la page gère le 403 (clergé sans périmètre) par un
+// état vide — le back est la source de vérité de l'autorité territoriale.
+const ITEM_ANALYTIQUE: NavItem = {
+  label: 'Analytique',
+  href: '/app/clerge/analytique',
+  icon: BarChart3,
+  clergyOnly: true,
+};
 // Admin "home" points directly to /app/admin to avoid the /app → /app/admin redirect flash
 const ITEM_ACCUEIL_ADMIN: NavItem = {
   label: 'Accueil',
@@ -109,6 +119,7 @@ export const buildNavItems = (user: UserType | null | undefined): NavItem[] => {
       ITEM_ACTUS,
       ITEM_SPIRITUEL,
       ITEM_CLERGE,
+      ITEM_ANALYTIQUE,
       // Clergé qui est aussi admin digital → passerelle vers l'admin.
       ...(isAdmin(user) ? [ITEM_ADMIN] : []),
       ITEM_MESSAGES,
