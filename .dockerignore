@@ -1,0 +1,42 @@
+# Dépendances — reconstruites dans le Dockerfile
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build Next.js — recréé pendant le docker build
+.next
+out
+
+# Fichiers d'environnement — NE JAMAIS inclure dans l'image
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+
+# Docker lui-même
+Dockerfile
+.dockerignore
+
+# Outils de dev — inutiles en prod
+.vscode
+.idea
+*.log
+
+# Tests — inutiles dans l'image de prod
+e2e
+__tests__
+coverage
+test-results
+playwright-report
+
+# Documentation
+docs
+README.md
+*.md
+
+# CI/CD
+.github
