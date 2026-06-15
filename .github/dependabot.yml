@@ -7,6 +7,14 @@ updates:
       interval: "weekly"
     target-branch: "main"
     open-pull-requests-limit: 10
+    ignore:
+      # eslint-plugin-react-hooks v6+ active les règles React Compiler
+      # (set-state-in-effect, incompatible-library) qui cassent le lint sur du
+      # code valide (gardes d'hydratation SSR, matchMedia, sync WebSocket).
+      # L'adoption = migration délibérée (refacto + QA), pas un bump auto :
+      # on bloque les MAJORS de ce plugin (les minor/patch passent toujours).
+      - dependency-name: "eslint-plugin-react-hooks"
+        update-types: ["version-update:semver-major"]
     groups:
       # minor + patch regroupés (faible risque) → 1 PR ; les MAJORS restent isolées
       prod-minor-patch:
