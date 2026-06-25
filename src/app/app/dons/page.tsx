@@ -7,6 +7,7 @@ import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { paths } from '@/config/paths';
 import { useCampaigns } from '@/features/dons/api/get-campaigns';
 import { useMakeDonation } from '@/features/dons/api/make-donation';
 import { useUser } from '@/lib/auth';
@@ -82,7 +83,7 @@ export default function DonsPage() {
   return (
     <AppShell>
     <div className="flex flex-col">
-      <PageHeader title="Dons & Quêtes" />
+      <PageHeader title="Dons & Quêtes" backHref={paths.app.root.getHref()} />
       <div className="mx-auto w-full max-w-2xl flex-1 space-y-4 overflow-y-auto p-4 lg:max-w-3xl">
         {isLoading && (
           <p className="py-6 text-center text-sm text-muted-foreground">

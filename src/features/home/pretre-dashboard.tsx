@@ -43,7 +43,7 @@ const QUICK_ACTIONS = [
     className: 'bg-warning/10 text-warning',
   },
   {
-    label: 'Spirituel',
+    label: 'Spiritualité',
     href: paths.app.spirituel.getHref(),
     icon: BookOpen,
     className: 'bg-primary/10 text-primary',

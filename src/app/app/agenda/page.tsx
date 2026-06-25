@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
+import { paths } from '@/config/paths';
 import { useEvents } from '@/features/agenda/api/get-events';
 import { EventCard } from '@/features/agenda/components/event-card';
 import { cn } from '@/lib/utils';
@@ -30,6 +31,7 @@ export default function AgendaPage() {
         <PageHeader
           title="Agenda"
           subtitle="Événements et célébrations de votre paroisse"
+          backHref={paths.app.root.getHref()}
         />
 
         <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">

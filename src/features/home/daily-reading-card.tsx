@@ -1,9 +1,10 @@
 'use client';
 
-import { BookOpen, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
+import { Card, CardEyebrow } from '@/components/ui/card/card';
 
 const todayReadings = [
   { label: '1ère Lecture', ref: 'Isaïe 55, 10-11', type: 'lecture' },
@@ -13,19 +14,15 @@ const todayReadings = [
 
 export function DailyReadingCard() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-      {/* Gold accent strip */}
-      <div className="h-0.5 bg-gradient-to-r from-gold via-gold/50 to-transparent" />
-
-      <div className="flex items-center gap-3 border-b border-border/60 bg-gradient-to-r from-gold/8 to-transparent p-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gold/15 ring-1 ring-gold/20">
-          <BookOpen className="size-5 text-gold" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="font-serif text-sm font-semibold text-foreground">
-            Lectures du jour
-          </p>
-          <p className="text-xs text-muted-foreground">
+    <Card variant="feature">
+      {/* En-tête éditorial */}
+      <div className="flex items-start justify-between gap-3 border-b border-border/60 p-5">
+        <div className="min-w-0">
+          <CardEyebrow>Lectures du Jour</CardEyebrow>
+          <h2 className="mt-1 font-serif text-xl font-bold tracking-tight text-foreground">
+            La Parole du jour
+          </h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
             Temps ordinaire — Semaine XII
           </p>
         </div>
@@ -42,12 +39,13 @@ export function DailyReadingCard() {
           <Link
             key={reading.label}
             href="/app/bible"
-            className="group flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-muted/40"
+            className="group flex items-center justify-between px-5 py-4 transition-colors hover:bg-muted/40"
           >
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-1 rounded-full bg-gold/35 transition-colors group-hover:bg-gold" />
+            <div className="flex items-center gap-4">
+              {/* Marqueur or */}
+              <div className="h-10 w-1 rounded-full bg-gold/35 transition-colors group-hover:bg-gold" />
               <div>
-                <span className="block text-sm font-semibold text-foreground">
+                <span className="block font-serif text-base font-semibold text-foreground">
                   {reading.label}
                 </span>
                 <span className="block text-xs text-muted-foreground">
@@ -59,6 +57,6 @@ export function DailyReadingCard() {
           </Link>
         ))}
       </div>
-    </div>
+    </Card>
   );
 }

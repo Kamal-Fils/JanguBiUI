@@ -47,7 +47,7 @@ const QUICK_ACTIONS = [
     className: 'bg-accent/15 text-accent',
   },
   {
-    label: 'Spirituel',
+    label: 'Spiritualité',
     href: paths.app.spirituel.getHref(),
     icon: BookOpen,
     className: 'bg-primary/10 text-primary',
