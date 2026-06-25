@@ -3,6 +3,7 @@
 import { BookOpen, Church, Clock, FileText, MessageSquare, PlusCircle, Users } from 'lucide-react';
 import Link from 'next/link';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { Card, CardEyebrow } from '@/components/ui/card/card';
 import { QuickActionTile } from '@/components/ui/quick-action-tile';
 import { SectionHeader } from '@/components/ui/section-header';
@@ -314,7 +315,7 @@ export function EvequeeDashboard() {
   const draftCount = draftsData?.count ?? 0;
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-6xl lg:px-8">
+    <ContentContainer width="wide">
       <div className="flex flex-col gap-8">
         <EvequeHero />
 
@@ -356,6 +357,6 @@ export function EvequeeDashboard() {
 
         <DraftArticlesSection articles={drafts} isLoading={loadingArticles} />
       </div>
-    </div>
+    </ContentContainer>
   );
 }

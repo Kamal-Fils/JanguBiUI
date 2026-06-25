@@ -3,6 +3,7 @@
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 
+import { Card } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMyIntentions } from '@/features/intentions/api/get-my-intentions';
 import { IntentionStatusBadge } from '@/features/intentions/components/intention-status-badge';
@@ -28,28 +29,33 @@ export function MyIntentionsSection() {
         </p>
       )}
 
-      {!isLoading && recentIntentions.map((intention) => (
-        <div
-          key={intention.id}
-          className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card p-3"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="line-clamp-2 text-sm text-foreground">
-              {intention.intention_text}
-            </p>
-            {intention.proposed_date && (
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Date proposée :{' '}
-                {new Date(intention.proposed_date).toLocaleDateString('fr-FR', {
-                  day: 'numeric',
-                  month: 'long',
-                })}
+      {!isLoading &&
+        recentIntentions.map((intention) => (
+          <Card
+            key={intention.id}
+            variant="elevated"
+            className="flex items-start justify-between gap-3 p-3"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="line-clamp-2 text-sm text-foreground">
+                {intention.intention_text}
               </p>
-            )}
-          </div>
-          <IntentionStatusBadge status={intention.status} />
-        </div>
-      ))}
+              {intention.proposed_date && (
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Date proposée :{' '}
+                  {new Date(intention.proposed_date).toLocaleDateString(
+                    'fr-FR',
+                    {
+                      day: 'numeric',
+                      month: 'long',
+                    },
+                  )}
+                </p>
+              )}
+            </div>
+            <IntentionStatusBadge status={intention.status} />
+          </Card>
+        ))}
 
       <Link
         href="/app/intentions"

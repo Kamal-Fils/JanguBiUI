@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
-import { PageHeader } from '@/components/layouts/page-header';
+import { ContentContainer } from '@/components/layouts/content-container';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { Card } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { paths } from '@/config/paths';
 import { useEvents } from '@/features/agenda/api/get-events';
 import { EventCard } from '@/features/agenda/components/event-card';
 import { cn } from '@/lib/utils';
@@ -25,64 +25,61 @@ export default function AgendaPage() {
     selectedType ? { event_type: selectedType } : undefined,
   );
 
-  return (
-    <AppShell>
-      <div className="flex flex-col">
-        <PageHeader
-          title="Agenda"
-          subtitle="Événements et célébrations de votre paroisse"
-          backHref={paths.app.root.getHref()}
-        />
+  useRegisterPageMeta({
+    title: 'Agenda',
+    subtitle: 'Événements et célébrations de votre paroisse',
+  });
 
-        <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
-          <div className="mb-6 flex flex-wrap gap-2">
-            {EVENT_TYPE_FILTERS.map((filter) => (
-              <button
-                key={filter.value}
-                type="button"
-                onClick={() => setSelectedType(filter.value)}
-                className={cn(
-                  'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
-                  selectedType === filter.value
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80',
-                )}
-              >
-                {filter.label}
-              </button>
+  return (
+    <div className="flex flex-col">
+      <ContentContainer>
+        <div className="mb-6 flex flex-wrap gap-2">
+          {EVENT_TYPE_FILTERS.map((filter) => (
+            <button
+              key={filter.value}
+              type="button"
+              onClick={() => setSelectedType(filter.value)}
+              className={cn(
+                'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
+                selectedType === filter.value
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80',
+              )}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+
+        {isLoading && (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} variant="elevated" className="p-4 space-y-3">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-1/2" />
+                <Skeleton className="h-10 w-full rounded-xl" />
+              </Card>
             ))}
           </div>
+        )}
 
-          {isLoading && (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-3">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-1/2" />
-                  <Skeleton className="h-10 w-full rounded-xl" />
-                </div>
-              ))}
-            </div>
-          )}
+        {!isLoading && data?.results.length === 0 && (
+          <div className="flex flex-col items-center gap-3 py-16 text-center">
+            <p className="text-sm text-muted-foreground">
+              Aucun événement à venir.
+            </p>
+          </div>
+        )}
 
-          {!isLoading && data?.results.length === 0 && (
-            <div className="flex flex-col items-center gap-3 py-16 text-center">
-              <p className="text-sm text-muted-foreground">
-                Aucun événement à venir.
-              </p>
-            </div>
-          )}
-
-          {!isLoading && data && data.results.length > 0 && (
-            <div className="space-y-4">
-              {data.results.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </AppShell>
+        {!isLoading && data && data.results.length > 0 && (
+          <div className="space-y-4">
+            {data.results.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        )}
+      </ContentContainer>
+    </div>
   );
 }

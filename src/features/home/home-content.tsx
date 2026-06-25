@@ -1,5 +1,7 @@
 'use client';
 
+import { ContentContainer } from '@/components/layouts/content-container';
+
 import { DailyReadingCard } from './daily-reading-card';
 import { QuickAccessGrid } from './quick-access-grid';
 import { WelcomeBanner } from './welcome-banner';
@@ -11,13 +13,13 @@ interface HomeContentProps {
 
 export function HomeContent({ widget }: HomeContentProps) {
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+    <ContentContainer>
       <div className="flex flex-col gap-6">
         <WelcomeBanner />
         <DailyReadingCard />
         {widget}
         <QuickAccessGrid />
       </div>
-    </div>
+    </ContentContainer>
   );
 }

@@ -1,47 +1,25 @@
 'use client';
 
 import { Calendar, ChevronDown, MapPin, Trash2, Users, X } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
+import { Button } from '@/components/ui/button/button';
 import { Card, CardEyebrow } from '@/components/ui/card/card';
 import { useNotifications } from '@/components/ui/notifications';
 import { Spinner } from '@/components/ui/spinner';
+import { paths } from '@/config/paths';
 import { cn } from '@/lib/utils';
 
 import { useDeleteEvent } from '../api/delete-event';
 import type { Event } from '../api/get-events';
 import { useRegisterEvent } from '../api/register-event';
 import { useUnregisterEvent } from '../api/unregister-event';
-
-export const EVENT_TYPE_LABELS: Record<string, string> = {
-  mass: 'Messe',
-  conference: 'Conférence',
-  retreat: 'Retraite',
-  ordination: 'Ordination',
-  other: 'Autre',
-};
-
-const EVENT_TYPE_COLORS: Record<string, string> = {
-  mass: 'bg-primary/10 text-primary',
-  conference: 'bg-info/10 text-info',
-  retreat: 'bg-success/10 text-success',
-  ordination: 'bg-accent/15 text-gold-ink',
-  other: 'bg-muted text-muted-foreground',
-};
-
-function formatEventDate(start: Date, end: Date): string {
-  const sameDay = start.toDateString() === end.toDateString();
-  const dateStr = start.toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  });
-  const startTime = start.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-  const endTime = end.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-  if (sameDay) return `${dateStr} · ${startTime} – ${endTime}`;
-  const endDateStr = end.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-  return `${dateStr} ${startTime} – ${endDateStr} ${endTime}`;
-}
+import {
+  EVENT_TYPE_COLORS,
+  EVENT_TYPE_LABELS,
+  formatEventDate,
+} from '../utils';
 
 interface EventCardProps {
   event: Event;
@@ -68,12 +46,20 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
     if (event.is_registered) {
       unregister(event.id, {
         onSuccess: () =>
-          addNotification({ type: 'success', title: 'Désinscrit', message: 'Votre inscription a été annulée.' }),
+          addNotification({
+            type: 'success',
+            title: 'Désinscrit',
+            message: 'Votre inscription a été annulée.',
+          }),
       });
     } else {
       register(event.id, {
         onSuccess: () =>
-          addNotification({ type: 'success', title: 'Inscrit', message: 'Votre inscription est confirmée.' }),
+          addNotification({
+            type: 'success',
+            title: 'Inscrit',
+            message: 'Votre inscription est confirmée.',
+          }),
       });
     }
   }
@@ -85,7 +71,11 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
     }
     deleteEvent(event.id, {
       onSuccess: () =>
-        addNotification({ type: 'success', title: 'Supprimé', message: "L'événement a été supprimé." }),
+        addNotification({
+          type: 'success',
+          title: 'Supprimé',
+          message: "L'événement a été supprimé.",
+        }),
     });
   }
 
@@ -125,51 +115,63 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
               {formatEventDate(start, end)}
             </span>
           </CardEyebrow>
-          <h3 className="font-serif text-base font-semibold text-foreground leading-snug">
-            {event.title}
-          </h3>
+          {/* Lien vers la page de détail (develop) + style éditorial (refonte).
+              relative z-10 : reste cliquable au-dessus de l'overlay « déplier ». */}
+          <Link
+            href={paths.app.agendaEvent.getHref(event.id)}
+            className="relative z-10 inline-block font-serif text-base font-semibold leading-snug text-foreground transition-colors hover:text-primary focus-visible:underline focus-visible:outline-none"
+          >
+            <h3>{event.title}</h3>
+          </Link>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span
             className={cn(
               'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
-              EVENT_TYPE_COLORS[event.event_type] ?? 'bg-muted text-muted-foreground',
+              EVENT_TYPE_COLORS[event.event_type] ??
+                'bg-muted text-muted-foreground',
             )}
           >
             {EVENT_TYPE_LABELS[event.event_type] ?? event.event_type}
           </span>
           {canDelete && !confirmDelete && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={handleDelete}
               disabled={deleting}
               aria-label="Supprimer l'événement"
-              className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 motion-reduce:transition-none"
+              className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
             >
               <Trash2 className="size-3.5" />
-            </button>
+            </Button>
           )}
           {canDelete && confirmDelete && (
             <div className="flex items-center gap-1">
-              <button
+              <Button
                 type="button"
+                variant="destructive"
+                size="sm"
+                isLoading={deleting}
                 onClick={handleDelete}
-                disabled={deleting}
                 aria-label={
                   deleting ? 'Suppression en cours' : 'Confirmer la suppression'
                 }
-                className="flex min-h-9 items-center rounded-lg bg-destructive px-2 text-[10px] font-semibold text-destructive-foreground transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 motion-reduce:transition-none"
+                className="px-2 text-[10px]"
               >
-                {deleting ? <Spinner className="size-3" /> : 'Supprimer'}
-              </button>
-              <button
+                Supprimer
+              </Button>
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => setConfirmDelete(false)}
                 aria-label="Annuler la suppression"
-                className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+                className="text-muted-foreground hover:bg-muted"
               >
                 <X className="size-3.5" />
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -199,7 +201,11 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
             <Users className="size-3.5 shrink-0" />
             <span>
               {event.registration_count} / {event.max_participants} inscrits
-              {isFull && <span className="ml-1 text-destructive font-medium">· Complet</span>}
+              {isFull && (
+                <span className="ml-1 text-destructive font-medium">
+                  · Complet
+                </span>
+              )}
             </span>
           </div>
         )}
@@ -231,7 +237,11 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
         )}
       >
         {isPendingAction && <Spinner className="size-4" />}
-        {event.is_registered ? 'Annuler mon inscription' : isFull ? 'Complet' : "S'inscrire"}
+        {event.is_registered
+          ? 'Annuler mon inscription'
+          : isFull
+            ? 'Complet'
+            : "S'inscrire"}
       </button>
     </Card>
   );

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
+import { AppShell } from '@/components/layouts/app-shell';
+
 export const metadata: Metadata = {
   title: 'Jàngu Bi — Bible, Chapelet & Spiritualité',
   description:
@@ -21,6 +23,9 @@ export const viewport: Viewport = {
 
 export const dynamic = 'force-dynamic';
 
+// Le shell applicatif (sidebar desktop + bottom-nav mobile + garde d'onboarding)
+// est monté ICI, une seule fois, pour TOUTES les routes /app/*. Les pages ne
+// doivent plus envelopper leur contenu dans <AppShell> (sinon double shell).
 export default function AppLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+  return <AppShell>{children}</AppShell>;
 }

@@ -4,7 +4,8 @@ import { BookOpen, Clock, Cross, MapPin, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
+import { ContentContainer } from '@/components/layouts/content-container';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { QuickActionTile } from '@/components/ui/quick-action-tile';
 import { SectionHeader } from '@/components/ui/section-header';
 import { paths } from '@/config/paths';
@@ -59,6 +60,11 @@ export default function ClergePage() {
     }
   }, [user, isLoading, router]);
 
+  useRegisterPageMeta({
+    title: 'Espace Clergé',
+    subtitle: 'Outils et ressources pastoraux',
+  });
+
   if (isLoading || !isClergy(user)) {
     return null;
   }
@@ -66,29 +72,28 @@ export default function ClergePage() {
   const firstName = user?.profile?.first_name ?? '';
 
   return (
-    <AppShell>
-      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
-        <div className="flex flex-col gap-8">
-          {/* Hero éditorial */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-7 text-primary-foreground shadow-glow-indigo motion-safe:animate-slide-up sm:p-9">
-            <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-              <div
-                className="absolute inset-0 opacity-[0.06]"
-                style={{
-                  backgroundImage:
-                    'radial-gradient(currentColor 0.6px, transparent 0.6px)',
-                  backgroundSize: '14px 14px',
-                }}
-              />
-              <svg
-                className="absolute -right-6 -top-10 size-56 text-primary-foreground/10 sm:size-64"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <rect x="10" y="2" width="4" height="20" rx="2" />
-                <rect x="2" y="8" width="20" height="4" rx="2" />
-              </svg>
-            </div>
+    <ContentContainer>
+      <div className="flex flex-col gap-8">
+        {/* Hero éditorial */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-7 text-primary-foreground shadow-glow-indigo motion-safe:animate-slide-up sm:p-9">
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div
+              className="absolute inset-0 opacity-[0.06]"
+              style={{
+                backgroundImage:
+                  'radial-gradient(currentColor 0.6px, transparent 0.6px)',
+                backgroundSize: '14px 14px',
+              }}
+            />
+            <svg
+              className="absolute -right-6 -top-10 size-56 text-primary-foreground/10 sm:size-64"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <rect x="10" y="2" width="4" height="20" rx="2" />
+              <rect x="2" y="8" width="20" height="4" rx="2" />
+            </svg>
+          </div>
 
             <div className="relative">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/70">
@@ -126,8 +131,7 @@ export default function ClergePage() {
               })}
             </div>
           </section>
-        </div>
       </div>
-    </AppShell>
+    </ContentContainer>
   );
 }

@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button/button';
 import {
   Card,
   CardContent,
@@ -65,9 +65,11 @@ function getInitials(name: string): string {
 
 function isSameGroup(previous: Message, current: Message): boolean {
   if (previous.is_mine !== current.is_mine) return false;
-  if (!previous.is_mine && previous.sender_id !== current.sender_id) return false;
+  if (!previous.is_mine && previous.sender_id !== current.sender_id)
+    return false;
   const timeDiff =
-    new Date(current.created_at).getTime() - new Date(previous.created_at).getTime();
+    new Date(current.created_at).getTime() -
+    new Date(previous.created_at).getTime();
   return timeDiff < GROUP_TIME_GAP_MS;
 }
 
@@ -91,17 +93,25 @@ function getMessagePosition(
 function getBubbleRadius(isMine: boolean, position: MessagePosition): string {
   if (isMine) {
     switch (position) {
-      case 'alone': return 'rounded-2xl rounded-br-sm';
-      case 'first': return 'rounded-2xl rounded-br-sm';
-      case 'middle': return 'rounded-l-2xl rounded-r-lg';
-      case 'last': return 'rounded-l-2xl rounded-b-2xl rounded-tr-lg';
+      case 'alone':
+        return 'rounded-2xl rounded-br-sm';
+      case 'first':
+        return 'rounded-2xl rounded-br-sm';
+      case 'middle':
+        return 'rounded-l-2xl rounded-r-lg';
+      case 'last':
+        return 'rounded-l-2xl rounded-b-2xl rounded-tr-lg';
     }
   } else {
     switch (position) {
-      case 'alone': return 'rounded-2xl rounded-bl-sm';
-      case 'first': return 'rounded-2xl rounded-bl-sm';
-      case 'middle': return 'rounded-r-2xl rounded-l-lg';
-      case 'last': return 'rounded-r-2xl rounded-b-2xl rounded-tl-lg';
+      case 'alone':
+        return 'rounded-2xl rounded-bl-sm';
+      case 'first':
+        return 'rounded-2xl rounded-bl-sm';
+      case 'middle':
+        return 'rounded-r-2xl rounded-l-lg';
+      case 'last':
+        return 'rounded-r-2xl rounded-b-2xl rounded-tl-lg';
     }
   }
 }
@@ -134,21 +144,9 @@ function ReadReceipt({ message }: { message: Message }) {
     );
   }
   if (message.read_at) {
-    return (
-      <CheckCheck
-        className="size-3"
-        aria-label="Lu"
-        role="img"
-      />
-    );
+    return <CheckCheck className="size-3" aria-label="Lu" role="img" />;
   }
-  return (
-    <Check
-      className="size-3"
-      aria-label="Envoyé"
-      role="img"
-    />
-  );
+  return <Check className="size-3" aria-label="Envoyé" role="img" />;
 }
 
 // ── MessageBubble ─────────────────────────────────────────────────────────────
@@ -248,7 +246,9 @@ function MessageBubble({
                 : 'text-muted-foreground',
             )}
           >
-            <span suppressHydrationWarning>{formatTime(message.created_at)}</span>
+            <span suppressHydrationWarning>
+              {formatTime(message.created_at)}
+            </span>
             {message.is_mine && <ReadReceipt message={message} />}
           </div>
         )}
@@ -265,7 +265,9 @@ export function ChatWindow({
 }: ChatWindowProps) {
   const router = useRouter();
   const [text, setText] = useState('');
-  const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
+  const [expandedMessages, setExpandedMessages] = useState<Set<string>>(
+    new Set(),
+  );
   const [showNewMessagePill, setShowNewMessagePill] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -293,8 +295,7 @@ export function ChatWindow({
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const distanceFromBottom =
-      el.scrollHeight - el.scrollTop - el.clientHeight;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
     const atBottom = distanceFromBottom <= SCROLL_BOTTOM_THRESHOLD;
     isAtBottomRef.current = atBottom;
     if (atBottom) setShowNewMessagePill(false);
@@ -361,14 +362,16 @@ export function ChatWindow({
     <div className="flex h-dvh flex-col md:h-full">
       {/* Header */}
       <div className="flex shrink-0 items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={() => router.back()}
-          className="-ml-2 flex size-11 items-center justify-center rounded-full transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:hidden"
+          className="-ml-2 rounded-full hover:bg-muted md:hidden"
           aria-label="Retour"
         >
           <ArrowLeft className="size-5" />
-        </button>
+        </Button>
         <Avatar className="size-9 shrink-0">
           <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
             {participantInitials}
@@ -491,18 +494,15 @@ export function ChatWindow({
           rows={1}
           className="max-h-[120px] min-h-11 flex-1 resize-none rounded-2xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
-        <button
+        <Button
           type="submit"
+          size="icon"
           disabled={!text.trim() || isPending}
-          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-40"
+          isLoading={isPending}
+          icon={<Send className="size-4" />}
+          className="shrink-0 rounded-full disabled:opacity-40"
           aria-label="Envoyer"
-        >
-          {isPending ? (
-            <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
-          ) : (
-            <Send className="size-4" />
-          )}
-        </button>
+        />
       </form>
     </div>
   );

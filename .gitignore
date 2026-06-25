@@ -25,6 +25,7 @@ storybook-static
 # misc
 .DS_Store
 .env
+.secrets
 .env.local
 .env.development.local
 .env.test.local
@@ -46,4 +47,4 @@ tsconfig.tsbuildinfo
 /graphify-out
 
 # sentry wizard logs
-sentry-wizard-installation-error-*.log
+sentry-wizard-installation-error-*.logpackage-lock.json

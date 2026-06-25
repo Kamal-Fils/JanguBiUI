@@ -2,10 +2,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import DOMPurify from 'isomorphic-dompurify';
-import { ArrowLeft, BookOpen, Flame, Moon, Sun } from 'lucide-react';
-import Link from 'next/link';
+import { BookOpen, Flame, Moon, Sun } from 'lucide-react';
 
-import { AppShell } from '@/components/layouts/app-shell';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import {
   Card,
   CardContent,
@@ -179,22 +178,10 @@ export default function LiturgiePage() {
   const isLoading =
     loadingInfo || loadingReadings || loadingLaudes || loadingVepres;
 
-  return (
-    <AppShell hideNav>
-    <div className="flex flex-col">
-      {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="mx-auto flex w-full max-w-lg items-center gap-3 px-4 py-3">
-          <Link
-            href="/app/spirituel"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="size-4" />
-            Spiritualité
-          </Link>
-        </div>
-      </div>
+  useRegisterPageMeta({ title: 'Liturgie du jour', showHeading: false });
 
+  return (
+    <div className="flex flex-col">
       <div className="mx-auto w-full max-w-lg px-4 py-6">
         {/* Page title */}
         <div className="mb-6 flex items-center gap-3">
@@ -279,6 +266,5 @@ export default function LiturgiePage() {
         )}
       </div>
     </div>
-    </AppShell>
   );
 }

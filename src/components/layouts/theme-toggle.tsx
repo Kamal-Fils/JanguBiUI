@@ -12,14 +12,26 @@ interface ThemeToggleProps {
    * `sidebar` (défaut) : libellé masqué jusqu'au breakpoint `lg` — conçu pour la
    * sidebar desktop rétractable.
    * `row` : libellé toujours visible, pleine largeur, aligné à gauche — conçu
-   * pour le tiroir « Plus » mobile.
+   * pour le tiroir « Plus » mobile et la page Profil.
    */
   variant?: 'sidebar' | 'row';
+  /**
+   * Surcharge explicite de la classe du libellé. Prioritaire sur `variant`.
+   * Sidebar repliée : 'hidden lg:block' (icône seule) — défaut.
+   * Profil / mobile : passer 'block' pour un libellé toujours visible.
+   */
+  labelClassName?: string;
 }
 
+/**
+ * Bascule clair/sombre partagée (sidebar desktop + tiroir « Plus » mobile +
+ * page Profil). La justification est passée via `className` par chaque usage
+ * pour éviter tout conflit Tailwind.
+ */
 export function ThemeToggle({
   className,
   variant = 'sidebar',
+  labelClassName,
 }: ThemeToggleProps) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -30,6 +42,8 @@ export function ThemeToggle({
 
   const isDark = mounted && resolvedTheme === 'dark';
   const isRow = variant === 'row';
+  const resolvedLabelClassName =
+    labelClassName ?? (isRow ? 'block' : 'hidden lg:block');
 
   return (
     <button
@@ -52,10 +66,7 @@ export function ThemeToggle({
       ) : (
         <span className="size-5 shrink-0" aria-hidden="true" />
       )}
-      <span
-        className={cn(isRow ? 'block' : 'hidden lg:block')}
-        suppressHydrationWarning
-      >
+      <span className={resolvedLabelClassName} suppressHydrationWarning>
         {mounted ? (isDark ? 'Mode clair' : 'Mode sombre') : ''}
       </span>
     </button>

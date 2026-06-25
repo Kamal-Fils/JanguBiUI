@@ -138,7 +138,7 @@ export function BottomNav({ messageBadge }: BottomNavProps) {
             <button
               type="button"
               onClick={() => setMoreOpen(true)}
-              aria-label="Plus d'options"
+              aria-label="Menu"
               className={cn(
                 'relative flex flex-1 min-w-0 flex-col items-center justify-center px-1 transition-colors',
                 overflowActive

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button/button';
+import { Card } from '@/components/ui/card/card';
 
 import { useSaveLectioSession } from '../api/save-lectio-session';
 
@@ -98,7 +99,11 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
     timerActive,
   );
 
-  const { register, handleSubmit, reset: resetForm } = useForm<FormValues>({
+  const {
+    register,
+    handleSubmit,
+    reset: resetForm,
+  } = useForm<FormValues>({
     defaultValues: {
       lectio: initial?.lectio ?? '',
       meditatio: initial?.meditatio ?? '',
@@ -134,7 +139,9 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
     return (
       <div className="flex flex-col items-center gap-4 py-12 text-center">
         <CheckCircle className="size-12 text-success" />
-        <p className="text-base font-medium text-foreground">Session sauvegardée</p>
+        <p className="text-base font-medium text-foreground">
+          Session sauvegardée
+        </p>
         <p className="text-sm text-muted-foreground">
           Que cette Parole porte du fruit en vous.
         </p>
@@ -195,13 +202,15 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
       </div>
 
       {/* Current step */}
-      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+      <Card variant="elevated" className="p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="text-base font-semibold text-foreground">
               {currentStep.label}
             </h3>
-            <p className="mt-1 text-sm text-muted-foreground">{currentStep.hint}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {currentStep.hint}
+            </p>
           </div>
 
           {/* Timer */}
@@ -244,7 +253,10 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
               <span className="text-[10px] text-muted-foreground">·</span>
               <button
                 type="button"
-                onClick={() => { reset(); setTimerActive(false); }}
+                onClick={() => {
+                  reset();
+                  setTimerActive(false);
+                }}
                 className="rounded text-[10px] text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 aria-label="Réinitialiser le timer"
               >
@@ -279,7 +291,12 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
           )}
 
           {!isLastStep ? (
-            <Button type="button" size="sm" onClick={handleNextStep} className="gap-1">
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleNextStep}
+              className="gap-1"
+            >
               Étape suivante
               <ChevronRight className="size-4" />
             </Button>
@@ -295,7 +312,7 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
             </Button>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Hidden inputs for all steps so react-hook-form has full data */}
       {STEPS.filter((_, i) => i !== currentStepIndex).map((step) => (

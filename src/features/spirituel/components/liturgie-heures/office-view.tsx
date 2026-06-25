@@ -3,6 +3,7 @@
 import DOMPurify from 'isomorphic-dompurify';
 import { BookOpen } from 'lucide-react';
 
+import { Card } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { OfficeKey, useOffice } from '../../api/get-office';
@@ -59,9 +60,10 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
             Hymne
           </h3>
           {office.hymns.map((hymn, i) => (
-            <div
+            <Card
               key={i}
-              className="prose prose-sm max-w-none rounded-xl border border-border bg-card p-4 text-foreground"
+              variant="elevated"
+              className="prose prose-sm max-w-none p-4 text-foreground"
               dangerouslySetInnerHTML={{ __html: safe(hymn.text) }}
             />
           ))}
@@ -76,10 +78,7 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
           </h3>
           <div className="space-y-3">
             {office.psalms.map((psalm, i) => (
-              <div
-                key={i}
-                className="rounded-xl border border-border bg-card p-4"
-              >
+              <Card key={i} variant="elevated" className="p-4">
                 {psalm.citation && (
                   <p className="mb-2 text-xs font-medium text-primary">
                     {psalm.citation}
@@ -90,7 +89,7 @@ export function OfficeView({ officeKey }: OfficeViewProps) {
                   className="prose prose-sm max-w-none text-foreground"
                   dangerouslySetInnerHTML={{ __html: safe(psalm.text) }}
                 />
-              </div>
+              </Card>
             ))}
           </div>
         </section>

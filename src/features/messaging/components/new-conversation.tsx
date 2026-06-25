@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useCreateConversation } from '../api/create-conversation';
@@ -89,14 +90,16 @@ export function NewConversation() {
   return (
     <div className="flex flex-col">
       <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={() => router.back()}
-          className="flex size-8 items-center justify-center rounded-full hover:bg-muted"
+          className="rounded-full hover:bg-muted"
           aria-label="Retour"
         >
           <ArrowLeft className="size-5" />
-        </button>
+        </Button>
         <div>
           <span className="text-sm font-semibold text-foreground">
             Nouvelle conversation

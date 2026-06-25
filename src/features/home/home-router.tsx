@@ -6,7 +6,12 @@ import { useEffect } from 'react';
 import { paths } from '@/config/paths';
 import { DailyMysteryCard } from '@/features/chapelet/components/daily-mystery-card';
 import { useUser } from '@/lib/auth';
-import { isAdmin, isClergy, isEvequeOrAbove, isFidele } from '@/lib/authorization';
+import {
+  isAdmin,
+  isClergy,
+  isEvequeOrAbove,
+  isFidele,
+} from '@/lib/authorization';
 
 import { EvequeeDashboard } from './eveque-dashboard';
 import { FideleDashboard } from './fidele-dashboard';
@@ -28,7 +33,11 @@ export function HomeRouter() {
 
   if (isAdmin(user) && !isClergy(user)) return null;
 
-  if (isFidele(user)) return <FideleDashboard />;
+  // `isFidele` lit la dimension admin (`role==='fidele'`) → vrai aussi pour le
+  // clergé, dont `role` reste 'fidele' (l'identité clergé vit dans pastoral_role).
+  // On exclut donc explicitement le clergé pour qu'un prêtre/évêque atteigne son
+  // dashboard pastoral au lieu du dashboard fidèle.
+  if (isFidele(user) && !isClergy(user)) return <FideleDashboard />;
   // isEvequeOrAbove before isClergy — évêque/archevêque are clergy but need a distinct dashboard
   if (isEvequeOrAbove(user)) return <EvequeeDashboard />;
   if (isClergy(user)) return <PretreeDashboard />;

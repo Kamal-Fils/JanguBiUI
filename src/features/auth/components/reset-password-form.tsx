@@ -1,13 +1,14 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import NextLink from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { Button } from '@/components/ui/button/button';
 import { paths } from '@/config/paths';
 import { useConfirmPasswordReset } from '@/lib/auth';
 
@@ -68,12 +69,9 @@ export const ResetPasswordForm = () => {
         <p className="text-sm font-medium text-foreground">
           Mot de passe réinitialisé avec succès
         </p>
-        <NextLink
-          href={paths.auth.login.getHref()}
-          className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
-        >
-          Se connecter
-        </NextLink>
+        <Button asChild size="lg">
+          <NextLink href={paths.auth.login.getHref()}>Se connecter</NextLink>
+        </Button>
       </div>
     );
   }
@@ -126,14 +124,9 @@ export const ResetPasswordForm = () => {
         )}
       </div>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-      >
-        {isPending && <Loader2 className="size-4 animate-spin" />}
+      <Button type="submit" size="lg" fullWidth isLoading={isPending}>
         {isPending ? 'Enregistrement…' : 'Réinitialiser'}
-      </button>
+      </Button>
     </form>
   );
 };

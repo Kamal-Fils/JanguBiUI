@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Card, CardContent, CardEyebrow } from '@/components/ui/card/card';
 import { FilterPills } from '@/components/ui/filter-pills';
@@ -41,12 +40,11 @@ export default function AdminDocumentsPage() {
   if (isLoading || !canProcessDocuments(user)) return null;
 
   return (
-    <AppShell>
-      <div className="flex flex-col">
-        <PageHeader
-          title="Demandes de documents"
-          subtitle="Traiter les demandes de documents ecclésiastiques"
-        />
+    <div className="flex flex-col">
+      <PageHeader
+        title="Demandes de documents"
+        subtitle="Traiter les demandes de documents ecclésiastiques"
+      />
         <div className="mx-auto w-full max-w-4xl px-4 py-6 md:px-6">
           <div className="mb-5">
             <FilterPills
@@ -70,7 +68,6 @@ export default function AdminDocumentsPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </AppShell>
+    </div>
   );
 }

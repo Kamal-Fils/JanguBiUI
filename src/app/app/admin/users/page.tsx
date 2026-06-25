@@ -28,21 +28,27 @@ import {
   type AdminUser,
 } from '@/features/users/api/get-admin-users';
 import { useToggleUserActive } from '@/features/users/api/toggle-user-active';
-import { canManageUsers } from '@/lib/authorization';
+import { useUser } from '@/lib/auth';
+import { canManageUsers, isSuperAdmin } from '@/lib/authorization';
 
-const FILTER_ROLES = [
-  { value: '', label: 'Tous' },
-  { value: 'super_admin', label: 'Super Admin' },
-  { value: 'parish_admin', label: 'Paroisse' },
-  { value: 'pretre', label: 'Prêtres' },
-  { value: 'fidele', label: 'Fidèles' },
-];
+// Filtres mixtes (F3b) : dimension admin (`role`) ET identité pastorale
+// (`pastoral_role`). Chaque option porte son `param` → le clergé se filtre par
+// pastoral_role (le bon champ ; ?role=pretre ne renverrait rien, role ∈ admin).
+const FILTER_OPTIONS = [
+  { value: '', label: 'Tous', param: 'role' },
+  { value: 'super_admin', label: 'Super Admin', param: 'role' },
+  { value: 'parish_admin', label: 'Paroisse', param: 'role' },
+  { value: 'pretre', label: 'Prêtres', param: 'pastoral_role' },
+  { value: 'eveque', label: 'Évêques', param: 'pastoral_role' },
+  { value: 'fidele', label: 'Fidèles', param: 'role' },
+] as const;
 
 const PAGE_SIZE = 20;
 
 function userName(u: AdminUser): string {
   if (u.user_profile) {
-    const full = `${u.user_profile.first_name} ${u.user_profile.last_name}`.trim();
+    const full =
+      `${u.user_profile.first_name} ${u.user_profile.last_name}`.trim();
     if (full) return full;
   }
   return u.email;
@@ -87,8 +93,17 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState('');
   const [offset, setOffset] = useState(0);
 
+  const { data: currentUser } = useUser();
+
+  const selected =
+    FILTER_OPTIONS.find((o) => o.value === roleFilter) ?? FILTER_OPTIONS[0];
   const { data, isLoading } = useAdminUsers({
-    role: roleFilter || undefined,
+    role:
+      selected.param === 'role' && selected.value ? selected.value : undefined,
+    pastoral_role:
+      selected.param === 'pastoral_role' && selected.value
+        ? selected.value
+        : undefined,
     limit: PAGE_SIZE,
     offset,
   });
@@ -121,7 +136,16 @@ export default function AdminUsersPage() {
     },
     {
       header: 'Rôle',
-      cell: (u) => <RoleBadge role={u.role} />,
+      // Dimension admin (role) + identité pastorale (pastoral_role) si clergé :
+      // un curé = « Paroisse » + « Prêtre » ; un vicaire = « Fidèle » + « Prêtre ».
+      cell: (u) => (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <RoleBadge role={u.role} />
+          {u.pastoral_role && u.pastoral_role !== 'fidele' && (
+            <RoleBadge role={u.pastoral_role} />
+          )}
+        </div>
+      ),
     },
     {
       header: 'Statut',
@@ -147,15 +171,20 @@ export default function AdminUsersPage() {
       subtitle="Gérer les comptes et leur accès à la plateforme"
       allow={canManageUsers}
       headerAction={
-        <Button asChild size="sm">
-          <Link href={paths.app.admin.users.invite.getHref()}>
-            + Inviter clergé
-          </Link>
-        </Button>
+        // V1 (REQ-USER-03) : seul super_admin crée des comptes. On masque le
+        // bouton pour les autres admins (diocèse/province) → plus de dead-end
+        // (la page d'invitation est gardée par canManageClergy, qui les rejette).
+        isSuperAdmin(currentUser) ? (
+          <Button asChild size="sm">
+            <Link href={paths.app.admin.users.invite.getHref()}>
+              + Inviter clergé
+            </Link>
+          </Button>
+        ) : undefined
       }
       toolbar={
         <FilterPills
-          options={FILTER_ROLES}
+          options={FILTER_OPTIONS.map(({ value, label }) => ({ value, label }))}
           value={roleFilter}
           onChange={handleRoleChange}
           ariaLabel="Filtrer par rôle"

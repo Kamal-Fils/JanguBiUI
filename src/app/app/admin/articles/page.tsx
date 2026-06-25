@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button/button';
 import { Card, CardContent, CardEyebrow } from '@/components/ui/card/card';
@@ -42,10 +41,9 @@ export default function AdminArticlesPage() {
   if (isLoading || !canCreateArticle(user)) return null;
 
   return (
-    <AppShell>
-      <div className="flex flex-col">
-        <PageHeader
-          title="Gestion des articles"
+    <div className="flex flex-col">
+      <PageHeader
+        title="Gestion des articles"
           subtitle="Créer, modifier et publier des articles"
           action={
             <Link href={paths.app.admin.articleNew.getHref()}>
@@ -79,7 +77,6 @@ export default function AdminArticlesPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </AppShell>
+    </div>
   );
 }

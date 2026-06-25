@@ -64,7 +64,7 @@ describe('ArticleDetail', () => {
 
     renderApp(<ArticleDetail articleId="article-1" />);
 
-    // Title appears in h1 (and also in the sticky header) — query the h1 specifically
+    // Title appears in the article h1 (le fil d'Ariane vit désormais dans le shell)
     expect(
       await screen.findByRole('heading', {
         name: 'Le pape François appelle à la paix',
@@ -147,26 +147,6 @@ describe('ArticleDetail', () => {
     renderApp(<ArticleDetail articleId="nonexistent" />);
 
     const backBtn = await screen.findByRole('button', { name: /retour/i });
-    await userEvent.click(backBtn);
-
-    expect(mockRouterBack).toHaveBeenCalledOnce();
-  });
-
-  test('back button in header calls router.back()', async () => {
-    server.use(
-      http.get(`${env.API_URL}/v1/news/article-1/`, () =>
-        HttpResponse.json(
-          createArticleDetail({ id: 'article-1', title: 'Mon Article' }),
-        ),
-      ),
-    );
-
-    renderApp(<ArticleDetail articleId="article-1" />);
-
-    // Wait for the article heading to load
-    await screen.findByRole('heading', { name: 'Mon Article' });
-
-    const backBtn = screen.getByRole('button', { name: /retour/i });
     await userEvent.click(backBtn);
 
     expect(mockRouterBack).toHaveBeenCalledOnce();

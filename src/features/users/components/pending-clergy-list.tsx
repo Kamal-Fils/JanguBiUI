@@ -19,7 +19,10 @@ import { Spinner } from '@/components/ui/spinner';
 import { roleLabel } from '@/config/roles';
 
 import { PendingClergyAccount } from '../api/get-pending-clergy';
-import { useApproveClergy, useRejectClergyAccount } from '../api/validate-clergy-account';
+import {
+  useApproveClergy,
+  useRejectClergyAccount,
+} from '../api/validate-clergy-account';
 
 function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -120,7 +123,11 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
                 )
               }
             >
-              {rejecting ? <Spinner className="size-4" /> : 'Confirmer le refus'}
+              {rejecting ? (
+                <Spinner className="size-4" />
+              ) : (
+                'Confirmer le refus'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -150,7 +157,11 @@ interface PendingClergyListProps {
   isLoading?: boolean;
 }
 
-export function PendingClergyList({ accounts, totalCount, isLoading }: PendingClergyListProps) {
+export function PendingClergyList({
+  accounts,
+  totalCount,
+  isLoading,
+}: PendingClergyListProps) {
   if (isLoading) return <PendingClergyListSkeleton />;
 
   if (totalCount === 0) {

@@ -4,7 +4,6 @@ import { Inbox } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -44,12 +43,11 @@ export default function ClergeIntentionsPage() {
   if (userLoading || !isClergy(user)) return null;
 
   return (
-    <AppShell>
-      <div className="flex flex-col">
-        <PageHeader
-          title="Intentions reçues"
-          backHref={paths.app.clerge.root.getHref()}
-        />
+    <div className="flex flex-col">
+      <PageHeader
+        title="Intentions reçues"
+        backHref={paths.app.clerge.root.getHref()}
+      />
         <div className="mx-auto w-full max-w-2xl space-y-4 px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
           <SectionHeader
             eyebrow="Intentions de messe"
@@ -177,7 +175,6 @@ export default function ClergeIntentionsPage() {
               </MassIntentionCard>
             ))}
         </div>
-      </div>
-    </AppShell>
+    </div>
   );
 }

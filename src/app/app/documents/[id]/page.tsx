@@ -2,7 +2,6 @@
 
 import { use } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
 import { DocumentDetail } from '@/features/documents/components/document-detail';
 
 interface DocumentDetailPageProps {
@@ -11,11 +10,7 @@ interface DocumentDetailPageProps {
 
 const DocumentDetailPage = ({ params }: DocumentDetailPageProps) => {
   const { id } = use(params);
-  return (
-    <AppShell hideNav>
-      <DocumentDetail documentId={id} />
-    </AppShell>
-  );
+  return <DocumentDetail documentId={id} />;
 };
 
 export default DocumentDetailPage;

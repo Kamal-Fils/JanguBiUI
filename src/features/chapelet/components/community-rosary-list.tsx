@@ -4,6 +4,7 @@ import { Radio, Users } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { RelativeTime } from '@/components/ui/relative-time';
@@ -23,7 +24,7 @@ function RosaryCard({
   onJoin: (r: CommunityRosary) => void;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-soft-sm">
+    <Card variant="elevated" className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <Radio className="size-4 animate-pulse text-success" />
@@ -48,7 +49,7 @@ function RosaryCard({
         <Users className="mr-2 size-4" />
         Rejoindre
       </Button>
-    </div>
+    </Card>
   );
 }
 

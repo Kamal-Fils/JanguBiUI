@@ -3,7 +3,6 @@
 import { HandHeart, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 
-import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Card } from '@/components/ui/card/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -21,11 +20,10 @@ export default function IntentionsPage() {
   const { data, isLoading, isError, refetch } = useMyIntentions();
 
   return (
-    <AppShell>
-      <div className="flex flex-col">
-        <PageHeader title="Intentions de Messe" backHref={paths.app.root.getHref()} />
-        <div className="mx-auto w-full max-w-2xl space-y-5 px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
-          <IntentionsIntro />
+    <div className="flex flex-col">
+      <PageHeader title="Intentions de Messe" backHref={paths.app.root.getHref()} />
+      <div className="mx-auto w-full max-w-2xl space-y-5 px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+        <IntentionsIntro />
 
           <button
             type="button"
@@ -77,7 +75,6 @@ export default function IntentionsPage() {
               <MassIntentionCard key={intention.id} intention={intention} />
             ))}
         </div>
-      </div>
-    </AppShell>
+    </div>
   );
 }

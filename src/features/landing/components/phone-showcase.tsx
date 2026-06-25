@@ -5,7 +5,7 @@ export function PhoneShowcase() {
       <div className="pointer-events-none absolute bottom-0 left-1/2 h-28 w-[500px] -translate-x-1/2 rounded-full bg-primary/20 blur-2xl" />
 
       {/* Left phone — Liturgie */}
-      <div className="relative z-10 hidden w-[185px] animate-float-l overflow-hidden rounded-[32px] border border-primary/14 bg-background opacity-70 shadow-[0_24px_80px_rgba(0,0,0,.6)] lg:block">
+      <div className="relative z-10 hidden w-[185px] animate-float-l overflow-hidden rounded-[32px] border border-primary/14 bg-background opacity-70 shadow-[0_24px_80px_rgba(20,40,80,.16)] dark:shadow-[0_24px_80px_rgba(0,0,0,.6)] lg:block">
         <div className="mx-auto h-4 w-16 rounded-b-xl bg-background" />
         <div className="flex min-h-[360px] flex-col gap-3 bg-background p-3">
           <p className="text-[0.48rem] font-bold uppercase tracking-widest text-primary/80">
@@ -39,7 +39,7 @@ export function PhoneShowcase() {
       </div>
 
       {/* Center phone — Accueil */}
-      <div className="relative z-10 w-[220px] animate-float-c overflow-hidden rounded-[38px] border-[6px] border-primary/14 bg-background shadow-[0_24px_80px_rgba(0,0,0,.6),0_0_48px_rgba(112,203,255,.25)]">
+      <div className="relative z-10 w-[220px] animate-float-c overflow-hidden rounded-[38px] border-[6px] border-primary/14 bg-background shadow-[0_24px_80px_rgba(20,40,80,.18),0_0_48px_rgba(112,203,255,.18)] dark:shadow-[0_24px_80px_rgba(0,0,0,.6),0_0_48px_rgba(112,203,255,.25)]">
         <div className="mx-auto h-4 w-16 rounded-b-xl bg-background" />
         <div className="flex min-h-[380px] flex-col gap-2 bg-background-surface p-3.5">
           <div className="flex items-start justify-between">
@@ -104,7 +104,7 @@ export function PhoneShowcase() {
       </div>
 
       {/* Right phone — Chat */}
-      <div className="relative z-10 hidden w-[185px] animate-float-r overflow-hidden rounded-[32px] border border-primary/14 bg-background opacity-70 shadow-[0_24px_80px_rgba(0,0,0,.6)] lg:block">
+      <div className="relative z-10 hidden w-[185px] animate-float-r overflow-hidden rounded-[32px] border border-primary/14 bg-background opacity-70 shadow-[0_24px_80px_rgba(20,40,80,.16)] dark:shadow-[0_24px_80px_rgba(0,0,0,.6)] lg:block">
         <div className="mx-auto h-4 w-16 rounded-b-xl bg-background" />
         <div className="flex min-h-[360px] flex-col bg-background-surface">
           <div className="flex items-center gap-2 border-b border-border bg-background p-2.5">

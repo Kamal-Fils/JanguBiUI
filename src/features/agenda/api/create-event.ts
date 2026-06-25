@@ -14,7 +14,9 @@ export type CreateEventInput = {
   max_participants?: number | null;
 };
 
-export const useCreateEvent = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
+export const useCreateEvent = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateEventInput): Promise<Event> =>
