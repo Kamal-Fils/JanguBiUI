@@ -7,6 +7,7 @@ import { AudioPlayer } from '@/components/ui/audio-player/audio-player';
 import { Button } from '@/components/ui/button/button';
 import { Card, CardContent } from '@/components/ui/card/card';
 import { Progress } from '@/components/ui/progress/progress';
+import { ScriptureQuote } from '@/components/ui/scripture-quote';
 import type { RosaryGroup } from '@/features/chapelet/api/get-rosary-groups';
 import type { TodayRosary } from '@/features/chapelet/api/get-rosary-today';
 
@@ -88,6 +89,15 @@ const guideSteps = [
   'Gloire au Père',
 ];
 
+const SIGN_OF_THE_CROSS =
+  'Au nom du Père, et du Fils, et du Saint-Esprit. Amen.';
+const FALLBACK_CREED =
+  'Je crois en Dieu, le Père tout-puissant, Créateur du ciel et de la terre...';
+const FALLBACK_HAIL_MARY =
+  'Je vous salue Marie, pleine de grâce, le Seigneur est avec vous...';
+const FALLBACK_GLORY_BE =
+  'Gloire au Père, et au Fils, et au Saint-Esprit. Comme il était au commencement, maintenant et toujours, pour les siècles des siècles. Amen.';
+
 export function ChapeletGuide({
   group,
   todayRosary,
@@ -144,10 +154,10 @@ export function ChapeletGuide({
     <div className="flex flex-col gap-6">
       {/* Back */}
       <Button
-        variant="ghost"
+        variant="ghost-indigo"
         size="sm"
         onClick={onBack}
-        className="w-fit text-muted-foreground"
+        className="w-fit"
         icon={<ArrowLeft className="size-4" />}
       >
         Retour
@@ -160,20 +170,21 @@ export function ChapeletGuide({
             Mystère {currentMystery + 1}/5 - Étape {currentStep + 1}/
             {guideSteps.length}
           </span>
-          <span>{Math.round(progress)}%</span>
+          <span className="font-medium text-gold-ink">{Math.round(progress)}%</span>
         </div>
         <Progress value={progress} />
       </div>
 
       {/* Mystery title & Audio Player */}
-      <div className="text-center flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-4 text-center">
         <div>
-          <p className="text-xs font-medium text-accent">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-ink">
             {currentMystery + 1}e mystère
           </p>
-          <h2 className="mt-1 text-xl font-semibold text-foreground">
+          <h2 className="mt-1 font-serif text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {mysteryNames[category][currentMystery]}
           </h2>
+          <div className="hairline-gold mx-auto mt-3 w-24" aria-hidden="true" />
         </div>
 
         {group.audio_file && (
@@ -186,32 +197,34 @@ export function ChapeletGuide({
       </div>
 
       {/* Step content */}
-      <Card className="gap-0 py-0 shadow-sm border-border">
+      <Card variant="sacred" className="gap-0 py-0">
         <CardContent className="p-6">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-accent flex items-center gap-2">
-            <span className="flex size-5 items-center justify-center rounded-full bg-accent/10">
+          <p className="mb-5 flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-ink">
+            <span className="flex size-6 items-center justify-center rounded-full bg-gold/15 font-serif text-xs text-gold-ink ring-1 ring-gold/25">
               {currentStep + 1}
             </span>
             {guideSteps[currentStep]}
           </p>
 
           {currentStep === 0 && (
-            <div className="text-foreground-secondary text-sm leading-relaxed whitespace-pre-line">
-              <p className="font-medium text-foreground mb-4">
-                Au nom du Père, et du Fils, et du Saint-Esprit. Amen.
+            <div className="flex flex-col gap-4">
+              <p className="font-serif text-lg font-medium text-foreground">
+                {SIGN_OF_THE_CROSS}
               </p>
-              {creedPrayer
-                ? creedPrayer.text
-                : 'Je crois en Dieu, le Père tout-puissant, Créateur du ciel et de la terre...'}
+              <ScriptureQuote
+                eyebrow="Symbole des Apôtres"
+                text={creedPrayer ? creedPrayer.text : FALLBACK_CREED}
+                size="sm"
+              />
             </div>
           )}
 
           {currentStep === 1 && (
-            <div className="text-foreground-secondary text-sm leading-relaxed">
-              <p className="font-medium text-foreground text-lg">
+            <div className="flex flex-col gap-3">
+              <p className="font-serif text-xl font-semibold text-foreground">
                 {mysteryNames[category][currentMystery]}
               </p>
-              <p className="mt-2 text-muted-foreground italic border-l-2 border-accent/40 pl-3">
+              <p className="border-l-[3px] border-gold pl-4 text-sm italic leading-relaxed text-muted-foreground">
                 Fruit du mystère : la contemplation de cet événement de la vie
                 du Christ et de Marie.
               </p>
@@ -219,12 +232,11 @@ export function ChapeletGuide({
           )}
 
           {currentStep === 2 && (
-            <div
-              className="text-foreground-secondary text-sm leading-relaxed bg-accent/5 p-4 rounded-lg"
-              style={{ lineHeight: 1.75 }}
-            >
-              {meditations[category][currentMystery]}
-            </div>
+            <ScriptureQuote
+              eyebrow="Méditation"
+              text={meditations[category][currentMystery]}
+              size="sm"
+            />
           )}
 
           {currentStep === 3 && (
@@ -233,56 +245,45 @@ export function ChapeletGuide({
                 {Array.from({ length: 10 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex size-8 items-center justify-center rounded-full bg-accent/20 text-xs font-medium text-accent shadow-sm"
+                    className="flex size-8 items-center justify-center rounded-full bg-gold/12 font-serif text-xs font-medium text-gold-ink shadow-soft-sm ring-1 ring-gold/20"
                   >
                     {i + 1}
                   </div>
                 ))}
               </div>
-              <p className="text-foreground-secondary text-center text-sm italic whitespace-pre-line max-w-sm mx-auto">
-                {hailMaryPrayer
-                  ? hailMaryPrayer.text
-                  : 'Je vous salue Marie, pleine de grâce, le Seigneur est avec vous...'}
+              <p className="mx-auto max-w-sm whitespace-pre-line text-center font-serif text-sm italic leading-relaxed text-foreground/85">
+                {hailMaryPrayer ? hailMaryPrayer.text : FALLBACK_HAIL_MARY}
               </p>
             </div>
           )}
 
           {currentStep === 4 && (
-            <div className="text-foreground-secondary text-sm leading-relaxed whitespace-pre-line">
-              {gloryBePrayer
-                ? gloryBePrayer.text
-                : 'Gloire au Père, et au Fils, et au Saint-Esprit. Comme il était au commencement, maintenant et toujours, pour les siècles des siècles. Amen.'}
-            </div>
+            <ScriptureQuote
+              eyebrow="Doxologie"
+              text={gloryBePrayer ? gloryBePrayer.text : FALLBACK_GLORY_BE}
+              size="sm"
+            />
           )}
         </CardContent>
       </Card>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between mt-2">
+      <div className="mt-2 flex items-center justify-between">
         <Button
-          variant="outline"
+          variant="outline-gold"
           size="lg"
           onClick={goPrev}
           disabled={isFirst}
-          className="bg-background hover:bg-secondary"
           icon={<ChevronLeft className="size-4" />}
         >
           Précédent
         </Button>
         {isLast ? (
-          <Button
-            size="lg"
-            onClick={onBack}
-            className="bg-accent text-accent-foreground hover:bg-accent/90 px-8"
-          >
+          <Button variant="gold" size="lg" onClick={onBack} className="px-8">
             Terminer
           </Button>
         ) : (
-          <Button
-            size="lg"
-            onClick={goNext}
-            className="bg-accent text-accent-foreground hover:bg-accent/90 px-6"
-          >
+          <Button variant="gold" size="lg" onClick={goNext} className="px-6">
             <span className="flex items-center gap-2">
               Suivant
               <ChevronRight className="size-4" />

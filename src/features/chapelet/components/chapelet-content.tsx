@@ -3,7 +3,7 @@
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
-import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { PageHeader } from '@/components/layouts/page-header';
 import {
   useRosaryGroups,
   RosaryGroup,
@@ -23,14 +23,6 @@ export function ChapeletContent() {
   // Default to today's group if one hasn't been explicitly selected
   const activeGroup = selectedGroup || todayRosary?.day.group;
 
-  useRegisterPageMeta({
-    title: isGuideActive ? 'Chapelet Guide' : 'Mon Chapelet Quotidien',
-    subtitle:
-      isGuideActive && activeGroup
-        ? `Mystères ${activeGroup.name}`
-        : 'Priez avec un guide jour après jour',
-  });
-
   if (isLoadingToday || isLoadingGroups) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -46,6 +38,10 @@ export function ChapeletContent() {
   if (isGuideActive) {
     return (
       <div className="flex flex-col">
+        <PageHeader
+          title="Chapelet Guide"
+          subtitle={`Mystères ${activeGroup.name}`}
+        />
         <div className="mx-auto w-full max-w-3xl p-4">
           <ChapeletGuide
             group={activeGroup}
@@ -59,6 +55,10 @@ export function ChapeletContent() {
 
   return (
     <div className="flex flex-col">
+      <PageHeader
+        title="Mon Chapelet Quotidien"
+        subtitle="Méditez les mystères, dizaine après dizaine"
+      />
       <div className="mx-auto w-full max-w-3xl p-4">
         <MysterySelector
           todayGroup={todayRosary.day.group}

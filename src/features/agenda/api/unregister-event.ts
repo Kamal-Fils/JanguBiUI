@@ -7,8 +7,11 @@ export const useUnregisterEvent = () => {
   return useMutation({
     mutationFn: (eventId: number) =>
       api.delete<void>(`/v1/agenda/events/${eventId}/register/`),
-    onSuccess: () => {
+    onSuccess: (_data, eventId) => {
+      // Le fil lit ['events', params] → ['events'] l'invalide par préfixe.
       queryClient.invalidateQueries({ queryKey: ['events'] });
+      // Invalide aussi la clé détail (utile dès qu'une page détail existera).
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
     },
   });
 };

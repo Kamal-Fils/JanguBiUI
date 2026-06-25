@@ -1,12 +1,10 @@
 'use client';
 
-import { FileDown, Paperclip, Send } from 'lucide-react';
+import { ArrowLeft, FileDown, Loader2, Paperclip, Send } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { ContentContainer } from '@/components/layouts/content-container';
-import { useRegisterPageMeta } from '@/components/layouts/page-meta';
-import { Button } from '@/components/ui/button/button';
-import { Card } from '@/components/ui/card/card';
+import { CardEyebrow } from '@/components/ui/card/card';
 import { Spinner } from '@/components/ui/spinner';
 import {
   StatusTimeline,
@@ -45,14 +43,13 @@ function formatDateTime(iso: string): string {
 }
 
 export function DocumentDetail({ documentId }: DocumentDetailProps) {
+  const router = useRouter();
   const { data, isLoading, isError } = useDocumentRequest(documentId);
   const [supplement, setSupplement] = useState('');
   const [submittedSupplement, setSubmittedSupplement] = useState(false);
 
   const { mutate: submitSupplement, isPending: isSubmitting } =
     useSubmitSupplement(documentId);
-
-  useRegisterPageMeta({ title: 'Demande de document', showHeading: false });
 
   function handleSupplementSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -71,7 +68,21 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
 
   return (
     <div className="flex flex-col">
-      <ContentContainer>
+      <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="flex size-8 items-center justify-center rounded-full hover:bg-muted"
+          aria-label="Retour"
+        >
+          <ArrowLeft className="size-5" />
+        </button>
+        <span className="text-sm font-semibold text-foreground">
+          Détail de la demande
+        </span>
+      </div>
+
+      <div className="mx-auto w-full max-w-2xl px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         {isLoading && (
           <div className="flex justify-center py-12">
             <Spinner />
@@ -86,21 +97,24 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
 
         {!isLoading && !isError && data && (
           <div className="flex flex-col gap-6">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Type de document
-                </p>
-                <h1 className="mt-1 text-xl font-semibold text-foreground">
-                  {formatDocumentType(data.document_type)}
-                </h1>
-                {data.reference_number && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Réf. {data.reference_number}
-                  </p>
-                )}
+            <div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <CardEyebrow className="text-gold-ink">
+                    Type de document
+                  </CardEyebrow>
+                  <h1 className="mt-1.5 font-serif text-2xl font-bold leading-tight tracking-tight text-foreground">
+                    {formatDocumentType(data.document_type)}
+                  </h1>
+                  {data.reference_number && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Réf. {data.reference_number}
+                    </p>
+                  )}
+                </div>
+                <DocumentStatusBadge status={data.status} />
               </div>
-              <DocumentStatusBadge status={data.status} />
+              <div className="hairline-gold mt-3" aria-hidden="true" />
             </div>
 
             {data.status === 'rejected' && data.rejection_reason && (
@@ -114,18 +128,14 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
               </div>
             )}
 
-            <Card variant="elevated" className="p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Date de la demande
-              </p>
+            <div className="rounded-2xl border border-primary/15 bg-secondary/60 p-4 shadow-soft-sm">
+              <CardEyebrow>Date de la demande</CardEyebrow>
               <p className="mt-1 text-sm font-medium text-foreground">
                 {formatDate(data.created_at)}
               </p>
               {data.parish_name && (
                 <>
-                  <p className="mt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Paroisse
-                  </p>
+                  <CardEyebrow className="mt-3">Paroisse</CardEyebrow>
                   <p className="mt-1 text-sm text-foreground">
                     {data.parish_name}
                   </p>
@@ -133,15 +143,13 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
               )}
               {data.notes && (
                 <>
-                  <p className="mt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Précisions
-                  </p>
+                  <CardEyebrow className="mt-3">Précisions</CardEyebrow>
                   <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">
                     {data.notes}
                   </p>
                 </>
               )}
-            </Card>
+            </div>
 
             {data.status === 'info_requested' && !submittedSupplement && (
               <form
@@ -164,16 +172,18 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
                   placeholder="Apportez les précisions demandées…"
                   className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
-                <Button
+                <button
                   type="submit"
-                  size="lg"
-                  fullWidth
-                  isLoading={isSubmitting}
-                  disabled={!supplement.trim()}
-                  icon={<Send className="size-4" />}
+                  disabled={!supplement.trim() || isSubmitting}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
                 >
+                  {isSubmitting ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Send className="size-4" />
+                  )}
                   {isSubmitting ? 'Envoi en cours…' : 'Envoyer le complément'}
-                </Button>
+                </button>
               </form>
             )}
 
@@ -185,15 +195,15 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
 
             {data.attachments && data.attachments.length > 0 && (
               <div>
-                <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <Paperclip className="size-4" />
+                <h2 className="mb-3 flex items-center gap-2 font-serif text-base font-semibold text-foreground">
+                  <Paperclip className="size-4 text-accent" />
                   Pièces jointes
                 </h2>
                 <ul className="flex flex-col gap-2">
                   {data.attachments.map((att) => (
                     <li
                       key={att.id}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-primary/15 bg-secondary/60 px-4 py-3 shadow-soft-sm"
                     >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-foreground">
@@ -224,7 +234,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
 
             {data.status_logs && data.status_logs.length > 0 && (
               <div>
-                <h2 className="mb-3 text-sm font-semibold text-foreground">
+                <h2 className="mb-3 font-serif text-base font-semibold text-foreground">
                   Historique
                 </h2>
                 <StatusTimeline
@@ -243,7 +253,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
             )}
           </div>
         )}
-      </ContentContainer>
+      </div>
     </div>
   );
 }

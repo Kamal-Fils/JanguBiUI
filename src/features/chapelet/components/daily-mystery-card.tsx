@@ -1,10 +1,16 @@
 'use client';
 
-import { ChevronRight, Headphones, Loader2 } from 'lucide-react';
+import { ChevronRight, Headphones, Loader2, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardEyebrow,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 import { useRosaryToday } from '../api/get-rosary-today';
 
@@ -13,7 +19,7 @@ export function DailyMysteryCard() {
 
   if (isLoading) {
     return (
-      <Card className="gap-0 overflow-hidden border-border py-0">
+      <Card variant="sacred" className="gap-0 overflow-hidden py-0">
         <CardContent className="flex items-center justify-center p-8">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </CardContent>
@@ -23,7 +29,7 @@ export function DailyMysteryCard() {
 
   if (isError || !rosaryData) {
     return (
-      <Card className="gap-0 overflow-hidden border-border py-0">
+      <Card variant="sacred" className="gap-0 overflow-hidden py-0">
         <CardContent className="p-4 text-center text-sm text-destructive">
           Erreur lors du chargement du chapelet du jour.
         </CardContent>
@@ -35,37 +41,37 @@ export function DailyMysteryCard() {
   const categoryDay = rosaryData.day.weekday_display;
 
   return (
-    <Card className="gap-0 overflow-hidden border-border py-0">
-      <CardHeader className="bg-accent/5 p-4 dark:bg-accent/10">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-            <Headphones className="size-5" />
+    <Card variant="sacred" className="gap-0 overflow-hidden py-0">
+      <CardHeader className="p-5">
+        <div className="flex items-center gap-4">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/25 to-accent/15 text-gold ring-1 ring-gold/30">
+            <Sparkles className="size-7" />
           </div>
-          <div className="flex-1">
-            <CardTitle className="text-base">Chapelet du jour</CardTitle>
-            <p className="text-xs text-muted-foreground">
+          <div className="min-w-0 flex-1">
+            <CardEyebrow>Chapelet du jour</CardEyebrow>
+            <CardTitle className="font-serif text-xl">
               Mystères {mysteryName}
-            </p>
+            </CardTitle>
           </div>
           <Badge
             variant="secondary"
-            className="bg-accent/10 text-accent dark:bg-accent/20"
+            className="shrink-0 bg-gold/15 text-gold-ink hover:bg-gold/20"
           >
             {categoryDay}
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="px-5 pb-5">
         <Link
           href="/app/chapelet"
-          className="bg-background-subtle flex items-center justify-between rounded-lg px-4 py-3 transition-colors hover:bg-secondary"
+          className="flex items-center justify-between rounded-xl border border-gold/20 bg-background/60 px-4 py-3.5 transition-colors hover:border-gold/40 hover:bg-background"
         >
           <div className="flex items-center gap-3">
-            <div className="flex size-8 items-center justify-center rounded-full bg-accent/10">
-              <Headphones className="size-4 text-accent" />
+            <div className="flex size-9 items-center justify-center rounded-full bg-gold/15 text-gold">
+              <Headphones className="size-4" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-foreground">
+              <span className="text-sm font-semibold text-foreground">
                 Commencer le chapelet
               </span>
               <span className="text-xs text-muted-foreground">
@@ -73,7 +79,7 @@ export function DailyMysteryCard() {
               </span>
             </div>
           </div>
-          <ChevronRight className="size-4 text-muted-foreground" />
+          <ChevronRight className="size-4 text-gold/70" />
         </Link>
       </CardContent>
     </Card>

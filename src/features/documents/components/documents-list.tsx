@@ -3,10 +3,11 @@
 import { ChevronRight, FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
 
-import { ContentContainer } from '@/components/layouts/content-container';
-import { Button } from '@/components/ui/button/button';
+import { PageHeader } from '@/components/layouts/page-header';
+import { CardEyebrow } from '@/components/ui/card/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { cn } from '@/utils/cn';
@@ -58,12 +59,38 @@ function DocumentsSkeleton() {
   );
 }
 
-export function DocumentsList() {
+interface DocumentsListProps {
+  hideHeader?: boolean;
+}
+
+export function DocumentsList({ hideHeader = false }: DocumentsListProps) {
   const { data, isLoading, isError, refetch } = useDocumentRequests();
 
   return (
     <div className="relative flex flex-col">
-      <ContentContainer>
+      {!hideHeader && (
+        <PageHeader
+          title="Documents"
+          subtitle="Demandes de documents officiels"
+          action={
+            <Link
+              href="/app/documents/new"
+              className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-soft-sm hover:bg-primary/90"
+              aria-label="Nouvelle demande"
+            >
+              <Plus className="size-5" />
+            </Link>
+          }
+        />
+      )}
+
+      <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+        <SectionHeader
+          eyebrow="Le registre"
+          title="Vos démarches"
+          description="Suivez l'avancement de vos demandes de documents officiels."
+        />
+
         {isLoading && <DocumentsSkeleton />}
         {isError && (
           <ErrorState
@@ -77,12 +104,13 @@ export function DocumentsList() {
             title="Aucune demande"
             description="Vos demandes de documents apparaîtront ici."
             action={
-              <Button asChild size="lg">
-                <Link href="/app/documents/new">
-                  <Plus className="size-4" />
-                  Nouvelle demande
-                </Link>
-              </Button>
+              <Link
+                href="/app/documents/new"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft motion-reduce:transform-none"
+              >
+                <Plus className="size-4" />
+                Nouvelle demande
+              </Link>
             }
           />
         )}
@@ -92,7 +120,7 @@ export function DocumentsList() {
               <Link
                 key={doc.id}
                 href={paths.app.document.getHref(String(doc.id))}
-                className="group flex overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.99]"
+                className="group flex overflow-hidden rounded-2xl border border-primary/15 bg-secondary/60 shadow-soft-sm transition-[transform,box-shadow,border-color] duration-[var(--duration-normal)] ease-out-soft hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-soft active:scale-[0.99] motion-reduce:transform-none"
               >
                 <div
                   className={cn(
@@ -101,11 +129,12 @@ export function DocumentsList() {
                   )}
                 />
                 <div className="flex min-w-0 flex-1 items-center gap-3 p-4">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted">
-                    <FileText className="size-5 text-muted-foreground" />
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/15">
+                    <FileText className="size-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-foreground">
+                    <CardEyebrow>Demande</CardEyebrow>
+                    <p className="mt-0.5 truncate font-serif font-semibold text-foreground transition-colors group-hover:text-primary">
                       {formatDocumentType(doc.document_type)}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -121,7 +150,7 @@ export function DocumentsList() {
             ))}
           </div>
         )}
-      </ContentContainer>
+      </div>
     </div>
   );
 }

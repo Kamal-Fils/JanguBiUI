@@ -3,6 +3,7 @@
 import {
   BookOpen,
   Calendar,
+  ChevronRight,
   FileText,
   Settings2,
   Tv2,
@@ -11,6 +12,7 @@ import {
 import Link from 'next/link';
 
 import { AdminPageLayout } from '@/components/layouts/admin-page-layout';
+import { SectionHeader } from '@/components/ui/section-header';
 import { paths } from '@/config/paths';
 import { useUser } from '@/lib/auth';
 import { canManageUsers, isAdmin, isSuperAdmin } from '@/lib/authorization';
@@ -85,6 +87,11 @@ export default function AdminDashboardPage() {
       subtitle="Tableau de bord administrateur"
       allow={isAdmin}
     >
+      <SectionHeader
+        eyebrow="Administration"
+        title="Pôles de gestion"
+        description="Sélectionnez un espace pour piloter la plateforme."
+      />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
         {sections.map((section) => {
           const Icon = section.icon;
@@ -92,18 +99,24 @@ export default function AdminDashboardPage() {
             <Link
               key={section.href}
               href={section.href}
-              className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:active:scale-100"
+              className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-border/60 bg-card p-4 shadow-soft-sm transition-[box-shadow,transform,border-color] duration-[var(--duration-normal)] ease-out-soft before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:bg-gradient-to-r before:from-gold before:via-gold/70 before:to-transparent before:opacity-0 before:transition-opacity hover:-translate-y-0.5 hover:border-border hover:shadow-soft hover:before:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:hover:translate-y-0"
             >
-              <div
-                className={cn(
-                  'flex size-10 items-center justify-center rounded-xl',
-                  section.tone,
-                )}
-              >
-                <Icon className="size-5" />
+              <div className="flex items-start justify-between">
+                <div
+                  className={cn(
+                    'flex size-10 items-center justify-center rounded-xl',
+                    section.tone,
+                  )}
+                >
+                  <Icon className="size-5" />
+                </div>
+                <ChevronRight
+                  aria-hidden="true"
+                  className="size-4 -translate-x-1 text-muted-foreground/50 opacity-0 transition-all group-hover:translate-x-0 group-hover:text-accent group-hover:opacity-100"
+                />
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-semibold text-foreground">
+                <span className="font-serif text-base font-bold tracking-tight text-foreground">
                   {section.label}
                 </span>
                 <span className="text-[11px] leading-tight text-muted-foreground">

@@ -4,7 +4,7 @@ import { CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
-import { Card } from '@/components/ui/card/card';
+import { Card, CardEyebrow } from '@/components/ui/card/card';
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ import {
 import { RoleBadge } from '@/components/ui/role-badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+import { roleLabel } from '@/config/roles';
 
 import { PendingClergyAccount } from '../api/get-pending-clergy';
 import {
@@ -34,26 +35,26 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
     [account.first_name, account.last_name].filter(Boolean).join(' ') ||
     account.email;
 
+  const eyebrow = [roleLabel(account.pastoral_role), account.diocese_name]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
     <>
-      <Card variant="elevated" className="p-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+      <Card variant="sacred" className="p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="font-semibold text-foreground truncate">
+            <CardEyebrow className="text-primary/70">{eyebrow}</CardEyebrow>
+            <div className="mt-1 flex flex-wrap items-center gap-2.5">
+              <span className="truncate font-serif text-lg font-bold tracking-tight text-foreground">
                 {fullName}
               </span>
               <RoleBadge role={account.pastoral_role} />
             </div>
-            <p className="text-xs text-muted-foreground">{account.email}</p>
-            {account.diocese_name && (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Diocèse : {account.diocese_name}
-              </p>
-            )}
+            <p className="mt-1 text-xs text-muted-foreground">{account.email}</p>
             {account.parish_name && (
-              <p className="text-xs text-muted-foreground">
-                Paroisse : {account.parish_name}
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Paroisse · {account.parish_name}
               </p>
             )}
           </div>
@@ -61,6 +62,7 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
           <div className="flex shrink-0 gap-2">
             <Button
               size="sm"
+              variant="gold"
               onClick={() => approve(account.id)}
               disabled={approving}
             >
@@ -138,8 +140,9 @@ function PendingClergyListSkeleton() {
   return (
     <div className="space-y-3">
       {[1, 2].map((i) => (
-        <Card key={i} variant="elevated" className="p-4 space-y-2">
-          <Skeleton className="h-4 w-40" />
+        <Card key={i} variant="sacred" className="space-y-2 p-5">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-5 w-40" />
           <Skeleton className="h-3 w-56" />
           <Skeleton className="h-3 w-32" />
         </Card>
@@ -164,10 +167,10 @@ export function PendingClergyList({
   if (totalCount === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-14 text-center">
-        <div className="flex size-12 items-center justify-center rounded-full bg-success/10">
-          <CheckCircle className="size-6 text-success" />
+        <div className="flex size-12 items-center justify-center rounded-full bg-accent/15">
+          <CheckCircle className="size-6 text-accent" />
         </div>
-        <p className="text-sm font-medium text-foreground">
+        <p className="font-serif text-base font-bold tracking-tight text-foreground">
           Aucun compte en attente
         </p>
         <p className="text-xs text-muted-foreground">
@@ -179,13 +182,13 @@ export function PendingClergyList({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="flex items-center gap-2 text-primary">
         <Clock className="size-4" />
-        <span>
-          {totalCount} compte{totalCount > 1 ? 's' : ''} en attente de
-          validation
-        </span>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em]">
+          {totalCount} compte{totalCount > 1 ? 's' : ''} en attente de validation
+        </p>
       </div>
+      <div className="hairline-gold" aria-hidden="true" />
       {accounts.map((account) => (
         <PendingClergyCard key={account.id} account={account} />
       ))}

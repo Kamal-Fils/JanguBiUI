@@ -20,7 +20,7 @@ const suggestions = [
     icon: Heart,
     label: 'Chapelet',
     text: "Quels sont les mysteres du chapelet d'aujourd'hui ?",
-    color: 'text-accent bg-accent/10 hover:bg-accent/15',
+    color: 'text-gold-ink bg-accent/10 hover:bg-accent/15',
   },
   {
     icon: MapPin,

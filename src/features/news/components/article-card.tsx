@@ -1,7 +1,8 @@
-import { Clock, Eye } from 'lucide-react';
+import { Clock, Eye, Newspaper } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { CardEyebrow } from '@/components/ui/card/card';
 import { cn } from '@/lib/utils';
 
 import { Article } from '../types';
@@ -29,37 +30,49 @@ export function ArticleCard({ article }: ArticleCardProps) {
   return (
     <Link
       href={`/app/actus/${article.id}`}
-      className="flex gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-muted active:scale-[0.98]"
+      className={cn(
+        'group flex gap-3.5 rounded-xl border border-border/50 bg-transparent p-3 transition-[background-color,border-color,box-shadow,transform] duration-[var(--duration-normal)] ease-out-soft',
+        'hover:border-accent/30 hover:bg-muted/50 hover:shadow-soft-sm active:scale-[0.98] motion-reduce:transform-none',
+      )}
     >
-      {article.cover_image_url && (
+      {article.cover_image_url ? (
         <div className="relative size-20 shrink-0 overflow-hidden rounded-lg">
           <Image
             src={article.cover_image_url}
             alt={article.title}
             fill
             unoptimized
-            className="object-cover"
+            className="object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.04] motion-reduce:transform-none"
             sizes="80px"
           />
+        </div>
+      ) : (
+        // Repli éditorial : bloc dégradé indigo → or quand l'article n'a pas d'image.
+        <div
+          className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary/15 via-primary/5 to-accent/15 text-primary/40"
+          aria-hidden="true"
+        >
+          <Newspaper className="size-7" />
         </div>
       )}
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
           {article.category && (
-            <span
-              className={cn(
-                'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                'bg-primary/10 text-primary',
-              )}
-            >
+            <CardEyebrow className="text-gold-ink">
               {article.category.name}
-            </span>
+            </CardEyebrow>
           )}
-          <span className="text-[10px] text-muted-foreground">
+          {article.category && (
+            <span
+              className="size-1 shrink-0 rounded-full bg-accent/50"
+              aria-hidden="true"
+            />
+          )}
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
             {scopeLabel[article.scope_type] ?? article.scope_type}
           </span>
         </div>
-        <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
+        <p className="line-clamp-2 font-serif text-[0.95rem] font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
           {article.title}
         </p>
         {article.excerpt && (

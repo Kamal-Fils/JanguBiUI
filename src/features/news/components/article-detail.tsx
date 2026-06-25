@@ -1,12 +1,11 @@
 'use client';
 
 import DOMPurify from 'isomorphic-dompurify';
-import { Clock, Eye, User } from 'lucide-react';
+import { ArrowLeft, Clock, Eye, User } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-import { useRegisterPageMeta } from '@/components/layouts/page-meta';
-import { Button } from '@/components/ui/button/button';
+import { Pill } from '@/components/ui/pill';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useArticleDetail } from '../api/get-article';
@@ -55,31 +54,39 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
   const router = useRouter();
   const { data: article, isLoading, isError } = useArticleDetail(articleId);
 
-  useRegisterPageMeta({
-    title: article?.title ?? 'Article',
-    showHeading: false,
-  });
-
   if (isLoading) return <ArticleDetailSkeleton />;
 
   if (isError || !article) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
         <p className="text-sm text-muted-foreground">Article introuvable.</p>
-        <Button
+        <button
           type="button"
-          variant="link"
-          size="sm"
           onClick={() => router.back()}
+          className="text-sm text-primary underline underline-offset-2"
         >
           Retour
-        </Button>
+        </button>
       </div>
     );
   }
 
   return (
     <article className="flex flex-col">
+      <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="flex size-8 items-center justify-center rounded-full hover:bg-muted"
+          aria-label="Retour"
+        >
+          <ArrowLeft className="size-5" />
+        </button>
+        <span className="truncate text-sm font-semibold text-foreground">
+          {article.title}
+        </span>
+      </div>
+
       <div className="mx-auto w-full max-w-2xl md:max-w-3xl lg:max-w-5xl">
         {article.cover_image_url && (
           <div className="relative h-52 w-full overflow-hidden">
@@ -96,20 +103,26 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
         )}
 
         <div className="px-4 py-5">
-          <div className="mb-2 flex flex-wrap items-center gap-2">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
             {article.category && (
-              <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                {article.category.name}
-              </span>
+              <Pill tone="gold">{article.category.name}</Pill>
             )}
-            <span className="text-xs text-muted-foreground">
+            {article.category && (
+              <span
+                className="size-1 rounded-full bg-accent/50"
+                aria-hidden="true"
+              />
+            )}
+            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               {scopeLabel[article.scope_type] ?? article.scope_type}
             </span>
           </div>
 
-          <h1 className="mb-3 text-xl font-bold leading-snug text-foreground">
+          <h1 className="mb-2 font-serif text-2xl font-bold leading-tight tracking-tight text-foreground">
             {article.title}
           </h1>
+
+          <div className="hairline-gold mb-4 mt-3" aria-hidden="true" />
 
           <div className="mb-6 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">

@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
@@ -37,53 +37,58 @@ export function TodayTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Date navigator */}
-      <div className="flex items-center justify-between rounded-lg bg-muted/40 p-3">
+      {/* Date navigator — bloc éditorial centré, flanqué de deux boutons fantômes */}
+      <div className="flex items-center justify-center gap-3 py-2">
         <Button
           variant="ghost"
           size="icon"
-          className="size-8"
+          className="size-10 shrink-0 rounded-full text-muted-foreground"
           onClick={() => navigateDay(-1)}
           aria-label="Jour précédent"
         >
-          <ChevronLeft className="size-4" />
+          <ChevronLeft className="size-5" />
         </Button>
-        <div className="flex items-center gap-2 text-sm font-medium capitalize text-foreground">
-          <Calendar className="size-4 text-muted-foreground" />
-          {dateStr}
+        <div className="min-w-0 text-center">
+          <p className="text-[0.625rem] font-medium uppercase tracking-[0.2em] text-muted-foreground/70">
+            Lectures liturgiques
+          </p>
+          <p className="font-serif text-lg font-bold capitalize text-foreground">
+            {dateStr}
+          </p>
         </div>
         <Button
           variant="ghost"
           size="icon"
-          className="size-8"
+          className="size-10 shrink-0 rounded-full text-muted-foreground"
           onClick={() => navigateDay(1)}
           aria-label="Jour suivant"
         >
-          <ChevronRight className="size-4" />
+          <ChevronRight className="size-5" />
         </Button>
       </div>
 
       {/* Rosary mystery card */}
       <DailyMysteryCard />
 
-      {/* Season / mystery label */}
-      {(data?.season || data?.mystery) && (
-        <p className="px-1 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-          {[data.season, data.mystery].filter(Boolean).join(' — ')}
-        </p>
-      )}
-
-      {/* Font size controls */}
-      {!isLoading && readings.length > 0 && (
-        <div className="flex items-center justify-end px-1">
+      {/* Season / mystery label + font controls on one row */}
+      <div className="flex items-center justify-between gap-2 px-1">
+        {data?.season || data?.mystery ? (
+          <p className="min-w-0 truncate text-xs font-medium uppercase tracking-widest text-muted-foreground">
+            {[data.season, data.mystery].filter(Boolean).join(' — ')}
+          </p>
+        ) : (
+          <span aria-hidden="true" />
+        )}
+        {!isLoading && readings.length > 0 && (
           <FontSizeStepper
             value={fontSize}
             onChange={setFontSize}
             min={12}
             max={24}
+            className="shrink-0"
           />
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Swipeable readings */}
       <ReadingsSwiper readings={readings} fontSize={fontSize} />

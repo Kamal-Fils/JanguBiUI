@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card/card';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { SectionHeader } from '@/components/ui/section-header';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -32,49 +33,52 @@ function CategoriesSection() {
   const [showForm, setShowForm] = useState(false);
 
   return (
-    <section>
-      <SectionHeader
-        title="Catégories"
-        action={
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setShowForm((v) => !v)}
-          >
-            {showForm ? 'Annuler' : '+ Catégorie'}
-          </Button>
-        }
-      />
-
-      {showForm && (
-        <div className="mb-3">
-          <CategoryForm onSuccess={() => setShowForm(false)} />
-        </div>
-      )}
-
-      {isLoading ? (
-        <p className="text-xs text-muted-foreground">Chargement…</p>
-      ) : (
-        <ul className="space-y-1.5">
-          {cats?.results.map((cat: TvCategory) => (
-            <li
-              key={cat.id}
-              className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-2 text-sm"
+    <Card variant="feature">
+      <CardContent className="p-4 sm:p-5">
+        <SectionHeader
+          eyebrow="Diffusion"
+          title="Catégories"
+          action={
+            <Button
+              size="sm"
+              variant="outline-gold"
+              onClick={() => setShowForm((v) => !v)}
             >
-              <span className="text-foreground">{cat.name}</span>
-              <div className="flex items-center gap-2">
-                {cat.is_clergy_only && (
-                  <StatusBadge tone="progress" label="Clergé" />
-                )}
-                <span className="text-xs text-muted-foreground">
-                  #{cat.order}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+              {showForm ? 'Annuler' : '+ Catégorie'}
+            </Button>
+          }
+        />
+
+        {showForm && (
+          <div className="mb-3">
+            <CategoryForm onSuccess={() => setShowForm(false)} />
+          </div>
+        )}
+
+        {isLoading ? (
+          <p className="text-xs text-muted-foreground">Chargement…</p>
+        ) : (
+          <ul className="space-y-1.5">
+            {cats?.results.map((cat: TvCategory) => (
+              <li
+                key={cat.id}
+                className="flex items-center justify-between rounded-lg border border-border/60 bg-background-surface px-3 py-2.5 text-sm transition-colors hover:border-border"
+              >
+                <span className="font-medium text-foreground">{cat.name}</span>
+                <div className="flex items-center gap-2">
+                  {cat.is_clergy_only && (
+                    <StatusBadge tone="progress" label="Clergé" />
+                  )}
+                  <span className="text-xs text-muted-foreground">
+                    #{cat.order}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -189,36 +193,39 @@ function VideosSection() {
   ];
 
   return (
-    <section>
-      <SectionHeader
-        title="Vidéos"
-        action={
-          <Button size="sm" variant="outline" onClick={startCreate}>
-            {showForm && !editingVideo ? 'Annuler' : '+ Vidéo'}
-          </Button>
-        }
-      />
+    <Card variant="feature">
+      <CardContent className="p-4 sm:p-5">
+        <SectionHeader
+          eyebrow="Programmes"
+          title="Vidéos"
+          action={
+            <Button size="sm" variant="outline-gold" onClick={startCreate}>
+              {showForm && !editingVideo ? 'Annuler' : '+ Vidéo'}
+            </Button>
+          }
+        />
 
-      {showForm && (
-        <div className="mb-4">
-          <VideoForm
-            key={editingVideo?.id ?? 'new'}
-            categories={categories}
-            video={editingVideo ?? undefined}
-            onSuccess={closeForm}
-            onCancel={closeForm}
-          />
-        </div>
-      )}
+        {showForm && (
+          <div className="mb-4">
+            <VideoForm
+              key={editingVideo?.id ?? 'new'}
+              categories={categories}
+              video={editingVideo ?? undefined}
+              onSuccess={closeForm}
+              onCancel={closeForm}
+            />
+          </div>
+        )}
 
-      <DataTable
-        data={videos?.results}
-        columns={columns}
-        rowKey={(v) => v.id}
-        isLoading={isLoading}
-        caption="Liste des vidéos TV"
-      />
-    </section>
+        <DataTable
+          data={videos?.results}
+          columns={columns}
+          rowKey={(v) => v.id}
+          isLoading={isLoading}
+          caption="Liste des vidéos TV"
+        />
+      </CardContent>
+    </Card>
   );
 }
 

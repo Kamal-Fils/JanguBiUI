@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Plus, ScrollText } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import Link from 'next/link';
 
 import { Card } from '@/components/ui/card/card';
@@ -14,21 +14,7 @@ export function MyIntentionsSection() {
   const recentIntentions = (data?.results ?? []).slice(0, 3);
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground/70">
-          <ScrollText className="size-3.5" />
-          Mes intentions de messe
-        </h2>
-        <Link
-          href="/app/intentions"
-          className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-        >
-          Tout voir
-          <ArrowRight className="size-3" />
-        </Link>
-      </div>
-
+    <div className="flex flex-col gap-3">
       {isLoading && (
         <div className="flex flex-col gap-2">
           {[1, 2].map((i) => (
@@ -78,6 +64,6 @@ export function MyIntentionsSection() {
         <Plus className="size-4" />
         Déposer une intention
       </Link>
-    </section>
+    </div>
   );
 }

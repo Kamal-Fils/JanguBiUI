@@ -17,6 +17,16 @@ const cardVariants = cva(
           'border-border bg-card shadow-soft-sm hover:-translate-y-0.5 hover:shadow-soft hover:border-border focus-within:shadow-soft motion-reduce:hover:translate-y-0',
         // Sans relief.
         flat: 'border-border bg-background-surface',
+        // Carte éditoriale : filet or dégradé en tête de carte.
+        feature:
+          'border-border/60 bg-card shadow-soft overflow-hidden before:block before:h-[3px] before:w-full before:bg-gradient-to-r before:from-gold before:via-gold/70 before:to-transparent',
+        // Carte « sacrée » : surface secondaire teintée indigo.
+        sacred: 'border-primary/15 bg-secondary/60 shadow-soft-sm',
+        // Carte fantôme : transparente, se révèle au survol.
+        ghost: 'border-border/50 bg-transparent hover:bg-muted/50 shadow-none',
+        // Citation mise en exergue : dégradé indigo → or, coins très arrondis.
+        pullquote:
+          'border-0 bg-gradient-to-br from-primary/8 via-primary/5 to-accent/5 rounded-3xl',
       },
     },
     defaultVariants: { variant: 'default' },
@@ -49,6 +59,22 @@ const CardHeader = React.forwardRef<
   />
 ));
 CardHeader.displayName = 'CardHeader';
+
+// Surtitre éditorial : petite étiquette majuscule au-dessus du titre.
+const CardEyebrow = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn(
+      'text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground',
+      className,
+    )}
+    {...props}
+  />
+));
+CardEyebrow.displayName = 'CardEyebrow';
 
 const CardTitle = React.forwardRef<
   HTMLParagraphElement,
@@ -100,6 +126,7 @@ export {
   CardHeader,
   CardFooter,
   CardTitle,
+  CardEyebrow,
   CardDescription,
   CardContent,
 };

@@ -5,8 +5,14 @@ import { useState } from 'react';
 
 import { AdminPageLayout } from '@/components/layouts/admin-page-layout';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card/card';
+import {
+  Card,
+  CardContent,
+  CardEyebrow,
+  CardTitle,
+} from '@/components/ui/card/card';
 import { FilterPills } from '@/components/ui/filter-pills';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEvents } from '@/features/agenda/api/get-events';
 import { EventCard } from '@/features/agenda/components/event-card';
@@ -60,40 +66,51 @@ export default function AdminAgendaPage() {
         />
       }
     >
-      <div className="space-y-6">
+      <div className="space-y-8">
         {showForm && (
-          <section className="rounded-2xl border border-border bg-card p-4">
-            <h2 className="mb-4 text-sm font-semibold text-foreground">
-              Nouvel événement
-            </h2>
-            <EventForm onSuccess={() => setShowForm(false)} />
-          </section>
+          <Card variant="sacred">
+            <CardContent className="p-5">
+              <CardEyebrow className="mb-1">Nouveau</CardEyebrow>
+              <CardTitle className="mb-4 font-serif text-lg">
+                Nouvel événement
+              </CardTitle>
+              <EventForm onSuccess={() => setShowForm(false)} />
+            </CardContent>
+          </Card>
         )}
 
-        {eventsLoading && (
-          <div className="space-y-4">
-            {[1, 2].map((i) => (
-              <Card key={i} variant="elevated" className="space-y-3 p-4">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-              </Card>
-            ))}
-          </div>
-        )}
+        <section>
+          <SectionHeader eyebrow="Calendrier paroissial" title="Événements" />
 
-        {!eventsLoading && data?.results.length === 0 && (
-          <p className="py-12 text-center text-sm text-muted-foreground">
-            Aucun événement publié.
-          </p>
-        )}
+          {eventsLoading && (
+            <div className="space-y-4">
+              {[1, 2].map((i) => (
+                <Card key={i} variant="flat">
+                  <CardContent className="space-y-3 p-4">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-        {!eventsLoading && data && data.results.length > 0 && (
-          <div className="space-y-4">
-            {data.results.map((event) => (
-              <EventCard key={event.id} event={event} canDelete />
-            ))}
-          </div>
-        )}
+          {!eventsLoading && data?.results.length === 0 && (
+            <Card variant="ghost">
+              <CardContent className="py-12 text-center text-sm text-muted-foreground">
+                Aucun événement publié.
+              </CardContent>
+            </Card>
+          )}
+
+          {!eventsLoading && data && data.results.length > 0 && (
+            <div className="space-y-4">
+              {data.results.map((event) => (
+                <EventCard key={event.id} event={event} canDelete />
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </AdminPageLayout>
   );

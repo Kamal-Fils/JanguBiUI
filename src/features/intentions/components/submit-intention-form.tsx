@@ -10,6 +10,11 @@ import { Textarea } from '@/components/ui/form/textarea';
 
 import { useSubmitIntention } from '../api/submit-intention';
 
+import {
+  INTENTION_TYPE_META,
+  type IntentionType,
+} from './intention-type-label';
+
 const schema = z.object({
   intention_type: z.enum([
     'for_deceased',
@@ -24,12 +29,10 @@ const schema = z.object({
 
 type FormInput = z.infer<typeof schema>;
 
-const TYPE_OPTIONS: { value: FormInput['intention_type']; label: string }[] = [
-  { value: 'for_deceased', label: 'Pour un défunt' },
-  { value: 'for_living', label: 'Pour un vivant' },
-  { value: 'for_occasion', label: 'Pour une occasion' },
-  { value: 'for_community', label: 'Pour la communauté' },
-];
+// Libellés issus de la source unique partagée avec la carte éditoriale.
+const TYPE_OPTIONS: { value: IntentionType; label: string }[] = (
+  ['for_deceased', 'for_living', 'for_occasion', 'for_community'] as const
+).map((value) => ({ value, label: INTENTION_TYPE_META[value].label }));
 
 interface SubmitIntentionFormProps {
   onSuccess?: () => void;
@@ -53,6 +56,11 @@ export function SubmitIntentionForm({ onSuccess }: SubmitIntentionFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Choisissez le motif, puis décrivez votre intention. Elle sera transmise
+        au prêtre de votre paroisse pour être portée lors d&apos;une messe.
+      </p>
+
       <Select
         label="Type d'intention"
         options={TYPE_OPTIONS}
@@ -75,8 +83,14 @@ export function SubmitIntentionForm({ onSuccess }: SubmitIntentionFormProps) {
         </p>
       )}
 
-      <Button type="submit" className="w-full" disabled={isPending} isLoading={isPending}>
-        {isPending ? 'Envoi…' : 'Soumettre'}
+      <Button
+        type="submit"
+        variant="gold"
+        className="w-full"
+        disabled={isPending}
+        isLoading={isPending}
+      >
+        {isPending ? 'Envoi…' : 'Confier mon intention'}
       </Button>
     </form>
   );

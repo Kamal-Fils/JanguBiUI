@@ -179,7 +179,7 @@ export function HeuresTab() {
         <Star className="size-4 text-accent" />
         <p className="text-sm text-muted-foreground">
           Office recommandé en ce moment :{' '}
-          <span className="font-medium text-accent">
+          <span className="font-medium text-gold-ink">
             {currentOfficeRecommended}
           </span>
         </p>
@@ -222,7 +222,7 @@ export function HeuresTab() {
                   {isCurrent && (
                     <Badge
                       variant="secondary"
-                      className="bg-accent/10 text-xs text-accent"
+                      className="bg-accent/10 text-xs text-gold-ink"
                     >
                       En cours
                     </Badge>

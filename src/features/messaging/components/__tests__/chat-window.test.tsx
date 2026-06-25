@@ -272,6 +272,95 @@ describe('ChatWindow', () => {
     await waitFor(() => expect(textarea).toHaveValue(''));
   });
 
+  test('shows the CGU acceptance panel when messages return 403, then loads messages after accepting', async () => {
+    let cguAccepted = false;
+    let cguPosted = false;
+    server.use(
+      http.get(
+        `${env.API_URL}/v1/messaging/conversations/${CONVERSATION_ID}/messages/`,
+        () => {
+          if (!cguAccepted) {
+            return HttpResponse.json(
+              {
+                detail:
+                  'Vous devez accepter les CGU de messagerie pour accéder aux messages.',
+              },
+              { status: 403 },
+            );
+          }
+          return HttpResponse.json({
+            count: 1,
+            results: [
+              createMessage({
+                id: 'after-cgu',
+                content: 'Bienvenue dans la conversation.',
+                is_mine: false,
+              }),
+            ],
+          });
+        },
+      ),
+      http.post(
+        `${env.API_URL}/v1/messaging/conversations/${CONVERSATION_ID}/read/`,
+        () => HttpResponse.json({}),
+      ),
+      http.post(
+        `${env.API_URL}/v1/messaging/conversations/${CONVERSATION_ID}/cgu/`,
+        () => {
+          cguPosted = true;
+          cguAccepted = true;
+          return HttpResponse.json({});
+        },
+      ),
+    );
+
+    renderApp(
+      <ChatWindow
+        conversationId={CONVERSATION_ID}
+        participantName="Père Jean"
+      />,
+    );
+
+    await screen.findByText(/accepter les cgu de messagerie/i);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /accepter les cgu/i }),
+    );
+
+    await waitFor(() => expect(cguPosted).toBe(true));
+    await screen.findByText('Bienvenue dans la conversation.');
+    // Le panneau a disparu : on cible le BOUTON du panneau (le toast 403 de
+    // l'intercepteur contient le même texte mais n'a pas de bouton).
+    expect(
+      screen.queryByRole('button', { name: /accepter les cgu/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  test('shows a generic error state when messages fail to load (non-403)', async () => {
+    server.use(
+      http.get(
+        `${env.API_URL}/v1/messaging/conversations/${CONVERSATION_ID}/messages/`,
+        () => HttpResponse.json({ detail: 'Boom' }, { status: 500 }),
+      ),
+      http.post(
+        `${env.API_URL}/v1/messaging/conversations/${CONVERSATION_ID}/read/`,
+        () => HttpResponse.json({}),
+      ),
+    );
+
+    renderApp(
+      <ChatWindow
+        conversationId={CONVERSATION_ID}
+        participantName="Père Jean"
+      />,
+    );
+
+    await screen.findByText(/impossible d’ouvrir la conversation/i);
+    expect(
+      screen.queryByText(/accepter les cgu de messagerie/i),
+    ).not.toBeInTheDocument();
+  });
+
   test('send button is disabled when textarea is empty', () => {
     server.use(
       http.get(

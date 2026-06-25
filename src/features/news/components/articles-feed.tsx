@@ -3,12 +3,11 @@
 import { Clock, Eye, Newspaper } from 'lucide-react';
 import { useState } from 'react';
 
-import { ContentContainer } from '@/components/layouts/content-container';
-import { useRegisterPageMeta } from '@/components/layouts/page-meta';
-import { Card } from '@/components/ui/card/card';
+import { PageHeader } from '@/components/layouts/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { MediaCard } from '@/components/ui/media-card';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatFrDate } from '@/utils/format-date';
 
@@ -27,14 +26,17 @@ function ArticlesSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {Array.from({ length: 6 }).map((_, i) => (
-        <Card key={i} variant="elevated" className="overflow-hidden">
+        <div
+          key={i}
+          className="overflow-hidden rounded-xl border border-border bg-card"
+        >
           <Skeleton className="aspect-video w-full rounded-none" />
           <div className="space-y-2 p-4">
             <Skeleton className="h-3 w-1/3" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-3 w-2/3" />
           </div>
-        </Card>
+        </div>
       ))}
     </div>
   );
@@ -69,11 +71,17 @@ export function ArticlesFeed() {
   const articles = data?.results ?? [];
   const [featured, ...rest] = articles;
 
-  useRegisterPageMeta({ title: 'Actualités', subtitle: "La vie de l'Église" });
-
   return (
     <div className="flex flex-col">
-      <ContentContainer>
+      <PageHeader title="Actualités" subtitle="La vie de l'Église" />
+
+      <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+        <SectionHeader
+          eyebrow="La revue"
+          title="Le fil de l'Église"
+          description="Annonces, articles et lettres pastorales de votre communauté."
+        />
+
         <div className="mb-4">
           <NewsScopeFilter value={scope} onChange={setScope} />
         </div>
@@ -139,7 +147,7 @@ export function ArticlesFeed() {
             )}
           </div>
         )}
-      </ContentContainer>
+      </div>
     </div>
   );
 }

@@ -13,7 +13,7 @@ export const EVENT_TYPE_COLORS: Record<string, string> = {
   mass: 'bg-primary/10 text-primary',
   conference: 'bg-info/10 text-info',
   retreat: 'bg-success/10 text-success',
-  ordination: 'bg-accent/15 text-accent',
+  ordination: 'bg-accent/15 text-gold-ink',
   other: 'bg-muted text-muted-foreground',
 };
 

@@ -4,13 +4,12 @@ import { Inbox } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { ContentContainer } from '@/components/layouts/content-container';
-import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { Input } from '@/components/ui/input';
+import { SectionHeader } from '@/components/ui/section-header';
 import { SkeletonList } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { useParishIntentions } from '@/features/intentions/api/get-parish-intentions';
@@ -20,7 +19,7 @@ import {
   useDeclineIntention,
   useProposeDate,
 } from '@/features/intentions/api/manage-intentions';
-import { IntentionStatusBadge } from '@/features/intentions/components/intention-status-badge';
+import { MassIntentionCard } from '@/features/intentions/components/mass-intention-card';
 import { useUser } from '@/lib/auth';
 import { isClergy } from '@/lib/authorization';
 
@@ -41,58 +40,53 @@ export default function ClergeIntentionsPage() {
     }
   }, [user, userLoading, router]);
 
-  useRegisterPageMeta({ title: 'Intentions reçues' });
-
   if (userLoading || !isClergy(user)) return null;
 
   return (
     <div className="flex flex-col">
-      <ContentContainer className="space-y-4">
-        {isLoading && <SkeletonList count={4} />}
-
-        {isError && (
-          <ErrorState
-            title="Impossible de charger les intentions"
-            description="Une erreur est survenue lors du chargement des intentions de votre paroisse."
-            onRetry={() => refetch()}
+      <PageHeader
+        title="Intentions reçues"
+        backHref={paths.app.clerge.root.getHref()}
+      />
+        <div className="mx-auto w-full max-w-2xl space-y-4 px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+          <SectionHeader
+            eyebrow="Intentions de messe"
+            title="Les intentions de votre paroisse"
+            description="Les fidèles vous confient leurs intentions de prière. Acceptez-les, proposez une date, puis marquez-les célébrées."
           />
-        )}
 
-        {!isLoading && !isError && data && data.results.length === 0 && (
-          <EmptyState
-            icon={<Inbox aria-hidden="true" />}
-            title="Aucune intention en attente"
-            description="Les intentions de messe soumises par les fidèles de votre paroisse apparaîtront ici."
-          />
-        )}
+          {isLoading && <SkeletonList count={4} />}
 
-        {!isLoading &&
-          !isError &&
-          data &&
-          data.results.map((intention) => (
-            <Card key={intention.id} className="space-y-3 p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 space-y-1">
-                  <p className="text-sm text-foreground">
-                    {intention.intention_text}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    De : {intention.requestor_email}
-                  </p>
-                  {intention.parish_name && (
-                    <p className="text-xs text-muted-foreground">
-                      Paroisse : {intention.parish_name}
-                    </p>
-                  )}
-                </div>
-                <IntentionStatusBadge status={intention.status} />
-              </div>
+          {isError && (
+            <ErrorState
+              title="Impossible de charger les intentions"
+              description="Une erreur est survenue lors du chargement des intentions de votre paroisse."
+              onRetry={() => refetch()}
+            />
+          )}
 
-              <div className="flex flex-wrap gap-2">
+          {!isLoading && !isError && data && data.results.length === 0 && (
+            <EmptyState
+              icon={<Inbox aria-hidden="true" />}
+              title="Aucune intention en attente"
+              description="Les intentions de messe soumises par les fidèles de votre paroisse apparaîtront ici."
+            />
+          )}
+
+          {!isLoading &&
+            !isError &&
+            data &&
+            data.results.map((intention) => (
+              <MassIntentionCard
+                key={intention.id}
+                intention={intention}
+                showRequester
+              >
                 {intention.status === 'pending' && (
                   <>
                     <Button
                       size="sm"
+                      variant="gold"
                       onClick={() => accept(intention.id)}
                       disabled={accepting}
                       isLoading={accepting}
@@ -101,7 +95,7 @@ export default function ClergeIntentionsPage() {
                     </Button>
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="outline-gold"
                       onClick={() => decline({ intentionId: intention.id })}
                       disabled={declining}
                       isLoading={declining}
@@ -115,6 +109,7 @@ export default function ClergeIntentionsPage() {
                   <>
                     <Button
                       size="sm"
+                      variant="gold"
                       onClick={() => celebrate(intention.id)}
                       disabled={celebrating}
                       isLoading={celebrating}
@@ -123,7 +118,7 @@ export default function ClergeIntentionsPage() {
                     </Button>
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="outline-gold"
                       onClick={() => {
                         setProposingDateFor(intention.id);
                         setDateInput('');
@@ -133,53 +128,53 @@ export default function ClergeIntentionsPage() {
                     </Button>
                   </>
                 )}
-              </div>
 
-              {proposingDateFor === intention.id && (
-                <div className="flex flex-wrap items-center gap-2">
-                  <label
-                    htmlFor={`propose-date-${intention.id}`}
-                    className="sr-only"
-                  >
-                    Date proposée
-                  </label>
-                  <Input
-                    id={`propose-date-${intention.id}`}
-                    type="date"
-                    value={dateInput}
-                    onChange={(e) => setDateInput(e.target.value)}
-                    className="w-auto"
-                  />
-                  <Button
-                    size="sm"
-                    disabled={!dateInput || proposingDate}
-                    isLoading={proposingDate}
-                    onClick={() => {
-                      if (dateInput) {
-                        proposeDate(
-                          {
-                            intentionId: intention.id,
-                            proposed_date: dateInput,
-                          },
-                          { onSuccess: () => setProposingDateFor(null) },
-                        );
-                      }
-                    }}
-                  >
-                    Confirmer
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setProposingDateFor(null)}
-                  >
-                    Annuler
-                  </Button>
-                </div>
-              )}
-            </Card>
-          ))}
-      </ContentContainer>
+                {proposingDateFor === intention.id && (
+                  <div className="flex w-full flex-wrap items-center gap-2">
+                    <label
+                      htmlFor={`propose-date-${intention.id}`}
+                      className="sr-only"
+                    >
+                      Date proposée
+                    </label>
+                    <Input
+                      id={`propose-date-${intention.id}`}
+                      type="date"
+                      value={dateInput}
+                      onChange={(e) => setDateInput(e.target.value)}
+                      className="w-auto"
+                    />
+                    <Button
+                      size="sm"
+                      variant="gold"
+                      disabled={!dateInput || proposingDate}
+                      isLoading={proposingDate}
+                      onClick={() => {
+                        if (dateInput) {
+                          proposeDate(
+                            {
+                              intentionId: intention.id,
+                              proposed_date: dateInput,
+                            },
+                            { onSuccess: () => setProposingDateFor(null) },
+                          );
+                        }
+                      }}
+                    >
+                      Confirmer
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost-indigo"
+                      onClick={() => setProposingDateFor(null)}
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                )}
+              </MassIntentionCard>
+            ))}
+        </div>
     </div>
   );
 }

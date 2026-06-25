@@ -15,8 +15,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button/button';
+import {
+  Card,
+  CardContent,
+  CardEyebrow,
+  CardTitle,
+} from '@/components/ui/card';
+import { ErrorState } from '@/components/ui/error-state';
+import { ApiError } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 
+import { useAcceptMessagingCgu } from '../api/accept-cgu';
 import { useGetMessages } from '../api/get-messages';
 import { useMarkRead } from '../api/mark-read';
 import { OPTIMISTIC_ID_PREFIX, useSendMessage } from '../api/send-message';
@@ -184,11 +193,11 @@ function MessageBubble({
 
       <div
         className={cn(
-          'max-w-[75%] md:max-w-[60%] px-3.5 py-2.5 text-sm shadow-sm',
+          'max-w-[75%] md:max-w-[60%] px-4 py-2.5 text-sm shadow-sm',
           getBubbleRadius(message.is_mine, position),
           message.is_mine
             ? 'bg-primary text-primary-foreground'
-            : 'border border-border bg-card text-foreground',
+            : 'bg-secondary text-secondary-foreground',
         )}
       >
         {/* Message content */}
@@ -265,10 +274,16 @@ export function ChatWindow({
   const isAtBottomRef = useRef(true);
   const hasScrolledOnceRef = useRef(false);
 
-  const { data, isLoading } = useGetMessages(conversationId);
+  const { data, isLoading, error, refetch } = useGetMessages(conversationId);
   const { mutate: send, isPending } = useSendMessage(conversationId);
   const { mutate: markRead } = useMarkRead(conversationId);
+  const { mutate: acceptCgu, isPending: isAcceptingCgu } =
+    useAcceptMessagingCgu(conversationId);
   const { status: socketStatus } = useChatSocket(conversationId);
+
+  const needsCguAcceptance =
+    error instanceof ApiError && error.status === 403;
+  const hasGenericError = !!error && !needsCguAcceptance;
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior) => {
     bottomRef.current?.scrollIntoView({ behavior });
@@ -388,26 +403,62 @@ export function ChatWindow({
               <Loader2 className="size-5 animate-spin text-muted-foreground motion-reduce:animate-none" />
             </div>
           )}
-          {!isLoading && !messages.length && (
+          {needsCguAcceptance && (
+            <div className="flex justify-center py-8">
+              <Card variant="sacred" className="max-w-sm text-center">
+                <CardContent className="flex flex-col items-center gap-4 p-6">
+                  <CardEyebrow>Messagerie sécurisée</CardEyebrow>
+                  <CardTitle className="font-serif text-lg">
+                    Accepter les CGU de messagerie
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Pour préserver la confidentialité de vos échanges, vous
+                    devez accepter les conditions d’utilisation de la messagerie
+                    avant d’ouvrir cette conversation.
+                  </p>
+                  <Button
+                    variant="default"
+                    isLoading={isAcceptingCgu}
+                    onClick={() => acceptCgu()}
+                  >
+                    Accepter les CGU
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          {hasGenericError && (
+            <div className="py-8">
+              <ErrorState
+                title="Impossible d’ouvrir la conversation"
+                description="Le chargement des messages a échoué. Veuillez réessayer."
+                onRetry={() => refetch()}
+                className="mx-auto max-w-sm"
+              />
+            </div>
+          )}
+          {!isLoading && !error && !messages.length && (
             <p className="py-8 text-center text-sm text-muted-foreground">
               Commencez la conversation…
             </p>
           )}
-          <div className="flex flex-col">
-            {messages.map((message, index) => {
-              const position = getMessagePosition(messages, index);
-              return (
-                <MessageBubble
-                  key={message.id}
-                  message={message}
-                  position={position}
-                  participantInitials={participantInitials}
-                  isExpanded={expandedMessages.has(message.id)}
-                  onToggleExpand={() => toggleMessageExpansion(message.id)}
-                />
-              );
-            })}
-          </div>
+          {!error && (
+            <div className="flex flex-col">
+              {messages.map((message, index) => {
+                const position = getMessagePosition(messages, index);
+                return (
+                  <MessageBubble
+                    key={message.id}
+                    message={message}
+                    position={position}
+                    participantInitials={participantInitials}
+                    isExpanded={expandedMessages.has(message.id)}
+                    onToggleExpand={() => toggleMessageExpansion(message.id)}
+                  />
+                );
+              })}
+            </div>
+          )}
           <div ref={bottomRef} />
         </div>
 

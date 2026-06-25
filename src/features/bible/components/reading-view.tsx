@@ -56,10 +56,13 @@ export function ReadingView({
       {/* Reading content */}
       <article className="mx-auto w-full max-w-reading rounded-xl bg-background-surface p-6">
         <header className="mb-6">
+          {/* Référence en eyebrow AU-DESSUS du titre (item 2). */}
+          <p className="mb-1 text-xs font-medium uppercase tracking-widest text-muted-foreground/70">
+            {reference}
+          </p>
           <h2 className="font-serif text-xl font-bold text-foreground">
             {title}
           </h2>
-          <p className="text-sm text-primary">{reference}</p>
         </header>
         {refrain && (
           <div className="mb-5 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3.5">

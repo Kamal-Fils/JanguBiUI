@@ -1,18 +1,12 @@
 'use client';
 
-import {
-  BookOpen,
-  CheckCircle,
-  Clock,
-  Inbox,
-  MessageSquare,
-  ScrollText,
-} from 'lucide-react';
+import { BookOpen, CheckCircle, Clock, MessageSquare, ScrollText } from 'lucide-react';
 import Link from 'next/link';
 
 import { ContentContainer } from '@/components/layouts/content-container';
-import { Button } from '@/components/ui/button/button';
-import { Card } from '@/components/ui/card/card';
+import { Card, CardEyebrow } from '@/components/ui/card/card';
+import { QuickActionTile } from '@/components/ui/quick-action-tile';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { ParishStatsSection } from '@/features/dashboard/components/parish-stats-section';
@@ -26,9 +20,62 @@ import { IntentionStatusBadge } from '@/features/intentions/components/intention
 import { useClericalInbox } from '@/features/messaging/api/get-clerical-inbox';
 import type { ClergicalMessage } from '@/features/messaging/api/get-clerical-inbox';
 import { PastoralReflectionComposer } from '@/features/reflexion-pastorale/components/pastoral-reflection-composer';
+import { useUser } from '@/lib/auth';
 import { cn } from '@/utils/cn';
 
-import { WelcomeBanner } from './welcome-banner';
+// ── Hero éditorial ─────────────────────────────────────────────────────────────
+
+function PretreHero() {
+  const { data: user } = useUser();
+
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting =
+    hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
+  const dateStr = now.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  const firstName = user?.profile?.first_name ?? '';
+
+  return (
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/85 p-7 text-primary-foreground shadow-glow-indigo motion-safe:animate-slide-up sm:p-9">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              'radial-gradient(currentColor 0.6px, transparent 0.6px)',
+            backgroundSize: '14px 14px',
+          }}
+        />
+        <svg
+          className="absolute -right-6 -top-10 size-56 text-primary-foreground/10 sm:size-64"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <rect x="10" y="2" width="4" height="20" rx="2" />
+          <rect x="2" y="8" width="20" height="4" rx="2" />
+        </svg>
+      </div>
+
+      <div className="relative">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/85">
+          {greeting} · Espace pastoral
+        </p>
+        <h1 className="mt-1 truncate font-serif text-display font-black italic leading-[0.95] text-primary-foreground">
+          {firstName || 'Bienvenue'}
+        </h1>
+        <div className="mt-4 h-px w-16 rounded-full bg-gold/70" aria-hidden="true" />
+        <p className="mt-3 text-sm capitalize text-primary-foreground/85">
+          {dateStr}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 // ── Quick actions ────────────────────────────────────────────────────────────
 
@@ -37,25 +84,25 @@ const QUICK_ACTIONS = [
     label: 'Intentions',
     href: paths.app.clerge.intentions.getHref(),
     icon: ScrollText,
-    className: 'bg-accent/15 text-accent',
+    tone: 'gold' as const,
   },
   {
     label: 'Messages',
     href: paths.app.clerge.messages.getHref(),
     icon: MessageSquare,
-    className: 'bg-info/10 text-info',
+    tone: 'info' as const,
   },
   {
     label: 'Liturgie',
     href: paths.app.spirituelHeures.getHref(),
     icon: Clock,
-    className: 'bg-warning/10 text-warning',
+    tone: 'warning' as const,
   },
   {
-    label: 'Spirituel',
+    label: 'Spiritualité',
     href: paths.app.spirituel.getHref(),
     icon: BookOpen,
-    className: 'bg-primary/10 text-primary',
+    tone: 'primary' as const,
   },
 ] as const;
 
@@ -68,19 +115,14 @@ interface StatsRowProps {
   loadingMessages: boolean;
 }
 
-function StatsRow({
-  pendingCount,
-  unreadCount,
-  loadingIntentions,
-  loadingMessages,
-}: StatsRowProps) {
+function StatsRow({ pendingCount, unreadCount, loadingIntentions, loadingMessages }: StatsRowProps) {
   const stats = [
     {
       label: 'En attente',
       value: pendingCount,
       isLoading: loadingIntentions,
       href: paths.app.clerge.intentions.getHref(),
-      color: 'text-accent',
+      color: 'text-gold-ink',
     },
     {
       label: 'Non lus',
@@ -94,19 +136,25 @@ function StatsRow({
   return (
     <div className="grid grid-cols-2 gap-3">
       {stats.map((stat) => (
-        <Link
-          key={stat.href}
-          href={stat.href}
-          className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4 shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft motion-reduce:transform-none"
-        >
-          {stat.isLoading ? (
-            <Skeleton className="h-8 w-12" />
-          ) : (
-            <span className={cn('text-3xl font-bold tabular-nums', stat.color)}>
-              {stat.value}
-            </span>
-          )}
-          <span className="text-xs text-muted-foreground">{stat.label}</span>
+        <Link key={stat.href} href={stat.href} className="group">
+          <Card
+            variant="feature"
+            className="p-4 transition-transform group-hover:-translate-y-0.5 motion-reduce:transform-none"
+          >
+            <CardEyebrow>{stat.label}</CardEyebrow>
+            {stat.isLoading ? (
+              <Skeleton className="mt-2 h-9 w-12" />
+            ) : (
+              <span
+                className={cn(
+                  'mt-1 block font-serif text-3xl font-black tabular-nums',
+                  stat.color,
+                )}
+              >
+                {stat.value}
+              </span>
+            )}
+          </Card>
         </Link>
       ))}
     </div>
@@ -120,12 +168,10 @@ function PendingIntentionCard({ intention }: { intention: MassIntention }) {
   const { mutate: celebrate, isPending: celebrating } = useCelebrateIntention();
 
   return (
-    <Card variant="elevated" className="p-4 space-y-3">
+    <Card variant="sacred" className="space-y-3 p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-foreground line-clamp-2">
-            {intention.intention_text}
-          </p>
+          <p className="text-sm text-foreground line-clamp-2">{intention.intention_text}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {intention.requestor_email}
           </p>
@@ -135,29 +181,26 @@ function PendingIntentionCard({ intention }: { intention: MassIntention }) {
 
       <div className="flex gap-2">
         {intention.status === 'pending' && (
-          <Button
+          <button
             type="button"
-            size="sm"
             onClick={() => accept(intention.id)}
-            isLoading={accepting}
-            icon={<CheckCircle className="size-3.5" />}
-            className="rounded-lg font-semibold"
+            disabled={accepting}
+            className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50"
           >
+            <CheckCircle className="size-3.5" />
             Accepter
-          </Button>
+          </button>
         )}
-        {(intention.status === 'accepted' ||
-          intention.status === 'date_proposed') && (
-          <Button
+        {(intention.status === 'accepted' || intention.status === 'date_proposed') && (
+          <button
             type="button"
-            size="sm"
             onClick={() => celebrate(intention.id)}
-            isLoading={celebrating}
-            icon={<CheckCircle className="size-3.5" />}
-            className="rounded-lg bg-success font-semibold text-white shadow-sm hover:bg-success/90"
+            disabled={celebrating}
+            className="flex items-center gap-1.5 rounded-lg bg-success px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
           >
+            <CheckCircle className="size-3.5" />
             Célébrée
-          </Button>
+          </button>
         )}
         <Link
           href={paths.app.clerge.intentions.getHref()}
@@ -177,62 +220,51 @@ interface PendingIntentionsSectionProps {
   isLoading: boolean;
 }
 
-function PendingIntentionsSection({
-  intentions,
-  isLoading,
-}: PendingIntentionsSectionProps) {
+function PendingIntentionsSection({ intentions, isLoading }: PendingIntentionsSectionProps) {
   const actionable = intentions.filter(
-    (i) =>
-      i.status === 'pending' ||
-      i.status === 'accepted' ||
-      i.status === 'date_proposed',
+    (i) => i.status === 'pending' || i.status === 'accepted' || i.status === 'date_proposed',
   );
   const preview = actionable.slice(0, 3);
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <ScrollText className="size-4 text-accent" />
-          Intentions à traiter
-        </h2>
-        <Link
-          href={paths.app.clerge.intentions.getHref()}
-          className="text-xs text-primary hover:underline"
-        >
-          Tout voir
-        </Link>
+    <section>
+      <SectionHeader
+        eyebrow="À traiter"
+        title="Intentions de messe"
+        actionHref={paths.app.clerge.intentions.getHref()}
+      />
+
+      <div className="flex flex-col gap-3">
+        {isLoading && (
+          <div className="flex flex-col gap-2">
+            {[1, 2].map((i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-xl" />
+            ))}
+          </div>
+        )}
+
+        {!isLoading && preview.length === 0 && (
+          <div className="rounded-xl border border-dashed border-border p-6 text-center">
+            <CheckCircle className="mx-auto mb-2 size-6 text-success/60" />
+            <p className="text-sm text-muted-foreground">
+              Aucune intention en attente.
+            </p>
+          </div>
+        )}
+
+        {preview.map((intention) => (
+          <PendingIntentionCard key={intention.id} intention={intention} />
+        ))}
+
+        {actionable.length > 3 && (
+          <Link
+            href={paths.app.clerge.intentions.getHref()}
+            className="text-center text-xs text-primary hover:underline"
+          >
+            +{actionable.length - 3} autres intentions
+          </Link>
+        )}
       </div>
-
-      {isLoading && (
-        <div className="flex flex-col gap-2">
-          {[1, 2].map((i) => (
-            <Skeleton key={i} className="h-24 w-full rounded-xl" />
-          ))}
-        </div>
-      )}
-
-      {!isLoading && preview.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border p-6 text-center">
-          <CheckCircle className="mx-auto mb-2 size-6 text-success/60" />
-          <p className="text-sm text-muted-foreground">
-            Aucune intention en attente.
-          </p>
-        </div>
-      )}
-
-      {preview.map((intention) => (
-        <PendingIntentionCard key={intention.id} intention={intention} />
-      ))}
-
-      {actionable.length > 3 && (
-        <Link
-          href={paths.app.clerge.intentions.getHref()}
-          className="text-center text-xs text-primary hover:underline"
-        >
-          +{actionable.length - 3} autres intentions
-        </Link>
-      )}
     </section>
   );
 }
@@ -244,63 +276,54 @@ interface RecentMessagesSectionProps {
   isLoading: boolean;
 }
 
-function RecentMessagesSection({
-  messages,
-  isLoading,
-}: RecentMessagesSectionProps) {
+function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionProps) {
   const recent = messages.slice(0, 2);
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Inbox className="size-4 text-info" />
-          Messages récents
-        </h2>
-        <Link
-          href={paths.app.clerge.messages.getHref()}
-          className="text-xs text-primary hover:underline"
-        >
-          Boîte de réception
-        </Link>
-      </div>
+    <section>
+      <SectionHeader
+        eyebrow="Boîte de réception"
+        title="Messages récents"
+        actionHref={paths.app.clerge.messages.getHref()}
+        actionLabel="Tout voir"
+      />
 
-      {isLoading && (
-        <div className="flex flex-col gap-2">
-          {[1, 2].map((i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-xl" />
-          ))}
-        </div>
-      )}
-
-      {!isLoading && recent.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border p-4 text-center">
-          <p className="text-sm text-muted-foreground">Aucun message.</p>
-        </div>
-      )}
-
-      {recent.map((message) => (
-        <Link
-          key={message.id}
-          href={paths.app.clerge.messages.getHref()}
-          className={cn(
-            'flex flex-col gap-0.5 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-muted',
-            !message.read_at && 'border-info/30 bg-info/5',
-          )}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium text-foreground line-clamp-1">
-              {message.subject}
-            </span>
-            {!message.read_at && (
-              <span className="size-2 shrink-0 rounded-full bg-info" />
-            )}
+      <div className="flex flex-col gap-3">
+        {isLoading && (
+          <div className="flex flex-col gap-2">
+            {[1, 2].map((i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-xl" />
+            ))}
           </div>
-          <p className="text-xs text-muted-foreground">
-            {message.sender_email}
-          </p>
-        </Link>
-      ))}
+        )}
+
+        {!isLoading && recent.length === 0 && (
+          <div className="rounded-xl border border-dashed border-border p-4 text-center">
+            <p className="text-sm text-muted-foreground">Aucun message.</p>
+          </div>
+        )}
+
+        {recent.map((message) => (
+          <Link
+            key={message.id}
+            href={paths.app.clerge.messages.getHref()}
+            className={cn(
+              'flex flex-col gap-0.5 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-muted',
+              !message.read_at && 'border-info/30 bg-info/5',
+            )}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-medium text-foreground line-clamp-1">
+                {message.subject}
+              </span>
+              {!message.read_at && (
+                <span className="size-2 shrink-0 rounded-full bg-info" />
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">{message.sender_email}</p>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }
@@ -308,8 +331,7 @@ function RecentMessagesSection({
 // ── Main component ───────────────────────────────────────────────────────────
 
 export function PretreeDashboard() {
-  const { data: intentionsData, isLoading: loadingIntentions } =
-    useParishIntentions();
+  const { data: intentionsData, isLoading: loadingIntentions } = useParishIntentions();
   const { data: inboxData, isLoading: loadingMessages } = useClericalInbox();
 
   const intentions = intentionsData?.results ?? [];
@@ -319,8 +341,8 @@ export function PretreeDashboard() {
 
   return (
     <ContentContainer width="wide">
-      <div className="flex flex-col gap-6">
-        <WelcomeBanner />
+      <div className="flex flex-col gap-8">
+        <PretreHero />
 
         <StatsRow
           pendingCount={pendingCount}
@@ -331,40 +353,33 @@ export function PretreeDashboard() {
 
         <ParishStatsSection />
 
-        <div className="grid grid-cols-4 gap-2">
-          {QUICK_ACTIONS.map((action) => {
-            const Icon = action.icon;
-            return (
-              <Link
-                key={action.href}
-                href={action.href}
-                className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3 shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.97] motion-reduce:transform-none"
-              >
-                <div
-                  className={cn(
-                    'flex size-10 items-center justify-center rounded-xl',
-                    action.className,
-                  )}
-                >
-                  <Icon className="size-5" />
-                </div>
-                <span className="text-center text-[11px] font-medium text-foreground">
-                  {action.label}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+        {/* Accès rapides */}
+        <section>
+          <SectionHeader eyebrow="Raccourcis" title="Accès rapides" />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {QUICK_ACTIONS.map((action) => {
+              const Icon = action.icon;
+              return (
+                <QuickActionTile
+                  key={action.href}
+                  href={action.href}
+                  icon={<Icon />}
+                  label={action.label}
+                  tone={action.tone}
+                />
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="hairline-gold" aria-hidden="true" />
 
         <PastoralReflectionComposer />
-        <PendingIntentionsSection
-          intentions={intentions}
-          isLoading={loadingIntentions}
-        />
-        <RecentMessagesSection
-          messages={messages}
-          isLoading={loadingMessages}
-        />
+        <PendingIntentionsSection intentions={intentions} isLoading={loadingIntentions} />
+
+        <div className="hairline-gold" aria-hidden="true" />
+
+        <RecentMessagesSection messages={messages} isLoading={loadingMessages} />
       </div>
     </ContentContainer>
   );

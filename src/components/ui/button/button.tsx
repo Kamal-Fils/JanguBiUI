@@ -22,6 +22,10 @@ const buttonVariants = cva(
           'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
+        gold: 'bg-accent text-accent-foreground shadow hover:bg-accent/85 focus-visible:ring-accent',
+        'outline-gold':
+          'border border-accent/50 text-gold-ink bg-transparent hover:bg-accent/10',
+        'ghost-indigo': 'text-primary hover:bg-primary/10 hover:text-primary',
       },
       size: {
         // default & icon : cible tactile 44px sur mobile, 36px sur desktop (md+).

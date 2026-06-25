@@ -5,6 +5,8 @@ import { cn } from '@/utils/cn';
 
 interface SectionHeaderProps {
   title: string;
+  /** Surtitre éditorial optionnel (petite étiquette majuscule au-dessus du titre). */
+  eyebrow?: string;
   /** Sous-titre / accroche optionnel. */
   description?: React.ReactNode;
   /** Lien « Tout voir » optionnel. */
@@ -14,6 +16,8 @@ interface SectionHeaderProps {
   action?: React.ReactNode;
   /** Niveau de titre rendu (défaut h2). */
   as?: 'h2' | 'h3';
+  /** Affiche le filet or sous le titre (défaut true). */
+  hairline?: boolean;
   className?: string;
 }
 
@@ -23,17 +27,24 @@ interface SectionHeaderProps {
  */
 export function SectionHeader({
   title,
+  eyebrow,
   description,
   actionHref,
   actionLabel = 'Tout voir',
   action,
   as: Heading = 'h2',
+  hairline = true,
   className,
 }: SectionHeaderProps) {
   return (
     <div className={cn('mb-4', className)}>
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
+          {eyebrow && (
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+              {eyebrow}
+            </p>
+          )}
           <Heading className="font-serif text-lg font-bold tracking-tight text-foreground sm:text-xl">
             {title}
           </Heading>
@@ -51,7 +62,9 @@ export function SectionHeader({
             </Link>
           ))}
       </div>
-      <div className="hairline-gold mt-2.5" aria-hidden="true" />
+      {hairline !== false && (
+        <div className="hairline-gold mt-2.5" aria-hidden="true" />
+      )}
     </div>
   );
 }

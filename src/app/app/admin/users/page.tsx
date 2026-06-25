@@ -16,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardEyebrow } from '@/components/ui/card/card';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { FilterPills } from '@/components/ui/filter-pills';
 import { RoleBadge } from '@/components/ui/role-badge';
@@ -190,19 +191,24 @@ export default function AdminUsersPage() {
         />
       }
     >
-      <DataTable
-        data={data?.results}
-        columns={columns}
-        rowKey={(u) => u.id}
-        isLoading={isLoading}
-        caption="Liste des utilisateurs"
-        pagination={{
-          count: data?.count ?? 0,
-          limit: PAGE_SIZE,
-          offset,
-          onOffsetChange: setOffset,
-        }}
-      />
+      <Card variant="feature">
+        <CardContent className="p-4 sm:p-5">
+          <CardEyebrow className="mb-3">Comptes &amp; accès</CardEyebrow>
+          <DataTable
+            data={data?.results}
+            columns={columns}
+            rowKey={(u) => u.id}
+            isLoading={isLoading}
+            caption="Liste des utilisateurs"
+            pagination={{
+              count: data?.count ?? 0,
+              limit: PAGE_SIZE,
+              offset,
+              onOffsetChange: setOffset,
+            }}
+          />
+        </CardContent>
+      </Card>
     </AdminPageLayout>
   );
 }
