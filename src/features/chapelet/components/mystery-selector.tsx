@@ -1,12 +1,19 @@
 'use client';
 
-import { Play } from 'lucide-react';
+import { Flower2, Play } from 'lucide-react';
 
 import { AudioPlayer } from '@/components/ui/audio-player/audio-player';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardEyebrow,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import type { RosaryGroup } from '@/features/chapelet/api/get-rosary-groups';
+import { cn } from '@/utils/cn';
 
 interface MysterySelectorProps {
   todayGroup: RosaryGroup;
@@ -45,15 +52,17 @@ export function MysterySelector({
             <button
               key={group.id}
               onClick={() => onSelectGroup(group)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              aria-pressed={isSelected}
+              className={cn(
+                'rounded-full px-4 py-2 text-sm font-medium transition-colors active:scale-[0.97] motion-reduce:active:scale-100',
                 isSelected
-                  ? 'bg-accent text-accent-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
+                  ? 'bg-gold text-primary-foreground shadow-soft-sm'
+                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+              )}
             >
               {group.name}
               {isToday && !isSelected && (
-                <span className="ml-1.5 inline-block size-1.5 rounded-full bg-accent" />
+                <span className="ml-1.5 inline-block size-1.5 rounded-full bg-gold" />
               )}
             </button>
           );
@@ -61,35 +70,46 @@ export function MysterySelector({
       </div>
 
       {/* Selected mystery details */}
-      <Card className="gap-0 overflow-hidden py-0">
-        <CardHeader className="bg-accent/5 p-4 dark:bg-accent/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-base">
+      <Card variant="feature" className="gap-0 py-0">
+        <CardHeader className="p-5">
+          <div className="flex items-center gap-4">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-gold/25 to-accent/15 text-gold ring-1 ring-gold/30">
+              <Flower2 className="size-7" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <CardEyebrow>Mystères du Rosaire</CardEyebrow>
+              <CardTitle className="font-serif text-xl">
                 Mystères {selectedGroup.name}
               </CardTitle>
             </div>
             {selectedGroup.id === todayGroup.id && (
-              <Badge variant="secondary" className="bg-accent/10 text-accent">
+              <Badge
+                variant="secondary"
+                className="shrink-0 bg-gold/15 text-gold hover:bg-gold/20"
+              >
                 Aujourd&apos;hui
               </Badge>
             )}
           </div>
         </CardHeader>
         <CardContent className="flex flex-col gap-0 p-0">
+          <div className="hairline-gold mx-5" aria-hidden="true" />
           {mysteriesList.length > 0 ? (
             mysteriesList.map((mystery, i) => (
-              <div key={i} className="flex items-center gap-3 px-4 py-3">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
+              <div
+                key={i}
+                className="flex items-center gap-4 border-b border-border/50 px-5 py-3.5 last:border-b-0"
+              >
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gold/12 font-serif text-sm font-semibold text-gold ring-1 ring-gold/20">
                   {i + 1}
                 </span>
-                <span className="text-sm text-foreground">
+                <span className="text-sm font-medium text-foreground">
                   {typeof mystery === 'string' ? mystery : mystery.title}
                 </span>
               </div>
             ))
           ) : (
-            <div className="p-4 text-sm text-foreground">
+            <div className="p-5 text-sm text-foreground">
               {typeof selectedGroup.mysteries === 'string'
                 ? selectedGroup.mysteries
                 : 'Aucun mystère disponible.'}
@@ -102,8 +122,9 @@ export function MysterySelector({
       <div className="flex flex-col gap-3">
         <Button
           size="lg"
+          variant="gold"
           onClick={onStartGuide}
-          className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+          className="w-full"
           icon={<Play className="size-4" />}
         >
           Commencer le chapelet guidé

@@ -12,7 +12,8 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { SkeletonList } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { useMyIntentions } from '@/features/intentions/api/get-my-intentions';
-import { IntentionStatusBadge } from '@/features/intentions/components/intention-status-badge';
+import { IntentionsIntro } from '@/features/intentions/components/intentions-intro';
+import { MassIntentionCard } from '@/features/intentions/components/mass-intention-card';
 import { SubmitIntentionForm } from '@/features/intentions/components/submit-intention-form';
 
 export default function IntentionsPage() {
@@ -24,6 +25,8 @@ export default function IntentionsPage() {
       <div className="flex flex-col">
         <PageHeader title="Intentions de Messe" backHref={paths.app.root.getHref()} />
         <div className="mx-auto w-full max-w-2xl space-y-5 px-4 py-6 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+          <IntentionsIntro />
+
           <button
             type="button"
             onClick={() => setShowForm((v) => !v)}
@@ -71,27 +74,7 @@ export default function IntentionsPage() {
             !isError &&
             data &&
             data.results.map((intention) => (
-              <Card key={intention.id} className="space-y-2 p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <p className="flex-1 text-sm text-foreground">
-                    {intention.intention_text}
-                  </p>
-                  <IntentionStatusBadge status={intention.status} />
-                </div>
-                {intention.pretre_email && (
-                  <p className="text-xs text-muted-foreground">
-                    Prêtre : {intention.pretre_email}
-                  </p>
-                )}
-                {intention.proposed_date && (
-                  <p className="text-xs text-muted-foreground">
-                    Date proposée :{' '}
-                    {new Date(intention.proposed_date).toLocaleDateString(
-                      'fr-FR',
-                    )}
-                  </p>
-                )}
-              </Card>
+              <MassIntentionCard key={intention.id} intention={intention} />
             ))}
         </div>
       </div>

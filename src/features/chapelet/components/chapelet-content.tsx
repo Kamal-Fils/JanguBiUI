@@ -57,7 +57,7 @@ export function ChapeletContent() {
     <div className="flex flex-col">
       <PageHeader
         title="Mon Chapelet Quotidien"
-        subtitle="Priez avec un guide jour après jour"
+        subtitle="Méditez les mystères, dizaine après dizaine"
       />
       <div className="mx-auto w-full max-w-3xl p-4">
         <MysterySelector

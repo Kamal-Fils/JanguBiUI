@@ -1,16 +1,29 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, LogOut, Trash2 } from 'lucide-react';
+import {
+  KeyRound,
+  Loader2,
+  LogOut,
+  Palette,
+  Church as ChurchIcon,
+  ShieldAlert,
+  Trash2,
+  UserRound,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { ThemeToggle } from '@/components/layouts/theme-toggle';
 import { MembershipManager } from '@/components/org/membership-manager';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Card, CardEyebrow } from '@/components/ui/card/card';
 import { useNotifications } from '@/components/ui/notifications';
+import { RoleBadge } from '@/components/ui/role-badge';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { useDeleteAccount, useLogout, useUser } from '@/lib/auth';
 import { isFidele } from '@/lib/authorization';
+import { cn } from '@/utils/cn';
 
 import {
   ChangePasswordInput,
@@ -45,25 +58,49 @@ type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 // ── Sub-components ───────────────────────────────────────────────────────────
 
+/**
+ * Section éditoriale « Revue Sacrée » : carte `sacred` avec surtitre majuscule
+ * (eyebrow), titre serif et filet or. Le `<section>` + `<h2>` sont conservés
+ * pour rester compatibles avec les tests (heading.closest('section')).
+ */
 function SectionCard({
+  eyebrow,
   title,
+  icon,
   children,
 }: {
+  eyebrow: string;
   title: string;
+  icon: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <section className="space-y-4 rounded-2xl border border-border bg-card p-4">
-      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-      {children}
-    </section>
+    <Card variant="sacred">
+      <section className="space-y-4 p-5">
+        <header className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-accent" aria-hidden="true">
+              {icon}
+            </span>
+            <CardEyebrow>{eyebrow}</CardEyebrow>
+          </div>
+          <h2 className="font-serif text-lg font-bold tracking-tight text-foreground">
+            {title}
+          </h2>
+          <div className="hairline-gold" aria-hidden="true" />
+        </header>
+        {children}
+      </section>
+    </Card>
   );
 }
 
 const inputClass =
-  'w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary';
+  'w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary';
 const labelClass = 'block text-xs font-medium text-muted-foreground mb-1';
 const errorClass = 'mt-1 text-xs text-destructive';
+const primaryButtonClass =
+  'flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-soft-sm transition-[background-color,box-shadow] hover:bg-primary/90 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50';
 
 // ── Main component ───────────────────────────────────────────────────────────
 
@@ -133,12 +170,16 @@ export function ProfilContent() {
     });
 
   const { mutate: logout, isPending: isLoggingOut } = useLogout({
-    onSuccess: () => { window.location.href = '/auth/login'; },
+    onSuccess: () => {
+      window.location.href = '/auth/login';
+    },
   });
 
   const { mutate: deleteAccount, isPending: isDeletingAccount } =
     useDeleteAccount({
-      onSuccess: () => { window.location.href = '/auth/login'; },
+      onSuccess: () => {
+        window.location.href = '/auth/login';
+      },
     });
 
   function onProfileSubmit(data: ProfileFormValues) {
@@ -170,36 +211,51 @@ export function ProfilContent() {
       .filter(Boolean)
       .join(' ') || user?.email;
 
-  const initials =
-    [user?.profile?.first_name, user?.profile?.last_name]
-      .filter(Boolean)
-      .map((n) => n![0].toUpperCase())
-      .join('') ||
-    (user?.email?.[0]?.toUpperCase() ?? '?');
-
   return (
     <div className="mx-auto w-full max-w-2xl md:max-w-3xl lg:max-w-5xl">
-      {/* Gradient header with large avatar */}
-      <div className="relative">
-        <div className="h-24 bg-gradient-to-r from-primary/20 via-primary/10 to-accent/10" />
-        <div className="-mt-10 flex items-end gap-4 px-4 pb-4">
-          <Avatar className="size-20 ring-4 ring-background shadow-lg">
-            <AvatarFallback className="bg-primary/10 text-2xl font-bold text-primary">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="pb-1">
-            <h1 className="text-lg font-bold text-foreground leading-tight">
+      {/* En-tête éditorial : bandeau indigo dégradé + portrait cerclé or/indigo */}
+      <header className="relative overflow-hidden">
+        <div className="h-28 bg-gradient-to-br from-primary/25 via-primary/10 to-accent/15" />
+        <div className="hairline-gold" aria-hidden="true" />
+        <div className="-mt-12 flex items-end gap-4 px-4 pb-5 md:px-6">
+          <div className="rounded-full bg-gradient-to-br from-accent via-accent/60 to-primary p-[3px] shadow-soft">
+            <div className="rounded-full bg-background p-1">
+              <UserAvatar
+                name={
+                  [user?.profile?.first_name, user?.profile?.last_name]
+                    .filter(Boolean)
+                    .join(' ') || null
+                }
+                email={user?.email}
+                src={user?.profile?.avatar}
+                size="xl"
+                className="size-20 text-2xl"
+              />
+            </div>
+          </div>
+          <div className="min-w-0 pb-1.5">
+            <h1 className="truncate font-serif text-xl font-bold leading-tight text-foreground">
               {displayName}
             </h1>
-            <p className="text-xs text-muted-foreground">{user?.email}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {user?.email}
+            </p>
+            {user?.role && (
+              <div className="mt-2">
+                <RoleBadge role={user.pastoral_role ?? user.role} />
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="flex flex-col gap-4 px-4 pb-8 md:px-6 lg:px-8">
+      <div className="flex flex-col gap-5 px-4 pb-8 md:px-6 lg:px-8">
         {/* Profile info section */}
-        <SectionCard title="Informations personnelles">
+        <SectionCard
+          eyebrow="Compte"
+          title="Informations personnelles"
+          icon={<UserRound className="size-4" />}
+        >
           <form
             onSubmit={handleProfileSubmit(onProfileSubmit)}
             className="space-y-3"
@@ -256,7 +312,7 @@ export function ProfilContent() {
             <button
               type="submit"
               disabled={isUpdating || isProfileSubmitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              className={primaryButtonClass}
             >
               {isUpdating && <Loader2 className="size-4 animate-spin" />}
               Enregistrer
@@ -265,7 +321,11 @@ export function ProfilContent() {
         </SectionCard>
 
         {/* Change password section */}
-        <SectionCard title="Changer le mot de passe">
+        <SectionCard
+          eyebrow="Sécurité"
+          title="Changer le mot de passe"
+          icon={<KeyRound className="size-4" />}
+        >
           <form
             onSubmit={handlePasswordSubmit(onPasswordSubmit)}
             className="space-y-3"
@@ -321,7 +381,7 @@ export function ProfilContent() {
             <button
               type="submit"
               disabled={isChangingPassword}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              className={primaryButtonClass}
             >
               {isChangingPassword && (
                 <Loader2 className="size-4 animate-spin" />
@@ -333,19 +393,38 @@ export function ProfilContent() {
 
         {/* Mes églises — gestion des appartenances (Chantier 7b) */}
         {isFidele(user) && (
-          <SectionCard title="Mes églises">
+          <SectionCard
+            eyebrow="Mes églises"
+            title="Appartenances"
+            icon={<ChurchIcon className="size-4" />}
+          >
             <MembershipManager />
           </SectionCard>
         )}
 
+        {/* Apparence — bascule clair/sombre (ThemeToggle conservé) */}
+        <SectionCard
+          eyebrow="Apparence"
+          title="Thème de l'application"
+          icon={<Palette className="size-4" />}
+        >
+          <div className="rounded-xl border border-border/70 bg-background/60 p-1">
+            <ThemeToggle variant="row" className="rounded-xl" />
+          </div>
+        </SectionCard>
+
         {/* Session section */}
-        <SectionCard title="Session">
+        <SectionCard
+          eyebrow="Session"
+          title="Connexion"
+          icon={<LogOut className="size-4" />}
+        >
           <div className="flex flex-col gap-2">
             <button
               type="button"
               onClick={() => logout()}
               disabled={isLoggingOut}
-              className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
             >
               <LogOut className="size-4" />
               Se déconnecter
@@ -354,12 +433,16 @@ export function ProfilContent() {
         </SectionCard>
 
         {/* Danger zone */}
-        <SectionCard title="Zone de danger">
+        <SectionCard
+          eyebrow="Zone de danger"
+          title="Supprimer le compte"
+          icon={<ShieldAlert className="size-4 text-destructive" />}
+        >
           {!showDeleteConfirm ? (
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10"
+              className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
             >
               <Trash2 className="size-4" />
               Supprimer mon compte
@@ -374,7 +457,7 @@ export function ProfilContent() {
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                  className="flex-1 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
                 >
                   Annuler
                 </button>
@@ -382,7 +465,9 @@ export function ProfilContent() {
                   type="button"
                   onClick={() => deleteAccount()}
                   disabled={isDeletingAccount}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
+                  className={cn(
+                    'flex flex-1 items-center justify-center gap-2 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:opacity-50',
+                  )}
                 >
                   {isDeletingAccount && (
                     <Loader2 className="size-4 animate-spin" />
