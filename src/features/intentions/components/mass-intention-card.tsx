@@ -4,6 +4,7 @@ import { Card, CardEyebrow } from '@/components/ui/card/card';
 import { cn } from '@/utils/cn';
 
 import { type MassIntention } from '../api/get-my-intentions';
+
 import { IntentionStatusBadge } from './intention-status-badge';
 import {
   INTENTION_TYPE_META,

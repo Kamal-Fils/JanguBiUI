@@ -70,7 +70,6 @@ function VideoCard({ video }: { video: TvVideo }) {
             className="relative flex size-full items-center justify-center"
           >
             {thumbnail ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={thumbnail}
                 alt=""

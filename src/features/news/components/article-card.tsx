@@ -68,7 +68,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
               aria-hidden="true"
             />
           )}
-          <span className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
             {scopeLabel[article.scope_type] ?? article.scope_type}
           </span>
         </div>
