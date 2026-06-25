@@ -5,6 +5,7 @@ import { ArrowLeft, Clock, Eye, User } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+import { Pill } from '@/components/ui/pill';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useArticleDetail } from '../api/get-article';
@@ -102,20 +103,26 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
         )}
 
         <div className="px-4 py-5">
-          <div className="mb-2 flex flex-wrap items-center gap-2">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
             {article.category && (
-              <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                {article.category.name}
-              </span>
+              <Pill tone="gold">{article.category.name}</Pill>
             )}
-            <span className="text-xs text-muted-foreground">
+            {article.category && (
+              <span
+                className="size-1 rounded-full bg-accent/50"
+                aria-hidden="true"
+              />
+            )}
+            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               {scopeLabel[article.scope_type] ?? article.scope_type}
             </span>
           </div>
 
-          <h1 className="mb-3 text-xl font-bold leading-snug text-foreground">
+          <h1 className="mb-2 font-serif text-2xl font-bold leading-tight tracking-tight text-foreground">
             {article.title}
           </h1>
+
+          <div className="hairline-gold mb-4 mt-3" aria-hidden="true" />
 
           <div className="mb-6 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">

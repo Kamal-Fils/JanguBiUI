@@ -20,6 +20,8 @@ import {
 import { useUser } from '@/lib/auth';
 import { cn } from '@/utils/cn';
 
+import { ThemeToggle } from './theme-toggle';
+
 interface BottomNavProps {
   messageBadge?: number;
 }
@@ -171,6 +173,17 @@ export function BottomNav({ messageBadge }: BottomNavProps) {
                 <DrawerTitle className="font-serif text-xl">Plus</DrawerTitle>
               </DrawerHeader>
               <div className="space-y-5">
+                {/* Apparence — bascule clair/sombre, en tête du tiroir */}
+                <section>
+                  <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Apparence
+                  </h3>
+                  <ThemeToggle
+                    variant="row"
+                    className="border border-border hover:bg-muted"
+                  />
+                </section>
+
                 {groupOverflow(overflow).map((group) => (
                   <section key={group.section}>
                     <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

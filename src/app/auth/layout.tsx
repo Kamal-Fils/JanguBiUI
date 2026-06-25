@@ -15,7 +15,7 @@ const AuthLayout = ({ children }: { children: ReactNode }) => {
   return (
     <Suspense
       fallback={
-        <div className="flex size-full items-center justify-center">
+        <div className="flex min-h-screen w-full items-center justify-center">
           <Spinner size="xl" />
         </div>
       }

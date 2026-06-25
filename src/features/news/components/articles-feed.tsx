@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/layouts/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { MediaCard } from '@/components/ui/media-card';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatFrDate } from '@/utils/format-date';
 
@@ -75,6 +76,12 @@ export function ArticlesFeed() {
       <PageHeader title="Actualités" subtitle="La vie de l'Église" />
 
       <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+        <SectionHeader
+          eyebrow="La revue"
+          title="Le fil de l'Église"
+          description="Annonces, articles et lettres pastorales de votre communauté."
+        />
+
         <div className="mb-4">
           <NewsScopeFilter value={scope} onChange={setScope} />
         </div>

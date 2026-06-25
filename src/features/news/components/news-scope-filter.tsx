@@ -110,10 +110,10 @@ export function NewsScopeFilter({ value, onChange }: NewsScopeFilterProps) {
             aria-pressed={active}
             onClick={() => onChange(opt.value)}
             className={cn(
-              'shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+              'shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium uppercase tracking-[0.08em] transition-[background-color,border-color,color,box-shadow] duration-150',
               active
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border bg-background text-muted-foreground hover:text-foreground',
+                ? 'border-primary bg-primary text-primary-foreground shadow-soft-sm'
+                : 'border-border/70 bg-transparent text-muted-foreground hover:border-accent/40 hover:text-foreground',
             )}
           >
             {opt.label}

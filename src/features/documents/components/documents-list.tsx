@@ -4,8 +4,10 @@ import { ChevronRight, FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 import { PageHeader } from '@/components/layouts/page-header';
+import { CardEyebrow } from '@/components/ui/card/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { cn } from '@/utils/cn';
@@ -83,6 +85,12 @@ export function DocumentsList({ hideHeader = false }: DocumentsListProps) {
       )}
 
       <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+        <SectionHeader
+          eyebrow="Le registre"
+          title="Vos démarches"
+          description="Suivez l'avancement de vos demandes de documents officiels."
+        />
+
         {isLoading && <DocumentsSkeleton />}
         {isError && (
           <ErrorState
@@ -112,7 +120,7 @@ export function DocumentsList({ hideHeader = false }: DocumentsListProps) {
               <Link
                 key={doc.id}
                 href={paths.app.document.getHref(String(doc.id))}
-                className="group flex overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.99]"
+                className="group flex overflow-hidden rounded-2xl border border-primary/15 bg-secondary/60 shadow-soft-sm transition-[transform,box-shadow,border-color] duration-[var(--duration-normal)] ease-out-soft hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-soft active:scale-[0.99] motion-reduce:transform-none"
               >
                 <div
                   className={cn(
@@ -121,11 +129,12 @@ export function DocumentsList({ hideHeader = false }: DocumentsListProps) {
                   )}
                 />
                 <div className="flex min-w-0 flex-1 items-center gap-3 p-4">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted">
-                    <FileText className="size-5 text-muted-foreground" />
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/15">
+                    <FileText className="size-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-foreground">
+                    <CardEyebrow>Demande</CardEyebrow>
+                    <p className="mt-0.5 truncate font-serif font-semibold text-foreground transition-colors group-hover:text-primary">
                       {formatDocumentType(doc.document_type)}
                     </p>
                     <p className="text-xs text-muted-foreground">
