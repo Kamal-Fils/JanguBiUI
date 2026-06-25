@@ -21,17 +21,34 @@ module.exports = {
                     ...defaultTheme.fontFamily.sans
                 ],
   			serif: [
-  				'var(--font-playfair)',
+  				'var(--font-fraunces)',
+  				...defaultTheme.fontFamily.serif
+  			],
+  			display: [
+  				'var(--font-fraunces)',
   				...defaultTheme.fontFamily.serif
   			],
   		},
   		maxWidth: {
   			reading: 'var(--reading-measure)'
   		},
+  		fontSize: {
+  			display: ['var(--text-display)', { lineHeight: '1.05', fontWeight: '700', letterSpacing: '-0.02em' }],
+  			headline: ['var(--text-headline)', { lineHeight: '1.15', fontWeight: '700' }],
+  			title: ['var(--text-title)', { lineHeight: '1.3', fontWeight: '600' }],
+  			body: ['var(--text-body)', { lineHeight: '1.7' }],
+  			caption: ['var(--text-caption)', { lineHeight: '1.5' }]
+  		},
+  		spacing: {
+  			section: 'var(--space-section)',
+  			card: 'var(--space-card)'
+  		},
   		boxShadow: {
   			'soft-sm': '0 1px 2px 0 hsl(var(--shadow-color) / 0.05), 0 1px 3px -1px hsl(var(--shadow-color) / 0.04)',
   			soft: '0 2px 8px -2px hsl(var(--shadow-color) / 0.08), 0 6px 20px -6px hsl(var(--shadow-color) / 0.07)',
-  			'soft-lg': '0 10px 32px -8px hsl(var(--shadow-color) / 0.12), 0 16px 56px -16px hsl(var(--shadow-color) / 0.10)'
+  			'soft-lg': '0 10px 32px -8px hsl(var(--shadow-color) / 0.12), 0 16px 56px -16px hsl(var(--shadow-color) / 0.10)',
+  			'glow-indigo': '0 0 0 1px hsl(var(--primary) / 0.2), 0 4px 20px -4px hsl(var(--primary) / 0.25)',
+  			'glow-gold': '0 0 0 1px hsl(var(--gold) / 0.25), 0 4px 16px -4px hsl(var(--gold) / 0.2)'
   		},
   		transitionTimingFunction: {
   			'out-expo': 'var(--ease-out-expo)',
@@ -90,7 +107,10 @@ module.exports = {
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			sm: 'calc(var(--radius) - 4px)',
+  			xl: 'calc(var(--radius) + 4px)',
+  			'2xl': 'calc(var(--radius) + 10px)',
+  			'3xl': 'calc(var(--radius) + 18px)'
   		},
   		keyframes: {
   			'accordion-down': {
@@ -121,6 +141,14 @@ module.exports = {
   				from: { opacity: '0', transform: 'translateY(8px)' },
   				to: { opacity: '1', transform: 'translateY(0)' }
   			},
+  			'slide-up': {
+  				from: { opacity: '0', transform: 'translateY(16px)' },
+  				to: { opacity: '1', transform: 'translateY(0)' }
+  			},
+  			shimmer: {
+  				'0%': { backgroundPosition: '-200% 0' },
+  				'100%': { backgroundPosition: '200% 0' }
+  			},
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
@@ -130,6 +158,8 @@ module.exports = {
   			'float-r': 'float-r 5.5s ease-in-out infinite',
   			'fade-in': 'fade-in var(--duration-normal) var(--ease-out-soft)',
   			'fade-in-up': 'fade-in-up var(--duration-normal) var(--ease-out-soft)',
+  			'slide-up': 'slide-up 0.4s var(--ease-out-expo) forwards',
+  			shimmer: 'shimmer 2s linear infinite',
   		}
   	}
   },
