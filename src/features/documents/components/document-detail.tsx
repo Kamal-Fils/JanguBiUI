@@ -100,7 +100,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
             <div>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <CardEyebrow className="text-accent">
+                  <CardEyebrow className="text-gold-ink">
                     Type de document
                   </CardEyebrow>
                   <h1 className="mt-1.5 font-serif text-2xl font-bold leading-tight tracking-tight text-foreground">

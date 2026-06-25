@@ -55,7 +55,7 @@ export function DailyMysteryCard() {
           </div>
           <Badge
             variant="secondary"
-            className="shrink-0 bg-gold/15 text-gold hover:bg-gold/20"
+            className="shrink-0 bg-gold/15 text-gold-ink hover:bg-gold/20"
           >
             {categoryDay}
           </Badge>

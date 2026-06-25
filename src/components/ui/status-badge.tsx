@@ -20,7 +20,7 @@ const statusBadgeVariants = cva(
         progress: 'bg-primary/10 text-primary',
         success: 'bg-success/10 text-success',
         danger: 'bg-destructive/10 text-destructive',
-        accent: 'bg-accent/15 text-accent',
+        accent: 'bg-accent/15 text-gold-ink',
       },
     },
     defaultVariants: { tone: 'neutral' },

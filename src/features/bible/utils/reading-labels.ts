@@ -23,7 +23,7 @@ export function normalizeReadingLabel(raw: string): string {
 export function getReadingAccentClass(normalizedLabel: string): string {
   const l = normalizedLabel.toLowerCase();
   // Accents tokenisés (theme-aware) plutôt que des couleurs littérales ad-hoc.
-  if (l.includes('psaume')) return 'text-accent';
+  if (l.includes('psaume')) return 'text-gold-ink';
   if (l.includes('évangile') || l.includes('evangile')) return 'text-primary';
   if (l.includes('deuxième') || l.includes('troisième')) return 'text-info';
   return 'text-primary';

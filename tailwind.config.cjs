@@ -93,6 +93,7 @@ module.exports = {
   				foreground: 'hsl(var(--card-foreground))'
   			},
   			gold: 'hsl(var(--gold))',
+  			goldInk: 'hsl(var(--gold-ink))',
   			success: 'hsl(var(--success, 142.1 76.2% 36.3%))',
   			warning: 'hsl(var(--warning, 38 92% 50%))',
   			info: 'hsl(var(--info, 221.2 83.2% 53.3%))',

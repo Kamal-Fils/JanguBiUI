@@ -28,7 +28,7 @@ export function DailyReadingCard() {
         </div>
         <Badge
           variant="secondary"
-          className="shrink-0 border-gold/25 bg-gold/10 font-medium text-gold"
+          className="shrink-0 border-gold/25 bg-gold/10 font-medium text-gold-ink"
         >
           Aujourd&apos;hui
         </Badge>

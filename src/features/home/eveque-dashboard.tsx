@@ -33,7 +33,7 @@ function EvequeHero() {
   const firstName = user?.profile?.first_name ?? '';
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-7 text-primary-foreground shadow-glow-indigo motion-safe:animate-slide-up sm:p-9">
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/85 p-7 text-primary-foreground shadow-glow-indigo motion-safe:animate-slide-up sm:p-9">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         <div
           className="absolute inset-0 opacity-[0.06]"
@@ -54,14 +54,14 @@ function EvequeHero() {
       </div>
 
       <div className="relative">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/70">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/85">
           {greeting} · Conduite du diocèse
         </p>
         <h1 className="mt-1 truncate font-serif text-display font-black italic leading-[0.95] text-primary-foreground">
           {firstName || 'Bienvenue'}
         </h1>
         <div className="mt-4 h-px w-16 rounded-full bg-gold/70" aria-hidden="true" />
-        <p className="mt-3 text-sm capitalize text-primary-foreground/75">
+        <p className="mt-3 text-sm capitalize text-primary-foreground/85">
           {dateStr}
         </p>
       </div>
@@ -135,7 +135,7 @@ function StatsRow({
       value: parishCount,
       isLoading: loadingParishes,
       href: paths.app.admin.org.getHref(),
-      color: 'text-accent',
+      color: 'text-gold-ink',
     },
     {
       label: 'Non lus',

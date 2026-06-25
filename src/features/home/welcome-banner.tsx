@@ -29,7 +29,7 @@ export function WelcomeBanner() {
   const firstName = user?.profile?.first_name ?? '';
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-7 text-primary-foreground shadow-glow-indigo motion-safe:animate-slide-up sm:p-9">
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/85 p-7 text-primary-foreground shadow-glow-indigo motion-safe:animate-slide-up sm:p-9">
       {/* Décor : grain subtil + grande croix filigrane, purement décoratif */}
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         <div
@@ -51,7 +51,7 @@ export function WelcomeBanner() {
       </div>
 
       <div className="relative">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/70">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/85">
           {greeting}
         </p>
         <h1 className="mt-1 truncate font-serif text-display font-black italic leading-[0.95] text-primary-foreground">
@@ -61,7 +61,7 @@ export function WelcomeBanner() {
         {/* Filet or court sous le nom */}
         <div className="mt-4 h-px w-16 rounded-full bg-gold/70" aria-hidden="true" />
 
-        <p className="mt-3 text-sm capitalize text-primary-foreground/75">
+        <p className="mt-3 text-sm capitalize text-primary-foreground/85">
           {dateStr}
         </p>
 

@@ -35,7 +35,7 @@ export function ScriptureQuote({
   return (
     <blockquote className={cn('border-l-[3px] border-gold pl-5', className)}>
       {eyebrow && (
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-gold/80">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-ink">
           {eyebrow}
         </p>
       )}

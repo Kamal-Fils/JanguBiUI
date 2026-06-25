@@ -50,7 +50,7 @@ export function MassIntentionCard({
       )}
     >
       <div className="flex items-start justify-between gap-3">
-        <CardEyebrow className="flex min-w-0 items-center gap-1.5 text-accent/90 [&_svg]:size-3.5">
+        <CardEyebrow className="flex min-w-0 items-center gap-1.5 text-gold-ink [&_svg]:size-3.5">
           {TypeIcon && <TypeIcon aria-hidden="true" />}
           <span className="truncate">
             {getIntentionTypeLabel(intention.intention_type)}

@@ -25,7 +25,7 @@ const EVENT_TYPE_COLORS: Record<string, string> = {
   mass: 'bg-primary/10 text-primary',
   conference: 'bg-info/10 text-info',
   retreat: 'bg-success/10 text-success',
-  ordination: 'bg-accent/15 text-accent',
+  ordination: 'bg-accent/15 text-gold-ink',
   other: 'bg-muted text-muted-foreground',
 };
 
@@ -119,7 +119,7 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
 
       <div className="relative z-10 flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
-          <CardEyebrow className="mb-1 flex items-center gap-1.5 text-accent">
+          <CardEyebrow className="mb-1 flex items-center gap-1.5 text-gold-ink">
             <Calendar className="size-3 shrink-0" aria-hidden />
             <span className="truncate capitalize tracking-[0.12em]">
               {formatEventDate(start, end)}
@@ -204,7 +204,7 @@ export function EventCard({ event, canDelete = false }: EventCardProps) {
           </div>
         )}
         {hasDescription && (
-          <div className="flex items-center gap-1 pt-0.5 text-accent">
+          <div className="flex items-center gap-1 pt-0.5 text-gold-ink">
             <ChevronDown
               className={cn(
                 'size-3.5 shrink-0 transition-transform duration-[var(--duration-normal)] ease-out-soft motion-reduce:transition-none',

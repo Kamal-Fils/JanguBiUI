@@ -34,8 +34,8 @@ describe('normalizeReadingLabel', () => {
 });
 
 describe('getReadingAccentClass', () => {
-  test('returns violet for Psaume', () => {
-    expect(getReadingAccentClass('Psaume')).toContain('accent');
+  test('returns gold for Psaume', () => {
+    expect(getReadingAccentClass('Psaume')).toContain('gold');
   });
 
   test('returns amber for Évangile', () => {

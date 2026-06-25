@@ -31,7 +31,7 @@ function youtubeThumbnail(video: TvVideo): string | null {
 /** Petit indicateur « EN DIRECT » or, avec point pulsé discret. */
 function LiveIndicator() {
   return (
-    <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-gold shadow-soft-sm backdrop-blur-sm">
+    <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-gold-ink shadow-soft-sm backdrop-blur-sm">
       <span className="relative flex size-1.5">
         <span className="absolute inline-flex size-full animate-ping rounded-full bg-gold/70 motion-reduce:animate-none" />
         <span className="relative inline-flex size-1.5 rounded-full bg-gold" />
@@ -94,7 +94,7 @@ function VideoCard({ video }: { video: TvVideo }) {
 
       <div className="flex min-w-0 flex-col gap-1">
         {video.category?.name && (
-          <CardEyebrow className="text-gold/80">
+          <CardEyebrow className="text-gold-ink">
             {video.category.name}
           </CardEyebrow>
         )}
@@ -223,7 +223,7 @@ export function TvContent() {
         ) : (
           <>
             {liveVideos.length > 0 && (
-              <p className="mb-4 inline-flex items-center gap-2 text-xs font-medium text-gold">
+              <p className="mb-4 inline-flex items-center gap-2 text-xs font-medium text-gold-ink">
                 <Radio className="size-3.5" aria-hidden="true" />
                 {liveVideos.length === 1
                   ? '1 programme en direct'

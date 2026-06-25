@@ -58,7 +58,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
           {article.category && (
-            <CardEyebrow className="text-accent">
+            <CardEyebrow className="text-gold-ink">
               {article.category.name}
             </CardEyebrow>
           )}

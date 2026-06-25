@@ -9,8 +9,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F6F8FB' },
-    { media: '(prefers-color-scheme: dark)', color: '#0B1220' },
+    // Aligné sur le token --background « Revue Sacrée » (ivoire / indigo-noir).
+    { media: '(prefers-color-scheme: light)', color: '#FAF8F4' },
+    { media: '(prefers-color-scheme: dark)', color: '#0D0916' },
   ],
   width: 'device-width',
   initialScale: 1,

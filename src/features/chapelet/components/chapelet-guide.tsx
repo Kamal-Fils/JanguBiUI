@@ -170,7 +170,7 @@ export function ChapeletGuide({
             Mystère {currentMystery + 1}/5 - Étape {currentStep + 1}/
             {guideSteps.length}
           </span>
-          <span className="font-medium text-gold">{Math.round(progress)}%</span>
+          <span className="font-medium text-gold-ink">{Math.round(progress)}%</span>
         </div>
         <Progress value={progress} />
       </div>
@@ -178,7 +178,7 @@ export function ChapeletGuide({
       {/* Mystery title & Audio Player */}
       <div className="flex flex-col items-center gap-4 text-center">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gold/80">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-ink">
             {currentMystery + 1}e mystère
           </p>
           <h2 className="mt-1 font-serif text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -199,8 +199,8 @@ export function ChapeletGuide({
       {/* Step content */}
       <Card variant="sacred" className="gap-0 py-0">
         <CardContent className="p-6">
-          <p className="mb-5 flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gold">
-            <span className="flex size-6 items-center justify-center rounded-full bg-gold/15 font-serif text-xs text-gold ring-1 ring-gold/25">
+          <p className="mb-5 flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-ink">
+            <span className="flex size-6 items-center justify-center rounded-full bg-gold/15 font-serif text-xs text-gold-ink ring-1 ring-gold/25">
               {currentStep + 1}
             </span>
             {guideSteps[currentStep]}
@@ -245,7 +245,7 @@ export function ChapeletGuide({
                 {Array.from({ length: 10 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex size-8 items-center justify-center rounded-full bg-gold/12 font-serif text-xs font-medium text-gold shadow-soft-sm ring-1 ring-gold/20"
+                    className="flex size-8 items-center justify-center rounded-full bg-gold/12 font-serif text-xs font-medium text-gold-ink shadow-soft-sm ring-1 ring-gold/20"
                   >
                     {i + 1}
                   </div>

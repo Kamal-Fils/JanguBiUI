@@ -35,7 +35,7 @@ describe('DocumentStatusBadge', () => {
   test('applies the accent tone for info_requested status', () => {
     render(<DocumentStatusBadge status="info_requested" />);
     const badge = screen.getByText('Infos requises');
-    expect(badge).toHaveClass('text-accent');
+    expect(badge).toHaveClass('text-gold-ink');
   });
 
   test('applies the destructive tone for rejected status', () => {

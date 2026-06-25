@@ -13,7 +13,7 @@ const pillVariants = cva(
     variants: {
       tone: {
         primary: 'bg-primary/10 text-primary',
-        gold: 'bg-accent/15 text-accent',
+        gold: 'bg-accent/15 text-gold-ink',
         muted: 'bg-muted text-muted-foreground',
         outline: 'border border-border text-muted-foreground',
       },

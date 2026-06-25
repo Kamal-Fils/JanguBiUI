@@ -23,7 +23,7 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         gold: 'bg-accent text-accent-foreground shadow hover:bg-accent/85 focus-visible:ring-accent',
         'outline-gold':
-          'border border-accent/50 text-accent bg-transparent hover:bg-accent/10',
+          'border border-accent/50 text-gold-ink bg-transparent hover:bg-accent/10',
         'ghost-indigo': 'text-primary hover:bg-primary/10 hover:text-primary',
       },
       size: {

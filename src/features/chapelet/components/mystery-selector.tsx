@@ -85,7 +85,7 @@ export function MysterySelector({
             {selectedGroup.id === todayGroup.id && (
               <Badge
                 variant="secondary"
-                className="shrink-0 bg-gold/15 text-gold hover:bg-gold/20"
+                className="shrink-0 bg-gold/15 text-gold-ink hover:bg-gold/20"
               >
                 Aujourd&apos;hui
               </Badge>
@@ -100,7 +100,7 @@ export function MysterySelector({
                 key={i}
                 className="flex items-center gap-4 border-b border-border/50 px-5 py-3.5 last:border-b-0"
               >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gold/12 font-serif text-sm font-semibold text-gold ring-1 ring-gold/20">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gold/12 font-serif text-sm font-semibold text-gold-ink ring-1 ring-gold/20">
                   {i + 1}
                 </span>
                 <span className="text-sm font-medium text-foreground">
