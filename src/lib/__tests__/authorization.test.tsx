@@ -128,10 +128,15 @@ describe('Article permissions', () => {
     expect(canCreateArticle(null)).toBe(false);
   });
 
-  test('canPublishArticle: any admin can publish', () => {
+  test('canPublishArticle: parish_admin and above; church_admin (diacre) excluded', () => {
+    // Aligné sur l'API : un diacre (church_admin) est limité aux brouillons.
     expect(canPublishArticle(superAdmin)).toBe(true);
-    expect(canPublishArticle(churchAdmin)).toBe(true);
+    expect(canPublishArticle(provinceAdmin)).toBe(true);
+    expect(canPublishArticle(dioceseAdmin)).toBe(true);
+    expect(canPublishArticle(parishAdmin)).toBe(true);
+    expect(canPublishArticle(churchAdmin)).toBe(false);
     expect(canPublishArticle(fidele)).toBe(false);
+    expect(canPublishArticle(null)).toBe(false);
   });
 
   test('canUnpublishArticle: church_admin cannot unpublish', () => {

@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/dialog/dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { paths } from '@/config/paths';
+import { useUser } from '@/lib/auth';
+import { canPublishArticle, canUnpublishArticle } from '@/lib/authorization';
 
 import { useDeleteArticle } from '../api/delete-article';
 import { usePublishArticle } from '../api/publish-article';
@@ -56,6 +58,13 @@ export function AdminArticleList({
 }: AdminArticleListProps) {
   const [deleteTarget, setDeleteTarget] = useState<Article | null>(null);
   const [unpublishTarget, setUnpublishTarget] = useState<Article | null>(null);
+
+  // Aligne l'UI sur l'API : un diacre (church_admin) gère ses brouillons mais
+  // ne peut ni publier ni dépublier. On masque les boutons correspondants pour
+  // éviter une action morte (le back renverrait 400/403).
+  const { data: user } = useUser();
+  const userCanPublish = canPublishArticle(user);
+  const userCanUnpublish = canUnpublishArticle(user);
 
   const publishMutation = usePublishArticle();
   const unpublishMutation = useUnpublishArticle();
@@ -154,7 +163,7 @@ export function AdminArticleList({
                           </Button>
                         </Link>
                       )}
-                      {article.status === 'draft' && (
+                      {article.status === 'draft' && userCanPublish && (
                         <Button
                           variant="ghost"
                           size="icon"
@@ -165,7 +174,7 @@ export function AdminArticleList({
                           <Send className="size-4" />
                         </Button>
                       )}
-                      {article.status === 'published' && (
+                      {article.status === 'published' && userCanUnpublish && (
                         <Button
                           variant="ghost"
                           size="icon"
