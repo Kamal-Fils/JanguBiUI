@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
 import { AppShell } from '@/components/layouts/app-shell';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button/button';
+import { Card, CardContent, CardEyebrow } from '@/components/ui/card/card';
+import { FilterPills } from '@/components/ui/filter-pills';
 import { paths } from '@/config/paths';
 import { useAdminArticles } from '@/features/news/api/get-admin-articles';
 import { AdminArticleList } from '@/features/news/components/admin-article-list';
@@ -45,36 +47,37 @@ export default function AdminArticlesPage() {
         <PageHeader
           title="Gestion des articles"
           subtitle="Créer, modifier et publier des articles"
-        />
-        <div className="mx-auto w-full max-w-5xl px-4 py-6 md:px-6">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <div className="flex gap-2">
-              {STATUS_FILTERS.map((f) => (
-                <button
-                  key={f.value}
-                  onClick={() => setStatusFilter(f.value)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                    statusFilter === f.value
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
+          action={
             <Link href={paths.app.admin.articleNew.getHref()}>
-              <Button size="sm">
+              <Button size="sm" variant="gold">
                 <PlusCircle className="mr-2 size-4" />
                 Nouvel article
               </Button>
             </Link>
+          }
+        />
+        <div className="mx-auto w-full max-w-5xl px-4 py-6 md:px-6">
+          <div className="mb-5">
+            <FilterPills
+              options={STATUS_FILTERS.map((f) => ({
+                value: f.value,
+                label: f.label,
+              }))}
+              value={statusFilter}
+              onChange={(v) => setStatusFilter(v as ArticleStatus | '')}
+              ariaLabel="Filtrer par statut"
+            />
           </div>
 
-          <AdminArticleList
-            articles={data?.results ?? []}
-            isLoading={articlesLoading}
-          />
+          <Card variant="feature">
+            <CardContent className="p-4 sm:p-5">
+              <CardEyebrow className="mb-3">Publications</CardEyebrow>
+              <AdminArticleList
+                articles={data?.results ?? []}
+                isLoading={articlesLoading}
+              />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AppShell>
