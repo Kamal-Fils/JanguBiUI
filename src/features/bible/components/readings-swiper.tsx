@@ -46,19 +46,26 @@ function ReadingPanel({ reading, fontSize }: ReadingPanelProps) {
   const { titre, introLue, refrain, versetEvangile } = extractMeta(reading);
 
   return (
-    <div className="px-4 py-6 md:px-6 lg:px-8">
+    // Conteneur d'échelle : le FontSizeStepper pilote `fontSize` ici, et TOUS
+    // les blocs enfants (Alléluia, Refrain, intro, corps) sont dimensionnés en
+    // `em` → ils héritent et se mettent à l'échelle ensemble.
+    <div
+      className="px-4 py-6 md:px-6 lg:px-8"
+      style={{ fontSize: `${fontSize}px` }}
+    >
       <header className="mb-5">
-        <h2 className={cn('font-serif text-xl font-bold', accentClass)}>
+        {/* Référence/citation en eyebrow AU-DESSUS du titre (item 2). */}
+        {reading.citation && (
+          <p className="mb-1 text-[0.75em] font-medium uppercase tracking-widest text-muted-foreground/70">
+            {reading.citation}
+          </p>
+        )}
+        <h2 className={cn('font-serif text-[1.5em] font-bold', accentClass)}>
           {label}
         </h2>
         {titre && (
-          <p className="mt-1.5 text-sm font-semibold italic text-foreground/90">
+          <p className="mt-1.5 text-[0.875em] font-semibold italic text-foreground/90">
             {titre}
-          </p>
-        )}
-        {reading.citation && (
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {reading.citation}
           </p>
         )}
       </header>
@@ -66,7 +73,7 @@ function ReadingPanel({ reading, fontSize }: ReadingPanelProps) {
       {/* Alléluia verse before the gospel (HTML) */}
       {versetEvangile && (
         <div
-          className="reading-content mb-5 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3"
+          className="reading-content mb-5 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3 text-[1em]"
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(versetEvangile),
           }}
@@ -75,26 +82,29 @@ function ReadingPanel({ reading, fontSize }: ReadingPanelProps) {
 
       {/* Intro lue — italic line before main text */}
       {introLue && (
-        <p className="mb-4 text-sm italic text-muted-foreground">{introLue}</p>
+        <p className="mb-4 text-[0.875em] italic text-muted-foreground">
+          {introLue}
+        </p>
       )}
 
       {/* Refrain psalmique (HTML) */}
       {refrain && (
         <div className="mb-5 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3.5">
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-primary/70">
+          <p className="mb-1.5 text-[0.75em] font-semibold uppercase tracking-widest text-primary/70">
             Refrain
           </p>
           <div
-            className="reading-content text-sm font-medium leading-relaxed text-foreground"
+            className="reading-content text-[0.9375em] font-medium leading-relaxed text-foreground"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(refrain) }}
           />
         </div>
       )}
 
-      {/* Main text — mesure et interligne unifiés (cf. ReadingSurface) */}
+      {/* Main text — mesure et interligne unifiés (cf. ReadingSurface). Hérite
+          de `fontSize` du conteneur ; plus de style fontSize ici. */}
       <div
-        className="reading-content prose prose-slate max-w-reading pb-8 dark:prose-invert prose-p:text-foreground/80 prose-strong:text-foreground"
-        style={{ fontSize: `${fontSize}px`, lineHeight: 1.8 }}
+        className="reading-content prose prose-slate max-w-reading pb-8 text-[1em] dark:prose-invert prose-p:text-foreground/80 prose-strong:text-foreground"
+        style={{ lineHeight: 1.8 }}
         dangerouslySetInnerHTML={{
           __html: DOMPurify.sanitize(reading.text ?? ''),
         }}
@@ -182,7 +192,7 @@ export function ReadingsSwiper({ readings, fontSize }: ReadingsSwiperProps) {
         ref={tabsRef}
         role="tablist"
         aria-label="Lectures du jour"
-        className="scrollbar-none sticky top-0 z-10 flex overflow-x-auto border-b border-border bg-background/95 backdrop-blur-md"
+        className="scrollbar-none sticky top-0 z-10 flex gap-2 overflow-x-auto bg-background/95 px-1 py-2 backdrop-blur-md"
       >
         {readings.map((r, i) => {
           const label = normalizeReadingLabel(r.type ?? '');
@@ -199,10 +209,10 @@ export function ReadingsSwiper({ readings, fontSize }: ReadingsSwiperProps) {
               onClick={() => goTo(i)}
               onKeyDown={(e) => onTabKeyDown(e, i)}
               className={cn(
-                'shrink-0 whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors',
+                'shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
                 isActive
-                  ? 'border-b-2 border-primary text-primary'
-                  : 'text-muted-foreground hover:text-foreground',
+                  ? 'bg-primary text-primary-foreground shadow-soft-sm'
+                  : 'text-muted-foreground hover:bg-muted/60',
               )}
             >
               {label}

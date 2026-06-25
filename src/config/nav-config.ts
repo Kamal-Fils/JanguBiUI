@@ -29,7 +29,7 @@ const ITEM_ACTUS: NavItem = {
   icon: Newspaper,
 };
 const ITEM_SPIRITUEL: NavItem = {
-  label: 'Spirituel',
+  label: 'Spiritualité',
   href: '/app/spirituel',
   icon: BookOpen,
 };
@@ -106,45 +106,35 @@ export const isNavActive = (pathname: string, href: string): boolean => {
   return pathname.startsWith(href);
 };
 
+/**
+ * Bottom-nav mobile : ≤ 4 onglets primaires par rôle. Le 5e emplacement visible
+ * est le bouton « Plus » rendu par `BottomNav` à partir de
+ * `buildOverflowNavItems` (tous les items sidebar absents de la bottom-nav).
+ * On garde donc ici un set resserré et role-aware.
+ */
 export const buildBottomNavItems = (
   user: UserType | null | undefined,
 ): NavItem[] => {
+  // Admin pur — Accueil, Actus, Messages, Profil (+ « Plus »)
   if (isAdmin(user) && !isClergy(user)) {
-    return [
-      ITEM_ACCUEIL_ADMIN,
-      ITEM_ACTUS,
-      ITEM_SPIRITUEL,
-      ITEM_MESSAGES,
-      ITEM_PROFIL,
-    ];
+    return [ITEM_ACCUEIL_ADMIN, ITEM_ACTUS, ITEM_MESSAGES, ITEM_PROFIL];
   }
 
+  // Clergé — Accueil, Spiritualité, Actus, Clergé (+ « Plus »)
   if (isClergy(user)) {
-    return [
-      ITEM_ACCUEIL,
-      ITEM_ACTUS,
-      ITEM_SPIRITUEL,
-      ITEM_CLERGE,
-      ITEM_MESSAGES,
-      ITEM_PROFIL,
-    ];
+    return [ITEM_ACCUEIL, ITEM_SPIRITUEL, ITEM_ACTUS, ITEM_CLERGE];
   }
 
-  // Fidèle — Spirituel + Documents dans la bottom nav, le reste via « Plus »
-  return [
-    ITEM_ACCUEIL,
-    ITEM_ACTUS,
-    ITEM_SPIRITUEL,
-    ITEM_DOCUMENTS,
-    ITEM_MESSAGES,
-    ITEM_PROFIL,
-  ];
+  // Fidèle — Accueil, Spiritualité, Actus, Messages (+ « Plus »)
+  return [ITEM_ACCUEIL, ITEM_SPIRITUEL, ITEM_ACTUS, ITEM_MESSAGES];
 };
 
 /**
  * Items présents dans la sidebar mais PAS dans la bottom-nav → exposés via une
- * entrée « Plus » sur mobile pour éviter les routes orphelines (fidèle :
- * Dons, Agenda, Transfert).
+ * entrée « Plus » sur mobile pour éviter les routes orphelines.
+ * Fidèle : Documents, Dons, Agenda, Transfert, Profil.
+ * Clergé : Messages, Profil (+ ses items spécifiques).
+ * Admin  : Spiritualité (+ tout item sidebar hors bottom-nav).
  */
 export const buildOverflowNavItems = (
   user: UserType | null | undefined,

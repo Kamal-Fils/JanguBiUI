@@ -13,13 +13,13 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
+// Fraunces est une police variable : on n'épingle pas `weight` (toutes les graisses
+// restent disponibles via les classes Tailwind font-light…font-black) + italique.
 const fraunces = Fraunces({
   subsets: ['latin'],
-  weight: ['300', '400', '600', '700', '900'],
   style: ['normal', 'italic'],
   display: 'swap',
   variable: '--font-fraunces',
-  axes: ['SOFT', 'WONK'],
 });
 
 export const metadata = {
