@@ -141,12 +141,20 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
             </span>
           </div>
 
-          <div
-            className="prose prose-sm max-w-reading text-foreground dark:prose-invert prose-headings:text-foreground prose-headings:font-serif prose-p:text-foreground/90 prose-a:text-primary"
-            dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(article.content),
-            }}
-          />
+          {article.content_format === 'html' ? (
+            <div
+              className="prose prose-sm max-w-reading text-foreground dark:prose-invert prose-headings:text-foreground prose-headings:font-serif prose-p:text-foreground/90 prose-a:text-primary"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(article.content),
+              }}
+            />
+          ) : (
+            // Ancien contenu « texte brut » (rédigé en textarea) : préserver les
+            // sauts de ligne au lieu de l'écraser en un seul bloc HTML.
+            <div className="max-w-reading whitespace-pre-line text-[0.9375rem] leading-relaxed text-foreground/90">
+              {article.content}
+            </div>
+          )}
         </div>
       </div>
     </article>

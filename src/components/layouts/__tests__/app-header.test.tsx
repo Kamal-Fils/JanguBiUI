@@ -52,7 +52,7 @@ describe('AppHeader (shell — 1C)', () => {
 
     // Le crumb parent est un lien, la feuille est le titre.
     expect(
-      await screen.findByRole('link', { name: 'Actus' }),
+      await screen.findByRole('link', { name: 'Actualité' }),
     ).toBeInTheDocument();
     expect(screen.getAllByText('Mon Article').length).toBeGreaterThan(0);
   });

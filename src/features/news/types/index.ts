@@ -20,6 +20,8 @@ export const articleSchema = z.object({
     .enum(['announcement', 'article', 'pastoral_letter'])
     .optional(),
   content_type_label: z.string().optional(),
+  // Annonces : date du jour concerné (ex. dimanche) — bloc « Annonces du dimanche ».
+  announcement_date: z.string().nullable().optional(),
   scope_type: z.enum(['global', 'diocese', 'parish', 'church']),
   scope_type_label: z.string().optional(),
   scope_parish_id: z.number().nullable().optional(),
@@ -34,6 +36,8 @@ export const articleSchema = z.object({
 
 export const articleDetailSchema = articleSchema.extend({
   content: z.string(),
+  // 'html' = éditeur riche (sanitizé serveur) ; 'text' = ancien contenu brut.
+  content_format: z.enum(['text', 'html']).optional(),
   updated_at: z.string().optional(),
   unpublished_at: z.string().nullable().optional(),
   unpublished_by_name: z.string().nullable().optional(),

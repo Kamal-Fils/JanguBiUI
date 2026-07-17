@@ -26,7 +26,7 @@ export interface NavItem {
 
 const ITEM_ACCUEIL: NavItem = { label: 'Accueil', href: '/app', icon: Home };
 const ITEM_ACTUS: NavItem = {
-  label: 'Actus',
+  label: 'Actualité',
   href: '/app/actus',
   icon: Newspaper,
 };
