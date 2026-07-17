@@ -61,7 +61,7 @@ const FEATURES: Feature[] = [
   },
   {
     Icon: HeartHandshake,
-    title: 'Dons & Quête',
+    title: 'Dons & Quêtes',
     description:
       'Contribuez à la quête dominicale et aux projets paroissiaux en ligne, en sécurité.',
   },
@@ -69,7 +69,7 @@ const FEATURES: Feature[] = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24">
+    <section id="features" className="py-12 sm:py-16 lg:py-24">
       <div className="mx-auto max-w-[1180px] px-5 sm:px-10">
         <div className="mb-14 text-center">
           <p className="mb-3 text-[0.6875rem] font-bold uppercase tracking-[.12em] text-primary">

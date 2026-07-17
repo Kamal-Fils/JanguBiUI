@@ -32,7 +32,7 @@ export function CtaSection() {
   return (
     <section
       id="cta"
-      className="relative overflow-hidden bg-background-surface py-28 text-center"
+      className="relative overflow-hidden bg-background-surface py-16 sm:py-20 lg:py-28 text-center"
     >
       {/* Glow */}
       <div className="pointer-events-none absolute -top-1/3 left-1/2 h-[400px] w-[800px] -translate-x-1/2 rounded-full bg-primary/10 blur-[80px]" />

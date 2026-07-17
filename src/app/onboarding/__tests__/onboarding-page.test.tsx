@@ -111,7 +111,9 @@ describe('OnboardingPage', () => {
 
     // Onboarding complété → redirection (le back passe à completed dès ≥1 appartenance).
     await waitFor(() => expect(replace).toHaveBeenCalled());
-  });
+    // Timeout élargi : parcours multi-étapes (cascade org + batch) qui dépasse
+    // les 5 s par défaut quand la machine CI est chargée (flake observé).
+  }, 15_000);
 
   test('le bouton « Commencer » est désactivé tant qu’aucune église n’est ajoutée', async () => {
     renderApp(<OnboardingPage />);

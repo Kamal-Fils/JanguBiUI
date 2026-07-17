@@ -14,6 +14,22 @@ import {
 
 import { useRosaryToday } from '../api/get-rosary-today';
 
+// L'API renvoie weekday_display en anglais (retour testeurs n°1) — on
+// traduit côté client en attendant une localisation serveur.
+const WEEKDAY_FR: Record<string, string> = {
+  monday: 'Lundi',
+  tuesday: 'Mardi',
+  wednesday: 'Mercredi',
+  thursday: 'Jeudi',
+  friday: 'Vendredi',
+  saturday: 'Samedi',
+  sunday: 'Dimanche',
+};
+
+function toFrenchWeekday(raw: string): string {
+  return WEEKDAY_FR[raw.trim().toLowerCase()] ?? raw;
+}
+
 export function DailyMysteryCard() {
   const { data: rosaryData, isLoading, isError } = useRosaryToday();
 
@@ -38,7 +54,7 @@ export function DailyMysteryCard() {
   }
 
   const mysteryName = rosaryData.day.group.name;
-  const categoryDay = rosaryData.day.weekday_display;
+  const categoryDay = toFrenchWeekday(rosaryData.day.weekday_display);
 
   return (
     <Card variant="sacred" className="gap-0 overflow-hidden py-0">

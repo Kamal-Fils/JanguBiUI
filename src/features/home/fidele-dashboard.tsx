@@ -1,34 +1,15 @@
 'use client';
 
-import { BookOpen, ScrollText } from 'lucide-react';
-import Link from 'next/link';
-
 import { ContentContainer } from '@/components/layouts/content-container';
 import { SectionHeader } from '@/components/ui/section-header';
 import { FideleSummarySection } from '@/features/dashboard/components/fidele-summary-section';
 import { PastoralReflectionWidget } from '@/features/reflexion-pastorale/components/pastoral-reflection-widget';
-import { cn } from '@/utils/cn';
 
 import { DailyReadingCard } from './daily-reading-card';
 import { MyIntentionsSection } from './my-intentions-section';
 import { ParishEventsSection } from './parish-events-section';
 import { ParishNewsSection } from './parish-news-section';
 import { WelcomeBanner } from './welcome-banner';
-
-const QUICK_ACTIONS = [
-  {
-    label: 'Spiritualité',
-    href: '/app/spirituel',
-    icon: BookOpen,
-    className: 'bg-primary/10 text-primary',
-  },
-  {
-    label: 'Intentions',
-    href: '/app/intentions',
-    icon: ScrollText,
-    className: 'bg-accent/15 text-accent',
-  },
-] as const;
 
 export function FideleDashboard() {
   return (
@@ -39,31 +20,9 @@ export function FideleDashboard() {
         {/* Lecture du jour — carte éditoriale pleine largeur */}
         <DailyReadingCard />
 
-        {/* Accès rapides */}
-        <div className="grid grid-cols-2 gap-3">
-          {QUICK_ACTIONS.map((action) => {
-            const Icon = action.icon;
-            return (
-              <Link
-                key={action.href}
-                href={action.href}
-                className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-card p-4 shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.97] motion-reduce:transform-none"
-              >
-                <div
-                  className={cn(
-                    'flex size-11 items-center justify-center rounded-xl',
-                    action.className,
-                  )}
-                >
-                  <Icon className="size-5" />
-                </div>
-                <span className="text-center text-xs font-medium leading-tight text-foreground">
-                  {action.label}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
+        {/* La grille « Accès rapides » a été retirée (retour testeurs n°5 :
+            Intentions apparaissait trois fois sur le dashboard). Les accès
+            vivent dans les pastilles du héro + la nav + « Mes intentions ». */}
 
         {/* Résumé (stats) — pleine largeur */}
         <FideleSummarySection />

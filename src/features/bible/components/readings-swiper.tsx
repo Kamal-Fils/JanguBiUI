@@ -4,12 +4,12 @@ import DOMPurify from 'isomorphic-dompurify';
 import { useEffect, useRef, useState } from 'react';
 
 import { cn } from '@/utils/cn';
-
-import type { LiturgyReading } from '../api/get-liturgy-today';
 import {
   getReadingAccentClass,
   normalizeReadingLabel,
-} from '../utils/reading-labels';
+} from '@/utils/reading-labels';
+
+import type { LiturgyReading } from '../api/get-liturgy-today';
 
 interface ReadingMeta {
   titre?: string;

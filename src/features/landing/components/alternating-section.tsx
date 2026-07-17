@@ -196,16 +196,19 @@ function DocsMockup() {
 
 export function AlternatingSection() {
   return (
-    <section id="alternating" className="py-24">
+    <section id="alternating" className="py-12 sm:py-16 lg:py-24">
       <div className="mx-auto max-w-[1180px] px-5 sm:px-10">
-        {/* Actualités */}
-        <div className="mb-24 grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-          <NewsMockup />
+        {/* Actualités — mockups masqués sous lg : sur mobile/tablette ils
+            triplaient la hauteur de la section (retour testeurs n°9). */}
+        <div className="mb-12 grid items-center gap-12 lg:mb-24 lg:grid-cols-2 lg:gap-20">
+          <div className="hidden lg:block">
+            <NewsMockup />
+          </div>
           <div>
             <p className="mb-3 text-[0.6875rem] font-bold uppercase tracking-[.12em] text-primary">
               Actualités paroissiales
             </p>
-            <h2 className="mb-4 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground">
+            <h2 className="mb-4 font-serif text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl">
               Votre paroisse,
               <br />
               en temps réel.
@@ -223,12 +226,12 @@ export function AlternatingSection() {
         </div>
 
         {/* Chat prêtres */}
-        <div className="mb-24 grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+        <div className="mb-12 grid items-center gap-12 lg:mb-24 lg:grid-cols-2 lg:gap-20">
           <div className="order-2 lg:order-1">
             <p className="mb-3 text-[0.6875rem] font-bold uppercase tracking-[.12em] text-primary">
               Discussion confidentielle
             </p>
-            <h2 className="mb-4 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground">
+            <h2 className="mb-4 font-serif text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl">
               Parlez à votre
               <br />
               prêtre en privé.
@@ -243,19 +246,21 @@ export function AlternatingSection() {
               <CheckItem>Réactions &amp; export</CheckItem>
             </ul>
           </div>
-          <div className="order-1 lg:order-2">
+          <div className="order-1 hidden lg:order-2 lg:block">
             <ChatMockup />
           </div>
         </div>
 
         {/* Dons & Documents */}
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-          <DocsMockup />
+          <div className="hidden lg:block">
+            <DocsMockup />
+          </div>
           <div>
             <p className="mb-3 text-[0.6875rem] font-bold uppercase tracking-[.12em] text-primary">
-              Dons, Quête &amp; Documents
+              Dons, Quêtes &amp; Documents
             </p>
-            <h2 className="mb-4 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground">
+            <h2 className="mb-4 font-serif text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl">
               Contribuez et gérez
               <br />
               vos sacrements.
