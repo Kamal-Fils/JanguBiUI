@@ -14,12 +14,50 @@ export class ApiError extends Error {
 // Access token — memory only (short-lived, refreshed via /jwt/refresh/)
 let _accessToken: string | null = null;
 
+/** Décode la claim `exp` d'un JWT en millisecondes epoch — null si illisible. */
+export function decodeJwtExpMs(token: string): number | null {
+  try {
+    const [, payload] = token.split('.');
+    if (!payload) return null;
+    const claims = JSON.parse(
+      atob(payload.replace(/-/g, '+').replace(/_/g, '/')),
+    ) as { exp?: number };
+    return typeof claims.exp === 'number' ? claims.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
+// Refresh PROACTIF : reprogramme un refresh ~60 s avant l'expiration de
+// l'access token pour que les pollers (notifications, conversations) ne
+// rencontrent plus le 401 « attendu » à chaque fenêtre d'expiration.
+let _refreshTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleProactiveRefresh(token: string): void {
+  if (typeof window === 'undefined') return;
+  if (_refreshTimer) clearTimeout(_refreshTimer);
+  const expMs = decodeJwtExpMs(token);
+  if (!expMs) return;
+  const delay = Math.max(expMs - Date.now() - 60_000, 10_000);
+  _refreshTimer = setTimeout(() => {
+    tryRefreshAccess().catch(() => {
+      // Échec silencieux : le refresh réactif sur 401 et le redirect login
+      // existants prennent le relais.
+    });
+  }, delay);
+}
+
 export function setAccessToken(token: string): void {
   _accessToken = token;
+  scheduleProactiveRefresh(token);
 }
 
 export function clearAccessToken(): void {
   _accessToken = null;
+  if (_refreshTimer) {
+    clearTimeout(_refreshTimer);
+    _refreshTimer = null;
+  }
 }
 
 export function getAccessToken(): string | null {
@@ -77,7 +115,13 @@ export async function tryRefreshAccess(): Promise<void> {
       });
       if (!res.ok) throw new Error('Refresh failed');
       const data = await res.json();
-      if (data.access) setAccessToken(data.access);
+      // Une réponse 200 SANS access token doit être traitée comme un échec :
+      // l'avaler laissait le client boucler en 401 silencieux avec un token
+      // mort, sans jamais déclencher le redirect login.
+      if (!data.access) {
+        throw new Error('Réponse de refresh invalide : access token absent');
+      }
+      setAccessToken(data.access);
       if (data.refresh) setRefreshToken(data.refresh);
     } finally {
       _isRefreshing = false;
@@ -87,6 +131,23 @@ export async function tryRefreshAccess(): Promise<void> {
 
   return _refreshPromise;
 }
+
+// --- Bootstrap de session (client uniquement) --------------------------------
+// L'access token ne vit qu'en mémoire : à chaque cold load il est absent alors
+// que le refresh token (localStorage) existe. Sans ce bootstrap, la première
+// requête (/me/, pollers) partait sans Authorization → 401 garanti en console
+// avant le refresh réactif. Ici le refresh démarre au chargement du bundle et
+// fetchApi attend sa résolution avant d'émettre la première requête.
+let _bootstrapPromise: Promise<void> | null =
+  typeof window !== 'undefined' && _refreshToken
+    ? tryRefreshAccess()
+        .catch(() => {
+          // Session morte — les requêtes suivantes déclencheront le redirect login.
+        })
+        .finally(() => {
+          _bootstrapPromise = null;
+        })
+    : null;
 
 type RequestOptions = {
   method?: string;
@@ -185,6 +246,11 @@ async function fetchApi<T>(
     cache = 'no-store',
     next,
   } = options;
+
+  // Cold load : attendre la fin du bootstrap de session avant la 1ʳᵉ requête.
+  if (typeof window !== 'undefined' && _bootstrapPromise) {
+    await _bootstrapPromise;
+  }
 
   // Get cookies from the request when running on server
   let cookieHeader = cookie;
