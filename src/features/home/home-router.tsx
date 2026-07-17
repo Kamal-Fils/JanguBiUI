@@ -8,11 +8,13 @@ import { DailyMysteryCard } from '@/features/chapelet/components/daily-mystery-c
 import { useUser } from '@/lib/auth';
 import {
   isAdmin,
+  isArcheveque,
   isClergy,
   isEvequeOrAbove,
   isFidele,
 } from '@/lib/authorization';
 
+import { ArchevequeDashboard } from './archeveque-dashboard';
 import { EvequeeDashboard } from './eveque-dashboard';
 import { FideleDashboard } from './fidele-dashboard';
 import { HomeContent } from './home-content';
@@ -38,6 +40,9 @@ export function HomeRouter() {
   // On exclut donc explicitement le clergé pour qu'un prêtre/évêque atteigne son
   // dashboard pastoral au lieu du dashboard fidèle.
   if (isFidele(user) && !isClergy(user)) return <FideleDashboard />;
+  // Archevêque AVANT évêque : vue PROVINCE dédiée (il voyait le dashboard
+  // évêque, scopé sur un seul diocèse — retour d'audit Lot 4).
+  if (isArcheveque(user)) return <ArchevequeDashboard />;
   // isEvequeOrAbove before isClergy — évêque/archevêque are clergy but need a distinct dashboard
   if (isEvequeOrAbove(user)) return <EvequeeDashboard />;
   if (isClergy(user)) return <PretreeDashboard />;

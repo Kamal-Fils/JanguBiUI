@@ -87,6 +87,9 @@ export const isDiacre = (user: User | null | undefined): boolean =>
 export const isEvequeOrAbove = (user: User | null | undefined): boolean =>
   user?.pastoral_role === 'eveque' || user?.pastoral_role === 'archeveque';
 
+export const isArcheveque = (user: User | null | undefined): boolean =>
+  user?.pastoral_role === 'archeveque';
+
 // Pastoral = clergé (via pastoral_role) OU fidèle laïc (via role, dimension
 // admin où 'fidele' = « pas un administrateur »). Les deux sous-helpers lisent
 // désormais le bon champ, donc la composition reste correcte.

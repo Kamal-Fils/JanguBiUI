@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { AdminPageLayout } from '@/components/layouts/admin-page-layout';
 import { SectionHeader } from '@/components/ui/section-header';
 import { paths } from '@/config/paths';
+import { GlobalStatsSection } from '@/features/dashboard/components/global-stats-section';
 import { useUser } from '@/lib/auth';
 import { canManageUsers, isAdmin, isSuperAdmin } from '@/lib/authorization';
 import { cn } from '@/lib/utils';
@@ -87,6 +88,10 @@ export default function AdminDashboardPage() {
       subtitle="Tableau de bord administrateur"
       allow={isAdmin}
     >
+      {/* Vue d'ensemble plateforme — réservée au super-admin (l'endpoint est
+          403 pour les autres ; le guard évite même de tirer la requête). */}
+      {isSuperAdmin(user) && <GlobalStatsSection />}
+
       <SectionHeader
         eyebrow="Administration"
         title="Pôles de gestion"
