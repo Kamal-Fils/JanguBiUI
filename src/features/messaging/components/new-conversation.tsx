@@ -3,27 +3,21 @@
 import { ArrowLeft, Loader2, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { UserAvatar } from '@/components/ui/user-avatar';
+import { cn } from '@/lib/utils';
 
 import { useCreateConversation } from '../api/create-conversation';
 import { usePriests, Priest } from '../api/get-priests';
 
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase();
-}
-
 function PriestsSkeleton() {
   return (
-    <div className="flex flex-col divide-y divide-border">
+    <div className="flex flex-col divide-y divide-border/50">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 px-4 py-3">
+        <div key={i} className="flex items-center gap-3.5 px-4 py-3.5">
           <Skeleton className="size-11 shrink-0 rounded-full" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-1/3" />
@@ -47,26 +41,36 @@ function PriestRow({
       type="button"
       onClick={() => onSelect(priest)}
       disabled={!priest.accepts_pastoral_chat}
-      className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors hover:bg-muted/60 active:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
     >
-      <Avatar className="size-11 shrink-0">
-        <AvatarFallback className="bg-primary/10 text-sm font-bold text-primary">
-          {getInitials(priest.full_name)}
-        </AvatarFallback>
-      </Avatar>
+      <UserAvatar
+        name={priest.full_name}
+        size="md"
+        className="size-11 shrink-0"
+      />
       <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-foreground">
+        <p className="truncate font-serif text-[15px] font-semibold text-foreground">
           {priest.full_name}
         </p>
         <p className="truncate text-xs text-muted-foreground">{priest.email}</p>
       </div>
       <span
-        className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+        className={cn(
+          'inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none',
           priest.accepts_pastoral_chat
             ? 'bg-success/10 text-success'
-            : 'bg-muted text-muted-foreground'
-        }`}
+            : 'bg-muted text-muted-foreground',
+        )}
       >
+        <span
+          className={cn(
+            'size-1.5 rounded-full',
+            priest.accepts_pastoral_chat
+              ? 'bg-success'
+              : 'bg-muted-foreground/50',
+          )}
+          aria-hidden="true"
+        />
         {priest.accepts_pastoral_chat ? 'Disponible' : 'Indisponible'}
       </span>
     </button>
@@ -75,7 +79,7 @@ function PriestRow({
 
 export function NewConversation() {
   const router = useRouter();
-  const { data: priests, isLoading, isError } = usePriests();
+  const { data: priests, isLoading, isError, refetch } = usePriests();
   const { mutate: createConversation, isPending } = useCreateConversation({
     onSuccess: (conv) => {
       router.push(`/app/messages/${conv.id}`);
@@ -89,47 +93,65 @@ export function NewConversation() {
 
   return (
     <div className="flex flex-col">
-      <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => router.back()}
-          className="rounded-full hover:bg-muted"
-          aria-label="Retour"
-        >
-          <ArrowLeft className="size-5" />
-        </Button>
-        <div>
-          <span className="text-sm font-semibold text-foreground">
-            Nouvelle conversation
-          </span>
-          <p className="text-xs text-muted-foreground">Choisissez un prêtre</p>
+      <div className="sticky top-0 z-10 bg-background-surface/90 backdrop-blur-md">
+        <div className="relative flex items-center gap-3 px-4 py-3">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="rounded-full hover:bg-muted"
+            aria-label="Retour"
+          >
+            <ArrowLeft className="size-5" />
+          </Button>
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+              Nouvelle conversation
+            </p>
+            <h1 className="truncate font-serif text-lg font-bold tracking-tight text-foreground">
+              Écrire à un prêtre
+            </h1>
+          </div>
+          {isPending && (
+            <Loader2 className="ml-auto size-4 animate-spin text-muted-foreground motion-reduce:animate-none" />
+          )}
+          {/* Filet or éditorial sous l'en-tête */}
+          <div
+            className="hairline-gold absolute inset-x-4 bottom-0"
+            aria-hidden="true"
+          />
         </div>
-        {isPending && (
-          <Loader2 className="ml-auto size-4 animate-spin text-muted-foreground" />
-        )}
       </div>
+
+      <p className="px-4 pb-1 pt-4 text-sm text-muted-foreground">
+        Choisissez un prêtre disponible pour engager un échange confidentiel.
+      </p>
 
       {isLoading && <PriestsSkeleton />}
 
       {isError && (
-        <p className="py-10 text-center text-sm text-destructive">
-          Impossible de charger la liste des prêtres.
-        </p>
+        <div className="p-4">
+          <ErrorState
+            title="Impossible de charger la liste des prêtres"
+            description="Vérifiez votre connexion puis réessayez."
+            onRetry={() => refetch()}
+          />
+        </div>
       )}
 
       {!isLoading && !isError && !priests?.length && (
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <MessageCircle className="size-10 text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">
-            Aucun prêtre disponible pour le moment.
-          </p>
+        <div className="px-4 py-8">
+          <EmptyState
+            icon={<MessageCircle aria-hidden="true" />}
+            title="Aucun prêtre disponible pour le moment"
+            description="Revenez un peu plus tard : les prêtres de votre paroisse apparaîtront ici dès qu'ils seront à l'écoute."
+          />
         </div>
       )}
 
       {!isLoading && !isError && !!priests?.length && (
-        <div className="flex flex-col divide-y divide-border">
+        <div className="flex flex-col divide-y divide-border/50">
           {priests.map((priest) => (
             <PriestRow
               key={priest.id}

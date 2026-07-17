@@ -47,7 +47,7 @@ export function ConnectionBanner({ status, onRetry }: ConnectionBannerProps) {
     <div
       role="status"
       className={cn(
-        'flex shrink-0 items-center justify-center gap-1.5 px-4 py-1.5 text-xs font-medium',
+        'flex shrink-0 items-center justify-center gap-1.5 border-b border-border/40 px-4 py-1.5 text-xs font-medium',
         tone,
       )}
     >
@@ -61,7 +61,7 @@ export function ConnectionBanner({ status, onRetry }: ConnectionBannerProps) {
         <button
           type="button"
           onClick={onRetry}
-          className="font-semibold underline underline-offset-2"
+          className="rounded font-semibold underline underline-offset-2 transition-colors hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           Réessayer
         </button>

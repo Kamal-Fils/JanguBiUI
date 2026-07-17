@@ -35,8 +35,9 @@ function MessageRow({
       onClick={onClick}
       aria-pressed={isSelected}
       className={cn(
-        'flex min-h-[68px] w-full items-start gap-3 border-b border-border px-4 py-3 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
-        isSelected && 'border-l-2 border-l-primary bg-primary/5',
+        'flex min-h-[68px] w-full items-start gap-3 border-b border-border/50 border-l-2 border-l-transparent px-4 py-3.5 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+        !isRead && 'border-l-primary/60 bg-primary/5',
+        isSelected && 'border-l-primary bg-primary/10',
       )}
     >
       <UserAvatar email={message.sender_email} size="sm" className="mt-0.5" />
@@ -57,8 +58,8 @@ function MessageRow({
         </div>
         <p
           className={cn(
-            'truncate text-sm text-foreground',
-            !isRead && 'font-medium',
+            'truncate font-serif text-sm text-foreground',
+            !isRead ? 'font-semibold' : 'font-medium',
           )}
         >
           {message.subject}
@@ -96,9 +97,9 @@ export function ClericalInboxList({
 
   if (isLoading) {
     return (
-      <div className="divide-y divide-border">
+      <div className="divide-y divide-border/50">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex items-start gap-3 px-4 py-3">
+          <div key={i} className="flex items-start gap-3 px-4 py-3.5">
             <Skeleton className="size-8 shrink-0 rounded-full" />
             <div className="flex-1 space-y-2">
               <Skeleton className="h-4 w-3/4" />
@@ -136,7 +137,7 @@ export function ClericalInboxList({
   }
 
   return (
-    <ul className="divide-y divide-border">
+    <ul>
       {messages.map((msg) => (
         <li key={msg.id}>
           <MessageRow

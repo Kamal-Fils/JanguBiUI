@@ -17,6 +17,15 @@ export const EVENT_TYPE_COLORS: Record<string, string> = {
   other: 'bg-muted text-muted-foreground',
 };
 
+// Portée de l'événement — mêmes libellés que le fil actus (article-card).
+export const EVENT_SCOPE_LABELS: Record<string, string> = {
+  church: 'Église',
+  parish: 'Paroisse',
+  diocese: 'Diocèse',
+  province: 'Province',
+  global: 'Universel',
+};
+
 export function formatEventDate(start: Date, end: Date): string {
   const sameDay = start.toDateString() === end.toDateString();
   const dateStr = start.toLocaleDateString('fr-FR', {

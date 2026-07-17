@@ -78,9 +78,9 @@ describe('DocumentsList', () => {
 
     renderApp(<DocumentsList />);
 
-    await screen.findByText(/aucune demande/i);
+    await screen.findByText(/demandez votre premier document/i);
     expect(
-      screen.getByText(/vos demandes de documents apparaîtront ici/i),
+      screen.getByText(/déposez votre demande en ligne/i),
     ).toBeInTheDocument();
   });
 
