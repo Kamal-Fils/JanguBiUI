@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 
 import { Link } from '@/components/ui/link/link';
 import { buildNavItems, isNavActive } from '@/config/nav-config';
+import { useNotificationsSocket } from '@/hooks/use-notifications-socket';
 import { useLogout, useUser } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { useMessagingStore } from '@/stores/messaging-store';
@@ -129,6 +130,10 @@ export function AppShell({ children }: AppShellProps) {
 function AppShellLayout({ children }: AppShellProps) {
   const totalUnread = useMessagingStore((s) => s.totalUnread);
   const meta = usePageMetaValue();
+
+  // Socket temps réel global (/ws/notifications/) : rend visibles immédiatement
+  // les conversations/messages entrants au lieu d'attendre le poll de 30 s.
+  useNotificationsSocket();
 
   return (
     <div className="flex min-h-dvh bg-background">

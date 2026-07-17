@@ -8,7 +8,10 @@ const participantSchema = z.object({
 
 const lastMessageSchema = z.object({
   id: z.string(),
-  content: z.string(),
+  // Le backend sérialise content en CharField(allow_null=True) — un message
+  // supprimé/purgé a un contenu null. Non-nullable ici, une seule ligne
+  // invalide faisait échouer le parse de TOUTE la liste de conversations.
+  content: z.string().nullable(),
   sent_at: z.string().nullable().optional(),
 });
 

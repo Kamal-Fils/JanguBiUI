@@ -279,7 +279,8 @@ export function ChatWindow({
   const { mutate: markRead } = useMarkRead(conversationId);
   const { mutate: acceptCgu, isPending: isAcceptingCgu } =
     useAcceptMessagingCgu(conversationId);
-  const { status: socketStatus } = useChatSocket(conversationId);
+  const { status: socketStatus, retry: retrySocket } =
+    useChatSocket(conversationId);
 
   const needsCguAcceptance =
     error instanceof ApiError && error.status === 403;
@@ -385,7 +386,7 @@ export function ChatWindow({
       </div>
 
       {/* Bannière d'état temps réel */}
-      <ConnectionBanner status={socketStatus} />
+      <ConnectionBanner status={socketStatus} onRetry={retrySocket} />
 
       {/* Messages */}
       <div className="relative flex-1 overflow-hidden">
@@ -413,8 +414,9 @@ export function ChatWindow({
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
                     Pour préserver la confidentialité de vos échanges, vous
-                    devez accepter les conditions d’utilisation de la messagerie
-                    avant d’ouvrir cette conversation.
+                    devez accepter les conditions d’utilisation de la
+                    messagerie. Cette acceptation ne vous sera demandée
+                    qu’une seule fois, pour toutes vos conversations.
                   </p>
                   <Button
                     variant="default"
