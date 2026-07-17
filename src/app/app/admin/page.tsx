@@ -89,49 +89,60 @@ export default function AdminDashboardPage() {
       allow={isAdmin}
     >
       {/* Vue d'ensemble plateforme — réservée au super-admin (l'endpoint est
-          403 pour les autres ; le guard évite même de tirer la requête). */}
-      {isSuperAdmin(user) && <GlobalStatsSection />}
+          403 pour les autres ; le guard évite même de tirer la requête).
+          Section séparée du reste par une bordure adoucie. */}
+      {isSuperAdmin(user) && (
+        <section
+          aria-label="Vue d'ensemble de la plateforme"
+          className="mb-8 border-b border-border/60 pb-8"
+        >
+          <GlobalStatsSection />
+        </section>
+      )}
 
-      <SectionHeader
-        eyebrow="Administration"
-        title="Pôles de gestion"
-        description="Sélectionnez un espace pour piloter la plateforme."
-      />
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-        {sections.map((section) => {
-          const Icon = section.icon;
-          return (
-            <Link
-              key={section.href}
-              href={section.href}
-              className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-border/60 bg-card p-4 shadow-soft-sm transition-[box-shadow,transform,border-color] duration-[var(--duration-normal)] ease-out-soft before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:bg-gradient-to-r before:from-gold before:via-gold/70 before:to-transparent before:opacity-0 before:transition-opacity hover:-translate-y-0.5 hover:border-border hover:shadow-soft hover:before:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:hover:translate-y-0"
-            >
-              <div className="flex items-start justify-between">
-                <div
-                  className={cn(
-                    'flex size-10 items-center justify-center rounded-xl',
-                    section.tone,
-                  )}
-                >
-                  <Icon className="size-5" />
+      <section aria-label="Pôles de gestion">
+        <SectionHeader
+          eyebrow="Administration"
+          title="Pôles de gestion"
+          description="Sélectionnez un espace pour piloter la plateforme."
+        />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+          {sections.map((section) => {
+            const Icon = section.icon;
+            return (
+              <Link
+                key={section.href}
+                href={section.href}
+                className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-border/60 bg-card p-4 shadow-soft-sm transition-[box-shadow,transform,border-color] duration-[var(--duration-normal)] ease-out-soft before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:bg-gradient-to-r before:from-gold before:via-gold/70 before:to-transparent before:opacity-0 before:transition-opacity hover:-translate-y-0.5 hover:border-border hover:shadow-soft hover:before:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:hover:translate-y-0"
+              >
+                <div className="flex items-start justify-between">
+                  <div
+                    aria-hidden="true"
+                    className={cn(
+                      'flex size-10 items-center justify-center rounded-xl',
+                      section.tone,
+                    )}
+                  >
+                    <Icon className="size-5" />
+                  </div>
+                  <ChevronRight
+                    aria-hidden="true"
+                    className="size-4 -translate-x-1 text-muted-foreground/50 opacity-0 transition-all group-hover:translate-x-0 group-hover:text-accent group-hover:opacity-100"
+                  />
                 </div>
-                <ChevronRight
-                  aria-hidden="true"
-                  className="size-4 -translate-x-1 text-muted-foreground/50 opacity-0 transition-all group-hover:translate-x-0 group-hover:text-accent group-hover:opacity-100"
-                />
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="font-serif text-base font-bold tracking-tight text-foreground">
-                  {section.label}
-                </span>
-                <span className="text-[11px] leading-tight text-muted-foreground">
-                  {section.description}
-                </span>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-serif text-base font-bold tracking-tight text-foreground">
+                    {section.label}
+                  </span>
+                  <span className="text-[11px] leading-tight text-muted-foreground">
+                    {section.description}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
     </AdminPageLayout>
   );
 }

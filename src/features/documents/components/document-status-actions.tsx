@@ -1,6 +1,13 @@
 'use client';
 
-import { CheckCircle, Info, PackageCheck, Send, XCircle } from 'lucide-react';
+import {
+  CheckCircle,
+  Info,
+  MoreHorizontal,
+  PackageCheck,
+  Send,
+  XCircle,
+} from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
@@ -12,7 +19,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog/dialog';
-import { Spinner } from '@/components/ui/spinner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown';
+import { Textarea } from '@/components/ui/textarea';
 
 import {
   useDepositDocument,
@@ -26,11 +40,19 @@ import { DocumentStatus } from '../types';
 interface DocumentStatusActionsProps {
   requestId: string;
   status: DocumentStatus;
+  /** Libellé accessible du menu « ⋯ » (ex. « Actions pour Baptême de A. Ndiaye »). */
+  ariaLabel?: string;
 }
 
+/**
+ * Workflow de traitement regroupé dans un menu « ⋯ » (pas de rangée de
+ * boutons). Les transitions disponibles dépendent strictement du statut —
+ * la logique métier (mutations, gardes) est inchangée.
+ */
 export function DocumentStatusActions({
   requestId,
   status,
+  ariaLabel = 'Actions sur la demande',
 }: DocumentStatusActionsProps) {
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
@@ -47,72 +69,59 @@ export function DocumentStatusActions({
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
-        {status === 'submitted' && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => startVerification.mutate(requestId)}
-            disabled={startVerification.isPending}
-          >
-            {startVerification.isPending ? (
-              <Spinner className="size-3" />
-            ) : (
-              <Send className="mr-1.5 size-3.5" />
-            )}
-            Démarrer vérification
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" aria-label={ariaLabel}>
+            <MoreHorizontal className="size-4" aria-hidden="true" />
           </Button>
-        )}
-
-        {(status === 'under_verification' || status === 'info_requested') && (
-          <>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setInfoOpen(true)}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          {status === 'submitted' && (
+            <DropdownMenuItem
+              disabled={startVerification.isPending}
+              onSelect={() => startVerification.mutate(requestId)}
             >
-              <Info className="mr-1.5 size-3.5" />
-              Demander info
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => validate.mutate({ requestId })}
-              disabled={validate.isPending}
-            >
-              {validate.isPending ? (
-                <Spinner className="size-3" />
-              ) : (
-                <CheckCircle className="mr-1.5 size-3.5" />
-              )}
-              Valider
-            </Button>
-          </>
-        )}
+              <Send className="mr-2 size-4" aria-hidden="true" />
+              Démarrer la vérification
+            </DropdownMenuItem>
+          )}
 
-        {status === 'validated' && (
-          <Button
-            size="sm"
-            onClick={() => deposit.mutate({ requestId })}
-            disabled={deposit.isPending}
+          {(status === 'under_verification' || status === 'info_requested') && (
+            <>
+              <DropdownMenuItem onSelect={() => setInfoOpen(true)}>
+                <Info className="mr-2 size-4" aria-hidden="true" />
+                Demander une information
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={validate.isPending}
+                onSelect={() => validate.mutate({ requestId })}
+              >
+                <CheckCircle className="mr-2 size-4" aria-hidden="true" />
+                Valider
+              </DropdownMenuItem>
+            </>
+          )}
+
+          {status === 'validated' && (
+            <DropdownMenuItem
+              disabled={deposit.isPending}
+              onSelect={() => deposit.mutate({ requestId })}
+            >
+              <PackageCheck className="mr-2 size-4" aria-hidden="true" />
+              Marquer déposé
+            </DropdownMenuItem>
+          )}
+
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+            onSelect={() => setRejectOpen(true)}
           >
-            {deposit.isPending ? (
-              <Spinner className="size-3" />
-            ) : (
-              <PackageCheck className="mr-1.5 size-3.5" />
-            )}
-            Marquer déposé
-          </Button>
-        )}
-
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={() => setRejectOpen(true)}
-        >
-          <XCircle className="mr-1.5 size-3.5" />
-          Rejeter
-        </Button>
-      </div>
+            <XCircle className="mr-2 size-4" aria-hidden="true" />
+            Rejeter
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Request info dialog */}
       <Dialog open={infoOpen} onOpenChange={setInfoOpen}>
@@ -123,11 +132,11 @@ export function DocumentStatusActions({
               Le requérant recevra un email avec votre message.
             </DialogDescription>
           </DialogHeader>
-          <textarea
+          <Textarea
             value={infoMessage}
             onChange={(e) => setInfoMessage(e.target.value)}
             rows={4}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            aria-label="Message pour le requérant"
             placeholder="Message pour le requérant..."
           />
           <DialogFooter>
@@ -147,12 +156,9 @@ export function DocumentStatusActions({
                 );
               }}
               disabled={!infoMessage.trim() || requestInfo.isPending}
+              isLoading={requestInfo.isPending}
             >
-              {requestInfo.isPending ? (
-                <Spinner className="size-4" />
-              ) : (
-                'Envoyer'
-              )}
+              Envoyer
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -167,11 +173,11 @@ export function DocumentStatusActions({
               Le requérant recevra un email avec le motif de rejet.
             </DialogDescription>
           </DialogHeader>
-          <textarea
+          <Textarea
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
             rows={3}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            aria-label="Motif du rejet"
             placeholder="Motif du rejet..."
           />
           <DialogFooter>
@@ -192,8 +198,9 @@ export function DocumentStatusActions({
                 );
               }}
               disabled={!rejectReason.trim() || reject.isPending}
+              isLoading={reject.isPending}
             >
-              {reject.isPending ? <Spinner className="size-4" /> : 'Rejeter'}
+              Rejeter
             </Button>
           </DialogFooter>
         </DialogContent>

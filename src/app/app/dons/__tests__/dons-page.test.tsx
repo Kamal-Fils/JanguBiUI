@@ -59,21 +59,26 @@ describe('DonsPage — bénéficiaire & paiement (C7c)', () => {
   test('le paiement en ligne est désactivé, les espèces actives par défaut', async () => {
     renderApp(<DonsPage />);
 
-    const method = (await screen.findByLabelText(
-      'Méthode de paiement',
-    )) as HTMLSelectElement;
-    expect(method.value).toBe('cash');
+    const method = await screen.findByRole('radiogroup', {
+      name: 'Méthode de paiement',
+    });
 
-    expect(within(method).getByRole('option', { name: /wave/i })).toBeDisabled();
+    // Espèces = seule méthode active, sélectionnée par défaut.
+    const cash = within(method).getByRole('radio', { name: /espèces/i });
+    expect(cash).toBeEnabled();
+    expect(cash).toHaveAttribute('aria-checked', 'true');
+
+    // Providers en ligne : désactivés, badge « Bientôt disponible ».
+    expect(within(method).getByRole('radio', { name: /wave/i })).toBeDisabled();
     expect(
-      within(method).getByRole('option', { name: /orange money/i }),
+      within(method).getByRole('radio', { name: /orange money/i }),
     ).toBeDisabled();
     expect(
-      within(method).getByRole('option', { name: /free money/i }),
+      within(method).getByRole('radio', { name: /free money/i }),
     ).toBeDisabled();
     expect(
-      within(method).getByRole('option', { name: /espèces/i }),
-    ).toBeEnabled();
+      within(method).getAllByText(/bientôt disponible/i),
+    ).toHaveLength(3);
   });
 
   test('le don envoie church_id (principale) + parish_id dérivé + cash', async () => {

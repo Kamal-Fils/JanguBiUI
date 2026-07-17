@@ -42,6 +42,15 @@ describe('EventDetail', () => {
     expect(screen.getByText(/Venez nombreux/i)).toBeInTheDocument();
   });
 
+  test('affiche le type et la portée (pills) avec les libellés du fil actus', async () => {
+    server.use(http.get(detailUrl, () => HttpResponse.json(makeEvent())));
+
+    renderApp(<EventDetail eventId={1} />);
+
+    expect(await screen.findByText('Messe')).toBeInTheDocument();
+    expect(screen.getByText('Paroisse')).toBeInTheDocument();
+  });
+
   test('affiche le lieu et l’organisateur', async () => {
     server.use(
       http.get(detailUrl, () =>
@@ -59,7 +68,7 @@ describe('EventDetail', () => {
     expect(screen.getByText('pere.senghor@jangubidev.sn')).toBeInTheDocument();
   });
 
-  test('état « Événement introuvable » sur 404', async () => {
+  test('état « Événement introuvable » (ErrorState + retry) sur 404', async () => {
     server.use(
       http.get(detailUrl, () =>
         HttpResponse.json({ message: 'Not found.' }, { status: 404 }),
@@ -69,7 +78,13 @@ describe('EventDetail', () => {
     renderApp(<EventDetail eventId={1} />);
 
     expect(
-      await screen.findByText('Événement introuvable.'),
+      await screen.findByText('Événement introuvable'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Réessayer/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /Retour à l'agenda/ }),
     ).toBeInTheDocument();
   });
 

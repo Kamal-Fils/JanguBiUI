@@ -200,8 +200,15 @@ export function ProfilContent() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center py-20">
-        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      <div
+        className="flex h-full items-center justify-center py-20"
+        role="status"
+      >
+        <Loader2
+          className="size-8 animate-spin text-muted-foreground"
+          aria-hidden="true"
+        />
+        <span className="sr-only">Chargement du profil…</span>
       </div>
     );
   }
@@ -314,7 +321,9 @@ export function ProfilContent() {
               disabled={isUpdating || isProfileSubmitting}
               className={primaryButtonClass}
             >
-              {isUpdating && <Loader2 className="size-4 animate-spin" />}
+              {isUpdating && (
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              )}
               Enregistrer
             </button>
           </form>
@@ -384,7 +393,7 @@ export function ProfilContent() {
               className={primaryButtonClass}
             >
               {isChangingPassword && (
-                <Loader2 className="size-4 animate-spin" />
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               )}
               Modifier le mot de passe
             </button>
@@ -408,7 +417,7 @@ export function ProfilContent() {
           title="Thème de l'application"
           icon={<Palette className="size-4" />}
         >
-          <div className="rounded-xl border border-border/70 bg-background/60 p-1">
+          <div className="rounded-xl border border-border/60 bg-background/60 p-1">
             <ThemeToggle variant="row" className="rounded-xl" />
           </div>
         </SectionCard>
@@ -424,9 +433,9 @@ export function ProfilContent() {
               type="button"
               onClick={() => logout()}
               disabled={isLoggingOut}
-              className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl border border-border/60 bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-border hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50"
             >
-              <LogOut className="size-4" />
+              <LogOut className="size-4" aria-hidden="true" />
               Se déconnecter
             </button>
           </div>
@@ -442,9 +451,9 @@ export function ProfilContent() {
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+              className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive transition-colors hover:border-destructive/50 hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
-              <Trash2 className="size-4" />
+              <Trash2 className="size-4" aria-hidden="true" />
               Supprimer mon compte
             </button>
           ) : (
@@ -457,7 +466,7 @@ export function ProfilContent() {
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                  className="flex-1 rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-border hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Annuler
                 </button>
@@ -466,11 +475,11 @@ export function ProfilContent() {
                   onClick={() => deleteAccount()}
                   disabled={isDeletingAccount}
                   className={cn(
-                    'flex flex-1 items-center justify-center gap-2 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:opacity-50',
+                    'flex flex-1 items-center justify-center gap-2 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50',
                   )}
                 >
                   {isDeletingAccount && (
-                    <Loader2 className="size-4 animate-spin" />
+                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                   )}
                   Confirmer
                 </button>

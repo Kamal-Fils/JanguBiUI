@@ -4,13 +4,15 @@ import Link from 'next/link';
 
 import { AdminPageLayout } from '@/components/layouts/admin-page-layout';
 import { Button } from '@/components/ui/button/button';
+import { Card, CardContent, CardEyebrow } from '@/components/ui/card/card';
+import { ErrorState } from '@/components/ui/error-state';
 import { paths } from '@/config/paths';
 import { useInvitations } from '@/features/clergy-accounts/api/get-invitations';
 import { InvitationList } from '@/features/clergy-accounts/components/invitation-list';
 import { canManageClergy } from '@/lib/authorization';
 
 export default function InvitationsPage() {
-  const { data, isLoading } = useInvitations();
+  const { data, isLoading, isError, refetch } = useInvitations();
 
   return (
     <AdminPageLayout
@@ -32,10 +34,22 @@ export default function InvitationsPage() {
         </div>
       }
     >
-      <InvitationList
-        invitations={data?.results ?? []}
-        isLoading={isLoading}
-      />
+      <Card variant="feature">
+        <CardContent className="p-4 sm:p-5">
+          <CardEyebrow className="mb-3">Suivi des invitations</CardEyebrow>
+          {isError ? (
+            <ErrorState
+              title="Impossible de charger les invitations"
+              onRetry={() => refetch()}
+            />
+          ) : (
+            <InvitationList
+              invitations={data?.results ?? []}
+              isLoading={isLoading}
+            />
+          )}
+        </CardContent>
+      </Card>
     </AdminPageLayout>
   );
 }
