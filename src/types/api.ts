@@ -85,7 +85,7 @@ export interface paths {
         put?: never;
         /**
          * Connexion JWT
-         * @description Authentifie l'utilisateur et retourne un access token (60 min) et un refresh token (7 jours). Le compte doit être actif ET l'email vérifié.
+         * @description Authentifie l'utilisateur et retourne un access token (30 min par défaut, réglable via JWT_ACCESS_TOKEN_LIFETIME_MINUTES) et un refresh token (7 jours). Le compte doit être actif ET l'email vérifié.
          */
         post: operations["v1_auth_jwt_login_create"];
         delete?: never;
@@ -105,7 +105,7 @@ export interface paths {
         put?: never;
         /**
          * Déconnexion (appareil courant)
-         * @description Blackliste le refresh token fourni. L'access token reste valide jusqu'à son expiration naturelle (60 min max). Pour révoquer tous les appareils, utiliser /logout-all/.
+         * @description Blackliste le refresh token fourni. L'access token reste valide jusqu'à son expiration naturelle (30 min max par défaut). Pour révoquer tous les appareils, utiliser /logout-all/.
          */
         post: operations["v1_auth_jwt_logout_create"];
         delete?: never;
@@ -552,6 +552,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/dashboards/analytics/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Analytique scopée (dons + fidèles) — curé / évêque / archevêque
+         * @description Analytique adaptative au rôle (curé→paroisse, évêque→diocèse, archevêque→
+         *     province). Flux de dons + fidèles, filtres spatio-temporels, bornée au périmètre.
+         */
+        get: operations["v1_dashboards_analytics_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboards/analytics/activity/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Matrice d'activité + files en souffrance (par périmètre)
+         * @description Matrice d'activité par sous-entité (paroisse/diocèse/église) + files en
+         *     souffrance (documents/intentions). Même résolution de périmètre que /analytics/.
+         */
+        get: operations["v1_dashboards_analytics_activity_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/dashboards/diocese/{diocese_id}/": {
         parameters: {
             query?: never;
@@ -561,6 +603,23 @@ export interface paths {
         };
         /** Tableau de bord diocésain (évêque) */
         get: operations["v1_dashboards_diocese_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboards/global/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Vue d'ensemble plateforme (super-admin uniquement) */
+        get: operations["v1_dashboards_global_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -612,6 +671,23 @@ export interface paths {
         };
         /** Tableau de bord de ma paroisse (curé connecté) */
         get: operations["v1_dashboards_my_parish_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboards/my-province/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tableau de bord de ma province (archevêque connecté) */
+        get: operations["v1_dashboards_my_province_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1019,7 +1095,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Liturgie pour une date spécifique */
+        /** Liturgie pour une date (lectures pour tous, offices clergé) */
         get: operations["v1_liturgy_date_retrieve"];
         put?: never;
         post?: never;
@@ -1036,7 +1112,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Détail d'un office liturgique */
+        /** Détail d'un office liturgique (clergé uniquement) */
         get: operations["v1_liturgy_offices_retrieve"];
         put?: never;
         post?: never;
@@ -1070,7 +1146,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Liturgie du jour complet (messe + offices) */
+        /** Liturgie du jour complet (lectures pour tous, offices clergé) */
         get: operations["v1_liturgy_today_retrieve"];
         put?: never;
         post?: never;
@@ -1110,6 +1186,10 @@ export interface paths {
         /**
          * Informations sur la date liturgique
          * @description Common date/zone parsing and AELF auto-sync for liturgy endpoints.
+         *
+         *     ApiAuthMixin est INDISPENSABLE : sans lui, le Bearer JWT n'était pas lu
+         *     (pas de JWTAuthentication) et les endpoints clergé renvoyaient 401 à tout
+         *     client SPA/mobile authentifié. Les vues publiques gardent AllowAny.
          */
         get: operations["v1_liturgy_v1_informations_retrieve"];
         put?: never;
@@ -1170,6 +1250,10 @@ export interface paths {
         /**
          * Lectures de la Messe du jour
          * @description Common date/zone parsing and AELF auto-sync for liturgy endpoints.
+         *
+         *     ApiAuthMixin est INDISPENSABLE : sans lui, le Bearer JWT n'était pas lu
+         *     (pas de JWTAuthentication) et les endpoints clergé renvoyaient 401 à tout
+         *     client SPA/mobile authentifié. Les vues publiques gardent AllowAny.
          */
         get: operations["v1_liturgy_v1_messes_list"];
         put?: never;
@@ -1409,6 +1493,30 @@ export interface paths {
         post?: never;
         /** Débloquer un utilisateur */
         delete: operations["v1_messaging_blocks_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/messaging/cgu/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Statut d'acceptation des CGU de messagerie
+         * @description CGU de messagerie globales : une acceptation vaut pour toutes les conversations.
+         */
+        get: operations["v1_messaging_cgu_retrieve"];
+        put?: never;
+        /**
+         * Accepter les CGU de messagerie (global, idempotent)
+         * @description CGU de messagerie globales : une acceptation vaut pour toutes les conversations.
+         */
+        post: operations["v1_messaging_cgu_create"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2019,6 +2127,98 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/notifications/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lister mes notifications */
+        get: operations["v1_notifications_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/{notification_id}/read/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marquer une notification comme lue */
+        post: operations["v1_notifications_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/devices/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enregistrer un token push (idempotent, réassigne l'appareil)
+         * @description Enregistrement des tokens push de l'app mobile (React Native).
+         */
+        post: operations["v1_notifications_devices_create"];
+        /**
+         * Désenregistrer un token push (déconnexion)
+         * @description Enregistrement des tokens push de l'app mobile (React Native).
+         */
+        delete: operations["v1_notifications_devices_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/read-all/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marquer toutes mes notifications comme lues */
+        post: operations["v1_notifications_read_all_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/unread-count/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Nombre de notifications non lues (badge) */
+        get: operations["v1_notifications_unread_count_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/org/churches/": {
         parameters: {
             query?: never;
@@ -2119,10 +2319,12 @@ export interface paths {
         get: operations["v1_org_parishes_retrieve_2"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Supprimer une paroisse (super_admin) */
+        delete: operations["v1_org_parishes_destroy"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Modifier une paroisse (super_admin) */
+        patch: operations["v1_org_parishes_partial_update"];
         trace?: never;
     };
     "/api/v1/org/provinces/": {
@@ -2396,6 +2598,178 @@ export interface paths {
          *             which are recited at the very beginning and very end of the entire Rosary.
          */
         get: operations["v1_rosary_today_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/spiritual/reflections/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historique des réflexions visibles (scopé aux appartenances) */
+        get: operations["v1_spiritual_reflections_retrieve"];
+        put?: never;
+        /** Publier / mettre à jour ma réflexion (clergé, scopée) */
+        post: operations["v1_spiritual_reflections_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/spiritual/reflections/{reflection_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'une réflexion */
+        get: operations["v1_spiritual_reflections_retrieve_2"];
+        put?: never;
+        post?: never;
+        /** Supprimer une réflexion (auteur ou admin) */
+        delete: operations["v1_spiritual_reflections_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/spiritual/reflections/my-today/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ma réflexion du jour (auteur connecté) */
+        get: operations["v1_spiritual_reflections_my_today_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/spiritual/reflections/today/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Réflexion pastorale du jour (scopée aux appartenances de l'utilisateur) */
+        get: operations["v1_spiritual_reflections_today_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transfers/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Soumettre une demande de transfert paroissial */
+        post: operations["v1_transfers_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transfers/{transfer_id}/acknowledge/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accuser réception et finaliser un transfert (admin destination) */
+        post: operations["v1_transfers_acknowledge_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transfers/{transfer_id}/approve/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approuver un transfert (admin paroisse d'origine) */
+        post: operations["v1_transfers_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transfers/{transfer_id}/reject/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rejeter un transfert (admin paroisse d'origine) */
+        post: operations["v1_transfers_reject_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transfers/admin/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Transferts des paroisses administrées (paginé) */
+        get: operations["v1_transfers_admin_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/transfers/my-request/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ma demande de transfert courante (404 si aucune) */
+        get: operations["v1_transfers_my_request_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2943,6 +3317,19 @@ export interface components {
             category_id: number;
             /** @default article */
             content_type: components["schemas"]["ContentTypeD15Enum"];
+            /**
+             * @description 'html' pour l'éditeur riche (sanitizé côté serveur), 'text' sinon.
+             *
+             *     * `text` - Texte brut
+             *     * `html` - HTML riche
+             * @default text
+             */
+            content_format: components["schemas"]["ContentFormatEnum"];
+            /**
+             * Format: date
+             * @description Annonces : date du jour concerné (ex. dimanche à venir).
+             */
+            announcement_date?: string | null;
             /** @default  */
             excerpt: string;
             cover_image_id?: number | null;
@@ -2962,12 +3349,19 @@ export interface components {
             excerpt?: string;
             /** Contenu */
             content: string;
+            /** Format du contenu */
+            content_format?: components["schemas"]["ContentFormatEnum"];
             readonly cover_image_url: string | null;
             readonly category: components["schemas"]["ArticleCategoryOutput"];
             readonly author_name: string;
             /** Type de contenu */
             content_type?: components["schemas"]["ContentTypeD15Enum"];
             readonly content_type_label: string;
+            /**
+             * Date de l'annonce
+             * Format: date
+             */
+            announcement_date?: string | null;
             /** Portée */
             scope_type?: components["schemas"]["ScopeType349Enum"];
             readonly scope_type_label: string;
@@ -3011,6 +3405,11 @@ export interface components {
             /** Type de contenu */
             content_type?: components["schemas"]["ContentTypeD15Enum"];
             readonly content_type_label: string;
+            /**
+             * Date de l'annonce
+             * Format: date
+             */
+            announcement_date?: string | null;
             /** Portée */
             scope_type?: components["schemas"]["ScopeType349Enum"];
             readonly scope_type_label: string;
@@ -3224,6 +3623,12 @@ export interface components {
             /** Format: date-time */
             started_at: string;
         };
+        /**
+         * @description * `text` - Texte brut
+         *     * `html` - HTML riche
+         * @enum {string}
+         */
+        ContentFormatEnum: "text" | "html";
         /**
          * @description * `announcement` - Annonce
          *     * `article` - Article
@@ -3787,6 +4192,11 @@ export interface components {
             /** Format: uuid */
             reply_to_id?: string | null;
         };
+        MessagingCguStatus: {
+            accepted: boolean;
+            /** Format: date-time */
+            accepted_at: string | null;
+        };
         MonProfil: {
             readonly id: number;
             /** Format: email */
@@ -3838,6 +4248,9 @@ export interface components {
             read_at?: string | null;
             /** Format: date-time */
             created_at?: string;
+        };
+        NotificationUnreadCount: {
+            unread: number;
         };
         /** @description Serializer for Liturgy of the Hours texts. */
         Office: {
@@ -3917,6 +4330,14 @@ export interface components {
             previous: string | null;
             results: components["schemas"]["ProvinceOutput"][];
         };
+        PaginatedReflectionOutputList: {
+            limit: number;
+            offset: number;
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["ReflectionOutput"][];
+        };
         PaginatedRegistrationOutputList: {
             limit: number;
             offset: number;
@@ -3924,6 +4345,14 @@ export interface components {
             next: string | null;
             previous: string | null;
             results: components["schemas"]["RegistrationOutput"][];
+        };
+        PaginatedTransferOutputList: {
+            limit: number;
+            offset: number;
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["TransferOutput"][];
         };
         ParishCreateInput: {
             name: string;
@@ -3960,6 +4389,9 @@ export interface components {
             title?: string;
             excerpt?: string;
             content?: string;
+            content_format?: components["schemas"]["ContentFormatEnum"];
+            /** Format: date */
+            announcement_date?: string | null;
             category_id?: number;
             cover_image_id?: number | null;
         };
@@ -3990,6 +4422,11 @@ export interface components {
             /** Format: uri */
             avatar?: string | null;
         };
+        PatchedParishUpdateInput: {
+            name?: string;
+            city?: string;
+            address?: string;
+        };
         PatchedPriestProfileUpdateInput: {
             accepts_pastoral_chat?: boolean;
             ordination_year?: number;
@@ -4011,6 +4448,13 @@ export interface components {
          * @enum {string}
          */
         PaymentProviderEnum: "wave" | "orange_money" | "free_money" | "cash";
+        /**
+         * @description * `ios` - ios
+         *     * `android` - android
+         *     * `web` - web
+         * @enum {string}
+         */
+        PlatformEnum: "ios" | "android" | "web";
         Prayer: {
             readonly id: number;
             type: components["schemas"]["TypeEnum"];
@@ -4051,16 +4495,26 @@ export interface components {
             /** Pays */
             country?: string;
         };
+        PushDeviceInput: {
+            platform: components["schemas"]["PlatformEnum"];
+            token: string;
+        };
+        PushDeviceOutput: {
+            id: number;
+            platform: string;
+            /** Format: date-time */
+            created_at: string;
+        };
         RagQuery: {
             /** @description The question or prompt to ask the assistant (e.g., 'Quel mystère aujourd'hui et as-tu un prêtre dispo à Mbour ?') */
             query: string;
         };
         RagResponse: {
-            /** @description The generated response from the LLM. */
+            /** @description La réponse (extractive par défaut, ou générée si activé). */
             answer: string;
-            /** @description The raw context retrieved from the database. */
+            /** @description Le contexte brut récupéré en base (peut être vide). */
             context: string;
-            /** @description The metadata showing how the LLM routed the question. */
+            /** @description Métadonnée de routage (intent/domains/entities). */
             intent: {
                 [key: string]: unknown;
             };
@@ -4109,6 +4563,41 @@ export interface components {
          * @enum {string}
          */
         RecipientScopeEnum: "individual" | "parish_clergy" | "diocese_clergy" | "province_bishops";
+        ReflectionOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Titre */
+            title?: string;
+            /** Contenu */
+            content: string;
+            /**
+             * Date de la réflexion
+             * Format: date
+             */
+            reflection_date: string;
+            /** Portée */
+            scope_type?: components["schemas"]["ScopeType349Enum"];
+            readonly scope_parish_id: number | null;
+            readonly scope_diocese_id: number | null;
+            readonly scope_church_id: number | null;
+            readonly author_name: string;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        ReflectionUpsertInput: {
+            content: string;
+            /** Format: date */
+            reflection_date?: string;
+            /** @default  */
+            title: string;
+            /** @default parish */
+            scope_type: components["schemas"]["ScopeType349Enum"];
+            scope_parish_id?: number | null;
+            scope_diocese_id?: number | null;
+            scope_church_id?: number | null;
+        };
         RegistrationOutput: {
             id: number;
             readonly user_email: string;
@@ -4294,6 +4783,38 @@ export interface components {
             day: components["schemas"]["RosaryDay"];
             standalone_prayers: components["schemas"]["Prayer"][];
         };
+        TransferCreateInput: {
+            destination_parish_id: number;
+            /** @default  */
+            reason: string;
+        };
+        TransferOutput: {
+            readonly id: number;
+            /** Statut */
+            status?: components["schemas"]["TransferOutputStatusEnum"];
+            /** Motif */
+            reason?: string;
+            /** Motif de rejet */
+            rejection_reason?: string;
+            readonly origin_parish_name: string | null;
+            readonly destination_parish_name: string | null;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `pending` - En attente
+         *     * `approved_by_origin` - Approuvée par la paroisse d'origine
+         *     * `acknowledged_by_destination` - Accusée par la paroisse de destination
+         *     * `completed` - Finalisée
+         *     * `rejected` - Rejetée
+         * @enum {string}
+         */
+        TransferOutputStatusEnum: "pending" | "approved_by_origin" | "acknowledged_by_destination" | "completed" | "rejected";
+        TransferRejectInput: {
+            reason: string;
+        };
         /**
          * @description * `SIGN_OF_CROSS` - Sign of Cross
          *     * `CREED` - Apostles Creed
@@ -4322,6 +4843,8 @@ export interface components {
             /** Format: email */
             email: string;
             role: string;
+            pastoral_role: string | null;
+            onboarding_state: string;
             is_admin: boolean;
         };
         UserJwtLogoutInput: {
@@ -4342,6 +4865,7 @@ export interface components {
             email: string;
             phone_number: string;
             role: string;
+            pastoral_role: string | null;
             is_active: boolean;
             is_verified: boolean;
             is_admin: boolean;
@@ -5322,6 +5846,78 @@ export interface operations {
             };
         };
     };
+    v1_dashboards_analytics_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Drill-down : diocèse (dans le périmètre) */
+                diocese?: number;
+                /** @description Début (ISO) — prioritaire sur period */
+                from?: string;
+                /** @description day|week|month (défaut month) */
+                granularity?: string;
+                /** @description Drill-down : paroisse (dans le périmètre) */
+                parish?: number;
+                /** @description today|week|month|quarter|year (défaut year) */
+                period?: string;
+                /** @description wave|orange_money|free_money|cash */
+                provider?: string;
+                /** @description Statut don (défaut confirmed) */
+                status?: string;
+                /** @description Fin (ISO) */
+                to?: string;
+                /** @description Type de don (church_tithe, sunday_collection, …) */
+                type?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    v1_dashboards_analytics_activity_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Drill-down diocèse */
+                diocese?: number;
+                /** @description Début (ISO) */
+                from?: string;
+                /** @description Drill-down paroisse */
+                parish?: number;
+                /** @description today|week|month|quarter|year */
+                period?: string;
+                /** @description Fin (ISO) */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
     v1_dashboards_diocese_retrieve: {
         parameters: {
             query?: never;
@@ -5329,6 +5925,27 @@ export interface operations {
             path: {
                 diocese_id: number;
             };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    v1_dashboards_global_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -5388,6 +6005,27 @@ export interface operations {
         };
     };
     v1_dashboards_my_parish_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    v1_dashboards_my_province_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -6566,6 +7204,44 @@ export interface operations {
             };
         };
     };
+    v1_messaging_cgu_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessagingCguStatus"];
+                };
+            };
+        };
+    };
+    v1_messaging_cgu_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessagingCguStatus"];
+                };
+            };
+        };
+    };
     v1_messaging_clerical_create: {
         parameters: {
             query?: never;
@@ -6662,7 +7338,10 @@ export interface operations {
     };
     v1_messaging_conversations_list: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Filtrer par nom ou email d'un participant */
+                search?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -7104,6 +7783,8 @@ export interface operations {
             query?: {
                 /** @description Filtrer par slug de catégorie */
                 category?: string;
+                /** @description Filtrer par type de contenu */
+                content_type?: "announcement" | "article" | "pastoral_letter";
                 /** @description Nombre de résultats (défaut 20) */
                 limit?: number;
                 /** @description Décalage pagination */
@@ -7153,6 +7834,8 @@ export interface operations {
             query?: {
                 /** @description Filtrer par slug catégorie */
                 category?: string;
+                /** @description Filtrer par type de contenu */
+                content_type?: "announcement" | "article" | "pastoral_letter";
                 /** @description Nombre de résultats */
                 limit?: number;
                 /** @description Décalage pagination */
@@ -7345,6 +8028,8 @@ export interface operations {
             query?: {
                 /** @description Filtrer par slug de catégorie */
                 category?: string;
+                /** @description Filtrer par type de contenu */
+                content_type?: "announcement" | "article" | "pastoral_letter";
                 /** @description Nombre de résultats */
                 limit?: number;
                 /** @description Décalage pagination */
@@ -7375,6 +8060,8 @@ export interface operations {
             query?: {
                 /** @description Filtrer par slug de catégorie */
                 category?: string;
+                /** @description Filtrer par type de contenu */
+                content_type?: "announcement" | "article" | "pastoral_letter";
                 /** @description Nombre de résultats */
                 limit?: number;
                 /** @description Décalage pagination */
@@ -7407,6 +8094,8 @@ export interface operations {
             query?: {
                 /** @description Filtrer par slug de catégorie */
                 category?: string;
+                /** @description Filtrer par type de contenu */
+                content_type?: "announcement" | "article" | "pastoral_letter";
                 /** @description Nombre de résultats */
                 limit?: number;
                 /** @description Décalage pagination */
@@ -7435,6 +8124,8 @@ export interface operations {
             query?: {
                 /** @description Filtrer par slug de catégorie */
                 category?: string;
+                /** @description Filtrer par type de contenu */
+                content_type?: "announcement" | "article" | "pastoral_letter";
                 /** @description Nombre de résultats */
                 limit?: number;
                 /** @description Décalage pagination */
@@ -7456,6 +8147,130 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedArticleListOutputList"];
+                };
+            };
+        };
+    };
+    v1_notifications_list: {
+        parameters: {
+            query?: {
+                /** @description Si true, retourne uniquement les notifications non lues */
+                unread_only?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationOutput"][];
+                };
+            };
+        };
+    };
+    v1_notifications_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                notification_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationOutput"];
+                };
+            };
+        };
+    };
+    v1_notifications_devices_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PushDeviceInput"];
+                "multipart/form-data": components["schemas"]["PushDeviceInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PushDeviceInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PushDeviceOutput"];
+                };
+            };
+        };
+    };
+    v1_notifications_devices_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_notifications_read_all_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationUnreadCount"];
+                };
+            };
+        };
+    };
+    v1_notifications_unread_count_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationUnreadCount"];
                 };
             };
         };
@@ -7695,6 +8510,53 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParishOutput"];
+                };
+            };
+        };
+    };
+    v1_org_parishes_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                parish_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_org_parishes_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                parish_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedParishUpdateInput"];
+                "multipart/form-data": components["schemas"]["PatchedParishUpdateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedParishUpdateInput"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -8030,6 +8892,269 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TodayRosaryOutput"];
+                };
+            };
+        };
+    };
+    v1_spiritual_reflections_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Nombre de résultats (défaut 20) */
+                limit?: number;
+                /** @description Décalage pagination */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedReflectionOutputList"];
+                };
+            };
+        };
+    };
+    v1_spiritual_reflections_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReflectionUpsertInput"];
+                "multipart/form-data": components["schemas"]["ReflectionUpsertInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReflectionUpsertInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReflectionOutput"];
+                };
+            };
+        };
+    };
+    v1_spiritual_reflections_retrieve_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reflection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReflectionOutput"];
+                };
+            };
+        };
+    };
+    v1_spiritual_reflections_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reflection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_spiritual_reflections_my_today_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReflectionOutput"];
+                };
+            };
+        };
+    };
+    v1_spiritual_reflections_today_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReflectionOutput"];
+                };
+            };
+        };
+    };
+    v1_transfers_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransferCreateInput"];
+                "multipart/form-data": components["schemas"]["TransferCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["TransferCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransferOutput"];
+                };
+            };
+        };
+    };
+    v1_transfers_acknowledge_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                transfer_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransferOutput"];
+                };
+            };
+        };
+    };
+    v1_transfers_approve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                transfer_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransferOutput"];
+                };
+            };
+        };
+    };
+    v1_transfers_reject_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                transfer_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransferRejectInput"];
+                "multipart/form-data": components["schemas"]["TransferRejectInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["TransferRejectInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransferOutput"];
+                };
+            };
+        };
+    };
+    v1_transfers_admin_retrieve: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedTransferOutputList"];
+                };
+            };
+        };
+    };
+    v1_transfers_my_request_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransferOutput"];
                 };
             };
         };

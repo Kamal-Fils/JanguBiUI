@@ -26,7 +26,11 @@ import { ApiError } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 
 import { useAcceptMessagingCgu } from '../api/accept-cgu';
-import { useGetMessages } from '../api/get-messages';
+import {
+  MESSAGES_PAGE_SIZE,
+  useGetMessages,
+  useLoadOlderMessages,
+} from '../api/get-messages';
 import { useMarkRead } from '../api/mark-read';
 import { OPTIMISTIC_ID_PREFIX, useSendMessage } from '../api/send-message';
 import { useChatSocket } from '../hooks/use-chat-socket';
@@ -275,6 +279,9 @@ export function ChatWindow({
   const hasScrolledOnceRef = useRef(false);
 
   const { data, isLoading, error, refetch } = useGetMessages(conversationId);
+  const { mutate: loadOlder, isPending: isLoadingOlder } =
+    useLoadOlderMessages(conversationId);
+  const [reachedStart, setReachedStart] = useState(false);
   const { mutate: send, isPending } = useSendMessage(conversationId);
   const { mutate: markRead } = useMarkRead(conversationId);
   const { mutate: acceptCgu, isPending: isAcceptingCgu } =
@@ -358,6 +365,25 @@ export function ChatWindow({
 
   const participantInitials = getInitials(participantName ?? '?');
   const messages = data?.results ?? [];
+  const canLoadOlder = !reachedStart && messages.length >= MESSAGES_PAGE_SIZE;
+
+  // Charge la page précédente (before_id) en préservant la position de lecture
+  // malgré le contenu prépendu en haut du fil.
+  const handleLoadOlder = useCallback(() => {
+    const oldest = messages[0];
+    const el = scrollRef.current;
+    if (!oldest || !el) return;
+    const prevHeight = el.scrollHeight;
+    loadOlder(oldest.id, {
+      onSuccess: (older) => {
+        if (older.results.length < MESSAGES_PAGE_SIZE) setReachedStart(true);
+        requestAnimationFrame(() => {
+          const node = scrollRef.current;
+          if (node) node.scrollTop += node.scrollHeight - prevHeight;
+        });
+      },
+    });
+  }, [messages, loadOlder]);
 
   return (
     <div className="flex h-dvh flex-col md:h-full">
@@ -443,6 +469,20 @@ export function ChatWindow({
             <p className="py-8 text-center text-sm text-muted-foreground">
               Commencez la conversation…
             </p>
+          )}
+          {!error && canLoadOlder && (
+            <div className="flex justify-center pb-3">
+              <button
+                type="button"
+                onClick={handleLoadOlder}
+                disabled={isLoadingOlder}
+                className="rounded-full border border-border bg-background px-4 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-60"
+              >
+                {isLoadingOlder
+                  ? 'Chargement…'
+                  : 'Voir les messages précédents'}
+              </button>
+            </div>
           )}
           {!error && (
             <div className="flex flex-col">

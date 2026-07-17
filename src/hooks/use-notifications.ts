@@ -21,7 +21,7 @@ const parseNotifications = (data: unknown): Notification[] => {
 };
 
 export const getNotifications = (): Promise<Notification[]> =>
-  api.get<unknown>('/v1/messaging/notifications/').then(parseNotifications);
+  api.get<unknown>('/v1/notifications/').then(parseNotifications);
 
 export const useNotifications = () => {
   const { data: user } = useUser();
@@ -38,7 +38,7 @@ export const useMarkNotificationRead = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (notificationId: string) =>
-      api.post<unknown>(`/v1/messaging/notifications/${notificationId}/read/`),
+      api.post<unknown>(`/v1/notifications/${notificationId}/read/`),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
