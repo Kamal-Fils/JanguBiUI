@@ -30,7 +30,9 @@ export function AppHeader() {
   const showHeading = meta.showHeading !== false;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background-surface/90 backdrop-blur-md">
+    // Le sticky est porté par le conteneur d'en-têtes du shell (AppShellLayout)
+    // pour empiler proprement AppTopBar + AppHeader + sous-nav.
+    <header className="border-b border-border bg-background-surface/90 backdrop-blur-md">
       {/* Desktop — fil d'Ariane (routes profondes) + bloc titre (sections/listes).
           Les actions globales restent dans la sidebar jusqu'à la bascule (1C-b
           dernier lot). */}
