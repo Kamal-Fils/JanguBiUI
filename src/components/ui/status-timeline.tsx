@@ -8,6 +8,18 @@ export interface TimelineStep {
   label: string;
   description?: React.ReactNode;
   timestamp?: React.ReactNode;
+  /**
+   * Acteur de l'étape, en libellé générique (« Par le secrétariat paroissial »).
+   * Le composant ne connaît aucun rôle métier : la chaîne est fournie par la
+   * feature appelante.
+   */
+  actor?: React.ReactNode;
+  /**
+   * Contenu riche rendu au pied du nœud (citation, formulaire de réponse…).
+   * Permet de traiter une branche du workflow à l'endroit où elle se produit
+   * plutôt que dans un encart détaché.
+   */
+  content?: React.ReactNode;
   /** Icône du nœud (défaut : check si done, point sinon). */
   icon?: React.ReactNode;
   state: 'done' | 'current' | 'upcoming';
@@ -28,6 +40,11 @@ const toneRing: Record<StatusTone, string> = {
 interface StatusTimelineProps {
   steps: TimelineStep[];
   className?: string;
+  /**
+   * Halo pulsant sur le nœud courant. Opt-in pour ne pas modifier les timelines
+   * existantes ; toujours coupé sous `prefers-reduced-motion`.
+   */
+  animateCurrent?: boolean;
   /** Nom accessible de la liste (lecteurs d'écran). */
   'aria-label'?: string;
 }
@@ -39,6 +56,7 @@ interface StatusTimelineProps {
 export function StatusTimeline({
   steps,
   className,
+  animateCurrent = false,
   'aria-label': ariaLabel = 'Progression',
 }: StatusTimelineProps) {
   return (
@@ -50,7 +68,7 @@ export function StatusTimeline({
         const current = step.state === 'current';
         return (
           <li
-            key={step.label}
+            key={`${step.label}-${i}`}
             aria-current={current ? 'step' : undefined}
             className="relative flex gap-3.5 pb-6 last:pb-0"
           >
@@ -74,15 +92,25 @@ export function StatusTimeline({
                 current && 'ring-offset-0 ring-2',
               )}
             >
-              {step.icon ??
-                (done ? (
-                  <Check className="size-4" />
-                ) : (
-                  <span className="size-2 rounded-full bg-current" />
-                ))}
+              {current && animateCurrent && (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 animate-ping rounded-full bg-current opacity-40 motion-reduce:hidden"
+                />
+              )}
+              <span className="relative flex items-center justify-center">
+                {step.icon ??
+                  (done ? (
+                    <Check className="size-4" />
+                  ) : (
+                    <span className="size-2 rounded-full bg-current" />
+                  ))}
+              </span>
             </span>
             {/* Contenu */}
-            <div className={cn('min-w-0 pt-1', current && 'font-semibold')}>
+            <div
+              className={cn('min-w-0 flex-1 pt-1', current && 'font-semibold')}
+            >
               <p
                 className={cn(
                   'text-sm',
@@ -93,6 +121,11 @@ export function StatusTimeline({
               >
                 {step.label}
               </p>
+              {step.actor && (
+                <p className="mt-0.5 text-xs font-normal text-muted-foreground">
+                  {step.actor}
+                </p>
+              )}
               {step.description && (
                 <p className="mt-0.5 text-xs font-normal text-muted-foreground">
                   {step.description}
@@ -102,6 +135,9 @@ export function StatusTimeline({
                 <p className="mt-0.5 text-xs font-normal text-muted-foreground">
                   {step.timestamp}
                 </p>
+              )}
+              {step.content && (
+                <div className="font-normal">{step.content}</div>
               )}
             </div>
           </li>
