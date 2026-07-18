@@ -15,6 +15,14 @@ export interface PageMeta {
    * d'Ariane est alors rendu sur desktop.
    */
   showHeading?: boolean;
+  /**
+   * Destination du bouton retour de l'app-bar mobile (parent logique de la
+   * page, ex. `/app/chapelet` pour `/app/chapelet/communautaire`). Quand il est
+   * fourni, le retour navigue TOUJOURS vers cette route (prévisible, y compris
+   * en arrivée par lien profond) au lieu de `router.back()`, et l'affordance
+   * est affichée même si le fil d'Ariane ne détecte pas de route profonde.
+   */
+  backHref?: string;
 }
 
 const PageMetaStateContext = React.createContext<PageMeta | null>(null);
@@ -54,9 +62,12 @@ export function useRegisterPageMeta(meta: PageMeta | null): void {
   const subtitle = meta?.subtitle;
   const leafLabel = meta?.leafLabel;
   const showHeading = meta?.showHeading;
+  const backHref = meta?.backHref;
 
   React.useEffect(() => {
-    setMeta(title ? { title, subtitle, leafLabel, showHeading } : null);
+    setMeta(
+      title ? { title, subtitle, leafLabel, showHeading, backHref } : null,
+    );
     return () => setMeta(null);
-  }, [setMeta, title, subtitle, leafLabel, showHeading]);
+  }, [setMeta, title, subtitle, leafLabel, showHeading, backHref]);
 }

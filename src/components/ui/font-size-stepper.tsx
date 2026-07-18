@@ -15,8 +15,8 @@ interface FontSizeStepperProps {
 }
 
 /**
- * Réglage de la taille du texte de lecture — un seul composant pour les 4
- * toolbars dupliquées (Bible today/masse/books, reading-view).
+ * Réglage de la taille du texte de lecture — composant partagé par les
+ * toolbars de lecture (vue Bible, liturgie…).
  */
 export function FontSizeStepper({
   value,

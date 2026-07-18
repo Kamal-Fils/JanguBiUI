@@ -44,7 +44,10 @@ export default function ClergeMessagesPage() {
     }
   }, [user, isLoading, router]);
 
-  useRegisterPageMeta({ title: 'Messages inter-clergé' });
+  useRegisterPageMeta({
+    title: 'Messages inter-clergé',
+    backHref: paths.app.clerge.root.getHref(),
+  });
 
   if (isLoading || !isClergy(user)) return null;
 

@@ -53,6 +53,7 @@ export function EventDetail({ eventId }: EventDetailProps) {
     title: event?.title ?? 'Événement',
     leafLabel: event?.title,
     showHeading: false,
+    backHref: paths.app.agenda.getHref(),
   });
 
   if (isLoading) return <EventDetailSkeleton />;

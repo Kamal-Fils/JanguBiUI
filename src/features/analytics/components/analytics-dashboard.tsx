@@ -20,6 +20,7 @@ import { FilterPills } from '@/components/ui/filter-pills';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatCard } from '@/components/ui/stat-card';
+import { paths } from '@/config/paths';
 import { ApiError } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 
@@ -136,6 +137,7 @@ export function AnalyticsDashboard() {
   useRegisterPageMeta({
     title: 'Analytique',
     subtitle: 'Flux de dons et de fidèles sur votre périmètre',
+    backHref: paths.app.clerge.root.getHref(),
   });
 
   const set = (patch: Partial<AnalyticsFilters>) =>

@@ -43,6 +43,7 @@ export default function ClergeIntentionsPage() {
   useRegisterPageMeta({
     title: 'Intentions reçues',
     subtitle: 'Recevoir et traiter les intentions de messe de votre paroisse',
+    backHref: paths.app.clerge.root.getHref(),
   });
 
   const intentions = useMemo(() => data?.results ?? [], [data]);

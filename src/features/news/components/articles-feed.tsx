@@ -2,6 +2,7 @@
 
 import { Clock, Eye, Newspaper } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 import { PageHeader } from '@/components/layouts/page-header';
@@ -10,7 +11,6 @@ import { ErrorState } from '@/components/ui/error-state';
 import { MediaCard } from '@/components/ui/media-card';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 import { formatFrDate } from '@/utils/format-date';
 
 import { useFeedArticles } from '../api/get-articles';
@@ -24,15 +24,24 @@ import {
   type ScopeFilterValue,
 } from './news-scope-filter';
 
-// Onglets par type de contenu (retour testeurs n°3) — filtre serveur.
-type TypeFilter = 'all' | ContentType;
+// Filtre par type de contenu (V4-1B1) — état d'URL piloté par la sidebar
+// (sous-navs « Actualité » : /app/actus?type=article|announcement|pastoral_letter).
+// Le client rejette les onglets dans la page : plus de tablist interne.
+const TYPE_PARAM = 'type';
 
-const TYPE_TABS: { key: TypeFilter; label: string }[] = [
-  { key: 'all', label: 'Tout' },
-  { key: 'article', label: 'Articles' },
-  { key: 'announcement', label: 'Annonces' },
-  { key: 'pastoral_letter', label: 'Lettres pastorales' },
-];
+const TYPE_LABELS: Record<ContentType, string> = {
+  article: 'Articles',
+  announcement: 'Annonces',
+  pastoral_letter: 'Lettres pastorales',
+};
+
+function isContentType(value: string | null): value is ContentType {
+  return (
+    value === 'article' ||
+    value === 'announcement' ||
+    value === 'pastoral_letter'
+  );
+}
 
 /** Dimanche à venir (aujourd'hui si on est dimanche), au format ISO. */
 function upcomingSundayIso(): string {
@@ -82,11 +91,16 @@ export function ArticlesFeed() {
   // Fil AGRÉGÉ (Chantier 7b) filtrable par portée : « Tous » = l'agrégat inchangé,
   // sinon le filtre serveur (?scope_type=&scope_id=) restreint à la portée choisie.
   const [scope, setScope] = useState<ScopeFilterValue>(ALL_SCOPE);
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  // Filtre par type : lu depuis l'URL (?type=…). Param absent ou inconnu → tout.
+  const searchParams = useSearchParams();
+  const rawType = searchParams?.get(TYPE_PARAM) ?? null;
+  const typeFilter: ContentType | null = isContentType(rawType)
+    ? rawType
+    : null;
   const { data, isLoading, isError, refetch } = useFeedArticles({
     limit: 20,
     ...scopeFilterToParams(scope),
-    ...(typeFilter !== 'all' ? { content_type: typeFilter } : {}),
+    ...(typeFilter ? { content_type: typeFilter } : {}),
   });
 
   const articles = data?.results ?? [];
@@ -108,7 +122,12 @@ export function ArticlesFeed() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader title="Actualité" subtitle="La vie de l'Église" />
+      <PageHeader
+        title={
+          typeFilter ? `Actualité — ${TYPE_LABELS[typeFilter]}` : 'Actualité'
+        }
+        subtitle="La vie de l'Église"
+      />
 
       <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
         <SectionHeader
@@ -116,31 +135,6 @@ export function ArticlesFeed() {
           title="Le fil de l'Église"
           description="Annonces, articles et lettres pastorales de votre communauté."
         />
-
-        {/* Onglets par type de contenu */}
-        <div
-          role="tablist"
-          aria-label="Type de contenu"
-          className="mb-3 flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {TYPE_TABS.map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              role="tab"
-              aria-selected={typeFilter === tab.key}
-              onClick={() => setTypeFilter(tab.key)}
-              className={cn(
-                'shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
-                typeFilter === tab.key
-                  ? 'bg-primary text-primary-foreground shadow-soft-sm'
-                  : 'bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground',
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
 
         <div className="mb-4">
           <NewsScopeFilter value={scope} onChange={setScope} />

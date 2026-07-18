@@ -1,6 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
+import { useSearchParams } from 'next/navigation';
 
 import { env } from '@/config/env';
 import { createArticle, createUser } from '@/testing/data-generators';
@@ -10,6 +11,17 @@ import { renderApp } from '@/testing/test-utils';
 import { ArticlesFeed } from '../articles-feed';
 
 const FEED = `${env.API_URL}/v1/news/feed/`;
+
+// Le filtre par type est un état d'URL (?type=…) piloté par la sidebar (V4-1B1).
+// useSearchParams est mocké en vi.fn() dans setup-tests.ts (défaut : get → null),
+// simuler une route /app/actus?type=… = surcharger le mock par test.
+const mockUseSearchParams = vi.mocked(useSearchParams);
+
+function withTypeParam(type: string) {
+  mockUseSearchParams.mockReturnValue({
+    get: (key: string) => (key === 'type' ? type : null),
+  } as never);
+}
 
 const MEMBERSHIPS = [
   {
@@ -29,6 +41,14 @@ const MEMBERSHIPS = [
 ];
 
 describe('ArticlesFeed', () => {
+  beforeEach(() => {
+    // Défaut : pas de param ?type= → fil complet (mockReturnValue survit à
+    // clearAllMocks, on le réinitialise donc explicitement à chaque test).
+    mockUseSearchParams.mockReturnValue({
+      get: vi.fn().mockReturnValue(null),
+    } as never);
+  });
+
   test('shows loading skeleton while fetching the aggregated feed', async () => {
     server.use(
       http.get(FEED, async () => {
@@ -180,5 +200,141 @@ describe('ArticlesFeed', () => {
     await waitFor(() =>
       expect(screen.queryByText('Article Universel')).not.toBeInTheDocument(),
     );
+  });
+
+  test('sans param ?type= → fil complet (pas de content_type) et plus de tablist', async () => {
+    const seenUrls: string[] = [];
+    server.use(
+      http.get(FEED, ({ request }) => {
+        seenUrls.push(request.url);
+        return HttpResponse.json({
+          count: 2,
+          results: [
+            createArticle({
+              id: 'a1',
+              title: 'Un article de fond',
+              content_type: 'article',
+            }),
+            createArticle({
+              id: 'n1',
+              title: 'Une annonce paroissiale',
+              content_type: 'announcement',
+            }),
+          ],
+        });
+      }),
+    );
+
+    renderApp(<ArticlesFeed />);
+
+    // Tous les types cohabitent dans le fil.
+    await screen.findByText('Un article de fond');
+    expect(screen.getByText('Une annonce paroissiale')).toBeInTheDocument();
+    // La requête serveur ne porte AUCUN filtre de type.
+    expect(seenUrls.length).toBeGreaterThan(0);
+    expect(new URL(seenUrls[0]).searchParams.get('content_type')).toBeNull();
+    // Plus d'onglets internes : la navigation par type se fait via la sidebar.
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+    // Titre générique sans filtre.
+    expect(
+      screen.getByRole('heading', { name: 'Actualité' }),
+    ).toBeInTheDocument();
+  });
+
+  test('route /app/actus?type=article → la requête API porte content_type=article', async () => {
+    withTypeParam('article');
+    const seenUrls: string[] = [];
+    server.use(
+      http.get(FEED, ({ request }) => {
+        seenUrls.push(request.url);
+        return HttpResponse.json({
+          count: 1,
+          results: [
+            createArticle({
+              id: 'a1',
+              title: 'Un article filtré',
+              content_type: 'article',
+            }),
+          ],
+        });
+      }),
+    );
+
+    renderApp(<ArticlesFeed />);
+
+    await screen.findByText('Un article filtré');
+    expect(seenUrls.length).toBeGreaterThan(0);
+    expect(new URL(seenUrls[0]).searchParams.get('content_type')).toBe(
+      'article',
+    );
+    // Le titre reflète le filtre actif.
+    expect(
+      screen.getByRole('heading', { name: 'Actualité — Articles' }),
+    ).toBeInTheDocument();
+  });
+
+  test('route ?type=announcement → filtre serveur + bloc « Annonces du dimanche »', async () => {
+    withTypeParam('announcement');
+    // Même calcul que le composant : dimanche à venir (aujourd'hui si dimanche).
+    const d = new Date();
+    d.setDate(d.getDate() + ((7 - d.getDay()) % 7));
+    const sundayIso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+    const seenUrls: string[] = [];
+    server.use(
+      http.get(FEED, ({ request }) => {
+        seenUrls.push(request.url);
+        return HttpResponse.json({
+          count: 1,
+          results: [
+            createArticle({
+              id: 'n1',
+              title: 'Messe des familles',
+              content_type: 'announcement',
+              announcement_date: sundayIso,
+            }),
+          ],
+        });
+      }),
+    );
+
+    renderApp(<ArticlesFeed />);
+
+    // Le bloc dominical est toujours déclenché par le filtre — désormais lu depuis l'URL.
+    await screen.findByText('Messe des familles');
+    expect(screen.getByText('Annonces du dimanche')).toBeInTheDocument();
+    expect(new URL(seenUrls[0]).searchParams.get('content_type')).toBe(
+      'announcement',
+    );
+  });
+
+  test('param ?type= inconnu → fallback « tout » (aucun content_type envoyé)', async () => {
+    withTypeParam('inconnu');
+    const seenUrls: string[] = [];
+    server.use(
+      http.get(FEED, ({ request }) => {
+        seenUrls.push(request.url);
+        return HttpResponse.json({
+          count: 1,
+          results: [
+            createArticle({
+              id: 'a1',
+              title: 'Fil complet malgré le param invalide',
+              content_type: 'article',
+            }),
+          ],
+        });
+      }),
+    );
+
+    renderApp(<ArticlesFeed />);
+
+    await screen.findByText('Fil complet malgré le param invalide');
+    expect(new URL(seenUrls[0]).searchParams.get('content_type')).toBeNull();
+    // Titre générique : le param invalide n'est pas reflété.
+    expect(
+      screen.getByRole('heading', { name: 'Actualité' }),
+    ).toBeInTheDocument();
   });
 });

@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { paths } from '@/config/paths';
 import { api } from '@/lib/api-client';
 import { useUser } from '@/lib/auth';
 import { isClergy } from '@/lib/authorization';
@@ -188,7 +189,11 @@ export default function LiturgiePage() {
   const isLoading =
     loadingInfo || loadingReadings || loadingLaudes || loadingVepres;
 
-  useRegisterPageMeta({ title: 'Liturgie du jour', showHeading: false });
+  useRegisterPageMeta({
+    title: 'Liturgie du jour',
+    showHeading: false,
+    backHref: paths.app.spirituel.getHref(),
+  });
 
   return (
     <div className="flex flex-col">

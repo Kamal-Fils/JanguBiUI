@@ -155,6 +155,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
       : 'Demande de document',
     leafLabel: 'Détail de la demande',
     showHeading: false,
+    backHref: paths.app.documents.getHref(),
   });
 
   function handleSupplementSubmit(e: React.FormEvent) {

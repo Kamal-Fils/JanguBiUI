@@ -33,6 +33,7 @@ export default function ClergeTransfertsPage() {
   useRegisterPageMeta({
     title: 'Transferts paroissiaux',
     subtitle: 'Gérer les demandes de transfert de votre paroisse',
+    backHref: paths.app.clerge.root.getHref(),
   });
 
   if (userLoading || !isClergy(user)) return null;
