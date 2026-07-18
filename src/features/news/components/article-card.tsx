@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 import { CardEyebrow } from '@/components/ui/card/card';
 import { cn } from '@/lib/utils';
+import { formatFrDate } from '@/utils/format-date';
 
 import { Article } from '../types';
 
@@ -11,19 +12,11 @@ interface ArticleCardProps {
   article: Article;
 }
 
-function formatDate(iso: string | null | undefined): string {
-  if (!iso) return '';
-  return new Date(iso).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
 const scopeLabel: Record<string, string> = {
   global: 'Universel',
   diocese: 'Diocèse',
   parish: 'Paroisse',
+  church: 'Église',
 };
 
 export function ArticleCard({ article }: ArticleCardProps) {
@@ -84,7 +77,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
           {article.published_at && (
             <span className="flex items-center gap-1">
               <Clock className="size-3" />
-              {formatDate(article.published_at)}
+              {formatFrDate(article.published_at, 'short')}
             </span>
           )}
           <span className="flex items-center gap-1">

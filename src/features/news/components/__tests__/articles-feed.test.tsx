@@ -10,6 +10,13 @@ import { renderApp } from '@/testing/test-utils';
 
 import { ArticlesFeed } from '../articles-feed';
 
+vi.mock('next/image', () => ({
+  default: ({ src, alt }: { src: string; alt: string }) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt={alt} />
+  ),
+}));
+
 const FEED = `${env.API_URL}/v1/news/feed/`;
 
 // Le filtre par type est un état d'URL (?type=…) piloté par la sidebar (V4-1B1).
@@ -80,7 +87,10 @@ describe('ArticlesFeed', () => {
     ];
     server.use(
       http.get(FEED, () =>
-        HttpResponse.json({ count: mockArticles.length, results: mockArticles }),
+        HttpResponse.json({
+          count: mockArticles.length,
+          results: mockArticles,
+        }),
       ),
     );
 
@@ -113,7 +123,10 @@ describe('ArticlesFeed', () => {
     ];
     server.use(
       http.get(FEED, () =>
-        HttpResponse.json({ count: mockArticles.length, results: mockArticles }),
+        HttpResponse.json({
+          count: mockArticles.length,
+          results: mockArticles,
+        }),
       ),
     );
 
@@ -132,9 +145,7 @@ describe('ArticlesFeed', () => {
 
     renderApp(<ArticlesFeed />);
 
-    expect(
-      await screen.findByText(/^aucune actualité$/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/^aucune actualité$/i)).toBeInTheDocument();
   });
 
   test('shows error message when the feed request fails', async () => {
@@ -174,7 +185,11 @@ describe('ArticlesFeed', () => {
         return HttpResponse.json({
           count: 2,
           results: [
-            createArticle({ id: 'g1', title: 'Article Universel', scope_type: 'global' }),
+            createArticle({
+              id: 'g1',
+              title: 'Article Universel',
+              scope_type: 'global',
+            }),
             createArticle({
               id: 'churchA',
               title: 'Veillée Église A',
@@ -193,7 +208,9 @@ describe('ArticlesFeed', () => {
     expect(screen.getByText('Veillée Église A')).toBeInTheDocument();
 
     // Sélection du filtre « Église A ».
-    await userEvent.click(await screen.findByRole('button', { name: 'Église A' }));
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Église A' }),
+    );
 
     // Le fil est restreint à la portée église A (l'article universel disparaît).
     await screen.findByText('Veillée Église A');
@@ -335,6 +352,91 @@ describe('ArticlesFeed', () => {
     // Titre générique : le param invalide n'est pas reflété.
     expect(
       screen.getByRole('heading', { name: 'Actualité' }),
+    ).toBeInTheDocument();
+  });
+
+  // --- Cartes « presse » du fil (V4-2) ---
+
+  test('cartes du fil : image de couverture rendue, repli brandé sinon', async () => {
+    server.use(
+      http.get(FEED, () =>
+        HttpResponse.json({
+          count: 2,
+          results: [
+            createArticle({
+              id: 'img1',
+              title: 'Article illustré',
+              cover_image_url: 'https://example.com/cover.jpg',
+            }),
+            createArticle({
+              id: 'noimg',
+              title: 'Article sans visuel',
+              cover_image_url: null,
+            }),
+          ],
+        }),
+      ),
+    );
+
+    renderApp(<ArticlesFeed />);
+
+    // La carte avec image rend le visuel (alt = titre).
+    const cover = await screen.findByRole('img', { name: 'Article illustré' });
+    expect(cover).toHaveAttribute('src', 'https://example.com/cover.jpg');
+    // La carte sans image garde un repli au même ratio (pas de trou).
+    expect(screen.getByTestId('article-card-placeholder')).toBeInTheDocument();
+  });
+
+  test('cartes du fil : kicker de type + chapô affichés', async () => {
+    server.use(
+      http.get(FEED, () =>
+        HttpResponse.json({
+          count: 1,
+          results: [
+            createArticle({
+              id: 'l1',
+              title: 'Lettre aux fidèles du diocèse',
+              content_type: 'pastoral_letter',
+              excerpt: 'Le chapô éditorial qui donne envie de lire.',
+            }),
+          ],
+        }),
+      ),
+    );
+
+    renderApp(<ArticlesFeed />);
+
+    await screen.findByText('Lettre aux fidèles du diocèse');
+    // Kicker (surtitre presse) : le type de contenu.
+    expect(screen.getByText('Lettre Pastorale')).toBeInTheDocument();
+    // Chapô rendu sous le titre.
+    expect(
+      screen.getByText('Le chapô éditorial qui donne envie de lire.'),
+    ).toBeInTheDocument();
+  });
+
+  test('une du fil : le premier article est un heading de niveau 3', async () => {
+    server.use(
+      http.get(FEED, () =>
+        HttpResponse.json({
+          count: 2,
+          results: [
+            createArticle({ id: 'f1', title: 'La une du jour' }),
+            createArticle({ id: 's1', title: 'Article secondaire' }),
+          ],
+        }),
+      ),
+    );
+
+    renderApp(<ArticlesFeed />);
+
+    // Une + cartes secondaires partagent la même hiérarchie (h3 sous le h2 de
+    // section), la une se distinguant par la taille display serif.
+    expect(
+      await screen.findByRole('heading', { level: 3, name: 'La une du jour' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Article secondaire' }),
     ).toBeInTheDocument();
   });
 });

@@ -6,30 +6,30 @@
   :root {
     /* Bleu Jàngu Bi — light : blanc + bleu #1A8FCC (identité d'origine,
        demandée par le client) + or en accent. Structure éditoriale conservée. */
-    --background: 0 0% 100%;           /* blanc */
+    --background: 0 0% 100%; /* blanc */
     --background-surface: 202 40% 97%; /* bleu glacier très pâle */
     --background-subtle: 202 30% 94%;
-    --foreground: 212 58% 6%;          /* #07101A navy quasi-noir */
+    --foreground: 212 58% 6%; /* #07101A navy quasi-noir */
     --card: 0 0% 100%;
     --card-foreground: 212 58% 6%;
     --popover: 0 0% 100%;
     --popover-foreground: 212 58% 6%;
-    --primary: 201 77% 45%;            /* #1A8FCC bleu Jàngu Bi */
+    --primary: 201 77% 45%; /* #1A8FCC bleu Jàngu Bi */
     --primary-foreground: 0 0% 100%;
-    --secondary: 202 60% 94%;          /* bleu pâle */
+    --secondary: 202 60% 94%; /* bleu pâle */
     --secondary-foreground: 201 77% 30%;
     --muted: 202 40% 96%;
     --muted-foreground: 215 16% 47%;
-    --accent: 40 65% 48%;              /* or — conservé comme accent liturgique */
-    --accent-foreground: 212 58% 6%;   /* navy — texte sombre sur boutons or (AA) */
+    --accent: 40 65% 48%; /* or — conservé comme accent liturgique */
+    --accent-foreground: 212 58% 6%; /* navy — texte sombre sur boutons or (AA) */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 202 30% 88%;
     --input: 202 30% 88%;
-    --ring: 201 90% 38%;               /* bleu soutenu — focus visible sur blanc (AA) */
+    --ring: 201 90% 38%; /* bleu soutenu — focus visible sur blanc (AA) */
     --radius: 0.625rem;
     --gold: 40 65% 48%;
-    --gold-ink: 40 80% 28%;            /* or antique profond — texte or lisible sur fonds clairs */
+    --gold-ink: 40 80% 28%; /* or antique profond — texte or lisible sur fonds clairs */
     /* Filets or, ombres douces navy, mesure de lecture, motion */
     --hairline-gold: 40 55% 52%;
     --shadow-color: 212 45% 22%;
@@ -56,7 +56,7 @@
 
   .dark {
     /* Bleu Jàngu Bi — dark : navy profond #07101A + bleu vif #70CBFF + or */
-    --background: 212 58% 6%;          /* #07101A navy profond */
+    --background: 212 58% 6%; /* #07101A navy profond */
     --background-surface: 212 45% 9%;
     --background-subtle: 210 40% 13%;
     --foreground: 210 40% 98%;
@@ -64,13 +64,13 @@
     --card-foreground: 210 40% 98%;
     --popover: 210 50% 9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 202 100% 72%;           /* #70CBFF bleu vif */
+    --primary: 202 100% 72%; /* #70CBFF bleu vif */
     --primary-foreground: 212 58% 6%;
     --secondary: 210 40% 14%;
     --secondary-foreground: 210 40% 98%;
     --muted: 210 40% 14%;
     --muted-foreground: 215 20% 65%;
-    --accent: 40 65% 55%;              /* or vif */
+    --accent: 40 65% 55%; /* or vif */
     --accent-foreground: 212 58% 6%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
@@ -78,7 +78,7 @@
     --input: 210 30% 18%;
     --ring: 202 100% 72%;
     --gold: 40 65% 55%;
-    --gold-ink: 40 65% 60%;            /* or vif — texte or lisible sur navy */
+    --gold-ink: 40 65% 60%; /* or vif — texte or lisible sur navy */
     /* En sombre les ombres doivent être quasi noires pour se voir sur le navy */
     --hairline-gold: 40 60% 58%;
     --shadow-color: 212 90% 2%;
@@ -101,7 +101,8 @@
   }
   /* Titres en serif Playfair — direction Sacred Editorial.
      h1/h2 = titres de page & sections ; h3+ restent en sans (libellés denses). */
-  h1, h2 {
+  h1,
+  h2 {
     @apply font-serif tracking-tight;
   }
 }
@@ -115,6 +116,13 @@
       transparent 0.5px
     );
     background-size: 18px 18px;
+  }
+  /* Lettrine éditoriale sobre — 1er paragraphe du corps d'article (détail
+     presse). `.lettrine` cible le HTML riche (prose), `.lettrine-plain` le
+     texte brut rendu dans un seul bloc. Taille en em → suit le corps prose. */
+  .lettrine > p:first-of-type::first-letter,
+  .lettrine-plain::first-letter {
+    @apply float-left mr-2 mt-[0.08em] font-serif text-[3.1em] font-bold leading-[0.8] text-foreground;
   }
   /* Filet or — séparateur éditorial */
   .hairline-gold {
@@ -130,8 +138,13 @@
 
 /* Landing page — star field */
 @keyframes twinkle {
-  0%, 100% { opacity: 0.1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 .star {
   position: absolute;
@@ -144,14 +157,20 @@
 .reveal {
   opacity: 0;
   transform: translateY(22px);
-  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal.in {
   opacity: 1;
   transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
   /* Désactive les animations décoratives/d'entrée pour les utilisateurs
      sensibles au mouvement (étoiles, flottement, fade-in du kit). */
   .star,

@@ -171,4 +171,108 @@ describe('ArticleDetail', () => {
 
     await screen.findByRole('heading', { name: 'Article sans optionnels' });
   });
+
+  // --- Expérience de lecture « presse » (V4-2) ---
+
+  test('renders the hero banner when a cover image is present', async () => {
+    server.use(
+      http.get(`${env.API_URL}/v1/news/article-1/`, () =>
+        HttpResponse.json(
+          createArticleDetail({
+            id: 'article-1',
+            title: 'Grand reportage diocésain',
+            cover_image_url: 'https://example.com/banner.jpg',
+          }),
+        ),
+      ),
+    );
+
+    renderApp(<ArticleDetail articleId="article-1" />);
+
+    const banner = await screen.findByRole('img', {
+      name: 'Grand reportage diocésain',
+    });
+    expect(banner).toHaveAttribute('src', 'https://example.com/banner.jpg');
+    // Pas de bandeau de repli quand l'image existe.
+    expect(
+      screen.queryByTestId('article-hero-placeholder'),
+    ).not.toBeInTheDocument();
+  });
+
+  test('renders an elegant placeholder banner when no cover image', async () => {
+    server.use(
+      http.get(`${env.API_URL}/v1/news/article-1/`, () =>
+        HttpResponse.json(
+          createArticleDetail({
+            id: 'article-1',
+            title: 'Article sans visuel',
+            cover_image_url: null,
+          }),
+        ),
+      ),
+    );
+
+    renderApp(<ArticleDetail articleId="article-1" />);
+
+    await screen.findByRole('heading', { name: 'Article sans visuel' });
+    // Le bandeau de repli occupe l'emplacement de la bannière (pas de trou).
+    expect(screen.getByTestId('article-hero-placeholder')).toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
+  test('shows the content-type kicker above the title', async () => {
+    server.use(
+      http.get(`${env.API_URL}/v1/news/article-1/`, () =>
+        HttpResponse.json(
+          createArticleDetail({
+            id: 'article-1',
+            content_type: 'pastoral_letter',
+          }),
+        ),
+      ),
+    );
+
+    renderApp(<ArticleDetail articleId="article-1" />);
+
+    expect(await screen.findByText('Lettre Pastorale')).toBeInTheDocument();
+  });
+
+  test('shows the chapô (excerpt) under the title', async () => {
+    server.use(
+      http.get(`${env.API_URL}/v1/news/article-1/`, () =>
+        HttpResponse.json(
+          createArticleDetail({
+            id: 'article-1',
+            excerpt: 'Un chapô qui donne envie de poursuivre la lecture.',
+          }),
+        ),
+      ),
+    );
+
+    renderApp(<ArticleDetail articleId="article-1" />);
+
+    expect(
+      await screen.findByText(
+        'Un chapô qui donne envie de poursuivre la lecture.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  test('shows the estimated reading time computed from the content', async () => {
+    // 400 mots à ~200 mots/min → « 2 min de lecture ».
+    server.use(
+      http.get(`${env.API_URL}/v1/news/article-1/`, () =>
+        HttpResponse.json(
+          createArticleDetail({
+            id: 'article-1',
+            content: `<p>${Array.from({ length: 400 }, () => 'mot').join(' ')}</p>`,
+          }),
+        ),
+      ),
+    );
+
+    renderApp(<ArticleDetail articleId="article-1" />);
+
+    expect(await screen.findByText(/2 min de lecture/i)).toBeInTheDocument();
+  });
 });
