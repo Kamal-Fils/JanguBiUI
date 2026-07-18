@@ -1,28 +1,32 @@
 'use client';
 
-import { Archive, Download, FileCheck, Plus } from 'lucide-react';
+import { useQueries } from '@tanstack/react-query';
+import { Archive, Lock, Plus } from 'lucide-react';
 import Link from 'next/link';
 
-import { CardEyebrow } from '@/components/ui/card/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
-import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
-import { formatFrDate } from '@/utils/format-date';
 
+import { getDocumentRequestQueryOptions } from '../api/get-document';
 import { useDocumentRequests } from '../api/get-documents';
-import { formatDocumentType } from '../utils/format-document-type';
+import { DocumentRequestDetail } from '../types';
+
+import { VaultCard } from './vault-card';
 
 function VaultSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="flex flex-col gap-3">
       {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className="space-y-3 rounded-2xl border border-border bg-card p-4"
+          className="space-y-3 rounded-2xl border border-gold/25 bg-card p-4"
         >
-          <Skeleton className="size-10 rounded-xl" />
+          <div className="flex items-center justify-between">
+            <Skeleton className="size-10 rounded-full" />
+            <Skeleton className="h-5 w-28 rounded-full" />
+          </div>
           <Skeleton className="h-4 w-2/3" />
           <Skeleton className="h-3 w-1/3" />
         </div>
@@ -32,9 +36,34 @@ function VaultSkeleton() {
 }
 
 /**
+ * Pièce téléchargeable : le document final déposé par la paroisse en priorité,
+ * à défaut la dernière pièce jointe disponible.
+ *
+ * NOTE : duplique volontairement le helper de `tracking-hero.tsx`. La
+ * factorisation dans `utils/` demandera de toucher ce fichier, livré par une
+ * autre phase — à faire quand les deux chantiers seront fusionnés.
+ */
+function getFinalAttachmentUrl(
+  data: DocumentRequestDetail | undefined,
+): string | undefined {
+  const downloadable = (data?.attachments ?? []).filter((att) => att.file_url);
+  if (downloadable.length === 0) return undefined;
+  const final = downloadable.find((att) =>
+    att.attachment_type.includes('final'),
+  );
+  return (final ?? downloadable[downloadable.length - 1]).file_url ?? undefined;
+}
+
+/**
  * Coffre-fort numérique : uniquement les demandes abouties
- * (status=document_deposited). Chaque carte ouvre le détail de la demande, où
- * le document final se télécharge depuis les pièces jointes.
+ * (status=document_deposited), rendues en cartes-certificats.
+ *
+ * L'endpoint liste ne porte pas les pièces jointes : le fichier final est
+ * résolu par demande via le détail (même clé de cache que la page de suivi, si
+ * bien que « Voir la démarche » devient instantané). Tant qu'une résolution est
+ * en cours ou qu'aucun fichier n'est exposé, la carte reste un accès valide au
+ * détail — aucun bouton mort. Exposer l'URL du fichier dans la liste
+ * (PLAN_documents §6.4) supprimerait ces appels.
  */
 export function VaultContent() {
   const { data, isLoading, isError, refetch } = useDocumentRequests({
@@ -42,13 +71,41 @@ export function VaultContent() {
   });
   const documents = data?.results ?? [];
 
+  const detailQueries = useQueries({
+    queries: documents.map((doc) => getDocumentRequestQueryOptions(doc.id)),
+  });
+
+  const showList = !isLoading && !isError && documents.length > 0;
+
   return (
     <section aria-label="Coffre-fort numérique">
-      <SectionHeader
-        eyebrow="Le coffre-fort"
-        title="Vos documents délivrés"
-        description="Chaque document déposé par votre paroisse est conservé ici, en sécurité et téléchargeable à tout moment."
-      />
+      <header className="mb-4">
+        <div className="flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full border-[1.5px] border-gold/50 bg-accent/15 font-serif text-lg text-gold-ink"
+          >
+            ✠
+          </span>
+          <div className="min-w-0">
+            <h2 className="font-serif text-lg font-bold tracking-tight text-foreground sm:text-xl">
+              Mon coffre-fort
+            </h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {showList
+                ? `${documents.length} document${documents.length > 1 ? 's' : ''} officiel${documents.length > 1 ? 's' : ''} · conservé${documents.length > 1 ? 's' : ''} à vie`
+                : 'Vos documents officiels, conservés à vie'}
+            </p>
+          </div>
+        </div>
+        <div className="hairline-gold mt-2.5" aria-hidden="true" />
+      </header>
+
+      <p className="mb-4 flex items-start gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-xs text-muted-foreground">
+        <Lock className="mt-px size-3.5 shrink-0" aria-hidden="true" />
+        Accessible uniquement par vous. Chaque document est déposé et signé par
+        votre paroisse, et reste conservé à vie.
+      </p>
 
       {isLoading && <VaultSkeleton />}
 
@@ -76,45 +133,19 @@ export function VaultContent() {
         />
       )}
 
-      {!isLoading && !isError && documents.length > 0 && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {documents.map((doc) => (
-            <Link
-              key={doc.id}
-              href={paths.app.document.getHref(doc.id)}
-              className="group flex flex-col gap-3 rounded-2xl border border-primary/15 bg-secondary/60 p-4 shadow-soft-sm transition-[transform,box-shadow,border-color] duration-[var(--duration-normal)] ease-out-soft hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-soft active:scale-[0.99] motion-reduce:transform-none"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-success/10 ring-1 ring-inset ring-success/15">
-                  <FileCheck
-                    className="size-5 text-success"
-                    aria-hidden="true"
-                  />
-                </div>
-                <span className="flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-medium text-success">
-                  <Download className="size-3" aria-hidden="true" />
-                  Disponible
-                </span>
-              </div>
-
-              <div className="flex-1">
-                <CardEyebrow className="text-gold-ink">
-                  Document officiel
-                </CardEyebrow>
-                <p className="mt-0.5 line-clamp-2 font-serif text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
-                  {formatDocumentType(doc.document_type)}
-                </p>
-                {doc.parish_name && (
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {doc.parish_name}
-                  </p>
-                )}
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Délivré le {formatFrDate(doc.updated_at ?? doc.created_at)}
-                </p>
-              </div>
-            </Link>
-          ))}
+      {showList && (
+        <div className="flex flex-col gap-3">
+          {documents.map((doc, index) => {
+            const detail = detailQueries[index];
+            return (
+              <VaultCard
+                key={doc.id}
+                document={doc}
+                downloadUrl={getFinalAttachmentUrl(detail?.data)}
+                isResolvingDownload={detail?.isPending ?? false}
+              />
+            );
+          })}
         </div>
       )}
     </section>

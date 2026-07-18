@@ -12,20 +12,41 @@ import { formatDocumentType } from '../utils/format-document-type';
 
 import { DocumentStatusActions } from './document-status-actions';
 import { DocumentStatusBadge } from './document-status-badge';
+import { compareByUrgency, SlaChip } from './sla-chip';
 
 /** En-têtes de colonnes « admin sobre » : micro-capitales espacées. */
 const TH_CLASS = 'text-[11px] uppercase tracking-wide text-muted-foreground';
+
+/** Description humaine d'une demande, réutilisée par les libellés d'action. */
+function describeRequest(doc: DocumentRequest): string {
+  const type = formatDocumentType(doc.document_type);
+  return doc.requester_name ? `${type} de ${doc.requester_name}` : type;
+}
 
 interface AdminDocumentListProps {
   documents: DocumentRequest[];
   isLoading?: boolean;
 }
 
+/**
+ * File de traitement paroissiale : liste **priorisée par SLA** (et non kanban —
+ * justification PLAN_documents §2.5). L'ordre est l'urgence : ce que la
+ * paroisse doit traiter d'abord, du plus ancien au plus récent ; les demandes
+ * en attente du fidèle puis les demandes clôturées ferment la marche.
+ */
 export function AdminDocumentList({
   documents,
   isLoading,
 }: AdminDocumentListProps) {
+  const ordered = [...documents].sort((a, b) => compareByUrgency(a, b));
+
   const columns: DataTableColumn<DocumentRequest>[] = [
+    {
+      header: 'Délai',
+      mobileLabel: 'Délai',
+      headClassName: TH_CLASS,
+      cell: (doc) => <SlaChip status={doc.status} createdAt={doc.created_at} />,
+    },
     {
       header: 'Demande',
       mobileLabel: 'Demande',
@@ -38,6 +59,11 @@ export function AdminDocumentList({
           {doc.requester_name && (
             <p className="truncate text-xs text-muted-foreground">
               par {doc.requester_name}
+            </p>
+          )}
+          {doc.reference && (
+            <p className="mt-0.5 truncate text-[11px] tabular-nums text-muted-foreground">
+              Réf. {doc.reference}
             </p>
           )}
         </div>
@@ -63,8 +89,8 @@ export function AdminDocumentList({
     },
     {
       header: 'Reçue le',
-      mobileLabel: 'Reçue le',
       headClassName: TH_CLASS,
+      hideOnMobile: true,
       cell: (doc) => (
         <span className="text-sm tabular-nums text-muted-foreground">
           {formatFrDate(doc.created_at, 'short')}
@@ -80,9 +106,7 @@ export function AdminDocumentList({
         <DocumentStatusActions
           requestId={doc.id}
           status={doc.status}
-          ariaLabel={`Actions pour ${formatDocumentType(doc.document_type)}${
-            doc.requester_name ? ` de ${doc.requester_name}` : ''
-          }`}
+          subject={describeRequest(doc)}
         />
       ),
     },
@@ -90,11 +114,11 @@ export function AdminDocumentList({
 
   return (
     <DataTable
-      data={documents}
+      data={ordered}
       columns={columns}
       rowKey={(doc) => doc.id}
       isLoading={isLoading}
-      caption="Demandes de documents à traiter"
+      caption="Demandes de documents à traiter, triées par urgence (les plus anciennes d’abord)"
       emptyState={
         <EmptyState
           icon={<FileText />}

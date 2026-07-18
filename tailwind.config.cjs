@@ -94,6 +94,10 @@ module.exports = {
   			},
   			gold: 'hsl(var(--gold))',
   			goldInk: 'hsl(var(--gold-ink))',
+  			// Alias kebab-case : la clé camelCase ne génère que `text-goldInk`,
+  			// alors que le code écrit `text-gold-ink` (43 emplacements) — ces
+  			// classes ne compilaient pas et l'accent or ne s'affichait jamais.
+  			'gold-ink': 'hsl(var(--gold-ink))',
   			success: 'hsl(var(--success, 142.1 76.2% 36.3%))',
   			warning: 'hsl(var(--warning, 38 92% 50%))',
   			info: 'hsl(var(--info, 221.2 83.2% 53.3%))',
