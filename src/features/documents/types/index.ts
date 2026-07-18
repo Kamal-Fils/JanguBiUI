@@ -11,6 +11,11 @@ export const documentStatusSchema = z.enum([
 
 export const documentRequestSchema = z.object({
   id: z.string(),
+  // Le backend nomme ce champ `reference` (unique, généré à la soumission) et
+  // le renvoie DÈS la liste. Le schéma lisait `reference_number` — un champ
+  // inexistant : `.optional()` masquait l'écart et la référence officielle
+  // n'était jamais affichée nulle part.
+  reference: z.string().nullable().optional(),
   document_type: z.string(),
   status: documentStatusSchema,
   notes: z.string().nullable().optional(),
@@ -33,7 +38,6 @@ const attachmentSchema = z.object({
 export type DocumentAttachment = z.infer<typeof attachmentSchema>;
 
 export const documentRequestDetailSchema = documentRequestSchema.extend({
-  reference_number: z.string().nullable().optional(),
   rejection_reason: z.string().nullable().optional(),
   attachments: z.array(attachmentSchema).optional(),
   status_logs: z
@@ -42,6 +46,10 @@ export const documentRequestDetailSchema = documentRequestSchema.extend({
         to_status: documentStatusSchema,
         created_at: z.string(),
         comment: z.string().nullable().optional(),
+        // Acteur réel de la transition (« Système » si automatique). Disponible
+        // depuis toujours côté API ; l'affichage reste en rôle générique tant
+        // que le client n'a pas tranché nom vs rôle (Q2 du plan).
+        changed_by_name: z.string().nullable().optional(),
       }),
     )
     .optional(),

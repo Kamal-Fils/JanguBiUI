@@ -101,6 +101,8 @@ export const createDocumentRequest = (
   overrides?: Partial<DocumentRequest>,
 ): DocumentRequest => ({
   id: randUuid(),
+  // Généré à la soumission côté backend (unique) et renvoyé dès la liste.
+  reference: `DOC-${randNumber({ min: 10000, max: 99999 })}`,
   document_type:
     DOCUMENT_TYPES[randNumber({ min: 0, max: DOCUMENT_TYPES.length - 1 })],
   status: 'submitted',

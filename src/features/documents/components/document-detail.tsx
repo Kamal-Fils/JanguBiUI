@@ -324,9 +324,9 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
               <h1 className="mt-1.5 font-serif text-2xl font-bold leading-tight tracking-tight text-foreground">
                 {formatDocumentType(data.document_type)}
               </h1>
-              {data.reference_number && (
+              {data.reference && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Réf. {data.reference_number}
+                  Réf. {data.reference}
                 </p>
               )}
             </div>
