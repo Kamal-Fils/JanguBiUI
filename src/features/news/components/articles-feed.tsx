@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Eye, Newspaper } from 'lucide-react';
+import { Newspaper } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
@@ -8,15 +8,13 @@ import { useState } from 'react';
 import { PageHeader } from '@/components/layouts/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
-import { MediaCard } from '@/components/ui/media-card';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatFrDate } from '@/utils/format-date';
 
 import { useFeedArticles } from '../api/get-articles';
-import type { Article, ContentType } from '../types';
+import type { ContentType } from '../types';
 
-import { ArticleTypeBadge } from './article-type-badge';
+import { ArticleFeedCard } from './article-feed-card';
 import {
   ALL_SCOPE,
   NewsScopeFilter,
@@ -51,38 +49,25 @@ function upcomingSundayIso(): string {
 }
 
 function ArticlesSkeleton() {
+  // Miroir de la mise en page presse : une (image large) + grille dense.
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="overflow-hidden rounded-xl border border-border bg-card"
-        >
-          <Skeleton className="aspect-video w-full rounded-none" />
-          <div className="space-y-2 p-4">
-            <Skeleton className="h-3 w-1/3" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-3 w-2/3" />
+    <div className="flex flex-col">
+      <div>
+        <Skeleton className="aspect-video w-full rounded-xl md:aspect-[2/1]" />
+        <Skeleton className="mt-4 h-3 w-1/4" />
+        <Skeleton className="mt-2 h-7 w-3/4" />
+        <Skeleton className="mt-2 h-4 w-2/3" />
+      </div>
+      <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i}>
+            <Skeleton className="aspect-[3/2] w-full rounded-xl" />
+            <Skeleton className="mt-3 h-3 w-1/3" />
+            <Skeleton className="mt-2 h-5 w-full" />
+            <Skeleton className="mt-2 h-4 w-2/3" />
           </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function articleMeta(article: Article) {
-  return (
-    <div className="flex items-center gap-3">
-      {article.published_at && (
-        <span className="flex items-center gap-1">
-          <Clock className="size-3" />
-          {formatFrDate(article.published_at, 'short')}
-        </span>
-      )}
-      <span className="flex items-center gap-1">
-        <Eye className="size-3" />
-        {article.views_count}
-      </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -111,9 +96,7 @@ export function ArticlesFeed() {
     typeFilter === 'announcement'
       ? articles.filter((a) => a.announcement_date === sundayIso)
       : [];
-  const feedArticles = articles.filter(
-    (a) => !sundayAnnouncements.includes(a),
-  );
+  const feedArticles = articles.filter((a) => !sundayAnnouncements.includes(a));
   const [featured, ...rest] = feedArticles;
   const sundayLabel = new Date(`${sundayIso}T00:00:00`).toLocaleDateString(
     'fr-FR',
@@ -189,51 +172,20 @@ export function ArticlesFeed() {
             description="Aucune actualité n'est disponible pour cette portée."
           />
         ) : (
-          <div className="flex flex-col gap-4">
-            {/* Article à la une — absent si toutes les entrées sont déjà dans
-                le bloc « Annonces du dimanche » ci-dessus. */}
-            {featured && (
-              <MediaCard
-                featured
-                href={`/app/actus/${featured.id}`}
-                image={featured.cover_image_url}
-                imageAlt={featured.title}
-                aspect="wide"
-                fallbackIcon={<Newspaper />}
-                overline={
-                  <>
-                    <ArticleTypeBadge contentType={featured.content_type} />
-                    {featured.category && (
-                      <span className="text-[11px] font-medium text-muted-foreground">
-                        {featured.category.name}
-                      </span>
-                    )}
-                  </>
-                }
-                title={featured.title}
-                excerpt={featured.excerpt ?? undefined}
-                meta={articleMeta(featured)}
-              />
+          <div className="flex flex-col">
+            {/* Une — grand format presse. Absente si toutes les entrées sont
+                déjà dans le bloc « Annonces du dimanche » ci-dessus. */}
+            {featured && <ArticleFeedCard article={featured} featured />}
+
+            {featured && rest.length > 0 && (
+              <div className="hairline-gold my-6" aria-hidden="true" />
             )}
 
-            {/* Reste — grille 2 colonnes en md+ */}
+            {/* Cartes secondaires plus denses — grille 2 colonnes en md+ */}
             {rest.length > 0 && (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
                 {rest.map((article) => (
-                  <MediaCard
-                    key={article.id}
-                    href={`/app/actus/${article.id}`}
-                    image={article.cover_image_url}
-                    imageAlt={article.title}
-                    aspect="video"
-                    fallbackIcon={<Newspaper />}
-                    overline={
-                      <ArticleTypeBadge contentType={article.content_type} />
-                    }
-                    title={article.title}
-                    excerpt={article.excerpt ?? undefined}
-                    meta={articleMeta(article)}
-                  />
+                  <ArticleFeedCard key={article.id} article={article} />
                 ))}
               </div>
             )}
