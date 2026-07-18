@@ -10,7 +10,7 @@ export default function MessagesLayout({
   return (
     <div className="flex md:h-[calc(100dvh-0px)]">
       {/* Left column: conversation list — desktop only, sticky full height */}
-      <div className="hidden md:flex md:w-80 md:shrink-0 md:flex-col md:overflow-y-auto md:border-r md:border-border">
+      <div className="hidden md:flex md:w-80 md:shrink-0 md:flex-col md:overflow-y-auto md:border-r md:border-border/60">
         <ConversationList />
       </div>
       {/* Right column — full width on mobile, flex-1 on desktop */}

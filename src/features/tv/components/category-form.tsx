@@ -4,8 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
+import { Button } from '@/components/ui/button/button';
 
 import { useCreateCategory } from '../api/create-category';
 
@@ -22,7 +21,9 @@ interface CategoryFormProps {
 }
 
 const inputClass =
-  'w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring';
+  'w-full rounded-lg border border-input bg-background px-3.5 py-2 text-sm text-foreground shadow-soft-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+const labelClass = 'block text-sm font-medium text-foreground';
+const errorClass = 'text-xs text-destructive';
 
 export function CategoryForm({ onSuccess }: CategoryFormProps) {
   const {
@@ -45,33 +46,37 @@ export function CategoryForm({ onSuccess }: CategoryFormProps) {
   return (
     <form
       onSubmit={handleSubmit((data) => createCategory(data))}
-      className="space-y-3 rounded-lg border border-border bg-card p-4"
+      className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-soft-sm sm:p-5"
     >
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+        Nouvelle catégorie
+      </p>
+
       <div className="space-y-1.5">
-        <label
-          htmlFor="cat-name"
-          className="block text-xs font-medium text-foreground"
-        >
-          Nom de la catégorie
+        <label htmlFor="cat-name" className={labelClass}>
+          Nom de la catégorie <span className="text-destructive">*</span>
         </label>
         <input
           id="cat-name"
           type="text"
-          placeholder="Nom de la catégorie"
+          placeholder="Ex : Enseignements"
+          aria-invalid={errors.name ? true : undefined}
           className={inputClass}
           {...register('name')}
         />
         {errors.name && (
-          <p className="text-xs text-destructive">{errors.name.message}</p>
+          <p className={errorClass} role="alert">
+            {errors.name.message}
+          </p>
         )}
       </div>
 
       <div className="space-y-1.5">
-        <label
-          htmlFor="cat-order"
-          className="block text-xs font-medium text-foreground"
-        >
-          Ordre (0 = premier)
+        <label htmlFor="cat-order" className={labelClass}>
+          Ordre d&apos;affichage{' '}
+          <span className="font-normal text-muted-foreground">
+            (0 = premier)
+          </span>
         </label>
         <input
           id="cat-order"
@@ -81,22 +86,30 @@ export function CategoryForm({ onSuccess }: CategoryFormProps) {
         />
       </div>
 
-      <label
-        htmlFor="cat-clergy-only"
-        className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground"
-      >
-        <input
-          id="cat-clergy-only"
-          type="checkbox"
-          className="size-4 rounded border-input accent-primary"
-          {...register('is_clergy_only')}
-        />
-        Clergé uniquement (Formation)
-      </label>
+      <div className="space-y-1.5">
+        <label
+          htmlFor="cat-clergy-only"
+          className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground"
+        >
+          <input
+            id="cat-clergy-only"
+            type="checkbox"
+            className="size-4 rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            {...register('is_clergy_only')}
+          />
+          Clergé uniquement (Formation)
+        </label>
+        <p className="pl-7 text-xs text-muted-foreground">
+          Les vidéos de cette catégorie ne seront visibles que par les membres
+          du clergé.
+        </p>
+      </div>
 
-      <Button type="submit" size="sm" disabled={isPending}>
-        {isPending ? <Spinner className="size-4" /> : 'Créer'}
-      </Button>
+      <div className="pt-1">
+        <Button type="submit" size="sm" isLoading={isPending}>
+          Créer la catégorie
+        </Button>
+      </div>
     </form>
   );
 }

@@ -8,6 +8,8 @@ export type UpdateArticleInput = {
   title?: string;
   excerpt?: string;
   content?: string;
+  content_format?: 'text' | 'html';
+  announcement_date?: string | null;
   category_id?: number;
   cover_image_id?: number | null;
   content_type?: ContentType;

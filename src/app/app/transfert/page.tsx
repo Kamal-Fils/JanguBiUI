@@ -8,6 +8,7 @@ import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { useNotifications } from '@/components/ui/notifications';
+import { SectionHeader } from '@/components/ui/section-header';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { useMyTransfer } from '@/features/transfert-paroissial/api/get-my-transfer';
@@ -55,16 +56,13 @@ export default function TransfertPage() {
           <div className="space-y-6">
             <TransferStatusCard transfer={transfer} />
             {transfer.status === 'rejected' && (
-              <div className="space-y-4">
-                <h2 className="font-serif text-lg font-bold tracking-tight text-foreground">
-                  Soumettre une nouvelle demande
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Votre demande a été refusée. Vous pouvez en soumettre une
-                  nouvelle ci-dessous.
-                </p>
+              <section aria-label="Soumettre une nouvelle demande">
+                <SectionHeader
+                  title="Soumettre une nouvelle demande"
+                  description="Votre demande a été refusée. Vous pouvez en soumettre une nouvelle ci-dessous."
+                />
                 <TransferRequestForm onSuccess={handleTransferSuccess} />
-              </div>
+              </section>
             )}
           </div>
         ) : (
@@ -74,7 +72,13 @@ export default function TransfertPage() {
               title="Aucune demande en cours"
               description="Sélectionnez votre nouvelle paroisse et soumettez votre demande de transfert ci-dessous."
             />
-            <TransferRequestForm onSuccess={handleTransferSuccess} />
+            <section aria-label="Nouvelle demande de transfert">
+              <SectionHeader
+                title="Nouvelle demande"
+                description="Votre demande sera examinée par votre paroisse actuelle, puis confirmée par la paroisse d'accueil."
+              />
+              <TransferRequestForm onSuccess={handleTransferSuccess} />
+            </section>
           </div>
         )}
       </ContentContainer>

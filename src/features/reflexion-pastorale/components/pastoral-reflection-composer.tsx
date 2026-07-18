@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
 import { Card } from '@/components/ui/card/card';
+import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useMyTodayReflection } from '../api/get-my-reflection';
@@ -13,8 +14,13 @@ import { useSaveReflection } from '../api/save-reflection';
 const MAX_CHARS = 500;
 
 export function PastoralReflectionComposer() {
-  const { data: existing, isLoading } = useMyTodayReflection();
-  const { mutate: save, isPending } = useSaveReflection();
+  const {
+    data: existing,
+    isLoading,
+    isError: isLoadError,
+    refetch,
+  } = useMyTodayReflection();
+  const { mutate: save, isPending, isError: isSaveError } = useSaveReflection();
 
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState('');
@@ -54,10 +60,21 @@ export function PastoralReflectionComposer() {
 
   if (isLoading) {
     return (
-      <Card variant="elevated" className="p-4 space-y-2">
+      <Card variant="elevated" className="space-y-2 p-4">
         <Skeleton className="h-4 w-40" />
         <Skeleton className="h-3 w-full" />
       </Card>
+    );
+  }
+
+  if (isLoadError) {
+    return (
+      <ErrorState
+        title="Impossible de charger votre réflexion"
+        description="Le chargement de votre réflexion du jour a échoué."
+        onRetry={() => refetch()}
+        className="py-8"
+      />
     );
   }
 
@@ -87,6 +104,7 @@ export function PastoralReflectionComposer() {
             value={content}
             onChange={(e) => setContent(e.target.value.slice(0, MAX_CHARS))}
             placeholder="Partagez une réflexion liée aux lectures du jour…"
+            aria-label="Votre réflexion pastorale"
             rows={4}
             className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           />
@@ -101,7 +119,7 @@ export function PastoralReflectionComposer() {
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                icon={<X className="size-3.5" />}
+                icon={<X className="size-3.5" aria-hidden="true" />}
                 className="text-xs"
               >
                 Annuler
@@ -111,13 +129,18 @@ export function PastoralReflectionComposer() {
                 onClick={handleSave}
                 disabled={isPending || !content.trim()}
                 isLoading={isPending}
-                icon={<CheckCircle className="size-3.5" />}
+                icon={<CheckCircle className="size-3.5" aria-hidden="true" />}
                 className="text-xs"
               >
                 {isPending ? 'Enregistrement…' : 'Publier'}
               </Button>
             </div>
           </div>
+          {isSaveError && (
+            <p role="alert" className="text-xs text-destructive">
+              Impossible de publier la réflexion. Veuillez réessayer.
+            </p>
+          )}
         </Card>
       ) : existing ? (
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">

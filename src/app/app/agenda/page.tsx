@@ -1,14 +1,19 @@
 'use client';
 
+import { CalendarDays } from 'lucide-react';
 import { useState } from 'react';
 
 import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { Button } from '@/components/ui/button/button';
 import { Card } from '@/components/ui/card/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+import { FilterPills } from '@/components/ui/filter-pills';
+import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEvents } from '@/features/agenda/api/get-events';
 import { EventCard } from '@/features/agenda/components/event-card';
-import { cn } from '@/lib/utils';
 
 const EVENT_TYPE_FILTERS = [
   { value: '', label: 'Tous' },
@@ -21,7 +26,7 @@ const EVENT_TYPE_FILTERS = [
 
 export default function AgendaPage() {
   const [selectedType, setSelectedType] = useState('');
-  const { data, isLoading } = useEvents(
+  const { data, isLoading, isError, refetch } = useEvents(
     selectedType ? { event_type: selectedType } : undefined,
   );
 
@@ -30,26 +35,24 @@ export default function AgendaPage() {
     subtitle: 'Événements et célébrations de votre paroisse',
   });
 
+  const events = data?.results ?? [];
+
   return (
     <div className="flex flex-col">
       <ContentContainer>
-        <div className="mb-6 flex flex-wrap gap-2">
-          {EVENT_TYPE_FILTERS.map((filter) => (
-            <button
-              key={filter.value}
-              type="button"
-              onClick={() => setSelectedType(filter.value)}
-              className={cn(
-                'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
-                selectedType === filter.value
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80',
-              )}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
+        <SectionHeader
+          eyebrow="Le calendrier"
+          title="Prochains événements"
+          description="Messes, retraites et rencontres de votre communauté."
+        />
+
+        <FilterPills
+          options={EVENT_TYPE_FILTERS}
+          value={selectedType}
+          onChange={setSelectedType}
+          ariaLabel="Filtrer par type d'événement"
+          className="mb-6"
+        />
 
         {isLoading && (
           <div className="space-y-4">
@@ -64,17 +67,44 @@ export default function AgendaPage() {
           </div>
         )}
 
-        {!isLoading && data?.results.length === 0 && (
-          <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <p className="text-sm text-muted-foreground">
-              Aucun événement à venir.
-            </p>
-          </div>
+        {isError && (
+          <ErrorState
+            title="Impossible de charger l'agenda"
+            description="Vérifiez votre connexion puis réessayez."
+            onRetry={() => refetch()}
+          />
         )}
 
-        {!isLoading && data && data.results.length > 0 && (
+        {!isLoading && !isError && events.length === 0 && (
+          <EmptyState
+            icon={<CalendarDays />}
+            title={
+              selectedType
+                ? 'Aucun événement de ce type'
+                : 'Aucun événement à venir'
+            }
+            description={
+              selectedType
+                ? 'Essayez un autre filtre pour découvrir les prochains rendez-vous de votre communauté.'
+                : 'Les prochaines messes, retraites et rencontres de votre paroisse apparaîtront ici. Revenez bientôt !'
+            }
+            action={
+              selectedType ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedType('')}
+                >
+                  Voir tous les événements
+                </Button>
+              ) : undefined
+            }
+          />
+        )}
+
+        {!isLoading && !isError && events.length > 0 && (
           <div className="space-y-4">
-            {data.results.map((event) => (
+            {events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>

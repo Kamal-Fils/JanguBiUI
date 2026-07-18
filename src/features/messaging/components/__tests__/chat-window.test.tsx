@@ -304,14 +304,17 @@ describe('ChatWindow', () => {
         `${env.API_URL}/v1/messaging/conversations/${CONVERSATION_ID}/read/`,
         () => HttpResponse.json({}),
       ),
-      http.post(
-        `${env.API_URL}/v1/messaging/conversations/${CONVERSATION_ID}/cgu/`,
-        () => {
-          cguPosted = true;
-          cguAccepted = true;
-          return HttpResponse.json({});
-        },
-      ),
+      // L'acceptation est désormais GLOBALE (une fois pour toutes les
+      // conversations) : POST /v1/messaging/cgu/ — plus l'endpoint par
+      // conversation qui redemandait les CGU à chaque correspondant.
+      http.post(`${env.API_URL}/v1/messaging/cgu/`, () => {
+        cguPosted = true;
+        cguAccepted = true;
+        return HttpResponse.json({
+          accepted: true,
+          accepted_at: new Date().toISOString(),
+        });
+      }),
     );
 
     renderApp(

@@ -1,11 +1,23 @@
 'use client';
 
-import { Eye, Pencil, Send, Trash2, X } from 'lucide-react';
+import {
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  ImageIcon,
+  MoreHorizontal,
+  Newspaper,
+  Pencil,
+  PencilLine,
+  Send,
+  Trash2,
+} from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { Badge } from '@/components/ui/badge/badge';
 import { Button } from '@/components/ui/button/button';
+import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import {
   Dialog,
   DialogContent,
@@ -14,35 +26,137 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog/dialog';
-import { Spinner } from '@/components/ui/spinner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown';
+import { EmptyState } from '@/components/ui/empty-state';
+import { StatusBadge, type StatusConfig } from '@/components/ui/status-badge';
 import { paths } from '@/config/paths';
+import { useUser } from '@/lib/auth';
+import { canPublishArticle, canUnpublishArticle } from '@/lib/authorization';
+import { cn } from '@/utils/cn';
+import { formatFrDate } from '@/utils/format-date';
 
 import { useDeleteArticle } from '../api/delete-article';
 import { usePublishArticle } from '../api/publish-article';
 import { useUnpublishArticle } from '../api/unpublish-article';
-import { Article } from '../types';
+import { Article, ArticleStatus } from '../types';
 
 import { ArticleTypeBadge } from './article-type-badge';
 
-const STATUS_CONFIG: Record<
-  string,
-  {
-    label: string;
-    variant: 'default' | 'secondary' | 'destructive' | 'outline' | 'success';
-  }
-> = {
-  draft: { label: 'Brouillon', variant: 'outline' },
-  published: { label: 'Publié', variant: 'success' },
-  unpublished: { label: 'Dépublié', variant: 'destructive' },
+/** Statut éditorial → StatusBadge tonal (icône + libellé, jamais couleur seule). */
+const STATUS_CONFIG: Record<ArticleStatus, StatusConfig> = {
+  draft: { label: 'Brouillon', tone: 'warning', icon: <PencilLine /> },
+  published: { label: 'Publié', tone: 'success', icon: <CheckCircle2 /> },
+  unpublished: { label: 'Dépublié', tone: 'danger', icon: <EyeOff /> },
 };
 
-function formatDate(iso: string | null | undefined): string {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
+/** En-têtes de colonnes « admin sobre » : micro-capitales espacées. */
+const TH_CLASS = 'text-[11px] uppercase tracking-wide text-muted-foreground';
+
+function ArticleCoverThumb({ article }: { article: Article }) {
+  if (article.cover_image_url) {
+    return (
+      <Image
+        src={article.cover_image_url}
+        alt=""
+        width={56}
+        height={40}
+        unoptimized
+        className="hidden h-10 w-14 shrink-0 rounded-md border border-border/60 object-cover md:block"
+      />
+    );
+  }
+  return (
+    <div
+      aria-hidden="true"
+      className="hidden h-10 w-14 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-primary/10 to-accent/10 text-primary/40 md:flex"
+    >
+      <ImageIcon className="size-4" />
+    </div>
+  );
+}
+
+interface ArticleRowActionsProps {
+  article: Article;
+  userCanPublish: boolean;
+  userCanUnpublish: boolean;
+  publishPending: boolean;
+  onPublish: (id: string) => void;
+  onUnpublishRequest: (article: Article) => void;
+  onDeleteRequest: (article: Article) => void;
+}
+
+/** Actions par ligne regroupées dans un menu « ⋯ » (pas de rangée de boutons). */
+function ArticleRowActions({
+  article,
+  userCanPublish,
+  userCanUnpublish,
+  publishPending,
+  onPublish,
+  onUnpublishRequest,
+  onDeleteRequest,
+}: ArticleRowActionsProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={`Actions pour ${article.title}`}
+        >
+          <MoreHorizontal className="size-4" aria-hidden="true" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem asChild>
+          <Link href={paths.app.article.getHref(article.id)} target="_blank">
+            <Eye className="mr-2 size-4" aria-hidden="true" />
+            Voir
+          </Link>
+        </DropdownMenuItem>
+        {article.status !== 'unpublished' && (
+          <DropdownMenuItem asChild>
+            <Link href={paths.app.admin.articleEdit.getHref(article.id)}>
+              <Pencil className="mr-2 size-4" aria-hidden="true" />
+              Modifier
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {article.status === 'draft' && userCanPublish && (
+          <DropdownMenuItem
+            disabled={publishPending}
+            onSelect={() => onPublish(article.id)}
+          >
+            <Send className="mr-2 size-4" aria-hidden="true" />
+            Publier
+          </DropdownMenuItem>
+        )}
+        {article.status === 'published' && userCanUnpublish && (
+          <DropdownMenuItem onSelect={() => onUnpublishRequest(article)}>
+            <EyeOff className="mr-2 size-4" aria-hidden="true" />
+            Dépublier
+          </DropdownMenuItem>
+        )}
+        {article.status !== 'published' && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+              onSelect={() => onDeleteRequest(article)}
+            >
+              <Trash2 className="mr-2 size-4" aria-hidden="true" />
+              Supprimer
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 interface AdminArticleListProps {
@@ -57,143 +171,111 @@ export function AdminArticleList({
   const [deleteTarget, setDeleteTarget] = useState<Article | null>(null);
   const [unpublishTarget, setUnpublishTarget] = useState<Article | null>(null);
 
+  // Aligne l'UI sur l'API : un diacre (church_admin) gère ses brouillons mais
+  // ne peut ni publier ni dépublier. On masque les actions correspondantes pour
+  // éviter une action morte (le back renverrait 400/403).
+  const { data: user } = useUser();
+  const userCanPublish = canPublishArticle(user);
+  const userCanUnpublish = canUnpublishArticle(user);
+
   const publishMutation = usePublishArticle();
   const unpublishMutation = useUnpublishArticle();
   const deleteMutation = useDeleteArticle({
     onSuccess: () => setDeleteTarget(null),
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner />
-      </div>
-    );
-  }
-
-  if (articles.length === 0) {
-    return (
-      <div className="py-12 text-center text-sm text-muted-foreground">
-        Aucun article trouvé.
-      </div>
-    );
-  }
+  const columns: DataTableColumn<Article>[] = [
+    {
+      header: 'Article',
+      mobileLabel: 'Titre',
+      headClassName: TH_CLASS,
+      cell: (article) => (
+        <div className="flex min-w-0 items-center gap-3">
+          <ArticleCoverThumb article={article} />
+          <div className="min-w-0">
+            <p className="line-clamp-1 font-serif text-sm font-semibold text-foreground">
+              {article.title}
+            </p>
+            {article.author_name && (
+              <p className="truncate text-xs text-muted-foreground">
+                par {article.author_name}
+              </p>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: 'Type',
+      headClassName: TH_CLASS,
+      cell: (article) => <ArticleTypeBadge contentType={article.content_type} />,
+    },
+    {
+      header: 'Statut',
+      headClassName: TH_CLASS,
+      cell: (article) => (
+        <StatusBadge
+          {...(STATUS_CONFIG[article.status] ?? STATUS_CONFIG.draft)}
+        />
+      ),
+    },
+    {
+      header: 'Catégorie',
+      headClassName: TH_CLASS,
+      hideOnMobile: true,
+      cell: (article) => (
+        <span className="text-sm text-muted-foreground">
+          {article.category?.name ?? '—'}
+        </span>
+      ),
+    },
+    {
+      header: 'Publié le',
+      mobileLabel: 'Publié le',
+      headClassName: TH_CLASS,
+      cell: (article) => (
+        <span className="text-sm tabular-nums text-muted-foreground">
+          {article.published_at
+            ? formatFrDate(article.published_at, 'short')
+            : '—'}
+        </span>
+      ),
+    },
+    {
+      header: 'Actions',
+      isAction: true,
+      headClassName: cn(TH_CLASS, 'text-right'),
+      className: 'text-right',
+      cell: (article) => (
+        <ArticleRowActions
+          article={article}
+          userCanPublish={userCanPublish}
+          userCanUnpublish={userCanUnpublish}
+          publishPending={publishMutation.isPending}
+          onPublish={(id) => publishMutation.mutate(id)}
+          onUnpublishRequest={setUnpublishTarget}
+          onDeleteRequest={setDeleteTarget}
+        />
+      ),
+    },
+  ];
 
   return (
     <>
-      <div className="overflow-x-auto rounded-lg border border-border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                Titre
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                Type
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                Statut
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                Catégorie
-              </th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                Publié le
-              </th>
-              <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {articles.map((article) => {
-              const statusConfig =
-                STATUS_CONFIG[article.status] ?? STATUS_CONFIG.draft;
-              return (
-                <tr key={article.id} className="bg-card hover:bg-muted/30">
-                  <td className="px-4 py-3">
-                    <span className="line-clamp-1 font-medium text-foreground">
-                      {article.title}
-                    </span>
-                    {article.author_name && (
-                      <span className="text-xs text-muted-foreground">
-                        par {article.author_name}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <ArticleTypeBadge contentType={article.content_type} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={statusConfig.variant}>
-                      {statusConfig.label}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {article.category?.name ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {formatDate(article.published_at)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <Link
-                        href={paths.app.article.getHref(article.id)}
-                        target="_blank"
-                      >
-                        <Button variant="ghost" size="icon" title="Voir">
-                          <Eye className="size-4" />
-                        </Button>
-                      </Link>
-                      {article.status !== 'unpublished' && (
-                        <Link
-                          href={paths.app.admin.articleEdit.getHref(article.id)}
-                        >
-                          <Button variant="ghost" size="icon" title="Modifier">
-                            <Pencil className="size-4" />
-                          </Button>
-                        </Link>
-                      )}
-                      {article.status === 'draft' && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Publier"
-                          onClick={() => publishMutation.mutate(article.id)}
-                          disabled={publishMutation.isPending}
-                        >
-                          <Send className="size-4" />
-                        </Button>
-                      )}
-                      {article.status === 'published' && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Dépublier"
-                          onClick={() => setUnpublishTarget(article)}
-                        >
-                          <X className="size-4" />
-                        </Button>
-                      )}
-                      {article.status !== 'published' && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Supprimer"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setDeleteTarget(article)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        data={articles}
+        columns={columns}
+        rowKey={(article) => article.id}
+        isLoading={isLoading}
+        caption="Liste des articles"
+        emptyState={
+          <EmptyState
+            icon={<Newspaper />}
+            title="Aucun article"
+            description="Aucun article ne correspond à ce filtre pour le moment."
+          />
+        }
+      />
 
       {/* Delete dialog */}
       <Dialog
@@ -217,13 +299,9 @@ export function AdminArticleList({
               onClick={() =>
                 deleteTarget && deleteMutation.mutate(deleteTarget.id)
               }
-              disabled={deleteMutation.isPending}
+              isLoading={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? (
-                <Spinner className="size-4" />
-              ) : (
-                'Supprimer'
-              )}
+              Supprimer
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -255,13 +333,9 @@ export function AdminArticleList({
                   );
                 }
               }}
-              disabled={unpublishMutation.isPending}
+              isLoading={unpublishMutation.isPending}
             >
-              {unpublishMutation.isPending ? (
-                <Spinner className="size-4" />
-              ) : (
-                'Dépublier'
-              )}
+              Dépublier
             </Button>
           </DialogFooter>
         </DialogContent>

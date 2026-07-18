@@ -2,7 +2,7 @@ import { queryOptions, useQuery } from '@tanstack/react-query';
 
 import { api } from '@/lib/api-client';
 
-import { Article, articleSchema } from '../types';
+import { Article, articleSchema, ContentType } from '../types';
 
 export type ScopeTypeFilter = 'global' | 'diocese' | 'parish' | 'church';
 
@@ -12,6 +12,8 @@ export type GetArticlesParams = {
   // Filtre de portée (feed) — borné serveur aux appartenances de l'utilisateur.
   scope_type?: ScopeTypeFilter;
   scope_id?: number;
+  // Filtre par type de contenu (onglets Articles / Annonces / Lettres).
+  content_type?: ContentType;
 };
 export type ArticlesResponse = { count: number; results: Article[] };
 

@@ -8,17 +8,26 @@ import { Conversation, conversationSchema } from '../types';
 export type ConversationsResponse = { count: number; results: Conversation[] };
 
 const parseConversations = (data: unknown): ConversationsResponse => {
-  if (Array.isArray(data)) {
-    return {
-      count: data.length,
-      results: data.map((item) => conversationSchema.parse(item)),
-    };
-  }
-  const raw = data as { count: number; results: unknown[] };
-  return {
-    count: raw.count ?? 0,
-    results: (raw.results ?? []).map((item) => conversationSchema.parse(item)),
-  };
+  const items = Array.isArray(data)
+    ? data
+    : ((data as { results?: unknown[] })?.results ?? []);
+
+  // safeParse ligne par ligne : une seule entrée malformée ne doit pas blanchir
+  // toute la liste (avec .parse en cascade, l'utilisateur voyait « Impossible
+  // de charger vos messages » pour UNE conversation hors schéma).
+  const results = items.flatMap((item) => {
+    const parsed = conversationSchema.safeParse(item);
+    if (!parsed.success) {
+      console.warn(
+        '[conversations] entrée ignorée (schéma invalide)',
+        parsed.error.issues,
+      );
+      return [];
+    }
+    return [parsed.data];
+  });
+
+  return { count: results.length, results };
 };
 
 export const getConversations = (

@@ -4,35 +4,24 @@ import { Play, Radio, Tv } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { PageHeader } from '@/components/layouts/page-header';
-import { CardEyebrow } from '@/components/ui/card';
+import { Button } from '@/components/ui/button/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { FilterPills } from '@/components/ui/filter-pills';
+import { Pill } from '@/components/ui/pill';
 import { SectionHeader } from '@/components/ui/section-header';
-import { Spinner } from '@/components/ui/spinner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { useTvCategories } from '../api/get-categories';
 import { useTvVideos } from '../api/get-videos';
 import type { TvVideo } from '../types';
-
-/**
- * Extrait l'ID YouTube d'une URL (watch?v=, youtu.be, /embed/, /live/, /shorts/)
- * pour servir une vignette éditoriale sans démarrer le lecteur.
- */
-function youtubeThumbnail(video: TvVideo): string | null {
-  const source = `${video.youtube_url} ${video.embed_url}`;
-  const match =
-    source.match(/[?&]v=([\w-]{11})/) ??
-    source.match(/youtu\.be\/([\w-]{11})/) ??
-    source.match(/\/(?:embed|live|shorts)\/([\w-]{11})/);
-  const id = match?.[1];
-  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
-}
+import { youtubeThumbnail } from '../utils/youtube-thumbnail';
 
 /** Petit indicateur « EN DIRECT » or, avec point pulsé discret. */
 function LiveIndicator() {
   return (
     <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-gold-ink shadow-soft-sm backdrop-blur-sm">
-      <span className="relative flex size-1.5">
+      <span className="relative flex size-1.5" aria-hidden="true">
         <span className="absolute inline-flex size-full animate-ping rounded-full bg-gold/70 motion-reduce:animate-none" />
         <span className="relative inline-flex size-1.5 rounded-full bg-gold" />
       </span>
@@ -42,9 +31,10 @@ function LiveIndicator() {
 }
 
 /**
- * Carte vidéo éditoriale : vignette YouTube riche, surtitre catégorie,
- * titre serif, indicateur or pour les lives. Façade cliquable — on n'embarque
- * l'<iframe> qu'au clic, pour ne pas démarrer N lecteurs en même temps.
+ * Carte vidéo éditoriale : vignette YouTube 16:9, catégorie en pastille or
+ * discrète, titre serif, indicateur or pour les lives. Façade cliquable — on
+ * n'embarque l'<iframe> qu'au clic, pour ne pas démarrer N lecteurs en même
+ * temps.
  */
 function VideoCard({ video }: { video: TvVideo }) {
   const [playing, setPlaying] = useState(false);
@@ -67,7 +57,7 @@ function VideoCard({ video }: { video: TvVideo }) {
             type="button"
             onClick={() => setPlaying(true)}
             aria-label={`Lire la vidéo : ${video.title}`}
-            className="relative flex size-full items-center justify-center"
+            className="relative flex size-full items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
           >
             {thumbnail ? (
               <img
@@ -85,17 +75,20 @@ function VideoCard({ video }: { video: TvVideo }) {
               className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent transition-colors group-hover:from-black/55"
             />
             <span className="relative flex size-14 items-center justify-center rounded-full bg-background/90 text-primary shadow-soft ring-1 ring-gold/30 transition-transform group-hover:scale-110 motion-reduce:transform-none">
-              <Play className="size-6 translate-x-0.5 fill-current" />
+              <Play
+                className="size-6 translate-x-0.5 fill-current"
+                aria-hidden="true"
+              />
             </span>
           </button>
         )}
       </div>
 
-      <div className="flex min-w-0 flex-col gap-1">
+      <div className="flex min-w-0 flex-col gap-1.5">
         {video.category?.name && (
-          <CardEyebrow className="text-gold-ink">
+          <Pill tone="gold" className="self-start">
             {video.category.name}
-          </CardEyebrow>
+          </Pill>
         )}
         {video.title && (
           <h3 className="line-clamp-2 font-serif text-base font-semibold leading-snug text-foreground">
@@ -117,6 +110,23 @@ function VideoGrid({ videos }: { videos: TvVideo[] }) {
   );
 }
 
+/** Squelette de la grille — mêmes proportions que les cartes (zéro reflow). */
+function TvSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-x-5 gap-y-7 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="flex flex-col gap-3">
+          <Skeleton className="aspect-video w-full rounded-xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20 rounded-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 interface CategorySection {
   slug: string;
   name: string;
@@ -125,10 +135,18 @@ interface CategorySection {
 
 export function TvContent() {
   const [selectedSlug, setSelectedSlug] = useState<string>('');
-  const { data: cats, isLoading: catsLoading } = useTvCategories();
-  const { data: videos, isLoading: vidsLoading } = useTvVideos(
-    selectedSlug || undefined,
-  );
+  const {
+    data: cats,
+    isLoading: catsLoading,
+    isError: catsError,
+    refetch: refetchCategories,
+  } = useTvCategories();
+  const {
+    data: videos,
+    isLoading: vidsLoading,
+    isError: vidsError,
+    refetch: refetchVideos,
+  } = useTvVideos(selectedSlug || undefined);
 
   const sortedVideos = useMemo<TvVideo[]>(() => {
     if (!videos?.results) return [];
@@ -169,9 +187,12 @@ export function TvContent() {
     ...(cats?.results.map((c) => ({ value: c.slug, label: c.name })) ?? []),
   ];
 
+  const selectedCategory = cats?.results.find((c) => c.slug === selectedSlug);
+
   const isLoading = vidsLoading || catsLoading;
-  const isEmpty = !isLoading && !sortedVideos.length;
-  const showGroupedView = !selectedSlug && !isEmpty;
+  const isError = vidsError || catsError;
+  const isEmpty = !isLoading && !isError && !sortedVideos.length;
+  const showGroupedView = !selectedSlug;
 
   return (
     <div className="flex flex-col">
@@ -191,14 +212,36 @@ export function TvContent() {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Spinner />
-          </div>
+          <TvSkeleton />
+        ) : isError ? (
+          <ErrorState
+            title="Impossible de charger les programmes"
+            description="Vérifiez votre connexion puis réessayez."
+            onRetry={() => {
+              refetchCategories();
+              refetchVideos();
+            }}
+          />
         ) : isEmpty ? (
           <EmptyState
-            icon={<Tv />}
-            title="Aucune vidéo"
-            description="Aucune vidéo n'est disponible dans cette catégorie."
+            icon={<Tv aria-hidden="true" />}
+            title={
+              selectedCategory
+                ? `Rien dans « ${selectedCategory.name} » pour l'instant`
+                : 'Les premiers programmes arrivent'
+            }
+            description={
+              selectedCategory
+                ? 'Les prochaines vidéos de cette catégorie apparaîtront ici dès leur mise en ligne. En attendant, explorez le reste de la chaîne.'
+                : 'Messes, enseignements, témoignages… La chaîne Jàngu Bi TV se remplit régulièrement. Revenez bientôt pour découvrir les premières vidéos.'
+            }
+            action={
+              selectedCategory ? (
+                <Button variant="outline" onClick={() => setSelectedSlug('')}>
+                  Voir toutes les vidéos
+                </Button>
+              ) : undefined
+            }
           />
         ) : showGroupedView ? (
           <div className="flex flex-col gap-10">

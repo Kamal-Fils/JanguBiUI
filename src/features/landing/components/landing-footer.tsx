@@ -41,7 +41,7 @@ export function LandingFooter() {
                 'Liturgie',
                 'Actualités',
                 'Messagerie',
-                'Dons & Quête',
+                'Dons & Quêtes',
               ].map((item) => (
                 <li key={item}>
                   <a

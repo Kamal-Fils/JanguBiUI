@@ -34,7 +34,7 @@ const CARDS: Card[] = [
 
 export function PourQuiSection() {
   return (
-    <section id="pour-qui" className="bg-background-surface py-24">
+    <section id="pour-qui" className="bg-background-surface py-12 sm:py-16 lg:py-24">
       <div className="mx-auto max-w-[1180px] px-5 sm:px-10">
         <div className="mb-14 text-center">
           <p className="mb-3 text-[0.6875rem] font-bold uppercase tracking-[.12em] text-primary">

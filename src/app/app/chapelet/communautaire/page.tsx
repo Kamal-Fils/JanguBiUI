@@ -29,7 +29,7 @@ export default function CommunautairePage() {
             )}
           </div>
           <button
-            className="text-sm text-muted-foreground underline"
+            className="rounded text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
             onClick={() => setJoined(null)}
             type="button"
           >

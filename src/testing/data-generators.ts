@@ -201,6 +201,9 @@ export const createArticleDetail = (
 ): ArticleDetail => ({
   ...createArticle(),
   content: `<p>${randParagraph()}</p>`,
+  // Le générateur produit du HTML → contrat 'html' (le rendu texte brut est
+  // réservé aux anciens articles rédigés en textarea).
+  content_format: 'html',
   updated_at: randPastDate().toISOString(),
   unpublished_at: null,
   unpublished_by_name: null,

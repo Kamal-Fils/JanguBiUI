@@ -22,12 +22,12 @@ export const mockNotifications = [
 ];
 
 export const notificationsHandlers = [
-  http.get(`${env.API_URL}/v1/messaging/notifications/`, () => {
+  http.get(`${env.API_URL}/v1/notifications/`, () => {
     return HttpResponse.json(mockNotifications);
   }),
 
   http.post(
-    `${env.API_URL}/v1/messaging/notifications/:id/read/`,
+    `${env.API_URL}/v1/notifications/:id/read/`,
     ({ params }) => {
       const id = String(params.id);
       const notification = mockNotifications.find((n) => n.id === id);

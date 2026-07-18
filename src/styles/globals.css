@@ -4,34 +4,35 @@
 
 @layer base {
   :root {
-    /* Revue Sacrée — light: ivoire/parchemin + indigo liturgique + or */
-    --background: 40 38% 97%;          /* #FAF8F5 ivoire chaud */
-    --background-surface: 38 32% 92%;  /* #F4F1EB parchemin */
-    --background-subtle: 38 25% 88%;   /* #EDE8DE crème */
-    --foreground: 265 52% 12%;         /* #1A1228 indigo quasi-noir */
-    --card: 40 38% 97%;
-    --card-foreground: 265 52% 12%;
-    --popover: 40 38% 97%;
-    --popover-foreground: 265 52% 12%;
-    --primary: 256 53% 36%;            /* #3D2B8E indigo liturgique */
-    --primary-foreground: 40 38% 97%;
-    --secondary: 256 48% 95%;          /* #EDE9F8 crème teinté indigo */
-    --secondary-foreground: 256 53% 28%;
-    --muted: 38 25% 88%;
-    --muted-foreground: 275 15% 42%;   /* #6B5E7A gris-prune chaud */
-    --accent: 38 63% 44%;              /* #B8922A or profond */
-    --accent-foreground: 265 52% 12%;  /* indigo quasi-noir — texte sombre sur boutons or (AA) */
+    /* Bleu Jàngu Bi — light : blanc + bleu #1A8FCC (identité d'origine,
+       demandée par le client) + or en accent. Structure éditoriale conservée. */
+    --background: 0 0% 100%;           /* blanc */
+    --background-surface: 202 40% 97%; /* bleu glacier très pâle */
+    --background-subtle: 202 30% 94%;
+    --foreground: 212 58% 6%;          /* #07101A navy quasi-noir */
+    --card: 0 0% 100%;
+    --card-foreground: 212 58% 6%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 212 58% 6%;
+    --primary: 201 77% 45%;            /* #1A8FCC bleu Jàngu Bi */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 202 60% 94%;          /* bleu pâle */
+    --secondary-foreground: 201 77% 30%;
+    --muted: 202 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 40 65% 48%;              /* or — conservé comme accent liturgique */
+    --accent-foreground: 212 58% 6%;   /* navy — texte sombre sur boutons or (AA) */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 38 20% 80%;              /* #D5CEC0 parchemin */
-    --input: 38 20% 80%;
-    --ring: 257 54% 60%;               /* #7A5FD4 indigo focus (AA) */
+    --border: 202 30% 88%;
+    --input: 202 30% 88%;
+    --ring: 201 90% 38%;               /* bleu soutenu — focus visible sur blanc (AA) */
     --radius: 0.625rem;
-    --gold: 38 63% 44%;
-    --gold-ink: 40 80% 28%;            /* or antique profond — texte or lisible (≥4.5:1 sur ivoire/parchemin/crème) */
-    /* Sacred Editorial — filets or, ombres douces indigo, mesure de lecture, motion */
-    --hairline-gold: 38 58% 50%;
-    --shadow-color: 256 40% 20%;
+    --gold: 40 65% 48%;
+    --gold-ink: 40 80% 28%;            /* or antique profond — texte or lisible sur fonds clairs */
+    /* Filets or, ombres douces navy, mesure de lecture, motion */
+    --hairline-gold: 40 55% 52%;
+    --shadow-color: 212 45% 22%;
     --reading-measure: 68ch;
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-out-soft: cubic-bezier(0.33, 1, 0.68, 1);
@@ -50,40 +51,40 @@
     /* Couleurs sémantiques (badges de statut, etc.) — theme-aware. */
     --success: 142 71% 36%;
     --warning: 38 92% 42%;
-    --info: 210 85% 52%;               /* bleu ciel conservé comme info seulement */
+    --info: 201 85% 42%;
   }
 
   .dark {
-    /* Revue Sacrée — dark: indigo-noir + lavande + or vif */
-    --background: 258 42% 6%;          /* #0D0B14 indigo-noir */
-    --background-surface: 258 36% 9%;  /* #14111E */
-    --background-subtle: 260 30% 13%;  /* #1C1828 */
-    --foreground: 38 25% 88%;          /* #EDE8DE crème chaud */
-    --card: 258 36% 9%;
-    --card-foreground: 38 25% 88%;
-    --popover: 258 36% 9%;
-    --popover-foreground: 38 25% 88%;
-    --primary: 256 45% 68%;            /* #9B87D4 lavande */
-    --primary-foreground: 258 42% 6%;
-    --secondary: 257 37% 17%;          /* #241E3A indigo profond */
-    --secondary-foreground: 38 25% 88%;
-    --muted: 260 30% 13%;
-    --muted-foreground: 270 18% 63%;   /* #9D91B0 */
-    --accent: 42 60% 55%;              /* #D4AA44 or vif */
-    --accent-foreground: 258 42% 6%;
+    /* Bleu Jàngu Bi — dark : navy profond #07101A + bleu vif #70CBFF + or */
+    --background: 212 58% 6%;          /* #07101A navy profond */
+    --background-surface: 212 45% 9%;
+    --background-subtle: 210 40% 13%;
+    --foreground: 210 40% 98%;
+    --card: 210 50% 9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 210 50% 9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 202 100% 72%;           /* #70CBFF bleu vif */
+    --primary-foreground: 212 58% 6%;
+    --secondary: 210 40% 14%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 210 40% 14%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 40 65% 55%;              /* or vif */
+    --accent-foreground: 212 58% 6%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 258 24% 20%;             /* #2E2740 */
-    --input: 258 24% 20%;
-    --ring: 257 54% 60%;
-    --gold: 42 60% 55%;
-    --gold-ink: 42 60% 60%;            /* or vif — texte or lisible sur indigo-noir */
-    /* En sombre les ombres doivent être quasi noires pour se voir sur l'indigo */
-    --hairline-gold: 42 55% 60%;
-    --shadow-color: 258 70% 4%;
+    --border: 210 30% 18%;
+    --input: 210 30% 18%;
+    --ring: 202 100% 72%;
+    --gold: 40 65% 55%;
+    --gold-ink: 40 65% 60%;            /* or vif — texte or lisible sur navy */
+    /* En sombre les ombres doivent être quasi noires pour se voir sur le navy */
+    --hairline-gold: 40 60% 58%;
+    --shadow-color: 212 90% 2%;
     --success: 142 60% 50%;
     --warning: 38 90% 58%;
-    --info: 210 90% 65%;
+    --info: 201 90% 62%;
   }
 }
 

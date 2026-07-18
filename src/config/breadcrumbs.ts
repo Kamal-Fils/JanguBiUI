@@ -11,7 +11,7 @@ export interface Crumb {
  */
 const PATH_LABELS: Record<string, string> = {
   '/app': 'Accueil',
-  '/app/actus': 'Actus',
+  '/app/actus': 'Actualité',
   '/app/spirituel': 'Spiritualité',
   '/app/spirituel/liturgie': 'Liturgie du jour',
   '/app/spirituel/heures': 'Liturgie des Heures',

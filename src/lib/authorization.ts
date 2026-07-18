@@ -40,22 +40,25 @@ export const isFidele = (user: User | null | undefined): boolean => {
 export const canCreateArticle = (user: User | null | undefined): boolean =>
   isAdmin(user);
 
+// Rôles d'administration digitale autorisés à PUBLIER / DÉPUBLIER un article.
+// church_admin (= diacre digital) est EXCLU : côté backend un diacre est limité
+// aux brouillons (news/services.py `article_can_publish` → False pour DIACRE) et
+// `CanUnpublishArticle` (news/permissions.py) n'autorise que ce même jeu de rôles.
+const ARTICLE_PUBLISH_ROLES: UserRole[] = [
+  'super_admin',
+  'province_admin',
+  'diocese_admin',
+  'parish_admin',
+];
+
+// church_admin ne peut pas publier — seulement parish_admin et au-dessus,
+// pour rester aligné sur l'API (sinon bouton « Publier » mort pour un diacre).
 export const canPublishArticle = (user: User | null | undefined): boolean =>
-  isAdmin(user);
+  user ? ARTICLE_PUBLISH_ROLES.includes(user.role) : false;
 
 // church_admin cannot unpublish — only parish_admin and above
-export const canUnpublishArticle = (user: User | null | undefined): boolean => {
-  return user
-    ? (
-        [
-          'super_admin',
-          'province_admin',
-          'diocese_admin',
-          'parish_admin',
-        ] as UserRole[]
-      ).includes(user.role)
-    : false;
-};
+export const canUnpublishArticle = (user: User | null | undefined): boolean =>
+  user ? ARTICLE_PUBLISH_ROLES.includes(user.role) : false;
 
 // Document requests
 export const canProcessDocuments = (user: User | null | undefined): boolean =>
@@ -83,6 +86,9 @@ export const isDiacre = (user: User | null | undefined): boolean =>
 
 export const isEvequeOrAbove = (user: User | null | undefined): boolean =>
   user?.pastoral_role === 'eveque' || user?.pastoral_role === 'archeveque';
+
+export const isArcheveque = (user: User | null | undefined): boolean =>
+  user?.pastoral_role === 'archeveque';
 
 // Pastoral = clergé (via pastoral_role) OU fidèle laïc (via role, dimension
 // admin où 'fidele' = « pas un administrateur »). Les deux sous-helpers lisent

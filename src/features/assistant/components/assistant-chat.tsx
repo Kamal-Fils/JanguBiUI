@@ -1,8 +1,8 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { Send, Bot, Sparkles } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { Bot, Send, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
 import { postRagQuery } from '@/features/assistant/api/post-rag-query';
@@ -11,14 +11,19 @@ import { cn } from '@/lib/utils';
 import { ChatMessage, type AppMessage } from './chat-message';
 import { SuggestionChips } from './suggestion-chips';
 
+const GENERATION_ERROR_MESSAGE =
+  "Je n'ai pas pu générer de réponse pour le moment. Vérifiez votre connexion, puis réessayez.";
+
 export function AssistantChat() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<AppMessage[]>([]);
+  const [lastFailedQuery, setLastFailedQuery] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const mutation = useMutation({
     mutationFn: postRagQuery,
     onSuccess: (data) => {
+      setLastFailedQuery(null);
       setMessages((prev) => [
         ...prev,
         {
@@ -29,14 +34,15 @@ export function AssistantChat() {
         },
       ]);
     },
-    onError: () => {
+    onError: (_error, variables) => {
+      setLastFailedQuery(variables.query);
       setMessages((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
           role: 'assistant',
-          content:
-            "Desole, une erreur s'est produite lors de la generation de la reponse. Veuillez reessayer.",
+          content: GENERATION_ERROR_MESSAGE,
+          isError: true,
         },
       ]);
     },
@@ -50,66 +56,57 @@ export function AssistantChat() {
     }
   }, [messages, isLoading]);
 
-  const handleSubmit = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const query = input.trim();
-    setInput('');
+  /** Ajoute la bulle utilisateur puis interroge l'assistant. */
+  const sendQuery = (raw: string) => {
+    const query = raw.trim();
+    if (!query || isLoading) return;
 
     setMessages((prev) => [
       ...prev,
-      {
-        id: crypto.randomUUID(),
-        role: 'user',
-        content: query,
-      },
+      { id: crypto.randomUUID(), role: 'user', content: query },
     ]);
-
     mutation.mutate({ query });
   };
 
-  const handleSuggestion = (text: string) => {
-    if (isLoading) return;
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!input.trim() || isLoading) return;
+    const query = input;
+    setInput('');
+    sendQuery(query);
+  };
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        role: 'user',
-        content: text,
-      },
-    ]);
-
-    mutation.mutate({ query: text });
+  /** Relance la dernière question échouée sans dupliquer la bulle utilisateur. */
+  const handleRetry = () => {
+    if (!lastFailedQuery || isLoading) return;
+    setMessages((prev) => prev.filter((m) => !m.isError));
+    mutation.mutate({ query: lastFailedQuery });
   };
 
   return (
     <div className="flex h-dvh flex-col">
-      {/* Header */}
+      {/* En-tête */}
       <header className="bg-background-surface/95 sticky top-0 z-40 border-b border-border px-4 py-3 backdrop-blur-md">
         <div className="mx-auto flex max-w-2xl items-center gap-3">
           <div className="flex size-9 items-center justify-center rounded-full bg-primary/10">
-            <Bot className="size-5 text-primary" />
+            <Bot className="size-5 text-primary" aria-hidden="true" />
           </div>
           <div>
             <h1 className="text-base font-semibold text-foreground">
-              Assistant Jangu Bi
+              Assistant Jàngu Bi
             </h1>
             <p className="text-xs text-muted-foreground">
-              {isLoading
-                ? 'En train de répondre…'
-                : 'Bible, Chapelet, Prêtres'}
+              {isLoading ? 'En train de répondre…' : 'Bible, Chapelet, Prêtres'}
             </p>
           </div>
         </div>
       </header>
 
-      {/* Messages Area */}
+      {/* Fil de conversation */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pb-4">
         <div className="mx-auto max-w-2xl">
           {messages.length === 0 ? (
-            <EmptyState onSuggestion={handleSuggestion} />
+            <WelcomeState onSuggestion={sendQuery} />
           ) : (
             <div
               className="flex flex-col gap-4 pt-4"
@@ -119,18 +116,26 @@ export function AssistantChat() {
               aria-label="Conversation avec l'assistant"
             >
               {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  onRetry={message.isError ? handleRetry : undefined}
+                />
               ))}
               {isLoading && (
                 <div className="flex items-start gap-3">
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <Bot className="size-4 text-primary" />
+                    <Bot className="size-4 text-primary" aria-hidden="true" />
                   </div>
                   <div className="bg-background-surface rounded-2xl rounded-tl-sm border border-border px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="size-2 animate-pulse rounded-full bg-primary" />
-                      <span className="size-2 animate-pulse rounded-full bg-primary [animation-delay:150ms]" />
-                      <span className="size-2 animate-pulse rounded-full bg-primary [animation-delay:300ms]" />
+                    <div
+                      className="flex items-center gap-1.5"
+                      role="status"
+                      aria-label="L'assistant réfléchit"
+                    >
+                      <span className="size-2 animate-pulse rounded-full bg-primary motion-reduce:animate-none" />
+                      <span className="size-2 animate-pulse rounded-full bg-primary [animation-delay:150ms] motion-reduce:animate-none" />
+                      <span className="size-2 animate-pulse rounded-full bg-primary [animation-delay:300ms] motion-reduce:animate-none" />
                     </div>
                   </div>
                 </div>
@@ -140,16 +145,16 @@ export function AssistantChat() {
         </div>
       </div>
 
-      {/* Suggestion chips after first response */}
+      {/* Raccourcis après la première réponse */}
       {messages.length > 0 && !isLoading && (
         <div className="border-t border-border bg-background px-4 py-2">
           <div className="mx-auto max-w-2xl">
-            <SuggestionChips onSelect={handleSuggestion} compact />
+            <SuggestionChips onSelect={sendQuery} compact />
           </div>
         </div>
       )}
 
-      {/* Input */}
+      {/* Saisie */}
       <div className="bg-background-surface border-t border-border px-4 pb-20 pt-3">
         <form
           onSubmit={handleSubmit}
@@ -165,7 +170,7 @@ export function AssistantChat() {
                   handleSubmit();
                 }
               }}
-              placeholder="Posez votre question..."
+              placeholder="Posez votre question…"
               rows={1}
               className={cn(
                 'w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground',
@@ -184,7 +189,7 @@ export function AssistantChat() {
             className="hover:bg-primary-hover size-11 shrink-0 rounded-xl bg-primary text-primary-foreground"
             aria-label="Envoyer le message"
           >
-            <Send className="size-4" />
+            <Send className="size-4" aria-hidden="true" />
           </Button>
         </form>
       </div>
@@ -192,8 +197,8 @@ export function AssistantChat() {
   );
 }
 
-/* ─── Empty state shown before first message ─── */
-function EmptyState({
+/* ─── Écran d'accueil avant le premier message ─── */
+function WelcomeState({
   onSuggestion,
 }: {
   onSuggestion: (text: string) => void;
@@ -201,15 +206,15 @@ function EmptyState({
   return (
     <div className="flex flex-col items-center gap-6 px-4 pb-8 pt-16">
       <div className="flex size-16 items-center justify-center rounded-2xl bg-primary/10">
-        <Sparkles className="size-8 text-primary" />
+        <Sparkles className="size-8 text-primary" aria-hidden="true" />
       </div>
       <div className="text-center">
-        <h2 className="text-lg font-semibold text-foreground">
+        <h2 className="font-serif text-lg font-semibold text-foreground">
           Bienvenue dans l&apos;Assistant
         </h2>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
           Je suis votre compagnon spirituel. Posez-moi vos questions sur la
-          Bible, le chapelet, ou trouvez un pretre disponible.
+          Bible, le chapelet, ou trouvez un prêtre disponible.
         </p>
       </div>
       <SuggestionChips onSelect={onSuggestion} />

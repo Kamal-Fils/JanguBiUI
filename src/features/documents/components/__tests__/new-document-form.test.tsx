@@ -47,7 +47,9 @@ function mockMe() {
  */
 async function navigateToSearch(user: ReturnType<typeof userEvent.setup>) {
   // Step 1 — document type + reason
-  await user.click(screen.getByRole('button', { name: 'Certificat de baptême' }));
+  await user.click(
+    screen.getByRole('button', { name: 'Certificat de baptême' }),
+  );
   await user.click(screen.getByRole('button', { name: 'Usage personnel' }));
   await user.click(screen.getByRole('button', { name: /continuer/i }));
 
@@ -126,7 +128,9 @@ describe('NewDocumentForm', () => {
     });
 
     // After selecting both, clicking Continuer should advance to step 2
-    await user.click(screen.getByRole('button', { name: 'Certificat de baptême' }));
+    await user.click(
+      screen.getByRole('button', { name: 'Certificat de baptême' }),
+    );
     await user.click(screen.getByRole('button', { name: 'Usage personnel' }));
     await user.click(screen.getByRole('button', { name: /continuer/i }));
 
@@ -174,10 +178,7 @@ describe('NewDocumentForm', () => {
     renderApp(<NewDocumentForm />);
     await navigateToSearch(user);
 
-    await user.type(
-      screen.getByLabelText(/rechercher une paroisse/i),
-      'Cath',
-    );
+    await user.type(screen.getByLabelText(/rechercher une paroisse/i), 'Cath');
     await user.click(await screen.findByRole('button', { name: /Cathédrale/ }));
 
     // État sélectionné : paroisse affichée + bouton "Changer".
@@ -192,7 +193,9 @@ describe('NewDocumentForm', () => {
     renderApp(<NewDocumentForm />);
     await navigateToConsent(user);
 
-    const submitBtn = screen.getByRole('button', { name: /envoyer la demande/i });
+    const submitBtn = screen.getByRole('button', {
+      name: /envoyer la demande/i,
+    });
     expect(submitBtn).toBeInTheDocument();
     expect(submitBtn).toBeDisabled();
   });
@@ -219,7 +222,10 @@ describe('NewDocumentForm', () => {
             (await request.json()) as Record<string, unknown>,
           );
           return HttpResponse.json(
-            createDocumentRequest({ document_type: 'baptism', status: 'submitted' }),
+            createDocumentRequest({
+              document_type: 'baptism',
+              status: 'submitted',
+            }),
             { status: 201 },
           );
         },
@@ -245,7 +251,8 @@ describe('NewDocumentForm', () => {
     expect(capturedBodies[0]).not.toHaveProperty('diocese');
   });
 
-  test('redirects to /app/documents after successful submission', async () => {
+  test('feedback succès + redirection vers le SUIVI de la demande créée', async () => {
+    // Le handler partagé POST /v1/documents/requests/ répond avec id "99".
     const user = userEvent.setup();
     renderApp(<NewDocumentForm />);
     await navigateToConsent(user);
@@ -254,8 +261,11 @@ describe('NewDocumentForm', () => {
       screen.getByRole('button', { name: /envoyer la demande/i }),
     );
 
+    // Notification de succès…
+    await screen.findByText('Demande envoyée');
+    // …et redirection vers la page de détail/suivi de la demande créée.
     await waitFor(() =>
-      expect(mockRouterPush).toHaveBeenCalledWith('/app/documents'),
+      expect(mockRouterPush).toHaveBeenCalledWith('/app/documents/99'),
     );
   });
 

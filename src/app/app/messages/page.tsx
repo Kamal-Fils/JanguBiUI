@@ -10,13 +10,23 @@ export default function MessagesPage() {
         <ConversationList />
       </div>
       {/* Desktop: placeholder in right panel (left panel is in layout) */}
-      <div className="hidden md:flex md:flex-1 md:flex-col md:items-center md:justify-center md:gap-3 md:text-center">
-        <div className="flex size-16 items-center justify-center rounded-full bg-muted">
-          <MessageCircle className="size-8 text-muted-foreground/40" />
+      <div className="bg-paper hidden md:flex md:flex-1 md:flex-col md:items-center md:justify-center md:gap-4 md:px-8 md:text-center">
+        <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
+          <MessageCircle
+            className="size-8 text-primary"
+            aria-hidden="true"
+          />
         </div>
-        <p className="text-sm text-muted-foreground">
-          Sélectionnez une conversation
-        </p>
+        <div>
+          <p className="font-serif text-lg font-semibold text-foreground">
+            Vos conversations
+          </p>
+          <p className="mx-auto mt-1 max-w-xs text-sm text-muted-foreground">
+            Sélectionnez une conversation pour reprendre l&apos;échange, en
+            toute confidentialité.
+          </p>
+        </div>
+        <div className="hairline-gold w-24" aria-hidden="true" />
       </div>
     </>
   );

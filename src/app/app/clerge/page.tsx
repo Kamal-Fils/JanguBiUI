@@ -1,6 +1,13 @@
 'use client';
 
-import { BookOpen, Clock, Cross, MapPin, MessageSquare } from 'lucide-react';
+import {
+  BarChart3,
+  BookOpen,
+  Clock,
+  Cross,
+  MapPin,
+  MessageSquare,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -33,6 +40,13 @@ const CLERGE_SECTIONS = [
     label: 'Transferts paroissiaux',
     description: 'Gérer les demandes de changement de paroisse',
     tone: 'success' as const,
+  },
+  {
+    href: paths.app.clerge.analytique.getHref(),
+    icon: BarChart3,
+    label: 'Analytique',
+    description: 'Dons · Fidèles · Activité du périmètre',
+    tone: 'primary' as const,
   },
   {
     href: paths.app.spirituelHeures.getHref(),
@@ -95,42 +109,42 @@ export default function ClergePage() {
             </svg>
           </div>
 
-            <div className="relative">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/70">
-                Espace Clergé
-              </p>
-              <h1 className="mt-1 truncate font-serif text-display font-black italic leading-[0.95] text-primary-foreground">
-                {firstName || 'Bienvenue'}
-              </h1>
-              <div
-                className="mt-4 h-px w-16 rounded-full bg-gold/70"
-                aria-hidden="true"
-              />
-              <p className="mt-3 text-sm text-primary-foreground/75">
-                Outils et ressources pastoraux
-              </p>
-            </div>
+          <div className="relative">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/70">
+              Espace Clergé
+            </p>
+            <h1 className="mt-1 truncate font-serif text-display font-black italic leading-[0.95] text-primary-foreground">
+              {firstName || 'Bienvenue'}
+            </h1>
+            <div
+              className="mt-4 h-px w-16 rounded-full bg-gold/70"
+              aria-hidden="true"
+            />
+            <p className="mt-3 text-sm text-primary-foreground/75">
+              Outils et ressources pastoraux
+            </p>
           </div>
+        </div>
 
-          {/* Outils pastoraux */}
-          <section>
-            <SectionHeader eyebrow="Ministère" title="Outils pastoraux" />
-            <div className="flex flex-col gap-3">
-              {CLERGE_SECTIONS.map((section) => {
-                const Icon = section.icon;
-                return (
-                  <QuickActionTile
-                    key={section.href}
-                    href={section.href}
-                    icon={<Icon />}
-                    label={section.label}
-                    description={section.description}
-                    tone={section.tone}
-                  />
-                );
-              })}
-            </div>
-          </section>
+        {/* Outils pastoraux */}
+        <section>
+          <SectionHeader eyebrow="Ministère" title="Outils pastoraux" />
+          <div className="flex flex-col gap-3">
+            {CLERGE_SECTIONS.map((section) => {
+              const Icon = section.icon;
+              return (
+                <QuickActionTile
+                  key={section.href}
+                  href={section.href}
+                  icon={<Icon />}
+                  label={section.label}
+                  description={section.description}
+                  tone={section.tone}
+                />
+              );
+            })}
+          </div>
+        </section>
       </div>
     </ContentContainer>
   );

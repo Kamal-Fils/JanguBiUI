@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import { PageHeader } from '@/components/layouts/page-header';
+import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Card, CardContent } from '@/components/ui/card/card';
 import { ScriptureQuote } from '@/components/ui/scripture-quote';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -30,6 +30,12 @@ export function BibleContent() {
 
   const activeTab = resolveTab(searchParams.get('tab'));
 
+  // Titre + app-bar fournis par le shell (AppHeader) — retour testeurs n°7.
+  useRegisterPageMeta({
+    title: 'Bible & Liturgie',
+    subtitle: 'Parole de Dieu au quotidien',
+  });
+
   function handleTabChange(value: string) {
     const params = new URLSearchParams(searchParams.toString());
     params.set('tab', value);
@@ -38,10 +44,6 @@ export function BibleContent() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader
-        title="Bible & Liturgie"
-        subtitle="Parole de Dieu au quotidien"
-      />
       <div className="mx-auto w-full max-w-3xl px-4 py-6">
         {/* Citation d'ouverture éditoriale — pose le ton « Revue Sacrée ». */}
         <ScriptureQuote

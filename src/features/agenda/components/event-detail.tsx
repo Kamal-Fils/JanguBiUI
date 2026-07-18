@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Button } from '@/components/ui/button/button';
-import { Card } from '@/components/ui/card/card';
+import { Card, CardEyebrow } from '@/components/ui/card/card';
+import { ErrorState } from '@/components/ui/error-state';
 import { useNotifications } from '@/components/ui/notifications';
+import { Pill } from '@/components/ui/pill';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { paths } from '@/config/paths';
@@ -17,6 +19,7 @@ import { useEvent } from '../api/get-event';
 import { useRegisterEvent } from '../api/register-event';
 import { useUnregisterEvent } from '../api/unregister-event';
 import {
+  EVENT_SCOPE_LABELS,
   EVENT_TYPE_COLORS,
   EVENT_TYPE_LABELS,
   formatEventDate,
@@ -41,7 +44,7 @@ function EventDetailSkeleton() {
 }
 
 export function EventDetail({ eventId }: EventDetailProps) {
-  const { data: event, isLoading, isError } = useEvent(eventId);
+  const { data: event, isLoading, isError, refetch } = useEvent(eventId);
   const { addNotification } = useNotifications();
   const { mutate: register, isPending: registering } = useRegisterEvent();
   const { mutate: unregister, isPending: unregistering } = useUnregisterEvent();
@@ -57,10 +60,12 @@ export function EventDetail({ eventId }: EventDetailProps) {
   if (isError || !event) {
     return (
       <ContentContainer width="reading">
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <p className="text-sm text-muted-foreground">
-            Événement introuvable.
-          </p>
+        <ErrorState
+          title="Événement introuvable"
+          description="Cet événement n'existe plus ou n'a pas pu être chargé pour le moment."
+          onRetry={() => refetch()}
+        />
+        <div className="mt-4 text-center">
           <Button variant="link" size="sm" asChild>
             <Link href={paths.app.agenda.getHref()}>
               Retour à l&apos;agenda
@@ -97,48 +102,53 @@ export function EventDetail({ eventId }: EventDetailProps) {
     <ContentContainer width="reading">
       <Link
         href={paths.app.agenda.getHref()}
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="mb-4 inline-flex items-center gap-1.5 rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <ArrowLeft className="size-4" />
+        <ArrowLeft className="size-4" aria-hidden="true" />
         Agenda
       </Link>
 
       <Card variant="elevated" className="p-5 md:p-6">
-        <span
-          className={cn(
-            'mb-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-            EVENT_TYPE_COLORS[event.event_type] ??
-              'bg-muted text-muted-foreground',
-          )}
-        >
-          {EVENT_TYPE_LABELS[event.event_type] ?? event.event_type}
-        </span>
+        {/* Type + portée : mêmes libellés que le fil actus. */}
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
+          <Pill tone="muted" className={EVENT_TYPE_COLORS[event.event_type]}>
+            {EVENT_TYPE_LABELS[event.event_type] ?? event.event_type}
+          </Pill>
+          <Pill tone="outline">
+            {EVENT_SCOPE_LABELS[event.scope_type] ?? event.scope_type}
+          </Pill>
+        </div>
 
-        <h1 className="mb-4 text-2xl font-bold leading-tight text-foreground">
+        <CardEyebrow className="mb-1.5 flex items-center gap-1.5 text-gold-ink">
+          <Calendar className="size-3 shrink-0" aria-hidden="true" />
+          <span className="capitalize tabular-nums tracking-[0.12em]">
+            {formatEventDate(start, end)}
+          </span>
+        </CardEyebrow>
+
+        <h1 className="font-serif text-2xl font-bold leading-tight tracking-tight text-foreground">
           {event.title}
         </h1>
 
+        <div className="hairline-gold mb-5 mt-3" aria-hidden="true" />
+
         <div className="mb-5 space-y-2 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <Calendar className="size-4 shrink-0" />
-            <span className="capitalize">{formatEventDate(start, end)}</span>
-          </div>
           {event.location && (
             <div className="flex items-center gap-2">
-              <MapPin className="size-4 shrink-0" />
+              <MapPin className="size-4 shrink-0" aria-hidden="true" />
               <span>{event.location}</span>
             </div>
           )}
           {event.organizer_email && (
             <div className="flex items-center gap-2">
-              <User className="size-4 shrink-0" />
+              <User className="size-4 shrink-0" aria-hidden="true" />
               <span>{event.organizer_email}</span>
             </div>
           )}
           {event.max_participants != null && (
             <div className="flex items-center gap-2">
-              <Users className="size-4 shrink-0" />
-              <span>
+              <Users className="size-4 shrink-0" aria-hidden="true" />
+              <span className="tabular-nums">
                 {event.registration_count} / {event.max_participants} inscrits
                 {isFull && (
                   <span className="ml-1 font-medium text-destructive">

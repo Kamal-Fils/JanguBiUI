@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button/button';
 import { FontSizeStepper } from '@/components/ui/font-size-stepper';
 import { useLiturgyToday } from '@/features/bible/api/get-liturgy-today';
-import { DailyMysteryCard } from '@/features/chapelet/components/daily-mystery-card';
 
 import { ReadingsSwiper } from './readings-swiper';
 
@@ -67,8 +66,8 @@ export function TodayTab() {
         </Button>
       </div>
 
-      {/* Rosary mystery card */}
-      <DailyMysteryCard />
+      {/* La carte « chapelet du jour » a quitté le flux de lecture (retour
+          testeurs n°1) — le chapelet vit sur sa propre page + la sous-nav. */}
 
       {/* Season / mystery label + font controls on one row */}
       <div className="flex items-center justify-between gap-2 px-1">

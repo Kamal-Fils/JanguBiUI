@@ -1,10 +1,17 @@
 'use client';
 
-import { ArrowRight, CheckCircle, Inbox, MapPin, XCircle } from 'lucide-react';
+import {
+  ArrowRight,
+  CheckCircle,
+  Inbox,
+  MapPin,
+  MoreHorizontal,
+  XCircle,
+} from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
-import { Card } from '@/components/ui/card';
+import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import {
   Dialog,
   DialogContent,
@@ -13,9 +20,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useNotifications } from '@/components/ui/notifications';
-import { SkeletonCard } from '@/components/ui/skeleton';
 
 import {
   useAcknowledgeTransfer,
@@ -26,6 +39,9 @@ import { TransferRequest } from '../types';
 
 import { TransferStatusBadge } from './transfer-status-badge';
 
+/** En-têtes de colonnes « admin sobre » : micro-capitales espacées. */
+const TH_CLASS = 'text-[11px] uppercase tracking-wide text-muted-foreground';
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('fr-FR', {
     day: 'numeric',
@@ -34,112 +50,233 @@ function formatDate(iso: string) {
   });
 }
 
-function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
-  const [rejectOpen, setRejectOpen] = useState(false);
-  const [rejectReason, setRejectReason] = useState('');
-  const { addNotification } = useNotifications();
+/** Vignette du trajet (pendant des vignettes actus/agenda). */
+function TransferThumb() {
+  return (
+    <div
+      aria-hidden="true"
+      className="hidden size-10 shrink-0 items-center justify-center rounded-md bg-success/10 text-success md:flex"
+    >
+      <MapPin className="size-4" />
+    </div>
+  );
+}
 
-  const { mutate: approve, isPending: approving } = useApproveTransfer();
-  const { mutate: reject, isPending: rejecting } = useRejectTransfer();
-  const { mutate: acknowledge, isPending: acknowledging } =
-    useAcknowledgeTransfer();
+interface TransferRowActionsProps {
+  transfer: TransferRequest;
+  onApprove: (transfer: TransferRequest) => void;
+  onAcknowledge: (transfer: TransferRequest) => void;
+  onRejectRequest: (transfer: TransferRequest) => void;
+}
 
+/**
+ * Actions par ligne regroupées dans un menu « ⋯ ». Les gardes métier sont
+ * inchangées : Approuver/Refuser uniquement en `pending` (paroisse d'origine),
+ * Accuser réception uniquement en `approved_by_origin` (paroisse d'accueil),
+ * aucune action sur les statuts terminaux (`completed`, `rejected`).
+ */
+function TransferRowActions({
+  transfer,
+  onApprove,
+  onAcknowledge,
+  onRejectRequest,
+}: TransferRowActionsProps) {
   const canApprove = transfer.status === 'pending';
   const canAcknowledge = transfer.status === 'approved_by_origin';
-  const isTerminal =
-    transfer.status === 'completed' || transfer.status === 'rejected';
+
+  if (!canApprove && !canAcknowledge) return null;
 
   return (
-    <>
-      <Card className="p-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={`Actions pour la demande #${transfer.id}`}
+        >
+          <MoreHorizontal className="size-4" aria-hidden="true" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52">
+        {canApprove && (
+          <>
+            <DropdownMenuItem onSelect={() => onApprove(transfer)}>
+              <CheckCircle className="mr-2 size-4" aria-hidden="true" />
+              Approuver
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+              onSelect={() => onRejectRequest(transfer)}
+            >
+              <XCircle className="mr-2 size-4" aria-hidden="true" />
+              Refuser
+            </DropdownMenuItem>
+          </>
+        )}
+        {canAcknowledge && (
+          <DropdownMenuItem onSelect={() => onAcknowledge(transfer)}>
+            <CheckCircle className="mr-2 size-4" aria-hidden="true" />
+            Accuser réception
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+interface AdminTransferListProps {
+  transfers: TransferRequest[];
+  isLoading?: boolean;
+}
+
+/**
+ * Liste clergé des demandes de transfert — pattern DataTable + menu « ⋯ »
+ * (cf. agenda/actus). L'accès reste gardé en amont par la page
+ * (`isClergy` + `enabled` sur la query) : aucune condition métier ne change,
+ * seule la présentation.
+ */
+export function AdminTransferList({
+  transfers,
+  isLoading,
+}: AdminTransferListProps) {
+  const { addNotification } = useNotifications();
+  const [rejectTarget, setRejectTarget] = useState<TransferRequest | null>(
+    null,
+  );
+  const [rejectReason, setRejectReason] = useState('');
+
+  const { mutate: approve } = useApproveTransfer();
+  const { mutate: reject, isPending: rejecting } = useRejectTransfer();
+  const { mutate: acknowledge } = useAcknowledgeTransfer();
+
+  function handleApprove(transfer: TransferRequest) {
+    approve(transfer.id, {
+      onSuccess: () =>
+        addNotification({
+          type: 'success',
+          title: 'Approuvé',
+          message: 'La demande a été approuvée.',
+        }),
+    });
+  }
+
+  function handleAcknowledge(transfer: TransferRequest) {
+    acknowledge(transfer.id, {
+      onSuccess: () =>
+        addNotification({
+          type: 'success',
+          title: 'Accusé réception',
+          message: 'La réception a été enregistrée.',
+        }),
+    });
+  }
+
+  function closeRejectDialog() {
+    setRejectTarget(null);
+    setRejectReason('');
+  }
+
+  function handleConfirmReject() {
+    if (!rejectTarget) return;
+    reject(
+      { transferId: rejectTarget.id, reason: rejectReason },
+      {
+        onSuccess: () => {
+          closeRejectDialog();
+          addNotification({
+            type: 'success',
+            title: 'Refus enregistré',
+            message: 'La demande a été refusée.',
+          });
+        },
+      },
+    );
+  }
+
+  const columns: DataTableColumn<TransferRequest>[] = [
+    {
+      header: 'Demande',
+      mobileLabel: 'Trajet',
+      headClassName: TH_CLASS,
+      cell: (transfer) => (
+        <div className="flex min-w-0 items-center gap-3">
+          <TransferThumb />
+          <div className="min-w-0">
+            <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
               <span className="truncate">
                 {transfer.origin_parish_name ?? '—'}
               </span>
-              <ArrowRight className="size-3.5 shrink-0" aria-hidden="true" />
+              <ArrowRight
+                className="size-3.5 shrink-0 text-muted-foreground"
+                aria-hidden="true"
+              />
               <span className="truncate">
                 {transfer.destination_parish_name ?? '—'}
               </span>
-            </div>
-            <TransferStatusBadge status={transfer.status} />
+            </p>
             {transfer.reason && (
-              <p className="mt-2 line-clamp-2 text-xs italic text-muted-foreground">
+              <p className="line-clamp-1 text-xs italic text-muted-foreground">
                 « {transfer.reason} »
               </p>
             )}
-            <p className="mt-1.5 text-xs text-muted-foreground">
-              {formatDate(transfer.created_at)}
-            </p>
           </div>
-
-          {!isTerminal && (
-            <div className="flex shrink-0 flex-wrap gap-2">
-              {canApprove && (
-                <>
-                  <Button
-                    size="sm"
-                    className="h-9"
-                    isLoading={approving}
-                    icon={<CheckCircle className="size-3.5" />}
-                    onClick={() =>
-                      approve(transfer.id, {
-                        onSuccess: () =>
-                          addNotification({
-                            type: 'success',
-                            title: 'Approuvé',
-                            message: 'La demande a été approuvée.',
-                          }),
-                      })
-                    }
-                    disabled={approving}
-                  >
-                    Approuver
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="h-9"
-                    icon={<XCircle className="size-3.5" />}
-                    onClick={() => setRejectOpen(true)}
-                  >
-                    Refuser
-                  </Button>
-                </>
-              )}
-              {canAcknowledge && (
-                <Button
-                  size="sm"
-                  className="h-9"
-                  isLoading={acknowledging}
-                  icon={<CheckCircle className="size-3.5" />}
-                  onClick={() =>
-                    acknowledge(transfer.id, {
-                      onSuccess: () =>
-                        addNotification({
-                          type: 'success',
-                          title: 'Accusé réception',
-                          message: 'La réception a été enregistrée.',
-                        }),
-                    })
-                  }
-                  disabled={acknowledging}
-                >
-                  Accuser réception
-                </Button>
-              )}
-            </div>
-          )}
         </div>
-      </Card>
+      ),
+    },
+    {
+      header: 'Statut',
+      headClassName: TH_CLASS,
+      cell: (transfer) => <TransferStatusBadge status={transfer.status} />,
+    },
+    {
+      header: 'Date',
+      mobileLabel: 'Soumise le',
+      headClassName: TH_CLASS,
+      cell: (transfer) => (
+        <span className="text-sm tabular-nums text-muted-foreground">
+          {formatDate(transfer.created_at)}
+        </span>
+      ),
+    },
+    {
+      header: 'Actions',
+      isAction: true,
+      headClassName: `${TH_CLASS} text-right`,
+      className: 'text-right',
+      cell: (transfer) => (
+        <TransferRowActions
+          transfer={transfer}
+          onApprove={handleApprove}
+          onAcknowledge={handleAcknowledge}
+          onRejectRequest={setRejectTarget}
+        />
+      ),
+    },
+  ];
 
+  return (
+    <>
+      <DataTable
+        data={transfers}
+        columns={columns}
+        rowKey={(transfer) => transfer.id}
+        isLoading={isLoading}
+        caption="Demandes de transfert paroissial"
+        emptyState={
+          <EmptyState
+            icon={<Inbox aria-hidden="true" />}
+            title="Aucune demande de transfert"
+            description="Dès qu'un fidèle demandera un rattachement impliquant votre paroisse, sa demande apparaîtra ici pour approbation ou accusé de réception."
+          />
+        }
+      />
+
+      {/* Dialogue de refus (motif obligatoire, transmis au fidèle) */}
       <Dialog
-        open={rejectOpen}
+        open={!!rejectTarget}
         onOpenChange={(open) => {
-          if (!open) setRejectReason('');
-          setRejectOpen(open);
+          if (!open) closeRejectDialog();
         }}
       >
         <DialogContent>
@@ -167,29 +304,14 @@ function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectOpen(false)}>
+            <Button variant="outline" onClick={closeRejectDialog}>
               Annuler
             </Button>
             <Button
               variant="destructive"
               isLoading={rejecting}
               disabled={!rejectReason.trim() || rejecting}
-              onClick={() =>
-                reject(
-                  { transferId: transfer.id, reason: rejectReason },
-                  {
-                    onSuccess: () => {
-                      setRejectOpen(false);
-                      setRejectReason('');
-                      addNotification({
-                        type: 'success',
-                        title: 'Refus enregistré',
-                        message: 'La demande a été refusée.',
-                      });
-                    },
-                  },
-                )
-              }
+              onClick={handleConfirmReject}
             >
               Confirmer le refus
             </Button>
@@ -197,43 +319,5 @@ function AdminTransferCard({ transfer }: { transfer: TransferRequest }) {
         </DialogContent>
       </Dialog>
     </>
-  );
-}
-
-interface AdminTransferListProps {
-  transfers: TransferRequest[];
-  isLoading?: boolean;
-}
-
-export function AdminTransferList({
-  transfers,
-  isLoading,
-}: AdminTransferListProps) {
-  if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[1, 2, 3].map((i) => (
-          <SkeletonCard key={i} />
-        ))}
-      </div>
-    );
-  }
-
-  if (transfers.length === 0) {
-    return (
-      <EmptyState
-        icon={<Inbox aria-hidden="true" />}
-        title="Aucune demande de transfert"
-        description="Les demandes de transfert vers votre paroisse apparaîtront ici."
-      />
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      {transfers.map((transfer) => (
-        <AdminTransferCard key={transfer.id} transfer={transfer} />
-      ))}
-    </div>
   );
 }

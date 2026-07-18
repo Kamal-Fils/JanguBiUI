@@ -11,11 +11,11 @@ import {
   CardEyebrow,
   CardTitle,
 } from '@/components/ui/card/card';
+import { ErrorState } from '@/components/ui/error-state';
 import { FilterPills } from '@/components/ui/filter-pills';
 import { SectionHeader } from '@/components/ui/section-header';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useEvents } from '@/features/agenda/api/get-events';
-import { EventCard } from '@/features/agenda/components/event-card';
+import { AdminEventList } from '@/features/agenda/components/admin-event-list';
 import { EventForm } from '@/features/agenda/components/event-form';
 import { useUser } from '@/lib/auth';
 import { isAdmin, isClergy } from '@/lib/authorization';
@@ -38,7 +38,12 @@ export default function AdminAgendaPage() {
   const [showForm, setShowForm] = useState(false);
 
   const canManage = canManageAgenda(user);
-  const { data, isLoading: eventsLoading } = useEvents(
+  const {
+    data,
+    isLoading: eventsLoading,
+    isError,
+    refetch,
+  } = useEvents(
     selectedType ? { event_type: selectedType } : undefined,
     canManage,
   );
@@ -82,33 +87,16 @@ export default function AdminAgendaPage() {
         <section>
           <SectionHeader eyebrow="Calendrier paroissial" title="Événements" />
 
-          {eventsLoading && (
-            <div className="space-y-4">
-              {[1, 2].map((i) => (
-                <Card key={i} variant="flat">
-                  <CardContent className="space-y-3 p-4">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {!eventsLoading && data?.results.length === 0 && (
-            <Card variant="ghost">
-              <CardContent className="py-12 text-center text-sm text-muted-foreground">
-                Aucun événement publié.
-              </CardContent>
-            </Card>
-          )}
-
-          {!eventsLoading && data && data.results.length > 0 && (
-            <div className="space-y-4">
-              {data.results.map((event) => (
-                <EventCard key={event.id} event={event} canDelete />
-              ))}
-            </div>
+          {isError ? (
+            <ErrorState
+              title="Impossible de charger les événements"
+              onRetry={() => refetch()}
+            />
+          ) : (
+            <AdminEventList
+              events={data?.results}
+              isLoading={eventsLoading}
+            />
           )}
         </section>
       </div>

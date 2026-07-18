@@ -8,12 +8,19 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
+  MessageCircle,
   Send,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button/button';
 import {
   Card,
@@ -22,11 +29,16 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ErrorState } from '@/components/ui/error-state';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { ApiError } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 
 import { useAcceptMessagingCgu } from '../api/accept-cgu';
-import { useGetMessages } from '../api/get-messages';
+import {
+  MESSAGES_PAGE_SIZE,
+  useGetMessages,
+  useLoadOlderMessages,
+} from '../api/get-messages';
 import { useMarkRead } from '../api/mark-read';
 import { OPTIMISTIC_ID_PREFIX, useSendMessage } from '../api/send-message';
 import { useChatSocket } from '../hooks/use-chat-socket';
@@ -54,19 +66,45 @@ function formatTime(iso: string): string {
   });
 }
 
-function getInitials(name: string): string {
-  return (name ?? '?')
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase();
+function isSameDay(isoA: string, isoB: string): boolean {
+  const a = new Date(isoA);
+  const b = new Date(isoB);
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+/** Libellé du séparateur de journée : Aujourd'hui / Hier / date longue. */
+function formatDayLabel(iso: string): string {
+  const date = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  const sameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+
+  if (sameDay(date, today)) return "Aujourd'hui";
+  if (sameDay(date, yesterday)) return 'Hier';
+  return date.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    ...(date.getFullYear() !== today.getFullYear()
+      ? { year: 'numeric' as const }
+      : {}),
+  });
 }
 
 function isSameGroup(previous: Message, current: Message): boolean {
   if (previous.is_mine !== current.is_mine) return false;
   if (!previous.is_mine && previous.sender_id !== current.sender_id)
     return false;
+  // Un changement de journée casse toujours le groupe (séparateur de date).
+  if (!isSameDay(previous.created_at, current.created_at)) return false;
   const timeDiff =
     new Date(current.created_at).getTime() -
     new Date(previous.created_at).getTime();
@@ -124,6 +162,24 @@ function isOptimistic(message: Message): boolean {
   return message.id.startsWith(OPTIMISTIC_ID_PREFIX);
 }
 
+// ── DaySeparator ──────────────────────────────────────────────────────────────
+
+/** Séparateur éditorial entre deux journées : filets or + pastille datée. */
+function DaySeparator({ iso }: { iso: string }) {
+  return (
+    <div className="mb-1 mt-5 flex items-center gap-3 first:mt-1">
+      <div className="hairline-gold flex-1" aria-hidden="true" />
+      <span
+        suppressHydrationWarning
+        className="shrink-0 rounded-full bg-muted/70 px-3 py-1 text-[11px] font-medium capitalize text-muted-foreground"
+      >
+        {formatDayLabel(iso)}
+      </span>
+      <div className="hairline-gold flex-1" aria-hidden="true" />
+    </div>
+  );
+}
+
 // ── ReadReceipt ───────────────────────────────────────────────────────────────
 
 /**
@@ -154,7 +210,7 @@ function ReadReceipt({ message }: { message: Message }) {
 interface MessageBubbleProps {
   message: Message;
   position: MessagePosition;
-  participantInitials: string;
+  participantName: string;
   isExpanded: boolean;
   onToggleExpand: () => void;
 }
@@ -162,7 +218,7 @@ interface MessageBubbleProps {
 function MessageBubble({
   message,
   position,
-  participantInitials,
+  participantName,
   isExpanded,
   onToggleExpand,
 }: MessageBubbleProps) {
@@ -182,22 +238,22 @@ function MessageBubble({
       {showAvatar && (
         <div className="size-7 shrink-0">
           {isLast && (
-            <Avatar className="size-7">
-              <AvatarFallback className="text-[10px] font-bold bg-muted text-muted-foreground">
-                {participantInitials}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              name={participantName}
+              size="sm"
+              className="size-7 text-[10px]"
+            />
           )}
         </div>
       )}
 
       <div
         className={cn(
-          'max-w-[75%] md:max-w-[60%] px-4 py-2.5 text-sm shadow-sm',
+          'max-w-[75%] md:max-w-[60%] px-4 py-2.5 text-sm',
           getBubbleRadius(message.is_mine, position),
           message.is_mine
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-secondary text-secondary-foreground',
+            ? 'bg-primary text-primary-foreground shadow-soft-sm'
+            : 'border border-border/60 bg-card text-foreground shadow-soft-sm',
         )}
       >
         {/* Message content */}
@@ -216,7 +272,7 @@ function MessageBubble({
             type="button"
             onClick={onToggleExpand}
             className={cn(
-              'mt-1 flex items-center gap-1 rounded text-[11px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              'mt-1 flex items-center gap-1 rounded text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               message.is_mine
                 ? 'text-primary-foreground/70 hover:text-primary-foreground'
                 : 'text-muted-foreground hover:text-foreground',
@@ -275,11 +331,15 @@ export function ChatWindow({
   const hasScrolledOnceRef = useRef(false);
 
   const { data, isLoading, error, refetch } = useGetMessages(conversationId);
+  const { mutate: loadOlder, isPending: isLoadingOlder } =
+    useLoadOlderMessages(conversationId);
+  const [reachedStart, setReachedStart] = useState(false);
   const { mutate: send, isPending } = useSendMessage(conversationId);
   const { mutate: markRead } = useMarkRead(conversationId);
   const { mutate: acceptCgu, isPending: isAcceptingCgu } =
     useAcceptMessagingCgu(conversationId);
-  const { status: socketStatus } = useChatSocket(conversationId);
+  const { status: socketStatus, retry: retrySocket } =
+    useChatSocket(conversationId);
 
   const needsCguAcceptance =
     error instanceof ApiError && error.status === 403;
@@ -355,13 +415,31 @@ export function ChatWindow({
     doSend();
   }
 
-  const participantInitials = getInitials(participantName ?? '?');
-  const messages = data?.results ?? [];
+  const messages = useMemo(() => data?.results ?? [], [data?.results]);
+  const canLoadOlder = !reachedStart && messages.length >= MESSAGES_PAGE_SIZE;
+
+  // Charge la page précédente (before_id) en préservant la position de lecture
+  // malgré le contenu prépendu en haut du fil.
+  const handleLoadOlder = useCallback(() => {
+    const oldest = messages[0];
+    const el = scrollRef.current;
+    if (!oldest || !el) return;
+    const prevHeight = el.scrollHeight;
+    loadOlder(oldest.id, {
+      onSuccess: (older) => {
+        if (older.results.length < MESSAGES_PAGE_SIZE) setReachedStart(true);
+        requestAnimationFrame(() => {
+          const node = scrollRef.current;
+          if (node) node.scrollTop += node.scrollHeight - prevHeight;
+        });
+      },
+    });
+  }, [messages, loadOlder]);
 
   return (
     <div className="flex h-dvh flex-col md:h-full">
       {/* Header */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+      <div className="relative flex shrink-0 items-center gap-3 bg-background-surface/90 px-4 py-3 backdrop-blur-md">
         <Button
           type="button"
           variant="ghost"
@@ -372,20 +450,38 @@ export function ChatWindow({
         >
           <ArrowLeft className="size-5" />
         </Button>
-        <Avatar className="size-9 shrink-0">
-          <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
-            {participantInitials}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          name={participantName ?? '?'}
+          size="md"
+          className="shrink-0"
+        />
         <div className="min-w-0 flex-1">
-          <span className="block truncate font-semibold text-foreground">
+          <span className="block truncate font-serif text-[15px] font-semibold text-foreground">
             {participantName ?? 'Conversation'}
           </span>
+          <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            {socketStatus === 'online' ? (
+              <>
+                <span
+                  className="size-1.5 rounded-full bg-success"
+                  aria-hidden="true"
+                />
+                Temps réel actif
+              </>
+            ) : (
+              'Échange confidentiel'
+            )}
+          </span>
         </div>
+        {/* Filet or éditorial sous l'en-tête */}
+        <div
+          className="hairline-gold absolute inset-x-4 bottom-0"
+          aria-hidden="true"
+        />
       </div>
 
       {/* Bannière d'état temps réel */}
-      <ConnectionBanner status={socketStatus} />
+      <ConnectionBanner status={socketStatus} onRetry={retrySocket} />
 
       {/* Messages */}
       <div className="relative flex-1 overflow-hidden">
@@ -396,7 +492,7 @@ export function ChatWindow({
           aria-live="polite"
           aria-label="Fil de la conversation"
           aria-relevant="additions"
-          className="h-full overflow-y-auto p-4"
+          className="bg-paper h-full overflow-y-auto p-4"
         >
           {isLoading && (
             <div className="flex justify-center py-8">
@@ -413,8 +509,9 @@ export function ChatWindow({
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
                     Pour préserver la confidentialité de vos échanges, vous
-                    devez accepter les conditions d’utilisation de la messagerie
-                    avant d’ouvrir cette conversation.
+                    devez accepter les conditions d’utilisation de la
+                    messagerie. Cette acceptation ne vous sera demandée
+                    qu’une seule fois, pour toutes vos conversations.
                   </p>
                   <Button
                     variant="default"
@@ -438,23 +535,54 @@ export function ChatWindow({
             </div>
           )}
           {!isLoading && !error && !messages.length && (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              Commencez la conversation…
-            </p>
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <MessageCircle className="size-6" aria-hidden="true" />
+              </div>
+              <p className="font-serif text-base font-semibold text-foreground">
+                Commencez la conversation…
+              </p>
+              <p className="max-w-[280px] text-xs text-muted-foreground">
+                Vos échanges sont confidentiels, entre vous et votre
+                interlocuteur.
+              </p>
+            </div>
+          )}
+          {!error && canLoadOlder && (
+            <div className="flex justify-center pb-3">
+              <button
+                type="button"
+                onClick={handleLoadOlder}
+                disabled={isLoadingOlder}
+                className="rounded-full border border-border/70 bg-card px-4 py-1.5 text-xs font-medium text-muted-foreground shadow-soft-sm transition-colors hover:bg-muted hover:text-foreground disabled:opacity-60"
+              >
+                {isLoadingOlder
+                  ? 'Chargement…'
+                  : 'Voir les messages précédents'}
+              </button>
+            </div>
           )}
           {!error && (
             <div className="flex flex-col">
               {messages.map((message, index) => {
                 const position = getMessagePosition(messages, index);
+                const previous = messages[index - 1];
+                const showDaySeparator =
+                  !previous ||
+                  !isSameDay(previous.created_at, message.created_at);
                 return (
-                  <MessageBubble
-                    key={message.id}
-                    message={message}
-                    position={position}
-                    participantInitials={participantInitials}
-                    isExpanded={expandedMessages.has(message.id)}
-                    onToggleExpand={() => toggleMessageExpansion(message.id)}
-                  />
+                  <Fragment key={message.id}>
+                    {showDaySeparator && (
+                      <DaySeparator iso={message.created_at} />
+                    )}
+                    <MessageBubble
+                      message={message}
+                      position={position}
+                      participantName={participantName ?? '?'}
+                      isExpanded={expandedMessages.has(message.id)}
+                      onToggleExpand={() => toggleMessageExpansion(message.id)}
+                    />
+                  </Fragment>
                 );
               })}
             </div>
@@ -478,7 +606,7 @@ export function ChatWindow({
       {/* Input */}
       <form
         onSubmit={handleFormSubmit}
-        className="flex shrink-0 items-end gap-2 border-t border-border bg-background px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]"
+        className="flex shrink-0 items-end gap-2 border-t border-border/60 bg-background-surface/80 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-md"
       >
         <textarea
           value={text}
@@ -492,7 +620,7 @@ export function ChatWindow({
           placeholder="Votre message…"
           aria-label="Votre message"
           rows={1}
-          className="max-h-[120px] min-h-11 flex-1 resize-none rounded-2xl border border-border bg-muted px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="max-h-[120px] min-h-11 flex-1 resize-none rounded-2xl border border-border/70 bg-background px-4 py-2.5 text-sm text-foreground shadow-soft-sm transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         <Button
           type="submit"

@@ -28,6 +28,29 @@ API backend : `http://localhost:8001/api/v1/`
 
 ---
 
+## Vérification AVANT push (CI locale — OBLIGATOIRE)
+
+> **Règle :** ne jamais pusher sur `develop` / `stage` / `main` sans avoir fait
+> passer le gate CI **en local d'abord**. Le job CI GitHub (lint + typecheck +
+> build) conditionne le déploiement : s'il échoue, rien ne se déploie. On attrape
+> les régressions **avant** le push.
+
+```bash
+yarn lint          # ESLint — 0 erreur (inclut la règle anti-palette)
+yarn check-types   # tsc --noEmit — 0 erreur
+yarn test --run    # Vitest — tous les tests passent
+yarn build         # build production standalone — doit être clean
+```
+
+Ces 4 commandes = ce que rejoue le job CI du frontend. Ne pusher que si **les
+4 sont vertes**. `main` ne se pousse qu'après revue de staging.
+
+> Note : `act` (simulation CI en conteneur) nécessite un accès **réseau** dans le
+> conteneur pour `yarn install` ; dans un environnement sandbox sans Internet il
+> échoue sur `ENETUNREACH` — utiliser alors directement les 4 commandes ci-dessus.
+
+---
+
 ## Architecture — Bulletproof React (CRITIQUE)
 
 ```

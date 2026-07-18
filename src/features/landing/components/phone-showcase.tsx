@@ -68,7 +68,7 @@ export function PhoneShowcase() {
           <div className="grid grid-cols-3 gap-1">
             {[
               ['📖', 'Bible'],
-              ['📰', 'Actus'],
+              ['📰', 'Actualité'],
               ['💬', 'Prêtre'],
               ['📄', 'Dem. messe'],
               ['💝', 'Dons'],

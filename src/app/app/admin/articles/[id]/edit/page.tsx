@@ -82,10 +82,12 @@ export default function EditArticlePage() {
               content: article.content,
               category_id: article.category?.id,
               content_type: article.content_type ?? 'article',
+              announcement_date: article.announcement_date ?? undefined,
               scope_type: article.scope_type,
               scope_parish_id: article.scope_parish_id ?? undefined,
               scope_diocese_id: article.scope_diocese_id ?? undefined,
             }}
+            defaultCoverUrl={article.cover_image_url ?? null}
             onSubmit={handleSubmit}
             isSubmitting={updateMutation.isPending}
             submitLabel="Enregistrer les modifications"

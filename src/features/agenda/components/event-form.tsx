@@ -16,7 +16,7 @@ const EVENT_TYPES = [
 ];
 
 const inputClass =
-  'w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary';
+  'w-full rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm text-foreground transition-colors placeholder:text-muted-foreground hover:border-border focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary';
 const labelClass = 'block text-xs font-medium text-muted-foreground mb-1';
 
 interface EventFormProps {

@@ -8,6 +8,8 @@ import type { ChatSocketStatus } from '../hooks/use-chat-socket';
 
 interface ConnectionBannerProps {
   status: ChatSocketStatus;
+  /** Relance la connexion — affiché uniquement en état `offline`. */
+  onRetry?: () => void;
 }
 
 const BANNER_COPY: Record<
@@ -36,7 +38,7 @@ const BANNER_COPY: Record<
  * N'affiche rien quand la connexion est établie (`online`).
  * Le signal repose sur icône + texte (jamais la couleur seule) → WCAG 1.4.1.
  */
-export function ConnectionBanner({ status }: ConnectionBannerProps) {
+export function ConnectionBanner({ status, onRetry }: ConnectionBannerProps) {
   if (status === 'online') return null;
 
   const { label, tone, spinning } = BANNER_COPY[status];
@@ -45,7 +47,7 @@ export function ConnectionBanner({ status }: ConnectionBannerProps) {
     <div
       role="status"
       className={cn(
-        'flex shrink-0 items-center justify-center gap-1.5 px-4 py-1.5 text-xs font-medium',
+        'flex shrink-0 items-center justify-center gap-1.5 border-b border-border/40 px-4 py-1.5 text-xs font-medium',
         tone,
       )}
     >
@@ -55,6 +57,15 @@ export function ConnectionBanner({ status }: ConnectionBannerProps) {
         <WifiOff className="size-3.5" aria-hidden="true" />
       )}
       <span>{label}</span>
+      {status === 'offline' && onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded font-semibold underline underline-offset-2 transition-colors hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Réessayer
+        </button>
+      )}
     </div>
   );
 }

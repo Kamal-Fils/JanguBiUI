@@ -22,7 +22,10 @@ import {
 } from '@/components/org/parish-picker';
 import { Button } from '@/components/ui/button/button';
 import { Card } from '@/components/ui/card/card';
+import { useNotifications } from '@/components/ui/notifications';
+import { paths } from '@/config/paths';
 import { useUser } from '@/lib/auth';
+import { cn } from '@/utils/cn';
 
 import { CreateDocumentInput, useCreateDocument } from '../api/create-document';
 import { useUploadDocumentFile } from '../api/upload-document-file';
@@ -193,11 +196,13 @@ function SelectCard({
           key={opt.value}
           type="button"
           onClick={() => onChange(opt.value)}
-          className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-medium transition-colors ${
+          aria-pressed={value === opt.value}
+          className={cn(
+            'flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             value === opt.value
               ? 'border-primary bg-primary/5 text-primary'
-              : 'border-border bg-card text-foreground hover:bg-muted'
-          }`}
+              : 'border-border bg-card text-foreground hover:bg-muted',
+          )}
         >
           {opt.label}
           {value === opt.value && (
@@ -320,6 +325,7 @@ function AttachmentStep({
 export function NewDocumentForm() {
   const router = useRouter();
   const { data: user } = useUser();
+  const { addNotification } = useNotifications();
   const [stepIndex, setStepIndex] = useState(0);
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -360,9 +366,7 @@ export function NewDocumentForm() {
     },
   });
 
-  const { mutate, isPending } = useCreateDocument({
-    onSuccess: () => router.push('/app/documents'),
-  });
+  const { mutate, isPending } = useCreateDocument();
 
   const { mutate: uploadFile, isPending: isUploading } =
     useUploadDocumentFile();
@@ -454,7 +458,20 @@ export function NewDocumentForm() {
       attachment_file_id: values.attachment_file_id ?? null,
       consent_given: true,
     };
-    mutate(payload);
+    mutate(payload, {
+      // Feedback succès + redirection vers le SUIVI de la demande créée
+      // (page détail), pas vers la liste : le fidèle voit tout de suite la
+      // timeline de sa démarche.
+      onSuccess: (created) => {
+        addNotification({
+          type: 'success',
+          title: 'Demande envoyée',
+          message:
+            'Votre demande a bien été transmise à la paroisse. Suivez son avancement pas à pas.',
+        });
+        router.push(paths.app.document.getHref(created.id));
+      },
+    });
   }
 
   const watchedDocumentType = watch('document_type');
@@ -488,9 +505,10 @@ export function NewDocumentForm() {
         {STEPS.map((s, i) => (
           <div
             key={s}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              i <= stepIndex ? 'bg-primary' : 'bg-muted'
-            }`}
+            className={cn(
+              'h-1 flex-1 rounded-full transition-colors',
+              i <= stepIndex ? 'bg-primary' : 'bg-muted',
+            )}
           />
         ))}
       </div>
@@ -883,18 +901,22 @@ export function NewDocumentForm() {
               <button
                 type="button"
                 onClick={() => setValue('consent_given', !watchedConsentGiven)}
-                className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors ${
+                aria-pressed={watchedConsentGiven}
+                className={cn(
+                  'flex items-start gap-3 rounded-xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   watchedConsentGiven
                     ? 'border-primary bg-primary/5'
-                    : 'border-border bg-card'
-                }`}
+                    : 'border-border bg-card',
+                )}
               >
                 <CheckCircle2
-                  className={`mt-0.5 size-5 shrink-0 ${
+                  aria-hidden="true"
+                  className={cn(
+                    'mt-0.5 size-5 shrink-0',
                     watchedConsentGiven
                       ? 'text-primary'
-                      : 'text-muted-foreground/40'
-                  }`}
+                      : 'text-muted-foreground/40',
+                  )}
                 />
                 <span className="text-sm text-foreground">
                   Je certifie que les informations fournies sont exactes et

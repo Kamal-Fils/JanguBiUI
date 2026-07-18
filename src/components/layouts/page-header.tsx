@@ -30,9 +30,11 @@ export function PageHeader({
   const withBack = showBack || backHref !== undefined;
 
   return (
+    // Plus de sticky ici : le shell (AppTopBar + AppHeader + sous-nav) porte
+    // désormais l'en-tête persistant — deux éléments sticky se chevauchaient.
     <header
       className={cn(
-        'sticky top-0 z-40 border-b border-border bg-background-surface/90 px-4 py-3.5 backdrop-blur-md',
+        'border-b border-border bg-background-surface/90 px-4 py-3.5 backdrop-blur-md',
         className,
       )}
     >

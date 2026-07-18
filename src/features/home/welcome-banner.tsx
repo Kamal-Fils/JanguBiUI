@@ -1,14 +1,15 @@
 'use client';
 
-import { BookOpen, ScrollText } from 'lucide-react';
+import { BookOpen, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 
 import { useUser } from '@/lib/auth';
 
-// Pastilles d'action rapide affichées dans le hero éditorial.
+// Pastilles d'action rapide du hero. « Intentions » retirée (retour testeurs
+// n°5 : triple doublon avec la section « Mes intentions » du dashboard).
 const HERO_ACTIONS = [
   { label: 'Spiritualité', href: '/app/spirituel', icon: BookOpen },
-  { label: 'Intentions', href: '/app/intentions', icon: ScrollText },
+  { label: 'Agenda', href: '/app/agenda', icon: CalendarDays },
 ] as const;
 
 export function WelcomeBanner() {

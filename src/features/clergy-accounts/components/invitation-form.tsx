@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button/button';
-import { Spinner } from '@/components/ui/spinner';
+import { Input } from '@/components/ui/input';
 import { useDioceses } from '@/lib/org/get-dioceses';
 
 import { useCreateInvitation } from '../api/create-invitation';
@@ -24,6 +24,11 @@ const schema = z.object({
 });
 
 export type InvitationFormValues = z.infer<typeof schema>;
+
+const LABEL_CLASS = 'mb-1 block text-sm font-medium text-foreground';
+/** Style aligné sur `ui/input` — les <select> natifs restent natifs (RHF register). */
+const SELECT_CLASS =
+  'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50';
 
 interface InvitationFormProps {
   onSuccess?: () => void;
@@ -48,23 +53,14 @@ export function InvitationForm({ onSuccess }: InvitationFormProps) {
     createInvitation.mutate(values);
   };
 
-  const labelClass = 'block text-sm font-medium text-foreground mb-1';
-  const inputClass =
-    'w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring';
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="first_name" className={labelClass}>
+          <label htmlFor="first_name" className={LABEL_CLASS}>
             Prénom
           </label>
-          <input
-            id="first_name"
-            {...register('first_name')}
-            className={inputClass}
-            placeholder="Abbé"
-          />
+          <Input id="first_name" {...register('first_name')} placeholder="Abbé" />
           {errors.first_name && (
             <p className="mt-1 text-xs text-destructive">
               {errors.first_name.message}
@@ -72,15 +68,10 @@ export function InvitationForm({ onSuccess }: InvitationFormProps) {
           )}
         </div>
         <div>
-          <label htmlFor="last_name" className={labelClass}>
+          <label htmlFor="last_name" className={LABEL_CLASS}>
             Nom
           </label>
-          <input
-            id="last_name"
-            {...register('last_name')}
-            className={inputClass}
-            placeholder="Sène"
-          />
+          <Input id="last_name" {...register('last_name')} placeholder="Sène" />
           {errors.last_name && (
             <p className="mt-1 text-xs text-destructive">
               {errors.last_name.message}
@@ -90,14 +81,13 @@ export function InvitationForm({ onSuccess }: InvitationFormProps) {
       </div>
 
       <div>
-        <label htmlFor="email" className={labelClass}>
+        <label htmlFor="email" className={LABEL_CLASS}>
           Email
         </label>
-        <input
+        <Input
           id="email"
           {...register('email')}
           type="email"
-          className={inputClass}
           placeholder="pretre@diocese.sn"
         />
         {errors.email && (
@@ -108,13 +98,13 @@ export function InvitationForm({ onSuccess }: InvitationFormProps) {
       </div>
 
       <div>
-        <label htmlFor="pastoral_role" className={labelClass}>
+        <label htmlFor="pastoral_role" className={LABEL_CLASS}>
           Rôle pastoral
         </label>
         <select
           id="pastoral_role"
           {...register('pastoral_role')}
-          className={inputClass}
+          className={SELECT_CLASS}
         >
           <option value="">-- Choisir --</option>
           <option value="pretre">Prêtre</option>
@@ -131,13 +121,13 @@ export function InvitationForm({ onSuccess }: InvitationFormProps) {
       </div>
 
       <div>
-        <label htmlFor="diocese_id" className={labelClass}>
+        <label htmlFor="diocese_id" className={LABEL_CLASS}>
           Diocèse (optionnel)
         </label>
         <select
           id="diocese_id"
           {...register('diocese_id')}
-          className={inputClass}
+          className={SELECT_CLASS}
         >
           <option value="">-- Aucun --</option>
           {dioceses.map((d) => (
@@ -150,14 +140,11 @@ export function InvitationForm({ onSuccess }: InvitationFormProps) {
 
       <Button
         type="submit"
-        className="w-full"
+        fullWidth
         disabled={createInvitation.isPending}
+        isLoading={createInvitation.isPending}
       >
-        {createInvitation.isPending ? (
-          <Spinner className="size-4" />
-        ) : (
-          "Envoyer l'invitation"
-        )}
+        Envoyer l&apos;invitation
       </Button>
     </form>
   );

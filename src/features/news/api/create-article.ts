@@ -9,6 +9,8 @@ export type CreateArticleInput = {
   content: string;
   category_id: number;
   content_type?: ContentType;
+  content_format?: 'text' | 'html';
+  announcement_date?: string | null;
   excerpt?: string;
   cover_image_id?: number | null;
   scope_type?: 'global' | 'diocese' | 'parish';

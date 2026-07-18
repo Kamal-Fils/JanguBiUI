@@ -40,7 +40,7 @@ describe('NotificationBell', () => {
   test('renders the bell button', async () => {
     setupAuthenticatedUser();
     server.use(
-      http.get(`${env.API_URL}/v1/messaging/notifications/`, () =>
+      http.get(`${env.API_URL}/v1/notifications/`, () =>
         HttpResponse.json([]),
       ),
     );
@@ -53,7 +53,7 @@ describe('NotificationBell', () => {
   test('shows unread badge when there are unread notifications', async () => {
     setupAuthenticatedUser();
     server.use(
-      http.get(`${env.API_URL}/v1/messaging/notifications/`, () =>
+      http.get(`${env.API_URL}/v1/notifications/`, () =>
         HttpResponse.json(mockNotifications),
       ),
     );
@@ -70,7 +70,7 @@ describe('NotificationBell', () => {
     setupAuthenticatedUser();
     const allRead = mockNotifications.map((n) => ({ ...n, is_read: true }));
     server.use(
-      http.get(`${env.API_URL}/v1/messaging/notifications/`, () =>
+      http.get(`${env.API_URL}/v1/notifications/`, () =>
         HttpResponse.json(allRead),
       ),
     );
@@ -85,7 +85,7 @@ describe('NotificationBell', () => {
   test('opens dropdown and shows notification list when clicked', async () => {
     setupAuthenticatedUser();
     server.use(
-      http.get(`${env.API_URL}/v1/messaging/notifications/`, () =>
+      http.get(`${env.API_URL}/v1/notifications/`, () =>
         HttpResponse.json(mockNotifications),
       ),
     );
@@ -103,7 +103,7 @@ describe('NotificationBell', () => {
   test('shows empty state when no notifications', async () => {
     setupAuthenticatedUser();
     server.use(
-      http.get(`${env.API_URL}/v1/messaging/notifications/`, () =>
+      http.get(`${env.API_URL}/v1/notifications/`, () =>
         HttpResponse.json([]),
       ),
     );
@@ -122,11 +122,11 @@ describe('NotificationBell', () => {
     const readIds: string[] = [];
 
     server.use(
-      http.get(`${env.API_URL}/v1/messaging/notifications/`, () =>
+      http.get(`${env.API_URL}/v1/notifications/`, () =>
         HttpResponse.json(mockNotifications),
       ),
       http.post(
-        `${env.API_URL}/v1/messaging/notifications/:id/read/`,
+        `${env.API_URL}/v1/notifications/:id/read/`,
         ({ params }) => {
           readIds.push(String(params.id));
           return HttpResponse.json({ ...mockNotifications[0], is_read: true });
@@ -158,7 +158,7 @@ describe('NotificationBell', () => {
     }));
 
     server.use(
-      http.get(`${env.API_URL}/v1/messaging/notifications/`, () =>
+      http.get(`${env.API_URL}/v1/notifications/`, () =>
         HttpResponse.json(manyUnread),
       ),
     );

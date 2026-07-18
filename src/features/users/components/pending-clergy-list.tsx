@@ -13,9 +13,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog/dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 import { RoleBadge } from '@/components/ui/role-badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Spinner } from '@/components/ui/spinner';
+import { Textarea } from '@/components/ui/textarea';
 import { roleLabel } from '@/config/roles';
 
 import { PendingClergyAccount } from '../api/get-pending-clergy';
@@ -65,20 +66,17 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
               variant="gold"
               onClick={() => approve(account.id)}
               disabled={approving}
+              isLoading={approving}
+              icon={<CheckCircle className="size-3.5" aria-hidden="true" />}
             >
-              {approving ? (
-                <Spinner className="size-3.5" />
-              ) : (
-                <CheckCircle className="mr-1.5 size-3.5" />
-              )}
               Approuver
             </Button>
             <Button
               size="sm"
               variant="destructive"
               onClick={() => setRejectOpen(true)}
+              icon={<XCircle className="size-3.5" aria-hidden="true" />}
             >
-              <XCircle className="mr-1.5 size-3.5" />
               Refuser
             </Button>
           </div>
@@ -96,12 +94,11 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
           <label htmlFor="reject-reason" className="sr-only">
             Motif du refus
           </label>
-          <textarea
+          <Textarea
             id="reject-reason"
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
             rows={3}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
             placeholder="Motif du refus (requis)…"
           />
           <DialogFooter>
@@ -111,6 +108,7 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
             <Button
               variant="destructive"
               disabled={!rejectReason.trim() || rejecting}
+              isLoading={rejecting}
               onClick={() =>
                 reject(
                   { userId: account.id, reason: rejectReason },
@@ -123,11 +121,7 @@ function PendingClergyCard({ account }: { account: PendingClergyAccount }) {
                 )
               }
             >
-              {rejecting ? (
-                <Spinner className="size-4" />
-              ) : (
-                'Confirmer le refus'
-              )}
+              Confirmer le refus
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -166,24 +160,18 @@ export function PendingClergyList({
 
   if (totalCount === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 py-14 text-center">
-        <div className="flex size-12 items-center justify-center rounded-full bg-accent/15">
-          <CheckCircle className="size-6 text-accent" />
-        </div>
-        <p className="font-serif text-base font-bold tracking-tight text-foreground">
-          Aucun compte en attente
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Tous les comptes clergé ont été traités.
-        </p>
-      </div>
+      <EmptyState
+        icon={<CheckCircle />}
+        title="Aucun compte en attente"
+        description="Tous les comptes clergé ont été traités. Les prochaines auto-déclarations apparaîtront ici pour validation."
+      />
     );
   }
 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-primary">
-        <Clock className="size-4" />
+        <Clock className="size-4" aria-hidden="true" />
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em]">
           {totalCount} compte{totalCount > 1 ? 's' : ''} en attente de validation
         </p>
