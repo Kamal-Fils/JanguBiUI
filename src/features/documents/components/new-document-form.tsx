@@ -4,14 +4,22 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ArrowLeft,
   ArrowRight,
+  Check,
   CheckCircle2,
+  Droplets,
+  Flame,
   FileText,
+  Gem,
+  HandHeart,
   Loader2,
+  type LucideIcon,
   Paperclip,
+  Wheat,
   X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -20,6 +28,16 @@ import {
   ParishPicker,
   type PickedParish,
 } from '@/components/org/parish-picker';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button/button';
 import { Card } from '@/components/ui/card/card';
 import { useNotifications } from '@/components/ui/notifications';
@@ -29,6 +47,9 @@ import { cn } from '@/utils/cn';
 
 import { CreateDocumentInput, useCreateDocument } from '../api/create-document';
 import { useUploadDocumentFile } from '../api/upload-document-file';
+import { formatDocumentType } from '../utils/format-document-type';
+
+import { WizardStepper } from './wizard-stepper';
 
 // ── File upload constants ────────────────────────────────────────────────────
 
@@ -37,12 +58,43 @@ const ACCEPTED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const DOCUMENT_TYPES = [
-  { value: 'baptism', label: 'Certificat de baptême' },
-  { value: 'first_communion', label: 'Attestation de première communion' },
-  { value: 'confirmation', label: 'Attestation de confirmation' },
-  { value: 'religious_marriage', label: 'Attestation de mariage religieux' },
-  { value: 'godparent', label: 'Attestation parrain / marraine' },
+/**
+ * Les 5 types réels du contrat backend. Le **libellé** vient de la source
+ * unique `formatDocumentType` (utils de la feature) : on n'ajoute ici que les
+ * repères de choix demandés par la maquette 02 (icône + usage), jamais un
+ * libellé concurrent.
+ */
+const DOCUMENT_TYPES: {
+  value: string;
+  description: string;
+  Icon: LucideIcon;
+}[] = [
+  {
+    value: 'baptism',
+    description:
+      'Le plus demandé — requis pour le mariage, le parrainage et la catéchèse.',
+    Icon: Droplets,
+  },
+  {
+    value: 'first_communion',
+    description: "Atteste la réception de l'Eucharistie.",
+    Icon: Wheat,
+  },
+  {
+    value: 'confirmation',
+    description: 'Requise pour être parrain ou marraine.',
+    Icon: Flame,
+  },
+  {
+    value: 'religious_marriage',
+    description: 'Noms des deux époux demandés à l’étape Détails.',
+    Icon: Gem,
+  },
+  {
+    value: 'godparent',
+    description: 'Précisez la célébration concernée.',
+    Icon: HandHeart,
+  },
 ];
 
 const REQUEST_REASONS = [
@@ -58,8 +110,10 @@ const inputClass =
   'w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary';
 const labelClass = 'text-sm font-medium text-foreground';
 const errorClass = 'mt-1 text-xs text-destructive';
+/** Paire de champs : empilée sur mobile, 2 colonnes dès `sm` (fin du `flex gap-3` écrasé). */
+const fieldPairClass = 'grid grid-cols-1 gap-3 sm:grid-cols-2';
 
-// ── Schema ───────────────────────────────────────────────────────────────────
+// ── Schema (inchangé — même contrat, mêmes règles) ───────────────────────────
 
 const schema = z
   .object({
@@ -127,58 +181,131 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>;
 
-// ── Step metadata ─────────────────────────────────────────────────────────────
+// ── Étapes : 6 micro-étapes → 4 étapes nommées (D3) ──────────────────────────
+//
+// Correspondance avec l'ancien découpage :
+//   type                        → document
+//   (paroisse extraite de search) → parish
+//   identity + search + contact + attachments → details (sous-sections)
+//   consent                     → review
+// Aucun champ ajouté ni retiré : le payload `CreateDocumentInput` est inchangé.
 
-type Step =
-  | 'type'
-  | 'identity'
-  | 'search'
-  | 'contact'
-  | 'attachments'
-  | 'consent';
+type Step = 'document' | 'parish' | 'details' | 'review';
 
-const STEPS: Step[] = [
-  'type',
-  'identity',
-  'search',
-  'contact',
-  'attachments',
-  'consent',
-];
+const STEPS: Step[] = ['document', 'parish', 'details', 'review'];
 
 const STEP_LABELS: Record<Step, string> = {
-  type: 'Type',
-  identity: 'Identité',
-  search: 'Sacrement',
-  contact: 'Contact',
-  attachments: 'Pièces jointes',
-  consent: 'Validation',
+  document: 'Document',
+  parish: 'Paroisse',
+  details: 'Détails',
+  review: 'Validation',
+};
+
+const STEP_TITLES: Record<Step, string> = {
+  document: 'Quel document ?',
+  parish: 'Quelle paroisse ?',
+  details: 'Vos informations',
+  review: 'Récapitulatif',
+};
+
+const STEP_HINTS: Record<Step, string> = {
+  document: 'Choisissez le document souhaité, puis le motif de la demande.',
+  parish:
+    'La paroisse qui détient le registre de votre sacrement. Le diocèse est déduit automatiquement.',
+  details:
+    'Ces éléments permettent de retrouver votre acte dans les registres paroissiaux.',
+  review: 'Vérifiez chaque section, puis confirmez pour envoyer votre demande.',
 };
 
 const STEP_FIELDS: Record<Step, (keyof FormValues)[]> = {
-  type: ['document_type', 'reason'],
-  identity: [
+  document: ['document_type', 'reason'],
+  parish: ['parish_id'],
+  details: [
     'requester_first_names',
     'requester_last_name',
     'date_of_birth',
     'place_of_birth',
-  ],
-  search: [
     'father_last_name',
     'mother_last_name',
-    'parish_id',
     'sacrament_approximate_date',
     'sacrament_location',
     'spouse_full_name_groom',
     'spouse_full_name_bride',
     'celebration_type',
+    'contact_phone',
+    'contact_email',
   ],
-  contact: ['contact_phone', 'contact_email'],
-  attachments: [],
-  consent: ['consent_given'],
+  review: ['consent_given'],
 };
 
-// ── SelectCard ───────────────────────────────────────────────────────────────
+const STEP_LABEL_LIST = STEPS.map((s) => STEP_LABELS[s]);
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+/**
+ * `<input type="date">` renvoie une date **calendaire** (`YYYY-MM-DD`), pas un
+ * instant : la passer à `new Date()` la parse en UTC et peut décaler d'un jour
+ * selon le fuseau. On reformate donc en pur texte (pas de `formatFrDate`, qui
+ * traite des instants ISO).
+ */
+function formatCalendarDate(value: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return value;
+  const [, year, month, day] = match;
+  return `${day}/${month}/${year}`;
+}
+
+// ── DocumentTypeCard ─────────────────────────────────────────────────────────
+
+interface DocumentTypeCardProps {
+  value: string;
+  description: string;
+  Icon: LucideIcon;
+  isSelected: boolean;
+  onSelect: (value: string) => void;
+}
+
+function DocumentTypeCard({
+  value,
+  description,
+  Icon,
+  isSelected,
+  onSelect,
+}: DocumentTypeCardProps) {
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(value)}
+      aria-pressed={isSelected}
+      className={cn(
+        'flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        isSelected
+          ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
+          : 'border-border bg-card hover:bg-muted',
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-accent/12 text-gold-ink"
+      >
+        <Icon className="size-4" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold leading-snug text-foreground">
+          {formatDocumentType(value)}
+        </span>
+        <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
+          {description}
+        </span>
+      </span>
+      {isSelected && (
+        <Check aria-hidden="true" className="size-4 shrink-0 text-primary" />
+      )}
+    </button>
+  );
+}
+
+// ── SelectCard (motifs) ──────────────────────────────────────────────────────
 
 function SelectCard({
   options,
@@ -206,7 +333,10 @@ function SelectCard({
         >
           {opt.label}
           {value === opt.value && (
-            <span className="size-2 rounded-full bg-primary" />
+            <span
+              aria-hidden="true"
+              className="size-2 rounded-full bg-primary"
+            />
           )}
         </button>
       ))}
@@ -214,9 +344,29 @@ function SelectCard({
   );
 }
 
-// ── AttachmentStep ───────────────────────────────────────────────────────────
+// ── FormSection (sous-sections de l'étape Détails) ───────────────────────────
 
-interface AttachmentStepProps {
+interface FormSectionProps {
+  legend: string;
+  hint?: string;
+  children: React.ReactNode;
+}
+
+function FormSection({ legend, hint, children }: FormSectionProps) {
+  return (
+    <fieldset className="flex flex-col gap-4 rounded-2xl border border-border bg-background-surface/60 px-4 pb-4 pt-2">
+      <legend className="px-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-ink">
+        {legend}
+      </legend>
+      {hint && <p className="-mt-2 text-xs text-muted-foreground">{hint}</p>}
+      {children}
+    </fieldset>
+  );
+}
+
+// ── AttachmentField ──────────────────────────────────────────────────────────
+
+interface AttachmentFieldProps {
   fileName: string | null;
   fileError: string | null;
   isUploading: boolean;
@@ -225,28 +375,22 @@ interface AttachmentStepProps {
   onClear: () => void;
 }
 
-function AttachmentStep({
+function AttachmentField({
   fileName,
   fileError,
   isUploading,
   isUploaded,
   onSelectFile,
   onClear,
-}: AttachmentStepProps) {
+}: AttachmentFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
     <>
-      <div className="flex flex-col gap-2">
-        <p className="text-sm font-semibold text-foreground">
-          Pièce jointe{' '}
-          <span className="text-muted-foreground">(optionnel)</span>
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Ajoutez un justificatif (acte de naissance, livret de famille, etc.) —
-          formats acceptés&nbsp;: PDF, JPG, PNG. Taille max&nbsp;: 10&nbsp;Mo.
-        </p>
-      </div>
+      <p className="text-xs text-muted-foreground">
+        Ajoutez un justificatif (acte de naissance, livret de famille, etc.) —
+        formats acceptés&nbsp;: PDF, JPG, PNG. Taille max&nbsp;: 10&nbsp;Mo.
+      </p>
 
       <input
         ref={inputRef}
@@ -266,9 +410,12 @@ function AttachmentStep({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card px-6 py-10 text-center transition-colors hover:border-primary hover:bg-primary/5"
+          className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card px-6 py-8 text-center transition-colors hover:border-primary hover:bg-primary/5"
         >
-          <Paperclip className="size-6 text-muted-foreground" />
+          <Paperclip
+            aria-hidden="true"
+            className="size-6 text-muted-foreground"
+          />
           <span className="text-sm font-medium text-foreground">
             Choisir un fichier
           </span>
@@ -280,7 +427,10 @@ function AttachmentStep({
 
       {isUploading && (
         <Card variant="elevated" className="flex items-center gap-3 px-4 py-3">
-          <Loader2 className="size-5 animate-spin text-primary" />
+          <Loader2
+            aria-hidden="true"
+            className="size-5 animate-spin text-primary"
+          />
           <span className="text-sm text-muted-foreground">
             Téléversement en cours…
           </span>
@@ -289,7 +439,10 @@ function AttachmentStep({
 
       {fileName && !isUploading && (
         <div className="flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/5 px-4 py-3">
-          <FileText className="size-5 shrink-0 text-primary" />
+          <FileText
+            aria-hidden="true"
+            className="size-5 shrink-0 text-primary"
+          />
           <div className="flex min-w-0 flex-1 flex-col">
             <span className="truncate text-sm font-medium text-foreground">
               {fileName}
@@ -306,7 +459,7 @@ function AttachmentStep({
             className="flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="Retirer le fichier"
           >
-            <X className="size-4" />
+            <X aria-hidden="true" className="size-4" />
           </button>
         </div>
       )}
@@ -320,6 +473,46 @@ function AttachmentStep({
   );
 }
 
+// ── Récapitulatif sectionné ──────────────────────────────────────────────────
+
+interface RecapSectionProps {
+  title: string;
+  onEdit: () => void;
+  children: React.ReactNode;
+}
+
+function RecapSection({ title, onEdit, children }: RecapSectionProps) {
+  return (
+    <Card variant="elevated" className="overflow-hidden">
+      <div className="flex items-center justify-between gap-3 border-b border-border bg-secondary/50 px-4 py-2.5">
+        <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-ink">
+          {title}
+        </h3>
+        <button
+          type="button"
+          onClick={onEdit}
+          className="rounded-md px-1 text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <span aria-hidden="true">Modifier</span>
+          <span className="sr-only">Modifier la section {title}</span>
+        </button>
+      </div>
+      <dl className="flex flex-col gap-2 px-4 py-3 text-sm">{children}</dl>
+    </Card>
+  );
+}
+
+function RecapRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <dt className="shrink-0 text-muted-foreground">{label}</dt>
+      <dd className="min-w-0 break-words text-right font-medium text-foreground">
+        {value}
+      </dd>
+    </div>
+  );
+}
+
 // ── Main component ───────────────────────────────────────────────────────────
 
 export function NewDocumentForm() {
@@ -330,8 +523,23 @@ export function NewDocumentForm() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [pickedParish, setPickedParish] = useState<PickedParish | null>(null);
+  const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
 
   const step = STEPS[stepIndex];
+  const isLastStep = stepIndex === STEPS.length - 1;
+
+  // Focus management : à chaque changement d'étape, le focus va sur le titre de
+  // la nouvelle étape (sinon il resterait sur un bouton démonté).
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const isInitialRender = useRef(true);
+
+  useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+      return;
+    }
+    headingRef.current?.focus();
+  }, [stepIndex]);
 
   const {
     register,
@@ -339,7 +547,8 @@ export function NewDocumentForm() {
     trigger,
     watch,
     setValue,
-    formState: { errors },
+    getValues,
+    formState: { errors, isDirty },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -372,6 +581,9 @@ export function NewDocumentForm() {
     useUploadDocumentFile();
 
   const watchedAttachmentId = watch('attachment_file_id');
+
+  /** Le tunnel contient-il du travail à perdre ? (garde de sortie) */
+  const hasEnteredData = isDirty || pickedParish !== null || fileName !== null;
 
   function handleSelectFile(file: File) {
     setFileError(null);
@@ -409,12 +621,25 @@ export function NewDocumentForm() {
     if (valid) setStepIndex((i) => i + 1);
   }
 
+  /** Retour : étape précédente, ou sortie du tunnel (avec garde) depuis l'étape 1. */
+  function handleBack() {
+    if (stepIndex > 0) {
+      setStepIndex((i) => i - 1);
+      return;
+    }
+    if (hasEnteredData) {
+      setIsExitDialogOpen(true);
+      return;
+    }
+    router.back();
+  }
+
   function handlePickParish(parish: PickedParish | null) {
     setPickedParish(parish);
     setValue(
       'parish_id',
       parish ? parish.id : (undefined as unknown as number),
-      { shouldValidate: true },
+      { shouldValidate: true, shouldDirty: true },
     );
   }
 
@@ -478,58 +703,82 @@ export function NewDocumentForm() {
   const watchedReason = watch('reason');
   const watchedConsentGiven = watch('consent_given');
 
+  const recap = getValues();
+
   return (
     <div className="flex flex-col">
-      <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={
-            stepIndex === 0
-              ? () => router.back()
-              : () => setStepIndex((i) => i - 1)
-          }
-          className="rounded-full hover:bg-muted"
-          aria-label="Retour"
-        >
-          <ArrowLeft className="size-5" />
-        </Button>
-        <span className="text-sm font-semibold text-foreground">
-          Nouvelle demande
-        </span>
-      </div>
-
-      {/* Progress */}
-      <div className="flex gap-1 px-4 pt-4">
-        {STEPS.map((s, i) => (
-          <div
-            key={s}
-            className={cn(
-              'h-1 flex-1 rounded-full transition-colors',
-              i <= stepIndex ? 'bg-primary' : 'bg-muted',
-            )}
+      {/* En-tête sticky : retour conscient des étapes + stepper nommé */}
+      <div className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur-md">
+        <ContentContainer width="narrow" className="py-0">
+          <div className="flex items-center gap-3 py-3">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              className="rounded-full hover:bg-muted"
+              aria-label={
+                stepIndex === 0 ? 'Quitter la demande' : 'Étape précédente'
+              }
+            >
+              <ArrowLeft aria-hidden="true" className="size-5" />
+            </Button>
+            <span className="text-sm font-semibold text-foreground">
+              Demander un document
+            </span>
+          </div>
+          <WizardStepper
+            steps={STEP_LABEL_LIST}
+            current={stepIndex}
+            onStepSelect={setStepIndex}
+            className="pb-3"
           />
-        ))}
+        </ContentContainer>
       </div>
-      <p className="px-4 pt-2 text-xs text-muted-foreground">
-        Étape {stepIndex + 1} sur {STEPS.length} — {STEP_LABELS[step]}
-      </p>
 
-      <ContentContainer>
+      <ContentContainer width="narrow">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-          {/* Step 1 — Type */}
-          {step === 'type' && (
+          <div className="flex flex-col gap-1">
+            <p
+              aria-hidden="true"
+              className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-ink"
+            >
+              Étape {stepIndex + 1} sur {STEPS.length}
+            </p>
+            <h2
+              ref={headingRef}
+              tabIndex={-1}
+              className="font-serif text-xl font-bold tracking-tight text-foreground outline-none"
+            >
+              {STEP_TITLES[step]}
+            </h2>
+            <p className="text-sm text-muted-foreground">{STEP_HINTS[step]}</p>
+          </div>
+
+          {/* Étape 1 — Document (type + motif) */}
+          {step === 'document' && (
             <>
               <div className="flex flex-col gap-2">
                 <p className="text-sm font-semibold text-foreground">
                   Type de document <span className="text-destructive">*</span>
                 </p>
-                <SelectCard
-                  options={DOCUMENT_TYPES}
-                  value={watchedDocumentType}
-                  onChange={(v) => setValue('document_type', v)}
-                />
+                <div className="flex flex-col gap-2">
+                  {DOCUMENT_TYPES.map((type) => (
+                    <DocumentTypeCard
+                      key={type.value}
+                      value={type.value}
+                      description={type.description}
+                      Icon={type.Icon}
+                      isSelected={watchedDocumentType === type.value}
+                      onSelect={(v) =>
+                        setValue('document_type', v, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        })
+                      }
+                    />
+                  ))}
+                </div>
                 {errors.document_type && (
                   <p className={errorClass} role="alert">
                     {errors.document_type.message}
@@ -544,7 +793,12 @@ export function NewDocumentForm() {
                 <SelectCard
                   options={REQUEST_REASONS}
                   value={watchedReason}
-                  onChange={(v) => setValue('reason', v)}
+                  onChange={(v) =>
+                    setValue('reason', v, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    })
+                  }
                 />
                 {errors.reason && (
                   <p className={errorClass} role="alert">
@@ -567,340 +821,379 @@ export function NewDocumentForm() {
             </>
           )}
 
-          {/* Step 2 — Identity */}
-          {step === 'identity' && (
-            <>
-              <div className="flex gap-3">
-                <div className="flex flex-1 flex-col gap-1.5">
-                  <label htmlFor="req_first" className={labelClass}>
-                    Prénom(s) <span className="text-destructive">*</span>
-                  </label>
-                  <input
-                    id="req_first"
-                    className={inputClass}
-                    {...register('requester_first_names')}
-                  />
-                  {errors.requester_first_names && (
-                    <p className={errorClass} role="alert">
-                      {errors.requester_first_names.message}
-                    </p>
-                  )}
-                </div>
-                <div className="flex flex-1 flex-col gap-1.5">
-                  <label htmlFor="req_last" className={labelClass}>
-                    Nom <span className="text-destructive">*</span>
-                  </label>
-                  <input
-                    id="req_last"
-                    className={inputClass}
-                    {...register('requester_last_name')}
-                  />
-                  {errors.requester_last_name && (
-                    <p className={errorClass} role="alert">
-                      {errors.requester_last_name.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="dob" className={labelClass}>
-                  Date de naissance <span className="text-destructive">*</span>
-                </label>
-                <input
-                  id="dob"
-                  type="date"
-                  className={inputClass}
-                  {...register('date_of_birth')}
-                />
-                {errors.date_of_birth && (
-                  <p className={errorClass} role="alert">
-                    {errors.date_of_birth.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="pob" className={labelClass}>
-                  Lieu de naissance <span className="text-destructive">*</span>
-                </label>
-                <input
-                  id="pob"
-                  className={inputClass}
-                  {...register('place_of_birth')}
-                />
-                {errors.place_of_birth && (
-                  <p className={errorClass} role="alert">
-                    {errors.place_of_birth.message}
-                  </p>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* Step 3 — Sacrament search */}
-          {step === 'search' && (
-            <>
-              <p className="text-sm text-muted-foreground">
-                Informations pour retrouver votre acte dans les registres
-                paroissiaux.
+          {/* Étape 2 — Paroisse du registre */}
+          {step === 'parish' && (
+            <div className="flex flex-col gap-1.5">
+              <span className={labelClass}>
+                Paroisse du sacrement{' '}
+                <span className="text-destructive">*</span>
+              </span>
+              <p className="text-xs text-muted-foreground">
+                Choisissez parmi vos paroisses ou recherchez la paroisse du
+                registre.
               </p>
-              <div className="flex gap-3">
-                <div className="flex flex-1 flex-col gap-1.5">
-                  <label htmlFor="father_last" className={labelClass}>
-                    Nom du père <span className="text-destructive">*</span>
-                  </label>
-                  <input
-                    id="father_last"
-                    className={inputClass}
-                    {...register('father_last_name')}
-                  />
-                  {errors.father_last_name && (
-                    <p className={errorClass} role="alert">
-                      {errors.father_last_name.message}
-                    </p>
-                  )}
-                </div>
-                <div className="flex flex-1 flex-col gap-1.5">
-                  <label htmlFor="mother_last" className={labelClass}>
-                    Nom de la mère <span className="text-destructive">*</span>
-                  </label>
-                  <input
-                    id="mother_last"
-                    className={inputClass}
-                    {...register('mother_last_name')}
-                  />
-                  {errors.mother_last_name && (
-                    <p className={errorClass} role="alert">
-                      {errors.mother_last_name.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <span className={labelClass}>
-                  Paroisse du sacrement{' '}
-                  <span className="text-destructive">*</span>
-                </span>
-                <p className="text-xs text-muted-foreground">
-                  Choisissez parmi vos paroisses ou recherchez la paroisse du
-                  registre (le diocèse est déduit automatiquement).
+              <ParishPicker value={pickedParish} onChange={handlePickParish} />
+              {errors.parish_id && (
+                <p className={errorClass} role="alert">
+                  {errors.parish_id.message}
                 </p>
-                <ParishPicker
-                  value={pickedParish}
-                  onChange={handlePickParish}
-                />
-                {errors.parish_id && (
-                  <p className={errorClass} role="alert">
-                    {errors.parish_id.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex gap-3">
-                <div className="flex flex-1 flex-col gap-1.5">
-                  <label htmlFor="sac_date" className={labelClass}>
-                    Date approx. <span className="text-destructive">*</span>
-                  </label>
-                  <input
-                    id="sac_date"
-                    placeholder="Ex : 1995 ou 15/06/1995"
-                    className={inputClass}
-                    {...register('sacrament_approximate_date')}
-                  />
-                  {errors.sacrament_approximate_date && (
-                    <p className={errorClass} role="alert">
-                      {errors.sacrament_approximate_date.message}
-                    </p>
-                  )}
-                </div>
-                <div className="flex flex-1 flex-col gap-1.5">
-                  <label htmlFor="sac_loc" className={labelClass}>
-                    Lieu <span className="text-destructive">*</span>
-                  </label>
-                  <input
-                    id="sac_loc"
-                    placeholder="Ex : Dakar"
-                    className={inputClass}
-                    {...register('sacrament_location')}
-                  />
-                  {errors.sacrament_location && (
-                    <p className={errorClass} role="alert">
-                      {errors.sacrament_location.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              {/* Champs conditionnels — mariage religieux */}
-              {watchedDocumentType === 'religious_marriage' && (
-                <>
-                  <div className="flex flex-col gap-1.5">
-                    <label htmlFor="groom" className={labelClass}>
-                      Nom complet de l&apos;époux{' '}
-                      <span className="text-destructive">*</span>
-                    </label>
-                    <input
-                      id="groom"
-                      placeholder="Prénom(s) et nom de l'époux"
-                      className={inputClass}
-                      {...register('spouse_full_name_groom')}
-                    />
-                    {errors.spouse_full_name_groom && (
-                      <p className={errorClass} role="alert">
-                        {errors.spouse_full_name_groom.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label htmlFor="bride" className={labelClass}>
-                      Nom complet de l&apos;épouse{' '}
-                      <span className="text-destructive">*</span>
-                    </label>
-                    <input
-                      id="bride"
-                      placeholder="Prénom(s) et nom de l'épouse"
-                      className={inputClass}
-                      {...register('spouse_full_name_bride')}
-                    />
-                    {errors.spouse_full_name_bride && (
-                      <p className={errorClass} role="alert">
-                        {errors.spouse_full_name_bride.message}
-                      </p>
-                    )}
-                  </div>
-                </>
               )}
+            </div>
+          )}
 
-              {/* Champs conditionnels — parrain / marraine */}
-              {watchedDocumentType === 'godparent' && (
+          {/* Étape 3 — Détails (identité + sacrement + contact + pièce jointe) */}
+          {step === 'details' && (
+            <>
+              <FormSection legend="Identité du demandeur">
+                <div className={fieldPairClass}>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="req_first" className={labelClass}>
+                      Prénom(s) <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      id="req_first"
+                      className={inputClass}
+                      {...register('requester_first_names')}
+                    />
+                    {errors.requester_first_names && (
+                      <p className={errorClass} role="alert">
+                        {errors.requester_first_names.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="req_last" className={labelClass}>
+                      Nom <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      id="req_last"
+                      className={inputClass}
+                      {...register('requester_last_name')}
+                    />
+                    {errors.requester_last_name && (
+                      <p className={errorClass} role="alert">
+                        {errors.requester_last_name.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className={fieldPairClass}>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="dob" className={labelClass}>
+                      Date de naissance{' '}
+                      <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      id="dob"
+                      type="date"
+                      className={inputClass}
+                      {...register('date_of_birth')}
+                    />
+                    {errors.date_of_birth && (
+                      <p className={errorClass} role="alert">
+                        {errors.date_of_birth.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="pob" className={labelClass}>
+                      Lieu de naissance{' '}
+                      <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      id="pob"
+                      className={inputClass}
+                      {...register('place_of_birth')}
+                    />
+                    {errors.place_of_birth && (
+                      <p className={errorClass} role="alert">
+                        {errors.place_of_birth.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </FormSection>
+
+              <FormSection
+                legend="Le sacrement à retrouver"
+                hint="Informations utiles à la recherche dans les registres paroissiaux."
+              >
+                <div className={fieldPairClass}>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="father_last" className={labelClass}>
+                      Nom du père <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      id="father_last"
+                      className={inputClass}
+                      {...register('father_last_name')}
+                    />
+                    {errors.father_last_name && (
+                      <p className={errorClass} role="alert">
+                        {errors.father_last_name.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="mother_last" className={labelClass}>
+                      Nom de la mère <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      id="mother_last"
+                      className={inputClass}
+                      {...register('mother_last_name')}
+                    />
+                    {errors.mother_last_name && (
+                      <p className={errorClass} role="alert">
+                        {errors.mother_last_name.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className={fieldPairClass}>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="sac_date" className={labelClass}>
+                      Date approx. <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      id="sac_date"
+                      placeholder="Ex : 1995 ou 15/06/1995"
+                      className={inputClass}
+                      {...register('sacrament_approximate_date')}
+                    />
+                    {errors.sacrament_approximate_date && (
+                      <p className={errorClass} role="alert">
+                        {errors.sacrament_approximate_date.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="sac_loc" className={labelClass}>
+                      Lieu <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      id="sac_loc"
+                      placeholder="Ex : Dakar"
+                      className={inputClass}
+                      {...register('sacrament_location')}
+                    />
+                    {errors.sacrament_location && (
+                      <p className={errorClass} role="alert">
+                        {errors.sacrament_location.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Champs conditionnels — mariage religieux */}
+                {watchedDocumentType === 'religious_marriage' && (
+                  <div className={fieldPairClass}>
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="groom" className={labelClass}>
+                        Nom complet de l&apos;époux{' '}
+                        <span className="text-destructive">*</span>
+                      </label>
+                      <input
+                        id="groom"
+                        placeholder="Prénom(s) et nom de l'époux"
+                        className={inputClass}
+                        {...register('spouse_full_name_groom')}
+                      />
+                      {errors.spouse_full_name_groom && (
+                        <p className={errorClass} role="alert">
+                          {errors.spouse_full_name_groom.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="bride" className={labelClass}>
+                        Nom complet de l&apos;épouse{' '}
+                        <span className="text-destructive">*</span>
+                      </label>
+                      <input
+                        id="bride"
+                        placeholder="Prénom(s) et nom de l'épouse"
+                        className={inputClass}
+                        {...register('spouse_full_name_bride')}
+                      />
+                      {errors.spouse_full_name_bride && (
+                        <p className={errorClass} role="alert">
+                          {errors.spouse_full_name_bride.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Champs conditionnels — parrain / marraine */}
+                {watchedDocumentType === 'godparent' && (
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="celebration_type" className={labelClass}>
+                      Type de célébration{' '}
+                      <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      id="celebration_type"
+                      placeholder="Ex : Baptême, Mariage, Confirmation…"
+                      className={inputClass}
+                      {...register('celebration_type')}
+                    />
+                    {errors.celebration_type && (
+                      <p className={errorClass} role="alert">
+                        {errors.celebration_type.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="celebration_type" className={labelClass}>
-                    Type de célébration{' '}
-                    <span className="text-destructive">*</span>
+                  <label htmlFor="add_info" className={labelClass}>
+                    Informations complémentaires{' '}
+                    <span className="text-muted-foreground">(optionnel)</span>
                   </label>
-                  <input
-                    id="celebration_type"
-                    placeholder="Ex : Baptême, Mariage, Confirmation…"
-                    className={inputClass}
-                    {...register('celebration_type')}
+                  <textarea
+                    id="add_info"
+                    rows={3}
+                    placeholder="Précisions utiles pour la recherche…"
+                    className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    {...register('additional_info')}
                   />
-                  {errors.celebration_type && (
-                    <p className={errorClass} role="alert">
-                      {errors.celebration_type.message}
-                    </p>
-                  )}
                 </div>
-              )}
+              </FormSection>
 
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="add_info" className={labelClass}>
-                  Informations complémentaires{' '}
-                  <span className="text-muted-foreground">(optionnel)</span>
-                </label>
-                <textarea
-                  id="add_info"
-                  rows={3}
-                  placeholder="Précisions utiles pour la recherche…"
-                  className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                  {...register('additional_info')}
+              <FormSection legend="Contact">
+                <div className={fieldPairClass}>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="contact_phone" className={labelClass}>
+                      Téléphone <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      id="contact_phone"
+                      type="tel"
+                      placeholder="+221 77 000 00 00"
+                      className={inputClass}
+                      {...register('contact_phone')}
+                    />
+                    {errors.contact_phone && (
+                      <p className={errorClass} role="alert">
+                        {errors.contact_phone.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="contact_email" className={labelClass}>
+                      Email <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      id="contact_email"
+                      type="email"
+                      className={inputClass}
+                      {...register('contact_email')}
+                    />
+                    {errors.contact_email && (
+                      <p className={errorClass} role="alert">
+                        {errors.contact_email.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </FormSection>
+
+              <FormSection legend="Pièce jointe (optionnel)">
+                <AttachmentField
+                  fileName={fileName}
+                  fileError={fileError}
+                  isUploading={isUploading}
+                  isUploaded={watchedAttachmentId != null}
+                  onSelectFile={handleSelectFile}
+                  onClear={handleClearFile}
                 />
-              </div>
+              </FormSection>
             </>
           )}
 
-          {/* Step 4 — Contact */}
-          {step === 'contact' && (
+          {/* Étape 4 — Validation (récap sectionné + consentement) */}
+          {step === 'review' && (
             <>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="contact_phone" className={labelClass}>
-                  Téléphone <span className="text-destructive">*</span>
-                </label>
-                <input
-                  id="contact_phone"
-                  type="tel"
-                  placeholder="+221 77 000 00 00"
-                  className={inputClass}
-                  {...register('contact_phone')}
+              <RecapSection title="Document" onEdit={() => setStepIndex(0)}>
+                <RecapRow
+                  label="Type"
+                  value={formatDocumentType(recap.document_type)}
                 />
-                {errors.contact_phone && (
-                  <p className={errorClass} role="alert">
-                    {errors.contact_phone.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="contact_email" className={labelClass}>
-                  Email <span className="text-destructive">*</span>
-                </label>
-                <input
-                  id="contact_email"
-                  type="email"
-                  className={inputClass}
-                  {...register('contact_email')}
+                <RecapRow
+                  label="Motif"
+                  value={
+                    REQUEST_REASONS.find((r) => r.value === recap.reason)
+                      ?.label ?? '—'
+                  }
                 />
-                {errors.contact_email && (
-                  <p className={errorClass} role="alert">
-                    {errors.contact_email.message}
-                  </p>
+                {recap.reason === 'other' && recap.reason_free && (
+                  <RecapRow label="Précision" value={recap.reason_free} />
                 )}
-              </div>
-            </>
-          )}
+              </RecapSection>
 
-          {/* Step 5 — Attachments (optional) */}
-          {step === 'attachments' && (
-            <AttachmentStep
-              fileName={fileName}
-              fileError={fileError}
-              isUploading={isUploading}
-              isUploaded={watchedAttachmentId != null}
-              onSelectFile={handleSelectFile}
-              onClear={handleClearFile}
-            />
-          )}
+              <RecapSection
+                title="Paroisse du registre"
+                onEdit={() => setStepIndex(1)}
+              >
+                <RecapRow label="Paroisse" value={pickedParish?.name ?? '—'} />
+                <RecapRow
+                  label="Diocèse"
+                  value={
+                    pickedParish?.dioceseName
+                      ? `${pickedParish.dioceseName} (déduit)`
+                      : '—'
+                  }
+                />
+              </RecapSection>
 
-          {/* Step 6 — Consent */}
-          {step === 'consent' && (
-            <>
-              <Card variant="elevated" className="p-4">
-                <h3 className="mb-2 font-semibold text-foreground">
-                  Récapitulatif
-                </h3>
-                <dl className="flex flex-col gap-1.5 text-sm">
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Document</dt>
-                    <dd className="font-medium text-foreground">
-                      {
-                        DOCUMENT_TYPES.find(
-                          (d) => d.value === watchedDocumentType,
-                        )?.label
-                      }
-                    </dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Motif</dt>
-                    <dd className="font-medium text-foreground">
-                      {
-                        REQUEST_REASONS.find((r) => r.value === watchedReason)
-                          ?.label
-                      }
-                    </dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Nom</dt>
-                    <dd className="font-medium text-foreground">
-                      {watch('requester_first_names')}{' '}
-                      {watch('requester_last_name')}
-                    </dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Paroisse</dt>
-                    <dd className="font-medium text-foreground">
-                      {pickedParish?.name}
-                    </dd>
-                  </div>
-                </dl>
-              </Card>
+              <RecapSection title="Détails" onEdit={() => setStepIndex(2)}>
+                <RecapRow
+                  label="Demandeur"
+                  value={`${recap.requester_first_names} ${recap.requester_last_name}`}
+                />
+                <RecapRow
+                  label="Né(e) le"
+                  value={`${formatCalendarDate(recap.date_of_birth)} · ${recap.place_of_birth}`}
+                />
+                <RecapRow
+                  label="Parents"
+                  value={`${recap.father_last_name} · ${recap.mother_last_name}`}
+                />
+                <RecapRow
+                  label="Sacrement"
+                  value={`≈ ${recap.sacrament_approximate_date} · ${recap.sacrament_location}`}
+                />
+                {recap.document_type === 'religious_marriage' && (
+                  <RecapRow
+                    label="Époux"
+                    value={`${recap.spouse_full_name_groom} · ${recap.spouse_full_name_bride}`}
+                  />
+                )}
+                {recap.document_type === 'godparent' && (
+                  <RecapRow
+                    label="Célébration"
+                    value={recap.celebration_type ?? '—'}
+                  />
+                )}
+                <RecapRow label="Contact" value={recap.contact_phone} />
+                <RecapRow label="Email" value={recap.contact_email} />
+                {recap.additional_info && (
+                  <RecapRow
+                    label="Informations complémentaires"
+                    value={recap.additional_info}
+                  />
+                )}
+                <RecapRow label="Pièce jointe" value={fileName ?? 'Aucune'} />
+              </RecapSection>
+
               <button
                 type="button"
-                onClick={() => setValue('consent_given', !watchedConsentGiven)}
+                onClick={() =>
+                  setValue('consent_given', !watchedConsentGiven, {
+                    shouldDirty: true,
+                  })
+                }
                 aria-pressed={watchedConsentGiven}
                 className={cn(
                   'flex items-start gap-3 rounded-xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -932,18 +1225,18 @@ export function NewDocumentForm() {
             </>
           )}
 
-          {/* Navigation buttons */}
-          {step !== 'consent' ? (
+          {/* Navigation */}
+          {!isLastStep ? (
             <Button
               type="button"
               size="lg"
               fullWidth
               onClick={handleNext}
-              isLoading={step === 'attachments' && isUploading}
-              icon={<ArrowRight className="size-4" />}
+              isLoading={step === 'details' && isUploading}
+              icon={<ArrowRight aria-hidden="true" className="size-4" />}
               iconPosition="right"
             >
-              {step === 'attachments' && isUploading
+              {step === 'details' && isUploading
                 ? 'Téléversement…'
                 : 'Continuer'}
             </Button>
@@ -960,6 +1253,28 @@ export function NewDocumentForm() {
           )}
         </form>
       </ContentContainer>
+
+      {/* Garde de sortie : ne pas perdre une saisie en cours sur un retour. */}
+      <AlertDialog open={isExitDialogOpen} onOpenChange={setIsExitDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Quitter la demande ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Les informations déjà saisies ne seront pas enregistrées. Vous
+              devrez recommencer la demande depuis le début.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continuer ma demande</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => router.back()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Quitter sans enregistrer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

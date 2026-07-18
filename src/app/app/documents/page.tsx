@@ -1,7 +1,6 @@
 'use client';
 
-import { Archive, FileText, Plus } from 'lucide-react';
-import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -12,19 +11,18 @@ import { DocumentsList } from '@/features/documents/components/documents-list';
 import { VaultContent } from '@/features/documents/components/vault-content';
 import { useUser } from '@/lib/auth';
 import { isAdmin, isClergy } from '@/lib/authorization';
-import { cn } from '@/lib/utils';
 
-type Tab = 'requests' | 'vault';
-
-const TABS: { id: Tab; label: string; icon: typeof FileText }[] = [
-  { id: 'requests', label: 'Mes demandes', icon: FileText },
-  { id: 'vault', label: 'Coffre-fort', icon: Archive },
-];
+/**
+ * Deux vues, pas deux onglets : le hub est la page ; le coffre-fort est une
+ * destination qu'on ouvre depuis sa carte d'accès et dont on revient. L'état
+ * reste local (non partageable par URL) — il l'était déjà avec les onglets.
+ */
+type HubView = 'requests' | 'vault';
 
 export default function DocumentsPage() {
   const router = useRouter();
   const { data: user, isLoading } = useUser();
-  const [activeTab, setActiveTab] = useState<Tab>('requests');
+  const [view, setView] = useState<HubView>('requests');
 
   useEffect(() => {
     if (!isLoading && isAdmin(user) && !isClergy(user)) {
@@ -41,46 +39,24 @@ export default function DocumentsPage() {
   if (isAdmin(user) && !isClergy(user)) return null;
 
   return (
-    <>
-      <div className="flex flex-col">
-        <ContentContainer>
-          {/* Tabs */}
-          <div className="mb-5 flex gap-1 rounded-xl bg-muted p-1">
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    'flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                    activeTab === tab.id
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  <Icon className="size-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
+    <div className="flex flex-col">
+      <ContentContainer>
+        {view === 'requests' ? (
+          <DocumentsList onOpenVault={() => setView('vault')} />
+        ) : (
+          <div className="flex flex-col gap-4">
+            <button
+              type="button"
+              onClick={() => setView('requests')}
+              className="inline-flex items-center gap-1 self-start rounded-lg py-1 text-sm font-medium text-primary transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <ChevronLeft className="size-4" aria-hidden="true" />
+              Mes demandes
+            </button>
+            <VaultContent />
           </div>
-
-          {activeTab === 'requests' && <DocumentsList />}
-          {activeTab === 'vault' && <VaultContent />}
-        </ContentContainer>
-      </div>
-
-      {activeTab === 'requests' && (
-        <Link
-          href={paths.app.newDocument.getHref()}
-          className="fixed bottom-24 right-4 z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl md:bottom-6"
-          aria-label="Nouvelle demande"
-        >
-          <Plus className="size-6" />
-        </Link>
-      )}
-    </>
+        )}
+      </ContentContainer>
+    </div>
   );
 }

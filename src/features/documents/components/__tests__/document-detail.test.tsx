@@ -79,10 +79,10 @@ describe('DocumentDetail', () => {
 
     renderApp(<DocumentDetail documentId="5" />);
 
-    await screen.findByRole('heading', { name: 'Suivi de la demande' });
+    await screen.findByRole('heading', { name: 'Historique de la démarche' });
 
     const timeline = screen.getByRole('list', {
-      name: 'Suivi de la demande',
+      name: 'Historique de la démarche',
     });
     // Étape franchie + étape courante (l'historique du back).
     expect(within(timeline).getByText('Soumis')).toBeInTheDocument();
@@ -90,13 +90,63 @@ describe('DocumentDetail', () => {
     expect(
       within(timeline).getByText('Prise en charge par la paroisse.'),
     ).toBeInTheDocument();
-    // Étapes restantes du chemin nominal, affichées « à venir ».
-    expect(within(timeline).getByText('Validé')).toBeInTheDocument();
-    expect(within(timeline).getByText('Déposé')).toBeInTheDocument();
+    // Acteurs en libellé de rôle générique (aucune identité exposée).
+    expect(
+      within(timeline).getByText(/Par vous — reçue par votre paroisse/),
+    ).toBeInTheDocument();
+    expect(
+      within(timeline).getByText(/Par le secrétariat paroissial/),
+    ).toBeInTheDocument();
+    // Étapes restantes, explicites sur le circuit ecclésial restant.
+    expect(
+      within(timeline).getByText('Validation et signature du curé'),
+    ).toBeInTheDocument();
+    expect(
+      within(timeline).getByText('Dépôt dans votre coffre-fort'),
+    ).toBeInTheDocument();
     // L'étape courante est marquée aria-current="step".
     const current = timeline.querySelector('[aria-current="step"]');
     expect(current).not.toBeNull();
     expect(current).toHaveTextContent('En vérification');
+  });
+
+  test('le suivi est placé avant les détails de la demande (hiérarchie « colis »)', async () => {
+    server.use(
+      http.get(`${env.API_URL}/v1/documents/requests/10/`, () =>
+        HttpResponse.json({
+          ...createDocumentRequest({
+            id: '10',
+            status: 'under_verification',
+            document_type: 'baptism',
+          }),
+          status_logs: [],
+        }),
+      ),
+    );
+
+    renderApp(<DocumentDetail documentId="10" />);
+
+    const hero = await screen.findByRole('region', {
+      name: 'État de la demande',
+    });
+    const timeline = screen.getByRole('region', {
+      name: 'Historique de la démarche',
+    });
+    const details = screen.getByText('Date de la demande');
+
+    // Héros → timeline → détails : la timeline n'est plus la dernière section.
+    expect(
+      hero.compareDocumentPosition(timeline) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      timeline.compareDocumentPosition(details) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    // Jauge de progression sur le chemin nominal.
+    expect(
+      within(hero).getByText(/Étape 2 sur 4 — Vérification au registre/),
+    ).toBeInTheDocument();
   });
 
   test('branche info_requested : la vérification reprend après le complément', async () => {
@@ -127,14 +177,32 @@ describe('DocumentDetail', () => {
     renderApp(<DocumentDetail documentId="6" />);
 
     const timeline = await screen.findByRole('list', {
-      name: 'Suivi de la demande',
+      name: 'Historique de la démarche',
     });
     expect(within(timeline).getByText('Infos requises')).toBeInTheDocument();
     expect(
       within(timeline).getByText('Reprise de la vérification'),
     ).toBeInTheDocument();
-    expect(within(timeline).getByText('Validé')).toBeInTheDocument();
-    expect(within(timeline).getByText('Déposé')).toBeInTheDocument();
+    expect(
+      within(timeline).getByText('Validation et signature du curé'),
+    ).toBeInTheDocument();
+    expect(
+      within(timeline).getByText('Dépôt dans votre coffre-fort'),
+    ).toBeInTheDocument();
+
+    // Le message de la paroisse est CITÉ au nœud, et le formulaire de réponse
+    // est juste dessous — plus d'encart isolé au milieu de la page.
+    expect(
+      within(timeline).getByText('Merci de préciser la date exacte.'),
+    ).toBeInTheDocument();
+    expect(
+      within(timeline).getByPlaceholderText(
+        /apportez les précisions demandées/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(timeline).getByRole('button', { name: /envoyer le complément/i }),
+    ).toBeInTheDocument();
   });
 
   test('branche rejected : statut terminal, aucune étape à venir', async () => {
@@ -165,16 +233,29 @@ describe('DocumentDetail', () => {
 
     renderApp(<DocumentDetail documentId="7" />);
 
-    await screen.findByText('Motif du rejet');
+    const hero = await screen.findByRole('region', {
+      name: 'État de la demande',
+    });
+    expect(within(hero).getByText('Motif du refus')).toBeInTheDocument();
     expect(
-      screen.getByText('Acte introuvable dans les registres.'),
+      within(hero).getByText('Acte introuvable dans les registres.'),
     ).toBeInTheDocument();
+    // Rebond : refaire une demande avec d'autres informations.
+    expect(
+      within(hero).getByRole('link', { name: /refaire une demande/i }),
+    ).toHaveAttribute('href', '/app/documents/new');
 
-    const timeline = screen.getByRole('list', { name: 'Suivi de la demande' });
+    const timeline = screen.getByRole('list', {
+      name: 'Historique de la démarche',
+    });
     expect(within(timeline).getByText('Refusé')).toBeInTheDocument();
     // Terminal : plus d'étapes « à venir ».
-    expect(within(timeline).queryByText('Validé')).not.toBeInTheDocument();
-    expect(within(timeline).queryByText('Déposé')).not.toBeInTheDocument();
+    expect(
+      within(timeline).queryByText('Validation et signature du curé'),
+    ).not.toBeInTheDocument();
+    expect(
+      within(timeline).queryByText('Dépôt dans votre coffre-fort'),
+    ).not.toBeInTheDocument();
   });
 
   test('document_deposited : panneau coffre-fort + téléchargement des pièces jointes', async () => {
@@ -204,15 +285,26 @@ describe('DocumentDetail', () => {
 
     renderApp(<DocumentDetail documentId="8" />);
 
-    await screen.findByText('Document déposé');
-    expect(screen.getByText(/coffre-fort numérique/i)).toBeInTheDocument();
+    const hero = await screen.findByRole('region', {
+      name: 'État de la demande',
+    });
+    expect(
+      within(hero).getByText('Votre document est prêt'),
+    ).toBeInTheDocument();
 
-    // Action de téléchargement conservée.
-    const download = screen.getByRole('link', { name: /télécharger/i });
-    expect(download).toHaveAttribute(
-      'href',
-      'https://files.example/certificat.pdf',
-    );
+    // Téléchargement en 1 clic depuis le héros + accès au coffre-fort.
+    expect(
+      within(hero).getByRole('link', { name: /télécharger le document/i }),
+    ).toHaveAttribute('href', 'https://files.example/certificat.pdf');
+    expect(
+      within(hero).getByRole('link', { name: /ouvrir le coffre-fort/i }),
+    ).toHaveAttribute('href', '/app/documents');
+
+    // Action de téléchargement des pièces jointes conservée.
+    const attachments = screen.getByRole('region', { name: 'Pièces jointes' });
+    expect(
+      within(attachments).getByRole('link', { name: /télécharger/i }),
+    ).toHaveAttribute('href', 'https://files.example/certificat.pdf');
   });
 
   test('shows supplement form when status is info_requested', async () => {

@@ -55,7 +55,7 @@ describe('VaultContent', () => {
     ).toHaveAttribute('href', '/app/documents/new');
   });
 
-  test('coffre-fort rempli : cartes lisibles reliées au détail', async () => {
+  test('coffre-fort rempli : cartes-certificats avec référence, destinataire et accès au détail', async () => {
     server.use(
       http.get(`${env.API_URL}/v1/documents/requests/`, () =>
         HttpResponse.json({
@@ -63,8 +63,10 @@ describe('VaultContent', () => {
           results: [
             createDocumentRequest({
               id: '42',
+              reference: 'DOC-2026-0188',
               document_type: 'baptism',
               status: 'document_deposited',
+              requester_name: 'Awa Sène',
               parish_name: 'Paroisse Saint-Pierre',
               updated_at: '2026-07-10T09:00:00Z',
             }),
@@ -76,12 +78,93 @@ describe('VaultContent', () => {
     renderApp(<VaultContent />);
 
     await screen.findByText('Certificat de baptême');
+    expect(screen.getByText(/Réf\. DOC-2026-0188/)).toBeInTheDocument();
+    expect(screen.getByText(/Délivré à/, { selector: 'p' })).toHaveTextContent(
+      'Awa Sène',
+    );
     expect(screen.getByText('Paroisse Saint-Pierre')).toBeInTheDocument();
-    expect(screen.getByText('Disponible')).toBeInTheDocument();
-    expect(screen.getByText(/délivré le 10 juillet 2026/i)).toBeInTheDocument();
+    expect(screen.getByText(/déposé le 10 juillet 2026/i)).toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: /certificat de baptême/i }),
+      screen.getByRole('link', { name: /voir la démarche/i }),
     ).toHaveAttribute('href', '/app/documents/42');
+    // Ligne de réassurance : conservation à vie + confidentialité.
+    expect(
+      screen.getByText(/accessible uniquement par vous/i),
+    ).toBeInTheDocument();
+  });
+
+  test('téléchargement en 1 clic : le fichier final est résolu via le détail', async () => {
+    server.use(
+      http.get(`${env.API_URL}/v1/documents/requests/`, () =>
+        HttpResponse.json({
+          count: 1,
+          results: [
+            createDocumentRequest({
+              id: '42',
+              document_type: 'confirmation',
+              status: 'document_deposited',
+            }),
+          ],
+        }),
+      ),
+      http.get(`${env.API_URL}/v1/documents/requests/:id/`, ({ params }) =>
+        HttpResponse.json({
+          ...createDocumentRequest({
+            id: String(params.id),
+            document_type: 'confirmation',
+            status: 'document_deposited',
+          }),
+          attachments: [
+            {
+              id: 1,
+              attachment_type: 'supporting',
+              file_url: 'https://files.test/piece-jointe.pdf',
+              created_at: '2026-07-01T09:00:00Z',
+            },
+            {
+              id: 2,
+              attachment_type: 'final_document',
+              file_url: 'https://files.test/attestation-finale.pdf',
+              created_at: '2026-07-10T09:00:00Z',
+            },
+          ],
+        }),
+      ),
+    );
+
+    renderApp(<VaultContent />);
+
+    const download = await screen.findByRole('link', { name: /télécharger/i });
+    // Le document final prime sur les autres pièces jointes.
+    expect(download).toHaveAttribute(
+      'href',
+      'https://files.test/attestation-finale.pdf',
+    );
+  });
+
+  test('partage désactivé et annoncé « Bientôt » sur chaque certificat', async () => {
+    server.use(
+      http.get(`${env.API_URL}/v1/documents/requests/`, () =>
+        HttpResponse.json({
+          count: 1,
+          results: [
+            createDocumentRequest({
+              id: '42',
+              document_type: 'baptism',
+              status: 'document_deposited',
+            }),
+          ],
+        }),
+      ),
+    );
+
+    renderApp(<VaultContent />);
+
+    await screen.findByText('Certificat de baptême');
+    const share = screen.getByRole('button', { name: /partager/i });
+    expect(share).toBeDisabled();
+    expect(share).toHaveAttribute('aria-disabled', 'true');
+    expect(share).toHaveTextContent(/bientôt/i);
   });
 
   test('erreur : ErrorState avec retry qui recharge le coffre-fort', async () => {

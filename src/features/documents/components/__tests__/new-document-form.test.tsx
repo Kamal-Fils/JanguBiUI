@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { useRouter } from 'next/navigation';
@@ -41,49 +41,67 @@ function mockMe() {
   );
 }
 
-/**
- * Steps 1–2 : type+motif puis identité. Laisse l'utilisateur sur l'étape 3
- * (recherche dans les registres / sélection de la paroisse).
- */
-async function navigateToSearch(user: ReturnType<typeof userEvent.setup>) {
-  // Step 1 — document type + reason
-  await user.click(
-    screen.getByRole('button', { name: 'Certificat de baptême' }),
-  );
-  await user.click(screen.getByRole('button', { name: 'Usage personnel' }));
-  await user.click(screen.getByRole('button', { name: /continuer/i }));
+type User = ReturnType<typeof userEvent.setup>;
 
-  // Step 2 — identity
-  await user.type(screen.getByLabelText(/prénom/i), 'Jean');
-  await user.type(screen.getByLabelText(/^nom/i), 'Dupont');
-  await user.type(screen.getByLabelText(/date de naissance/i), '2000-01-01');
-  await user.type(screen.getByLabelText(/lieu de naissance/i), 'Dakar');
-  await user.click(screen.getByRole('button', { name: /continuer/i }));
+/**
+ * `delay: null` supprime l'attente inter-frappe : l'étape « Détails » saisit
+ * 10 champs, et le délai par défaut rendait ces tests fragiles (timeout) quand
+ * la suite complète tourne en parallèle. Les événements émis sont identiques.
+ */
+function setupUser(): User {
+  return userEvent.setup({ delay: null });
 }
 
 /**
- * Remplit toutes les étapes requises 1–4 et saute l'étape 5 (pièces jointes,
- * optionnelle) pour arriver à l'étape 6 (Validation / consentement). La paroisse
- * du registre est choisie via le picker (raccourci appartenance).
+ * Les champs d'identité/contact sont préremplis depuis le profil (valeurs
+ * aléatoires en test) : on vide avant de saisir pour rendre le payload
+ * déterministe.
  */
-async function navigateToConsent(user: ReturnType<typeof userEvent.setup>) {
-  await navigateToSearch(user);
+async function fill(user: User, field: HTMLElement, value: string) {
+  await user.clear(field);
+  await user.type(field, value);
+}
 
-  // Step 3 — sacrament search (parents + paroisse via picker)
-  await user.type(screen.getByLabelText(/nom du père/i), 'Dupont');
-  await user.type(screen.getByLabelText(/nom de la mère/i), 'Martin');
+// ── Navigation : 4 étapes nommées (Document · Paroisse · Détails · Validation) ─
+
+/** Étape 1 → 2 : choisit le type de document et le motif. */
+async function completeDocumentStep(user: User) {
+  await user.click(
+    screen.getByRole('button', { name: /Certificat de baptême/ }),
+  );
+  await user.click(screen.getByRole('button', { name: 'Usage personnel' }));
+  await user.click(screen.getByRole('button', { name: /continuer/i }));
+  await screen.findByRole('heading', { name: 'Quelle paroisse ?' });
+}
+
+/** Étape 2 → 3 : sélectionne la paroisse du registre via le picker. */
+async function completeParishStep(user: User) {
   await user.click(await screen.findByRole('button', { name: /Saint-Pierre/ }));
-  await user.type(screen.getByLabelText(/date approx/i), '2000');
-  await user.type(screen.getByLabelText(/^lieu/i), 'Dakar');
   await user.click(screen.getByRole('button', { name: /continuer/i }));
+  await screen.findByRole('heading', { name: 'Vos informations' });
+}
 
-  // Step 4 — contact
-  await user.type(screen.getByLabelText(/téléphone/i), '+221770000000');
-  await user.type(screen.getByLabelText(/email/i), 'jean@example.com');
+/** Étape 3 → 4 : identité + sacrement + contact (pièce jointe optionnelle). */
+async function completeDetailsStep(user: User) {
+  await fill(user, screen.getByLabelText(/prénom/i), 'Jean');
+  await fill(user, screen.getByLabelText(/^nom \*/i), 'Dupont');
+  await fill(user, screen.getByLabelText(/date de naissance/i), '2000-01-01');
+  await fill(user, screen.getByLabelText(/lieu de naissance/i), 'Dakar');
+  await fill(user, screen.getByLabelText(/nom du père/i), 'Dupont');
+  await fill(user, screen.getByLabelText(/nom de la mère/i), 'Martin');
+  await fill(user, screen.getByLabelText(/date approx/i), '2000');
+  await fill(user, screen.getByLabelText(/^lieu \*/i), 'Dakar');
+  await fill(user, screen.getByLabelText(/téléphone/i), '+221770000000');
+  await fill(user, screen.getByLabelText(/email/i), 'jean@example.com');
   await user.click(screen.getByRole('button', { name: /continuer/i }));
+  await screen.findByRole('heading', { name: 'Récapitulatif' });
+}
 
-  // Step 5 — attachments (optional, skip without uploading)
-  await user.click(screen.getByRole('button', { name: /continuer/i }));
+/** Parcours complet jusqu'à l'étape 4 (Validation), consentement non coché. */
+async function navigateToReview(user: User) {
+  await completeDocumentStep(user);
+  await completeParishStep(user);
+  await completeDetailsStep(user);
 }
 
 describe('NewDocumentForm', () => {
@@ -93,59 +111,135 @@ describe('NewDocumentForm', () => {
     mockMe();
   });
 
-  test('renders all document type selection cards on step 1', () => {
+  // ── Étape 1 — Document ─────────────────────────────────────────────────────
+
+  test('affiche les 5 cartes de type enrichies (icône + description d’usage)', () => {
     renderApp(<NewDocumentForm />);
 
     expect(
-      screen.getByRole('button', { name: 'Certificat de baptême' }),
+      screen.getByRole('button', { name: /Certificat de baptême/ }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Attestation de première communion' }),
+      screen.getByRole('button', {
+        name: /Attestation de première communion/,
+      }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Attestation de confirmation' }),
+      screen.getByRole('button', { name: /Attestation de confirmation/ }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Attestation de mariage religieux' }),
+      screen.getByRole('button', { name: /Attestation de mariage religieux/ }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Attestation parrain / marraine' }),
+      screen.getByRole('button', { name: /Attestation parrain \/ marraine/ }),
+    ).toBeInTheDocument();
+
+    // La description d'usage fait partie du repère de choix (maquette 02).
+    expect(
+      screen.getByText(/Le plus demandé — requis pour le mariage/),
     ).toBeInTheDocument();
   });
 
-  test('shows validation errors when "Continuer" is clicked without selections on step 1', async () => {
-    const user = userEvent.setup();
+  test('la carte de type cliquée devient sélectionnée (aria-pressed)', async () => {
+    const user = setupUser();
     renderApp(<NewDocumentForm />);
 
-    // Click Continuer without selecting anything — should show errors, not advance
+    const card = screen.getByRole('button', { name: /Certificat de baptême/ });
+    expect(card).toHaveAttribute('aria-pressed', 'false');
+
+    await user.click(card);
+
+    expect(card).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('impossible d’avancer depuis l’étape 1 sans type ni motif', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+
     await user.click(screen.getByRole('button', { name: /continuer/i }));
 
-    // Should still be on step 1 (document type cards still visible)
-    await waitFor(() => {
-      expect(
-        screen.getByRole('button', { name: 'Certificat de baptême' }),
-      ).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByText('Veuillez sélectionner un type de document'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Veuillez sélectionner un motif'),
+    ).toBeInTheDocument();
+    // Toujours sur l'étape 1.
+    expect(
+      screen.getByRole('heading', { name: 'Quel document ?' }),
+    ).toBeInTheDocument();
+  });
 
-    // After selecting both, clicking Continuer should advance to step 2
+  // ── Stepper + navigation avant / arrière ───────────────────────────────────
+
+  test('parcourt les 4 étapes nommées puis revient en arrière', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+
+    // 1 — Document
+    expect(
+      screen.getByRole('heading', { name: 'Quel document ?' }),
+    ).toBeInTheDocument();
+    await completeDocumentStep(user);
+
+    // 2 — Paroisse
+    expect(
+      screen.getByRole('heading', { name: 'Quelle paroisse ?' }),
+    ).toBeInTheDocument();
+    await completeParishStep(user);
+
+    // 3 — Détails
+    expect(
+      screen.getByRole('heading', { name: 'Vos informations' }),
+    ).toBeInTheDocument();
+    await completeDetailsStep(user);
+
+    // 4 — Validation
+    expect(
+      screen.getByRole('heading', { name: 'Récapitulatif' }),
+    ).toBeInTheDocument();
+
+    // Retour arrière via le bouton d'en-tête → étape 3.
+    await user.click(screen.getByRole('button', { name: 'Étape précédente' }));
+    expect(
+      await screen.findByRole('heading', { name: 'Vos informations' }),
+    ).toBeInTheDocument();
+
+    // Retour arrière via le stepper → étape 1.
     await user.click(
-      screen.getByRole('button', { name: 'Certificat de baptême' }),
+      screen.getByRole('button', {
+        name: "Revenir à l'étape 1 sur 4 : Document",
+      }),
     );
-    await user.click(screen.getByRole('button', { name: 'Usage personnel' }));
-    await user.click(screen.getByRole('button', { name: /continuer/i }));
-
-    // Now on step 2 — identity fields appear
-    await waitFor(() => {
-      expect(screen.getByLabelText(/prénom/i)).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByRole('heading', { name: 'Quel document ?' }),
+    ).toBeInTheDocument();
   });
 
-  test('le picker propose les paroisses d’appartenance en tête (plus de saisie libre)', async () => {
-    const user = userEvent.setup();
+  test('le stepper n’expose pas d’étape à venir comme cliquable', async () => {
+    const user = setupUser();
     renderApp(<NewDocumentForm />);
-    await navigateToSearch(user);
 
-    // Raccourci "Mes paroisses" présent…
+    // Sur l'étape 1, aucune étape n'est franchie → aucun retour possible.
+    expect(
+      screen.queryByRole('button', { name: /Revenir à l'étape/ }),
+    ).not.toBeInTheDocument();
+
+    await completeDocumentStep(user);
+
+    // Sur l'étape 2 : seule l'étape 1 est un bouton de retour.
+    expect(
+      screen.getAllByRole('button', { name: /Revenir à l'étape/ }),
+    ).toHaveLength(1);
+  });
+
+  // ── Étape 2 — Paroisse ─────────────────────────────────────────────────────
+
+  test('l’étape Paroisse propose les paroisses d’appartenance en tête', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+    await completeDocumentStep(user);
+
     expect(await screen.findByText('Mes paroisses')).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /Saint-Pierre/ }),
@@ -174,9 +268,9 @@ describe('NewDocumentForm', () => {
       ),
     );
 
-    const user = userEvent.setup();
+    const user = setupUser();
     renderApp(<NewDocumentForm />);
-    await navigateToSearch(user);
+    await completeDocumentStep(user);
 
     await user.type(screen.getByLabelText(/rechercher une paroisse/i), 'Cath');
     await user.click(await screen.findByRole('button', { name: /Cathédrale/ }));
@@ -188,10 +282,155 @@ describe('NewDocumentForm', () => {
     ).toBeInTheDocument();
   });
 
-  test('"Envoyer la demande" appears on the final step and is disabled before consent', async () => {
-    const user = userEvent.setup();
+  test('impossible d’avancer depuis l’étape Paroisse sans sélection', async () => {
+    const user = setupUser();
     renderApp(<NewDocumentForm />);
-    await navigateToConsent(user);
+    await completeDocumentStep(user);
+
+    await user.click(screen.getByRole('button', { name: /continuer/i }));
+
+    expect(await screen.findByText('Paroisse requise')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Quelle paroisse ?' }),
+    ).toBeInTheDocument();
+  });
+
+  // ── Étape 3 — Détails ──────────────────────────────────────────────────────
+
+  test('regroupe identité, sacrement, contact et pièce jointe en sous-sections', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+    await completeDocumentStep(user);
+    await completeParishStep(user);
+
+    // Les 4 sous-sections d'un même écran défilant (fieldset/legend).
+    expect(
+      screen.getByRole('group', { name: 'Identité du demandeur' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: 'Le sacrement à retrouver' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Contact' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: 'Pièce jointe (optionnel)' }),
+    ).toBeInTheDocument();
+  });
+
+  test('impossible d’avancer depuis l’étape Détails si elle est invalide', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+    await completeDocumentStep(user);
+    await completeParishStep(user);
+
+    // Champs vidés → l'étape reste bloquée.
+    await user.clear(screen.getByLabelText(/prénom/i));
+    await user.clear(screen.getByLabelText(/^nom \*/i));
+    await user.click(screen.getByRole('button', { name: /continuer/i }));
+
+    expect(await screen.findByText('Prénom(s) requis')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Vos informations' }),
+    ).toBeInTheDocument();
+  });
+
+  // ── Étape 4 — Validation ───────────────────────────────────────────────────
+
+  test('le récapitulatif affiche les valeurs saisies, par section', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+    await navigateToReview(user);
+
+    const documentSection = screen
+      .getByRole('heading', { name: 'Document' })
+      .closest('div')?.parentElement as HTMLElement;
+    expect(
+      within(documentSection).getByText('Certificat de baptême'),
+    ).toBeInTheDocument();
+    expect(
+      within(documentSection).getByText('Usage personnel'),
+    ).toBeInTheDocument();
+
+    // Paroisse du registre + diocèse déduit.
+    expect(screen.getByText('Saint-Pierre')).toBeInTheDocument();
+    expect(screen.getByText('Diocèse de Dakar (déduit)')).toBeInTheDocument();
+
+    // Détails : identité, naissance, parents, sacrement, contact, pièce jointe.
+    expect(screen.getByText('Jean Dupont')).toBeInTheDocument();
+    expect(screen.getByText('01/01/2000 · Dakar')).toBeInTheDocument();
+    expect(screen.getByText('Dupont · Martin')).toBeInTheDocument();
+    expect(screen.getByText('≈ 2000 · Dakar')).toBeInTheDocument();
+    expect(screen.getByText('+221770000000')).toBeInTheDocument();
+    expect(screen.getByText('jean@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Aucune')).toBeInTheDocument();
+  });
+
+  test('« Modifier » de la section Document renvoie à l’étape 1', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+    await navigateToReview(user);
+
+    await user.click(
+      screen.getByRole('button', { name: 'Modifier la section Document' }),
+    );
+
+    expect(
+      await screen.findByRole('heading', { name: 'Quel document ?' }),
+    ).toBeInTheDocument();
+  });
+
+  test('« Modifier » de la section Paroisse renvoie à l’étape 2', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+    await navigateToReview(user);
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Modifier la section Paroisse du registre',
+      }),
+    );
+
+    expect(
+      await screen.findByRole('heading', { name: 'Quelle paroisse ?' }),
+    ).toBeInTheDocument();
+  });
+
+  test('« Modifier » de la section Détails renvoie à l’étape 3', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+    await navigateToReview(user);
+
+    await user.click(
+      screen.getByRole('button', { name: 'Modifier la section Détails' }),
+    );
+
+    expect(
+      await screen.findByRole('heading', { name: 'Vos informations' }),
+    ).toBeInTheDocument();
+  });
+
+  test('la saisie est conservée en revenant au récapitulatif après « Modifier »', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+    await navigateToReview(user);
+
+    await user.click(
+      screen.getByRole('button', { name: 'Modifier la section Détails' }),
+    );
+    await screen.findByRole('heading', { name: 'Vos informations' });
+    expect(screen.getByLabelText(/prénom/i)).toHaveValue('Jean');
+
+    await user.click(screen.getByRole('button', { name: /continuer/i }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Récapitulatif' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Jean Dupont')).toBeInTheDocument();
+  });
+
+  test('"Envoyer la demande" apparaît à la dernière étape, désactivé avant consentement', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+    await navigateToReview(user);
 
     const submitBtn = screen.getByRole('button', {
       name: /envoyer la demande/i,
@@ -200,10 +439,10 @@ describe('NewDocumentForm', () => {
     expect(submitBtn).toBeDisabled();
   });
 
-  test('consent checkbox enables "Envoyer la demande"', async () => {
-    const user = userEvent.setup();
+  test('le consentement active "Envoyer la demande"', async () => {
+    const user = setupUser();
     renderApp(<NewDocumentForm />);
-    await navigateToConsent(user);
+    await navigateToReview(user);
 
     await user.click(screen.getByRole('button', { name: /je certifie/i }));
 
@@ -212,7 +451,9 @@ describe('NewDocumentForm', () => {
     ).toBeEnabled();
   });
 
-  test('envoie UNIQUEMENT parish_id (FK), sans texte libre parish_name/diocese', async () => {
+  // ── Soumission — le payload NE CHANGE PAS ──────────────────────────────────
+
+  test('soumet EXACTEMENT le même payload CreateDocumentInput qu’avant la refonte', async () => {
     const capturedBodies: Array<Record<string, unknown>> = [];
     server.use(
       http.post(
@@ -232,19 +473,35 @@ describe('NewDocumentForm', () => {
       ),
     );
 
-    const user = userEvent.setup();
+    const user = setupUser();
     renderApp(<NewDocumentForm />);
-    await navigateToConsent(user);
+    await navigateToReview(user);
     await user.click(screen.getByRole('button', { name: /je certifie/i }));
     await user.click(
       screen.getByRole('button', { name: /envoyer la demande/i }),
     );
 
     await waitFor(() => expect(capturedBodies).toHaveLength(1));
-    expect(capturedBodies[0]).toMatchObject({
+
+    // Contrat figé : mêmes clés, mêmes valeurs, aucun champ ajouté ni retiré.
+    // (`reason_free`, `additional_info` et `document_details` valent `undefined`
+    // ici et sont donc absents du JSON — comportement inchangé.)
+    expect(capturedBodies[0]).toEqual({
       document_type: 'baptism',
-      consent_given: true,
+      reason: 'personal',
+      requester_last_name: 'Dupont',
+      requester_first_names: 'Jean',
+      date_of_birth: '2000-01-01',
+      place_of_birth: 'Dakar',
+      contact_phone: '+221770000000',
+      contact_email: 'jean@example.com',
+      father_last_name: 'Dupont',
+      mother_last_name: 'Martin',
       parish_id: 11,
+      sacrament_approximate_date: '2000',
+      sacrament_location: 'Dakar',
+      attachment_file_id: null,
+      consent_given: true,
     });
     // B5c : plus de texte libre parish_name/diocese dans le payload (FK seule).
     expect(capturedBodies[0]).not.toHaveProperty('parish_name');
@@ -253,9 +510,9 @@ describe('NewDocumentForm', () => {
 
   test('feedback succès + redirection vers le SUIVI de la demande créée', async () => {
     // Le handler partagé POST /v1/documents/requests/ répond avec id "99".
-    const user = userEvent.setup();
+    const user = setupUser();
     renderApp(<NewDocumentForm />);
-    await navigateToConsent(user);
+    await navigateToReview(user);
     await user.click(screen.getByRole('button', { name: /je certifie/i }));
     await user.click(
       screen.getByRole('button', { name: /envoyer la demande/i }),
@@ -269,7 +526,7 @@ describe('NewDocumentForm', () => {
     );
   });
 
-  test('shows loading indicator while submitting', async () => {
+  test('affiche un indicateur de chargement pendant la soumission', async () => {
     let resolveRequest!: () => void;
     server.use(
       http.post(
@@ -290,9 +547,9 @@ describe('NewDocumentForm', () => {
       ),
     );
 
-    const user = userEvent.setup();
+    const user = setupUser();
     renderApp(<NewDocumentForm />);
-    await navigateToConsent(user);
+    await navigateToReview(user);
     await user.click(screen.getByRole('button', { name: /je certifie/i }));
     await user.click(
       screen.getByRole('button', { name: /envoyer la demande/i }),
@@ -304,5 +561,69 @@ describe('NewDocumentForm', () => {
     ).toBeDisabled();
 
     resolveRequest();
+  });
+
+  // ── Garde de sortie ────────────────────────────────────────────────────────
+
+  test('quitter un formulaire vierge ne demande aucune confirmation', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+
+    await user.click(
+      screen.getByRole('button', { name: 'Quitter la demande' }),
+    );
+
+    expect(mockRouterBack).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  test('quitter avec des données saisies demande confirmation', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+
+    await user.click(
+      screen.getByRole('button', { name: /Certificat de baptême/ }),
+    );
+    await user.click(
+      screen.getByRole('button', { name: 'Quitter la demande' }),
+    );
+
+    // Le tunnel n'est pas quitté tant que la sortie n'est pas confirmée.
+    expect(
+      await screen.findByRole('alertdialog', { name: 'Quitter la demande ?' }),
+    ).toBeInTheDocument();
+    expect(mockRouterBack).not.toHaveBeenCalled();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Quitter sans enregistrer' }),
+    );
+
+    expect(mockRouterBack).toHaveBeenCalledTimes(1);
+  });
+
+  test('la garde de sortie peut être annulée sans perdre la saisie', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+
+    await user.click(
+      screen.getByRole('button', { name: /Certificat de baptême/ }),
+    );
+    await user.click(
+      screen.getByRole('button', { name: 'Quitter la demande' }),
+    );
+    await screen.findByRole('alertdialog');
+
+    await user.click(
+      screen.getByRole('button', { name: 'Continuer ma demande' }),
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument(),
+    );
+    expect(mockRouterBack).not.toHaveBeenCalled();
+    // La sélection est conservée.
+    expect(
+      screen.getByRole('button', { name: /Certificat de baptême/ }),
+    ).toHaveAttribute('aria-pressed', 'true');
   });
 });

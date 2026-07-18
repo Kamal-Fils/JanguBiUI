@@ -4,10 +4,11 @@ import {
   CheckCircle,
   Info,
   MoreHorizontal,
-  PackageCheck,
-  Send,
+  PenLine,
+  Play,
   XCircle,
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
@@ -37,22 +38,47 @@ import {
 } from '../api/admin-actions';
 import { DocumentStatus } from '../types';
 
+/**
+ * Libellés uniques des transitions — repris à l'identique par le bouton
+ * d'action principale et par le menu « ⋯ », pour qu'un agent ne découvre
+ * jamais deux noms pour le même acte.
+ */
+const ACTION_LABELS = {
+  startVerification: 'Démarrer la vérification',
+  requestInfo: 'Demander une information',
+  validate: 'Transmettre au curé',
+  deposit: 'Signer et déposer',
+  reject: 'Rejeter',
+} as const;
+
+interface PrimaryAction {
+  label: string;
+  icon: ReactNode;
+  /** `gold` = acte du curé (signature) ; `default` = traitement niveau 1. */
+  variant: 'default' | 'gold';
+  isPending: boolean;
+  run: () => void;
+}
+
 interface DocumentStatusActionsProps {
   requestId: string;
   status: DocumentStatus;
-  /** Libellé accessible du menu « ⋯ » (ex. « Actions pour Baptême de A. Ndiaye »). */
-  ariaLabel?: string;
+  /** Description humaine de la demande (ex. « Baptême de A. Ndiaye »). */
+  subject?: string;
 }
 
 /**
- * Workflow de traitement regroupé dans un menu « ⋯ » (pas de rangée de
- * boutons). Les transitions disponibles dépendent strictement du statut —
- * la logique métier (mutations, gardes) est inchangée.
+ * Actions de traitement d'une demande.
+ *
+ * L'**action principale du statut** est un bouton visible (l'acte le plus
+ * fréquent ne doit pas coûter deux clics) ; le menu « ⋯ » ne garde que les
+ * actions secondaires. Les transitions à motif obligatoire (demande d'info,
+ * rejet) conservent leur dialogue — aucune règle métier n'est modifiée.
  */
 export function DocumentStatusActions({
   requestId,
   status,
-  ariaLabel = 'Actions sur la demande',
+  subject = 'la demande',
 }: DocumentStatusActionsProps) {
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
@@ -67,61 +93,93 @@ export function DocumentStatusActions({
 
   if (status === 'rejected' || status === 'document_deposited') return null;
 
+  // `info_requested` n'a volontairement pas d'action principale : la balle est
+  // dans le camp du fidèle. Ses transitions restent accessibles en secondaire.
+  let primary: PrimaryAction | null = null;
+
+  if (status === 'submitted') {
+    primary = {
+      label: ACTION_LABELS.startVerification,
+      icon: <Play className="size-4" aria-hidden="true" />,
+      variant: 'default',
+      isPending: startVerification.isPending,
+      run: () => startVerification.mutate(requestId),
+    };
+  } else if (status === 'under_verification') {
+    primary = {
+      label: ACTION_LABELS.validate,
+      icon: <CheckCircle className="size-4" aria-hidden="true" />,
+      variant: 'default',
+      isPending: validate.isPending,
+      run: () => validate.mutate({ requestId }),
+    };
+  } else if (status === 'validated') {
+    primary = {
+      label: ACTION_LABELS.deposit,
+      icon: <PenLine className="size-4" aria-hidden="true" />,
+      variant: 'gold',
+      isPending: deposit.isPending,
+      run: () => deposit.mutate({ requestId }),
+    };
+  }
+
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label={ariaLabel}>
-            <MoreHorizontal className="size-4" aria-hidden="true" />
+      <div className="flex items-center justify-end gap-2">
+        {primary && (
+          <Button
+            variant={primary.variant}
+            size="sm"
+            className="h-10 md:h-8"
+            icon={primary.icon}
+            isLoading={primary.isPending}
+            onClick={primary.run}
+          >
+            {primary.label}
+            <span className="sr-only"> — {subject}</span>
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          {status === 'submitted' && (
-            <DropdownMenuItem
-              disabled={startVerification.isPending}
-              onSelect={() => startVerification.mutate(requestId)}
-            >
-              <Send className="mr-2 size-4" aria-hidden="true" />
-              Démarrer la vérification
-            </DropdownMenuItem>
-          )}
+        )}
 
-          {(status === 'under_verification' || status === 'info_requested') && (
-            <>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={`Actions pour ${subject}`}
+            >
+              <MoreHorizontal className="size-4" aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {(status === 'under_verification' ||
+              status === 'info_requested') && (
               <DropdownMenuItem onSelect={() => setInfoOpen(true)}>
                 <Info className="mr-2 size-4" aria-hidden="true" />
-                Demander une information
+                {ACTION_LABELS.requestInfo}
               </DropdownMenuItem>
+            )}
+
+            {status === 'info_requested' && (
               <DropdownMenuItem
                 disabled={validate.isPending}
                 onSelect={() => validate.mutate({ requestId })}
               >
                 <CheckCircle className="mr-2 size-4" aria-hidden="true" />
-                Valider
+                {ACTION_LABELS.validate}
               </DropdownMenuItem>
-            </>
-          )}
+            )}
 
-          {status === 'validated' && (
+            <DropdownMenuSeparator />
             <DropdownMenuItem
-              disabled={deposit.isPending}
-              onSelect={() => deposit.mutate({ requestId })}
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+              onSelect={() => setRejectOpen(true)}
             >
-              <PackageCheck className="mr-2 size-4" aria-hidden="true" />
-              Marquer déposé
+              <XCircle className="mr-2 size-4" aria-hidden="true" />
+              {ACTION_LABELS.reject}
             </DropdownMenuItem>
-          )}
-
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-            onSelect={() => setRejectOpen(true)}
-          >
-            <XCircle className="mr-2 size-4" aria-hidden="true" />
-            Rejeter
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       {/* Request info dialog */}
       <Dialog open={infoOpen} onOpenChange={setInfoOpen}>

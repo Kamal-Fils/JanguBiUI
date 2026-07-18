@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { createDocumentRequest } from '@/testing/data-generators';
@@ -7,17 +7,20 @@ import { renderApp } from '@/testing/test-utils';
 import { AdminDocumentList } from '../admin-document-list';
 
 /**
- * Les actions par ligne vivent dans un menu « ⋯ » — on l'ouvre avant d'asserter.
  * La DataTable rend chaque ligne deux fois (table desktop + carte mobile,
- * départagées par CSS que jsdom n'applique pas) : on ouvre le premier menu.
+ * départagées par du CSS que jsdom n'applique pas) : on cible le premier
+ * rendu, ou la table sémantique quand l'ordre des lignes est en jeu.
  */
 async function openRowActions(name: string) {
   const [trigger] = await screen.findAllByRole('button', { name });
   await userEvent.click(trigger);
 }
 
-describe('AdminDocumentList — actions « ⋯ » par statut (workflow inchangé)', () => {
-  test('une demande soumise propose Démarrer la vérification et Rejeter, pas Valider', async () => {
+const daysAgo = (days: number): string =>
+  new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+describe('AdminDocumentList — action principale visible par statut', () => {
+  test('une demande soumise expose « Démarrer la vérification » en bouton, et « Rejeter » en secondaire', async () => {
     const doc = createDocumentRequest({
       document_type: 'Baptême',
       requester_name: 'Awa Ndiaye',
@@ -26,20 +29,25 @@ describe('AdminDocumentList — actions « ⋯ » par statut (workflow inchangé
 
     renderApp(<AdminDocumentList documents={[doc]} />);
 
+    expect(
+      (
+        await screen.findAllByRole('button', {
+          name: /démarrer la vérification/i,
+        })
+      ).length,
+    ).toBeGreaterThan(0);
+
     await openRowActions('Actions pour Baptême de Awa Ndiaye');
 
     expect(
-      await screen.findByRole('menuitem', { name: /démarrer la vérification/i }),
+      await screen.findByRole('menuitem', { name: /rejeter/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('menuitem', { name: /rejeter/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole('menuitem', { name: /^valider$/i }),
+      screen.queryByRole('menuitem', { name: /démarrer la vérification/i }),
     ).not.toBeInTheDocument();
   });
 
-  test('une demande en vérification propose Demander une information et Valider', async () => {
+  test('une demande en vérification expose « Transmettre au curé », le menu gardant la demande d’info', async () => {
     const doc = createDocumentRequest({
       document_type: 'Confirmation',
       requester_name: 'Moussa Diop',
@@ -47,6 +55,11 @@ describe('AdminDocumentList — actions « ⋯ » par statut (workflow inchangé
     });
 
     renderApp(<AdminDocumentList documents={[doc]} />);
+
+    expect(
+      (await screen.findAllByRole('button', { name: /transmettre au curé/i }))
+        .length,
+    ).toBeGreaterThan(0);
 
     await openRowActions('Actions pour Confirmation de Moussa Diop');
 
@@ -56,11 +69,26 @@ describe('AdminDocumentList — actions « ⋯ » par statut (workflow inchangé
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('menuitem', { name: /^valider$/i }),
-    ).toBeInTheDocument();
-    expect(
       screen.getByRole('menuitem', { name: /rejeter/i }),
     ).toBeInTheDocument();
+  });
+
+  test('une demande en attente du fidèle n’expose aucune action principale', async () => {
+    const doc = createDocumentRequest({
+      document_type: 'Mariage',
+      requester_name: 'Marie Gomis',
+      status: 'info_requested',
+    });
+
+    renderApp(<AdminDocumentList documents={[doc]} />);
+
+    await screen.findAllByText('Mariage');
+    expect(
+      screen.queryAllByRole('button', { name: /démarrer la vérification/i }),
+    ).toHaveLength(0);
+    expect(
+      screen.queryAllByRole('button', { name: /transmettre au curé/i }),
+    ).toHaveLength(0);
   });
 
   test('une demande déposée (statut terminal) ne montre aucun menu d’actions', async () => {
@@ -87,5 +115,80 @@ describe('AdminDocumentList — actions « ⋯ » par statut (workflow inchangé
     expect(
       screen.getByText(/les nouvelles demandes des fidèles/i),
     ).toBeInTheDocument();
+  });
+});
+
+describe('AdminDocumentList — priorisation par SLA', () => {
+  test('ordonne la file du plus ancien au plus récent, les demandes en veille en fin de file', async () => {
+    const documents = [
+      createDocumentRequest({
+        id: 'recent',
+        document_type: 'Parrain',
+        status: 'submitted',
+        created_at: daysAgo(1),
+      }),
+      createDocumentRequest({
+        id: 'dormant',
+        document_type: 'Mariage',
+        status: 'info_requested',
+        created_at: daysAgo(30),
+      }),
+      createDocumentRequest({
+        id: 'late',
+        document_type: 'Confirmation',
+        status: 'submitted',
+        created_at: daysAgo(16),
+      }),
+    ];
+
+    renderApp(<AdminDocumentList documents={documents} />);
+
+    const table = await screen.findByRole('table');
+    const rows = within(table).getAllByRole('row').slice(1); // hors en-tête
+
+    expect(rows[0]).toHaveTextContent('Confirmation');
+    expect(rows[1]).toHaveTextContent('Parrain');
+    expect(rows[2]).toHaveTextContent('Mariage');
+  });
+
+  test('signale le retard des demandes au-delà du seuil d’escalade', async () => {
+    const doc = createDocumentRequest({
+      document_type: 'Confirmation',
+      status: 'submitted',
+      created_at: daysAgo(16),
+    });
+
+    renderApp(<AdminDocumentList documents={[doc]} />);
+
+    const [chip] = await screen.findAllByText('J+16 · en retard');
+    expect(chip).toHaveClass('text-destructive');
+  });
+
+  test('met en veille — sans alerte — une demande qui attend le fidèle', async () => {
+    const doc = createDocumentRequest({
+      document_type: 'Mariage',
+      status: 'info_requested',
+      created_at: daysAgo(30),
+    });
+
+    renderApp(<AdminDocumentList documents={[doc]} />);
+
+    const [chip] = await screen.findAllByText('En attente du fidèle');
+    expect(chip).toHaveClass('text-muted-foreground');
+    expect(screen.queryByText(/en retard/i)).not.toBeInTheDocument();
+  });
+
+  test('affiche la référence officielle de la demande', async () => {
+    const doc = createDocumentRequest({
+      document_type: 'Baptême',
+      status: 'submitted',
+      reference: 'DOC-2026-0301',
+    });
+
+    renderApp(<AdminDocumentList documents={[doc]} />);
+
+    expect(
+      (await screen.findAllByText(/DOC-2026-0301/)).length,
+    ).toBeGreaterThan(0);
   });
 });

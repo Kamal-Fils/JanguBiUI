@@ -34,44 +34,91 @@ import {
   DOCUMENT_STATUS_CONFIG,
   DocumentStatusBadge,
 } from './document-status-badge';
+import { NOMINAL_PATH, TERMINAL_STATUSES, TrackingHero } from './tracking-hero';
 
 interface DocumentDetailProps {
   documentId: string;
 }
 
 /**
- * Chemin nominal du workflow. Les branches (`info_requested`, `rejected`)
- * apparaissent via l'historique immuable renvoyé par le back (status_logs).
+ * Acteur générique de chaque étape franchie. Le backend ne renvoie pas encore
+ * d'acteur dans `status_logs` (cf. PLAN_documents §6.1) : on affiche le **rôle**
+ * déduit du statut, jamais une identité. Ces libellés sont propres à la feature
+ * documents — le composant partagé `StatusTimeline` n'en connaît aucun.
  */
-const NOMINAL_PATH: DocumentStatus[] = [
-  'submitted',
-  'under_verification',
-  'validated',
-  'document_deposited',
-];
+const STEP_ACTOR: Record<DocumentStatus, string> = {
+  submitted: 'Par vous — reçue par votre paroisse',
+  under_verification: 'Par le secrétariat paroissial (niveau 1)',
+  info_requested: 'Demandé par le secrétariat paroissial',
+  validated: 'Par le curé (niveau 2)',
+  document_deposited: 'Par le curé — déposé dans votre coffre-fort',
+  rejected: 'Décision de la paroisse',
+};
 
-/** Statuts terminaux : plus aucune étape à venir dans le suivi. */
-const TERMINAL_STATUSES: DocumentStatus[] = ['document_deposited', 'rejected'];
+/**
+ * Étapes à venir : le fidèle doit comprendre le circuit ecclésial qui reste à
+ * parcourir, pas seulement lire un statut technique.
+ */
+const UPCOMING_STEP: Partial<
+  Record<DocumentStatus, { label: string; actor: string }>
+> = {
+  validated: {
+    label: 'Validation et signature du curé',
+    actor: 'Niveau 2 — signature de l’autorité paroissiale',
+  },
+  document_deposited: {
+    label: 'Dépôt dans votre coffre-fort',
+    actor: 'Document téléchargeable, conservé à vie',
+  },
+};
 
 /**
  * Construit le suivi complet : étapes franchies (historique, la dernière étant
  * la courante) + étapes restantes du chemin nominal en « à venir ». Après un
  * complément demandé, la vérification reprend — libellé dédié pour la
- * distinguer de la première passe.
+ * distinguer de la première passe. `nodeContent` est greffé sur l'étape
+ * courante : la branche `info_requested` se traite à son nœud.
  */
-function buildTimelineSteps(data: DocumentRequestDetail): TimelineStep[] {
+function buildTimelineSteps(
+  data: DocumentRequestDetail,
+  nodeContent?: React.ReactNode,
+): TimelineStep[] {
   const logs = data.status_logs ?? [];
 
   const past: TimelineStep[] =
     logs.length > 0
       ? logs.map((log, idx, arr): TimelineStep => {
           const cfg = DOCUMENT_STATUS_CONFIG[log.to_status];
+          const isCurrent = idx === arr.length - 1;
+          // Une reprise de vérification qui suit une demande d'info a été
+          // déclenchée par la réponse du fidèle : l'acteur, c'est lui.
+          const isResumption =
+            log.to_status === 'under_verification' &&
+            arr[idx - 1]?.to_status === 'info_requested';
+          // Le message de la paroisse est CITÉ au nœud « Infos requises »
+          // (pas relégué en simple description grise).
+          const isRequest = log.to_status === 'info_requested';
+          const quote =
+            isRequest && log.comment ? (
+              <ParishRequestQuote comment={log.comment} />
+            ) : null;
+          const nodeSlot = isCurrent ? nodeContent : null;
           return {
-            label: cfg.label,
+            label: isResumption ? 'Reprise de la vérification' : cfg.label,
             tone: cfg.tone,
-            state: idx === arr.length - 1 ? 'current' : 'done',
+            state: isCurrent ? 'current' : 'done',
             timestamp: formatFrDate(log.created_at, 'datetime'),
-            description: log.comment || undefined,
+            actor: isResumption
+              ? 'Par vous — précisions transmises à la paroisse'
+              : STEP_ACTOR[log.to_status],
+            description: isRequest ? undefined : log.comment || undefined,
+            content:
+              quote || nodeSlot ? (
+                <>
+                  {quote}
+                  {nodeSlot}
+                </>
+              ) : undefined,
           };
         })
       : [
@@ -80,6 +127,8 @@ function buildTimelineSteps(data: DocumentRequestDetail): TimelineStep[] {
             tone: DOCUMENT_STATUS_CONFIG[data.status].tone,
             state: 'current',
             timestamp: formatFrDate(data.created_at, 'datetime'),
+            actor: STEP_ACTOR[data.status],
+            content: nodeContent,
           },
         ];
 
@@ -94,13 +143,15 @@ function buildTimelineSteps(data: DocumentRequestDetail): TimelineStep[] {
   const upcoming: TimelineStep[] = upcomingStatuses.map(
     (status): TimelineStep => {
       const cfg = DOCUMENT_STATUS_CONFIG[status];
+      const narrative = UPCOMING_STEP[status];
       return {
         label:
           data.status === 'info_requested' && status === 'under_verification'
             ? 'Reprise de la vérification'
-            : cfg.label,
+            : (narrative?.label ?? cfg.label),
         tone: cfg.tone,
         state: 'upcoming',
+        actor: narrative?.actor,
       };
     },
   );
@@ -137,6 +188,17 @@ function DocumentDetailSkeleton() {
         <Skeleton className="h-48 w-full rounded-2xl" />
       </div>
     </ContentContainer>
+  );
+}
+
+/** Message de la paroisse, cité au nœud « Infos requises » de la timeline. */
+function ParishRequestQuote({ comment }: { comment: string }) {
+  return (
+    <blockquote className="mt-2 rounded-e-xl border-s-2 border-accent bg-accent/5 px-3 py-2 text-sm italic text-foreground/85">
+      <span aria-hidden="true">« </span>
+      <span>{comment}</span>
+      <span aria-hidden="true"> »</span>
+    </blockquote>
   );
 }
 
@@ -207,6 +269,47 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
 
   if (!data) return null;
 
+  // Réponse au nœud : le formulaire vit sous la citation de la paroisse.
+  const supplementNode =
+    data.status === 'info_requested' ? (
+      <>
+        {submittedSupplement ? (
+          <p
+            className="mt-2 rounded-xl border border-success/30 bg-success/10 px-3 py-2 text-sm text-success"
+            role="status"
+          >
+            Vos informations ont été envoyées à la paroisse.
+          </p>
+        ) : (
+          <form onSubmit={handleSupplementSubmit} className="mt-2">
+            <label htmlFor="supplement-input" className="sr-only">
+              Informations complémentaires demandées
+            </label>
+            <textarea
+              id="supplement-input"
+              value={supplement}
+              onChange={(e) => setSupplement(e.target.value)}
+              rows={3}
+              placeholder="Apportez les précisions demandées…"
+              className="w-full resize-none rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+            <button
+              type="submit"
+              disabled={!supplement.trim() || isSubmitting}
+              className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Send className="size-4" aria-hidden="true" />
+              )}
+              {isSubmitting ? 'Envoi en cours…' : 'Envoyer le complément'}
+            </button>
+          </form>
+        )}
+      </>
+    ) : undefined;
+
   return (
     <ContentContainer>
       <BackToDocumentsLink />
@@ -221,9 +324,9 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
               <h1 className="mt-1.5 font-serif text-2xl font-bold leading-tight tracking-tight text-foreground">
                 {formatDocumentType(data.document_type)}
               </h1>
-              {data.reference_number && (
+              {data.reference && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Réf. {data.reference_number}
+                  Réf. {data.reference}
                 </p>
               )}
             </div>
@@ -232,29 +335,20 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
           <div className="hairline-gold mt-3" aria-hidden="true" />
         </div>
 
-        {data.status === 'rejected' && data.rejection_reason && (
-          <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-destructive">
-              Motif du rejet
-            </p>
-            <p className="mt-1 text-sm text-destructive/80">
-              {data.rejection_reason}
-            </p>
-          </div>
-        )}
+        {/* Héros d'état courant : la réponse à « où en est ma demande ? ». */}
+        <TrackingHero document={data} />
 
-        {data.status === 'document_deposited' && (
-          <div className="rounded-xl border border-success/30 bg-success/10 px-4 py-3">
-            <p className="text-sm font-semibold text-success">
-              Document déposé
-            </p>
-            <p className="mt-1 text-sm text-success/80">
-              Votre document est disponible : téléchargez-le depuis les pièces
-              jointes ci-dessous, ou retrouvez-le à tout moment dans votre
-              coffre-fort numérique.
-            </p>
-          </div>
-        )}
+        {/* Le suivi remonte juste après le héros : c'est le cœur de la page. */}
+        <section aria-label="Historique de la démarche">
+          <h2 className="mb-3 font-serif text-base font-semibold text-foreground">
+            Historique de la démarche
+          </h2>
+          <StatusTimeline
+            aria-label="Historique de la démarche"
+            animateCurrent
+            steps={buildTimelineSteps(data, supplementNode)}
+          />
+        </section>
 
         <Card variant="sacred" className="p-4">
           <CardEyebrow>Date de la demande</CardEyebrow>
@@ -276,55 +370,6 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
             </>
           )}
         </Card>
-
-        {data.status === 'info_requested' && !submittedSupplement && (
-          <form
-            onSubmit={handleSupplementSubmit}
-            className="flex flex-col gap-3 rounded-xl border border-accent/30 bg-accent/5 p-4"
-          >
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                Informations complémentaires demandées
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Votre paroisse demande des précisions pour traiter votre
-                demande.
-              </p>
-            </div>
-            <label htmlFor="supplement-input" className="sr-only">
-              Informations complémentaires
-            </label>
-            <textarea
-              id="supplement-input"
-              value={supplement}
-              onChange={(e) => setSupplement(e.target.value)}
-              rows={4}
-              placeholder="Apportez les précisions demandées…"
-              className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-            <button
-              type="submit"
-              disabled={!supplement.trim() || isSubmitting}
-              className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-            >
-              {isSubmitting ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              ) : (
-                <Send className="size-4" aria-hidden="true" />
-              )}
-              {isSubmitting ? 'Envoi en cours…' : 'Envoyer le complément'}
-            </button>
-          </form>
-        )}
-
-        {submittedSupplement && (
-          <div
-            className="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success"
-            role="status"
-          >
-            Vos informations ont été envoyées à la paroisse.
-          </div>
-        )}
 
         {data.attachments && data.attachments.length > 0 && (
           <section aria-label="Pièces jointes">
@@ -364,16 +409,6 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
             </ul>
           </section>
         )}
-
-        <section aria-label="Suivi de la demande">
-          <h2 className="mb-3 font-serif text-base font-semibold text-foreground">
-            Suivi de la demande
-          </h2>
-          <StatusTimeline
-            aria-label="Suivi de la demande"
-            steps={buildTimelineSteps(data)}
-          />
-        </section>
       </div>
     </ContentContainer>
   );
