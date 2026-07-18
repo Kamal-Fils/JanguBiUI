@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { paths } from '@/config/paths';
 import type { CommunityRosary } from '@/features/chapelet/api/get-community-rosaries';
 import { CommunityRosaryList } from '@/features/chapelet/components/community-rosary-list';
 
@@ -12,6 +13,7 @@ export default function CommunautairePage() {
 
   useRegisterPageMeta({
     title: joined ? 'Chapelet en cours' : 'Chapelet communautaire',
+    backHref: paths.app.chapelet.getHref(),
   });
 
   return (

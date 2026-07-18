@@ -1,10 +1,12 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { Bot, Send, Sparkles } from 'lucide-react';
+import { ArrowLeft, Bot, Send, Sparkles } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
+import { paths } from '@/config/paths';
 import { postRagQuery } from '@/features/assistant/api/post-rag-query';
 import { cn } from '@/lib/utils';
 
@@ -88,6 +90,15 @@ export function AssistantChat() {
       {/* En-tête */}
       <header className="bg-background-surface/95 sticky top-0 z-40 border-b border-border px-4 py-3 backdrop-blur-md">
         <div className="mx-auto flex max-w-2xl items-center gap-3">
+          {/* Vue plein écran exemptée de l'AppHeader → retour porté par
+              l'en-tête custom, vers le parent logique (hub Spiritualité). */}
+          <Link
+            href={paths.app.spirituel.getHref()}
+            aria-label="Retour"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <ArrowLeft className="size-5" aria-hidden="true" />
+          </Link>
           <div className="flex size-9 items-center justify-center rounded-full bg-primary/10">
             <Bot className="size-5 text-primary" aria-hidden="true" />
           </div>

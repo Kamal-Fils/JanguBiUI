@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
+import { paths } from '@/config/paths';
 import type { OfficeKey } from '@/features/spirituel/api/get-office';
 import { OfficeSelector } from '@/features/spirituel/components/liturgie-heures/office-selector';
 import { OfficeView } from '@/features/spirituel/components/liturgie-heures/office-view';
@@ -26,6 +27,7 @@ export default function LiturgieHeuresPage() {
   useRegisterPageMeta({
     title: 'Liturgie des Heures',
     subtitle: 'Les 7 offices de la prière quotidienne',
+    backHref: paths.app.spirituel.getHref(),
   });
 
   return (

@@ -3,13 +3,14 @@
 import { useNotificationsSocket } from '@/hooks/use-notifications-socket';
 import { useMessagingStore } from '@/stores/messaging-store';
 
+import { AppFooter } from './app-footer';
 import { AppHeader } from './app-header';
+import { AppSidebar } from './app-sidebar';
 import { AppTopBar } from './app-top-bar';
 import { BottomNav } from './bottom-nav';
 import { NotificationBell } from './notification-bell';
 import { OnboardingGuard } from './onboarding-guard';
 import { PageMetaProvider, usePageMetaValue } from './page-meta';
-import { SpiritualiteSubNav } from './spiritualite-subnav';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -26,11 +27,11 @@ export function AppShell({ children }: AppShellProps) {
 }
 
 /**
- * Shell de l'app — refonte V3 « header » : la navigation desktop vit dans une
- * barre supérieure persistante (AppTopBar) au lieu d'une sidebar. Le bloc
- * sticky empile : barre de marque/nav (md+) → rangée contextuelle titre/retour/
- * fil d'Ariane (AppHeader, pages avec meta) → sous-nav Spiritualité (section
- * spirituelle). Mobile : BottomNav + tiroir « Plus » restent la nav principale.
+ * Shell de l'app — refonte V4-1 « layout classique » : header sticky en haut
+ * (marque + actions, sans nav horizontale), puis sur desktop (`lg+`) une barre
+ * latérale (AppSidebar — navigations + sous-navigations, rétractable) à gauche
+ * d'une colonne contenu (AppHeader contextuel + main + AppFooter). Mobile
+ * (<lg) : BottomNav + tiroir « Plus » (mêmes sections que la sidebar).
  */
 function AppShellLayout({ children }: AppShellProps) {
   const totalUnread = useMessagingStore((s) => s.totalUnread);
@@ -43,11 +44,19 @@ function AppShellLayout({ children }: AppShellProps) {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       <div className="sticky top-0 z-40">
-        <AppTopBar messageBadge={totalUnread} />
-        <AppHeader />
-        <SpiritualiteSubNav />
+        <AppTopBar />
       </div>
-      <main className="flex-1 pb-20 md:pb-0">{children}</main>
+      <div className="flex flex-1">
+        <AppSidebar />
+        {/* Colonne contenu — le dégagement bas (<lg) évite la bottom-nav fixe. */}
+        <div className="flex min-w-0 flex-1 flex-col pb-20 lg:pb-0">
+          <div className="sticky top-0 z-30 md:top-16">
+            <AppHeader />
+          </div>
+          <main className="flex-1">{children}</main>
+          <AppFooter />
+        </div>
+      </div>
       <BottomNav messageBadge={totalUnread} />
       {/* Cloche flottante mobile — uniquement pour les pages plein écran sans
           meta (chat, assistant…) : les autres l'affichent dans l'app-bar. */}

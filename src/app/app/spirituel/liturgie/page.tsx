@@ -12,7 +12,10 @@ import {
   CardTitle,
 } from '@/components/ui/card/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { paths } from '@/config/paths';
 import { api } from '@/lib/api-client';
+import { useUser } from '@/lib/auth';
+import { isClergy } from '@/lib/authorization';
 
 interface LiturgicalInfo {
   id: number;
@@ -151,6 +154,12 @@ function OfficeCard({
 }
 
 export default function LiturgiePage() {
+  // Laudes/Vêpres sont réservées au clergé/religieux côté backend
+  // (CanAccessLiturgyOfHours) : ne pas les requêter pour un fidèle, sinon
+  // l'intercepteur api-client affiche un toast 403 à chaque visite.
+  const { data: user } = useUser();
+  const canAccessHours = isClergy(user);
+
   const { data: info, isLoading: loadingInfo } = useQuery({
     queryKey: ['liturgy', 'info'],
     queryFn: fetchInfo,
@@ -167,18 +176,24 @@ export default function LiturgiePage() {
     queryKey: ['liturgy', 'laudes'],
     queryFn: fetchLaudes,
     retry: false,
+    enabled: canAccessHours,
   });
 
   const { data: vepres, isLoading: loadingVepres } = useQuery({
     queryKey: ['liturgy', 'vepres'],
     queryFn: fetchVepres,
     retry: false,
+    enabled: canAccessHours,
   });
 
   const isLoading =
     loadingInfo || loadingReadings || loadingLaudes || loadingVepres;
 
-  useRegisterPageMeta({ title: 'Liturgie du jour', showHeading: false });
+  useRegisterPageMeta({
+    title: 'Liturgie du jour',
+    showHeading: false,
+    backHref: paths.app.spirituel.getHref(),
+  });
 
   return (
     <div className="flex flex-col">

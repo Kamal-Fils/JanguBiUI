@@ -28,6 +28,11 @@ export function AppHeader() {
   const trail = buildBreadcrumbs(pathname, meta.leafLabel ?? meta.title);
   const isDeep = trail.length > 1;
   const showHeading = meta.showHeading !== false;
+  // Retour mobile : affiché sur les routes profondes (fil d'Ariane) OU dès
+  // qu'une page déclare son parent logique via `backHref`. `backHref` prime
+  // sur l'historique — prévisible même en arrivée par lien profond.
+  const backHref = meta.backHref;
+  const showBack = isDeep || Boolean(backHref);
 
   return (
     // Le sticky est porté par le conteneur d'en-têtes du shell (AppShellLayout)
@@ -59,10 +64,10 @@ export function AppHeader() {
 
       {/* Mobile — app-bar : retour (routes profondes) + titre (+ sous-titre) + cloche. */}
       <div className="flex items-center gap-2 px-3 py-2.5 md:hidden">
-        {isDeep && (
+        {showBack && (
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => (backHref ? router.push(backHref) : router.back())}
             aria-label="Retour"
             className="flex size-9 shrink-0 items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
