@@ -23,5 +23,6 @@ export const getParishIntentionsQueryOptions = () =>
     queryFn: getParishIntentions,
   });
 
-export const useParishIntentions = () =>
-  useQuery(getParishIntentionsQueryOptions());
+/** `enabled` : ne déclenche le fetch qu'une fois l'accès clergé confirmé. */
+export const useParishIntentions = (enabled = true) =>
+  useQuery({ ...getParishIntentionsQueryOptions(), enabled });

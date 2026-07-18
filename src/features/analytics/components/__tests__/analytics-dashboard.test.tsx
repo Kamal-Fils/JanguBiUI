@@ -83,10 +83,11 @@ describe('AnalyticsDashboard', () => {
     expect(screen.getByText('1/4')).toBeInTheDocument(); // paroisses actives
     expect(screen.getByText('+50%')).toBeInTheDocument(); // delta période
 
-    // Incrément 2 : matrice d'activité + files en souffrance.
+    // Incrément 2 : matrice d'activité + files en souffrance. Le libellé
+    // apparaît deux fois (titre h3 + caption sr-only de la DataTable).
     expect(
-      await screen.findByText(/Matrice d.activité par paroisse/),
-    ).toBeInTheDocument();
+      (await screen.findAllByText(/Matrice d.activité par paroisse/)).length,
+    ).toBeGreaterThan(0);
     expect(screen.getByText('Documents en attente')).toBeInTheDocument();
     expect(
       screen.getByText('Intentions de messe en attente'),
@@ -104,6 +105,23 @@ describe('AnalyticsDashboard', () => {
 
     expect(
       await screen.findByText('Analytique indisponible'),
+    ).toBeInTheDocument();
+  });
+
+  test('erreur technique (500) → ErrorState avec bouton réessayer', async () => {
+    server.use(
+      http.get(ANALYTICS_URL, () =>
+        HttpResponse.json({ detail: 'boom' }, { status: 500 }),
+      ),
+    );
+
+    renderApp(<AnalyticsDashboard />);
+
+    expect(
+      await screen.findByText("Impossible de charger l'analytique"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /réessayer/i }),
     ).toBeInTheDocument();
   });
 });

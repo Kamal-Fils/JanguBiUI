@@ -4,9 +4,13 @@ import { api } from '@/lib/api-client';
 
 import { PastoralReflection, pastoralReflectionSchema } from '../types';
 
-export type SaveReflectionInput = { content: string; existingId?: number };
+// `existingId` est l'UUID (string) renvoyé par le backend — cf. types/index.ts.
+export type SaveReflectionInput = { content: string; existingId?: string };
 
-const saveReflection = ({ content, existingId }: SaveReflectionInput): Promise<PastoralReflection> => {
+const saveReflection = ({
+  content,
+  existingId,
+}: SaveReflectionInput): Promise<PastoralReflection> => {
   const payload = { content };
   const request = existingId
     ? api.patch<unknown>(`/v1/spiritual/reflections/${existingId}/`, payload)
@@ -14,7 +18,9 @@ const saveReflection = ({ content, existingId }: SaveReflectionInput): Promise<P
   return request.then((res) => pastoralReflectionSchema.parse(res));
 };
 
-export const useSaveReflection = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
+export const useSaveReflection = ({
+  onSuccess,
+}: { onSuccess?: () => void } = {}) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: saveReflection,
