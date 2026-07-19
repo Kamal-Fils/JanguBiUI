@@ -31,7 +31,7 @@ interface EventDetailProps {
 
 function EventDetailSkeleton() {
   return (
-    <ContentContainer width="reading">
+    <ContentContainer>
       <Skeleton className="mb-4 h-4 w-24" />
       <Card variant="elevated" className="space-y-4 p-5">
         <Skeleton className="h-6 w-3/4" />
@@ -60,7 +60,7 @@ export function EventDetail({ eventId }: EventDetailProps) {
 
   if (isError || !event) {
     return (
-      <ContentContainer width="reading">
+      <ContentContainer>
         <ErrorState
           title="Événement introuvable"
           description="Cet événement n'existe plus ou n'a pas pu être chargé pour le moment."
@@ -100,7 +100,7 @@ export function EventDetail({ eventId }: EventDetailProps) {
   }
 
   return (
-    <ContentContainer width="reading">
+    <ContentContainer>
       <Link
         href={paths.app.agenda.getHref()}
         className="mb-4 inline-flex items-center gap-1.5 rounded-md text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -162,7 +162,9 @@ export function EventDetail({ eventId }: EventDetailProps) {
         </div>
 
         {event.description ? (
-          <p className="mb-6 whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-foreground/90">
+          // La mesure de lecture se pose ICI, sur le texte : le cadre de page
+          // reste à la largeur standard de l'app (cf. ContentContainer).
+          <p className="mb-6 max-w-reading whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-foreground/90">
             {event.description}
           </p>
         ) : (

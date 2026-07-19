@@ -2,17 +2,12 @@
 
 import * as React from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { RoleGuard } from '@/components/layouts/role-guard';
 import type { User } from '@/lib/auth';
-import { cn } from '@/utils/cn';
 
-const widthClass = {
-  md: 'max-w-2xl',
-  lg: 'max-w-4xl',
-  xl: 'max-w-5xl',
-  full: 'max-w-7xl',
-};
+type ContentWidth = React.ComponentProps<typeof ContentContainer>['width'];
 
 interface AdminPageLayoutProps {
   title: string;
@@ -24,7 +19,12 @@ interface AdminPageLayoutProps {
   headerAction?: React.ReactNode;
   /** Barre de filtres / outils. Rendue dans le toolbar en tête de contenu. */
   toolbar?: React.ReactNode;
-  width?: keyof typeof widthClass;
+  /**
+   * Largeur du CADRE de page — mêmes recettes que `ContentContainer`. Défaut :
+   * `default`, comme tout écran de l'app. Une colonne de saisie plus étroite se
+   * contraint À L'INTÉRIEUR (ex. `max-w-2xl` sur le formulaire), pas ici.
+   */
+  width?: ContentWidth;
   children: React.ReactNode;
 }
 
@@ -33,6 +33,10 @@ interface AdminPageLayoutProps {
  * `usePageMeta` (en-tête AppHeader : fil d'Ariane + titre). `headerAction` et
  * `toolbar` sont rendus DANS le contenu, en tête. Le shell applicatif (sidebar
  * + bottom-nav) vient de `app/app/layout.tsx`.
+ *
+ * La largeur délègue à `ContentContainer` : une seule recette de cadre pour
+ * TOUTE l'app, admin comprise (avant, cette coquille avait sa propre échelle
+ * md/lg/xl/full et les pages admin ne s'alignaient sur aucun autre écran).
  */
 export function AdminPageLayout({
   title,
@@ -41,13 +45,13 @@ export function AdminPageLayout({
   redirectTo,
   headerAction,
   toolbar,
-  width = 'xl',
+  width = 'default',
   children,
 }: AdminPageLayoutProps) {
   useRegisterPageMeta({ title, subtitle });
 
   const body = (
-    <div className={cn('mx-auto w-full px-4 py-6', widthClass[width])}>
+    <ContentContainer width={width}>
       {(toolbar || headerAction) && (
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {toolbar ? (
@@ -59,7 +63,7 @@ export function AdminPageLayout({
         </div>
       )}
       {children}
-    </div>
+    </ContentContainer>
   );
 
   if (allow) {

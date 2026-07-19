@@ -3,6 +3,7 @@
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import {
   useRosaryGroups,
@@ -51,20 +52,20 @@ export function ChapeletContent() {
   if (isGuideActive) {
     return (
       <div className="flex flex-col">
-        <div className="mx-auto w-full max-w-3xl p-4">
+        <ContentContainer>
           <ChapeletGuide
             group={activeGroup}
             todayRosary={todayRosary}
             onBack={() => setIsGuideActive(false)}
           />
-        </div>
+        </ContentContainer>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-3xl p-4">
+      <ContentContainer>
         <MysterySelector
           todayGroup={todayRosary.day.group}
           groups={groups}
@@ -72,7 +73,7 @@ export function ChapeletContent() {
           onSelectGroup={setSelectedGroup}
           onStartGuide={() => setIsGuideActive(true)}
         />
-      </div>
+      </ContentContainer>
     </div>
   );
 }

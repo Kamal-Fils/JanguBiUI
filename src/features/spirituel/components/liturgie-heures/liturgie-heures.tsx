@@ -61,14 +61,17 @@ export function LiturgieHeures() {
 
   if (loadingUser || infoQuery.isLoading) {
     return (
-      <ContentContainer width="reading" className="pb-20">
+      <ContentContainer className="pb-20">
         <LiturgieSkeleton />
       </ContentContainer>
     );
   }
 
   return (
-    <ContentContainer width="reading" className="pb-20">
+    // Cadre standard : la mesure ~68ch est portée par `ReadingSurface` dans
+    // `OfficeSections`, pas par le cadre (sinon le sélecteur d'office et
+    // l'en-tête liturgique se retrouvaient tassés au centre de l'écran).
+    <ContentContainer className="pb-20">
       <LiturgicalHeader
         title="Liturgie des Heures"
         season={infoQuery.data?.season}

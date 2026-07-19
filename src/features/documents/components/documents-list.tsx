@@ -91,7 +91,7 @@ function TrackCard({ doc }: { doc: DocumentRequest }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-serif text-[15px] font-bold text-foreground transition-colors group-hover:text-primary">
-            {formatDocumentType(doc.document_type)}
+            {formatDocumentType(doc.document_type, doc.document_type_free)}
           </p>
           {context && (
             <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -121,7 +121,7 @@ function DoneRow({ doc }: { doc: DocumentRequest }) {
       >
         <DocumentStatusBadge status={doc.status} />
         <span className="min-w-0 flex-1 truncate text-sm text-foreground">
-          {formatDocumentType(doc.document_type)}
+          {formatDocumentType(doc.document_type, doc.document_type_free)}
         </span>
         <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
           {formatFrDate(doc.updated_at ?? doc.created_at, 'short')}

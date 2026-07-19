@@ -41,7 +41,8 @@ export default function AdminDocumentsPage() {
   // Les demandes prêtes à signer ont leur propre requête : le panneau reste
   // complet même quand la file est paginée, et l'acte du curé n'est jamais
   // relégué en page 2.
-  const showSignaturePanel = statusFilter === '' || statusFilter === 'validated';
+  const showSignaturePanel =
+    statusFilter === '' || statusFilter === 'validated';
   const { data: signatureData } = useAdminDocuments(
     showSignaturePanel ? { status: 'validated', limit: 50 } : undefined,
   );
@@ -73,9 +74,6 @@ export default function AdminDocumentsPage() {
       title="Demandes de documents"
       subtitle="File de traitement paroissiale, priorisée par délai"
       allow={canProcessDocuments}
-      // Écran de travail : on prend la largeur disponible pour tenir plus de
-      // demandes à l'écran, pas une mesure de lecture confortable.
-      width="xl"
       toolbar={
         <QueueCounters
           value={statusFilter}

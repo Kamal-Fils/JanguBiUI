@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Card, CardContent } from '@/components/ui/card/card';
 import { ScriptureQuote } from '@/components/ui/scripture-quote';
@@ -62,7 +63,7 @@ export function BibleContent() {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-3xl px-4 py-6">
+      <ContentContainer>
         {/* Citation d'ouverture éditoriale — pose le ton « Revue Sacrée ». */}
         <ScriptureQuote
           eyebrow="Parole de Dieu"
@@ -75,7 +76,7 @@ export function BibleContent() {
         {activeTab === 'bible' && <BibleBooksTab />}
         {activeTab === 'lectio' && <LectioView />}
         {activeTab === 'parcours' && <ReadingPlanList />}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

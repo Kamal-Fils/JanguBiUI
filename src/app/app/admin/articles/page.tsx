@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button/button';
 import { Card, CardContent, CardEyebrow } from '@/components/ui/card/card';
@@ -44,39 +45,39 @@ export default function AdminArticlesPage() {
     <div className="flex flex-col">
       <PageHeader
         title="Gestion des articles"
-          subtitle="Créer, modifier et publier des articles"
-          action={
-            <Link href={paths.app.admin.articleNew.getHref()}>
-              <Button size="sm" variant="gold">
-                <PlusCircle className="mr-2 size-4" />
-                Nouvel article
-              </Button>
-            </Link>
-          }
-        />
-        <div className="mx-auto w-full max-w-5xl px-4 py-6 md:px-6">
-          <div className="mb-5">
-            <FilterPills
-              options={STATUS_FILTERS.map((f) => ({
-                value: f.value,
-                label: f.label,
-              }))}
-              value={statusFilter}
-              onChange={(v) => setStatusFilter(v as ArticleStatus | '')}
-              ariaLabel="Filtrer par statut"
-            />
-          </div>
-
-          <Card variant="feature">
-            <CardContent className="p-4 sm:p-5">
-              <CardEyebrow className="mb-3">Publications</CardEyebrow>
-              <AdminArticleList
-                articles={data?.results ?? []}
-                isLoading={articlesLoading}
-              />
-            </CardContent>
-          </Card>
+        subtitle="Créer, modifier et publier des articles"
+        action={
+          <Link href={paths.app.admin.articleNew.getHref()}>
+            <Button size="sm" variant="gold">
+              <PlusCircle className="mr-2 size-4" />
+              Nouvel article
+            </Button>
+          </Link>
+        }
+      />
+      <ContentContainer>
+        <div className="mb-5">
+          <FilterPills
+            options={STATUS_FILTERS.map((f) => ({
+              value: f.value,
+              label: f.label,
+            }))}
+            value={statusFilter}
+            onChange={(v) => setStatusFilter(v as ArticleStatus | '')}
+            ariaLabel="Filtrer par statut"
+          />
         </div>
+
+        <Card variant="feature">
+          <CardContent className="p-4 sm:p-5">
+            <CardEyebrow className="mb-3">Publications</CardEyebrow>
+            <AdminArticleList
+              articles={data?.results ?? []}
+              isLoading={articlesLoading}
+            />
+          </CardContent>
+        </Card>
+      </ContentContainer>
     </div>
   );
 }

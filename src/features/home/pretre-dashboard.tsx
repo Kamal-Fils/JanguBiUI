@@ -1,6 +1,12 @@
 'use client';
 
-import { BookOpen, CheckCircle, Clock, MessageSquare, ScrollText } from 'lucide-react';
+import {
+  BookOpen,
+  CheckCircle,
+  Clock,
+  MessageSquare,
+  ScrollText,
+} from 'lucide-react';
 import Link from 'next/link';
 
 import { ContentContainer } from '@/components/layouts/content-container';
@@ -68,7 +74,10 @@ function PretreHero() {
         <h1 className="mt-1 truncate font-serif text-display font-black italic leading-[0.95] text-primary-foreground">
           {firstName || 'Bienvenue'}
         </h1>
-        <div className="mt-4 h-px w-16 rounded-full bg-gold/70" aria-hidden="true" />
+        <div
+          className="mt-4 h-px w-16 rounded-full bg-gold/70"
+          aria-hidden="true"
+        />
         <p className="mt-3 text-sm capitalize text-primary-foreground/85">
           {dateStr}
         </p>
@@ -115,7 +124,12 @@ interface StatsRowProps {
   loadingMessages: boolean;
 }
 
-function StatsRow({ pendingCount, unreadCount, loadingIntentions, loadingMessages }: StatsRowProps) {
+function StatsRow({
+  pendingCount,
+  unreadCount,
+  loadingIntentions,
+  loadingMessages,
+}: StatsRowProps) {
   const stats = [
     {
       label: 'En attente',
@@ -171,7 +185,9 @@ function PendingIntentionCard({ intention }: { intention: MassIntention }) {
     <Card variant="sacred" className="space-y-3 p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-foreground line-clamp-2">{intention.intention_text}</p>
+          <p className="text-sm text-foreground line-clamp-2">
+            {intention.intention_text}
+          </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {intention.requestor_email}
           </p>
@@ -191,7 +207,8 @@ function PendingIntentionCard({ intention }: { intention: MassIntention }) {
             Accepter
           </button>
         )}
-        {(intention.status === 'accepted' || intention.status === 'date_proposed') && (
+        {(intention.status === 'accepted' ||
+          intention.status === 'date_proposed') && (
           <button
             type="button"
             onClick={() => celebrate(intention.id)}
@@ -220,9 +237,15 @@ interface PendingIntentionsSectionProps {
   isLoading: boolean;
 }
 
-function PendingIntentionsSection({ intentions, isLoading }: PendingIntentionsSectionProps) {
+function PendingIntentionsSection({
+  intentions,
+  isLoading,
+}: PendingIntentionsSectionProps) {
   const actionable = intentions.filter(
-    (i) => i.status === 'pending' || i.status === 'accepted' || i.status === 'date_proposed',
+    (i) =>
+      i.status === 'pending' ||
+      i.status === 'accepted' ||
+      i.status === 'date_proposed',
   );
   const preview = actionable.slice(0, 3);
 
@@ -276,7 +299,10 @@ interface RecentMessagesSectionProps {
   isLoading: boolean;
 }
 
-function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionProps) {
+function RecentMessagesSection({
+  messages,
+  isLoading,
+}: RecentMessagesSectionProps) {
   const recent = messages.slice(0, 2);
 
   return (
@@ -320,7 +346,9 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
                 <span className="size-2 shrink-0 rounded-full bg-info" />
               )}
             </div>
-            <p className="text-xs text-muted-foreground">{message.sender_email}</p>
+            <p className="text-xs text-muted-foreground">
+              {message.sender_email}
+            </p>
           </Link>
         ))}
       </div>
@@ -331,7 +359,8 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
 // ── Main component ───────────────────────────────────────────────────────────
 
 export function PretreeDashboard() {
-  const { data: intentionsData, isLoading: loadingIntentions } = useParishIntentions();
+  const { data: intentionsData, isLoading: loadingIntentions } =
+    useParishIntentions();
   const { data: inboxData, isLoading: loadingMessages } = useClericalInbox();
 
   const intentions = intentionsData?.results ?? [];
@@ -340,7 +369,7 @@ export function PretreeDashboard() {
   const unreadCount = messages.filter((m) => !m.read_at).length;
 
   return (
-    <ContentContainer width="wide">
+    <ContentContainer>
       <div className="flex flex-col gap-8">
         <PretreHero />
 
@@ -375,11 +404,17 @@ export function PretreeDashboard() {
         <div className="hairline-gold" aria-hidden="true" />
 
         <PastoralReflectionComposer />
-        <PendingIntentionsSection intentions={intentions} isLoading={loadingIntentions} />
+        <PendingIntentionsSection
+          intentions={intentions}
+          isLoading={loadingIntentions}
+        />
 
         <div className="hairline-gold" aria-hidden="true" />
 
-        <RecentMessagesSection messages={messages} isLoading={loadingMessages} />
+        <RecentMessagesSection
+          messages={messages}
+          isLoading={loadingMessages}
+        />
       </div>
     </ContentContainer>
   );

@@ -3,6 +3,7 @@
 import { BookOpen, ChevronRight, Clock, Flame, Tv2 } from 'lucide-react';
 import Link from 'next/link';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import {
   Card,
@@ -199,7 +200,7 @@ export function SpirituelContent() {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-2xl px-4 py-8 md:max-w-3xl md:px-6 md:py-10 lg:max-w-5xl lg:px-8">
+      <ContentContainer className="py-8 md:py-10">
         {/* Citation d'ouverture — pose le ton éditorial du hub. */}
         <ScriptureQuote
           eyebrow="Méditation"
@@ -233,7 +234,7 @@ export function SpirituelContent() {
             );
           })}
         </div>
-      </div>
+      </ContentContainer>
     </div>
   );
 }

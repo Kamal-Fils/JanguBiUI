@@ -34,7 +34,7 @@ export default function TransfertPage() {
 
   return (
     <div className="flex flex-col">
-      <ContentContainer width="narrow">
+      <ContentContainer>
         <div className="mb-4">
           <Link
             href={paths.app.profil.getHref()}
@@ -53,7 +53,8 @@ export default function TransfertPage() {
             onRetry={() => refetch()}
           />
         ) : transfer ? (
-          <div className="space-y-6">
+          // Cadre de page standard ; la colonne de saisie reste étroite.
+          <div className="max-w-2xl space-y-6">
             <TransferStatusCard transfer={transfer} />
             {transfer.status === 'rejected' && (
               <section aria-label="Soumettre une nouvelle demande">
@@ -66,7 +67,7 @@ export default function TransfertPage() {
             )}
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="max-w-2xl space-y-6">
             <EmptyState
               icon={<ArrowRightLeft aria-hidden="true" />}
               title="Aucune demande en cours"
