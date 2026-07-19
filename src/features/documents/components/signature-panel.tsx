@@ -65,7 +65,7 @@ function SignatureItem({ document: doc }: SignatureItemProps) {
           </p>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <SlaChip status={doc.status} createdAt={doc.created_at} />
+            <SlaChip document={doc} />
             <div className="ml-auto">
               <DocumentStatusActions
                 requestId={doc.id}

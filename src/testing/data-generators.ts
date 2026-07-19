@@ -103,6 +103,11 @@ export const createDocumentRequest = (
   id: randUuid(),
   // Généré à la soumission côté backend (unique) et renvoyé dès la liste.
   reference: `DOC-${randNumber({ min: 10000, max: 99999 })}`,
+  // Délais calculés par le serveur (jours depuis la dernière action + seuil du statut).
+  sla_days: 1,
+  sla_threshold_days: 7,
+  is_escalated: false,
+  final_document_url: null,
   document_type:
     DOCUMENT_TYPES[randNumber({ min: 0, max: DOCUMENT_TYPES.length - 1 })],
   status: 'submitted',

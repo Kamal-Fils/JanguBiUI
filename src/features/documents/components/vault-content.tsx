@@ -1,6 +1,5 @@
 'use client';
 
-import { useQueries } from '@tanstack/react-query';
 import { Archive, Lock, Plus } from 'lucide-react';
 import Link from 'next/link';
 
@@ -9,9 +8,7 @@ import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 
-import { getDocumentRequestQueryOptions } from '../api/get-document';
 import { useDocumentRequests } from '../api/get-documents';
-import { DocumentRequestDetail } from '../types';
 
 import { VaultCard } from './vault-card';
 
@@ -36,44 +33,19 @@ function VaultSkeleton() {
 }
 
 /**
- * Pièce téléchargeable : le document final déposé par la paroisse en priorité,
- * à défaut la dernière pièce jointe disponible.
- *
- * NOTE : duplique volontairement le helper de `tracking-hero.tsx`. La
- * factorisation dans `utils/` demandera de toucher ce fichier, livré par une
- * autre phase — à faire quand les deux chantiers seront fusionnés.
- */
-function getFinalAttachmentUrl(
-  data: DocumentRequestDetail | undefined,
-): string | undefined {
-  const downloadable = (data?.attachments ?? []).filter((att) => att.file_url);
-  if (downloadable.length === 0) return undefined;
-  const final = downloadable.find((att) =>
-    att.attachment_type.includes('final'),
-  );
-  return (final ?? downloadable[downloadable.length - 1]).file_url ?? undefined;
-}
-
-/**
  * Coffre-fort numérique : uniquement les demandes abouties
  * (status=document_deposited), rendues en cartes-certificats.
  *
- * L'endpoint liste ne porte pas les pièces jointes : le fichier final est
- * résolu par demande via le détail (même clé de cache que la page de suivi, si
- * bien que « Voir la démarche » devient instantané). Tant qu'une résolution est
- * en cours ou qu'aucun fichier n'est exposé, la carte reste un accès valide au
- * détail — aucun bouton mort. Exposer l'URL du fichier dans la liste
- * (PLAN_documents §6.4) supprimerait ces appels.
+ * L'URL du document final est portée par la liste (`final_document_url`) : le
+ * coffre-fort n'a plus besoin de charger le détail de chaque certificat. Si le
+ * champ est absent (backend pas encore déployé), la carte reste un accès valide
+ * au détail — aucun bouton mort.
  */
 export function VaultContent() {
   const { data, isLoading, isError, refetch } = useDocumentRequests({
     status: 'document_deposited',
   });
   const documents = data?.results ?? [];
-
-  const detailQueries = useQueries({
-    queries: documents.map((doc) => getDocumentRequestQueryOptions(doc.id)),
-  });
 
   const showList = !isLoading && !isError && documents.length > 0;
 
@@ -135,17 +107,13 @@ export function VaultContent() {
 
       {showList && (
         <div className="flex flex-col gap-3">
-          {documents.map((doc, index) => {
-            const detail = detailQueries[index];
-            return (
-              <VaultCard
-                key={doc.id}
-                document={doc}
-                downloadUrl={getFinalAttachmentUrl(detail?.data)}
-                isResolvingDownload={detail?.isPending ?? false}
-              />
-            );
-          })}
+          {documents.map((doc) => (
+            <VaultCard
+              key={doc.id}
+              document={doc}
+              downloadUrl={doc.final_document_url ?? undefined}
+            />
+          ))}
         </div>
       )}
     </section>

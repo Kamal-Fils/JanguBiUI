@@ -3,70 +3,69 @@ import {
   Archive,
   CheckCircle2,
   Clock,
+  HelpCircle,
   PauseCircle,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { cn } from '@/utils/cn';
 
-import { DocumentRequest, DocumentStatus } from '../types';
+import { DocumentRequest } from '../types';
 
 import { TERMINAL_STATUSES } from './tracking-hero';
 
 /**
- * Seuil d'escalade des demandes, aligné sur le réglage backend
- * `DOCS_ESCALATE_DAYS` (défaut **7 jours**, `config/django/base.py`) : au-delà,
- * la tâche Celery quotidienne (08:00 UTC) escalade la demande.
+ * Le délai est une donnée **serveur** (`apps/documents/sla.py`) : l'ancienneté
+ * se mesure depuis la dernière action (`updated_at`) et le seuil dépend du
+ * statut — 7 jours pour une demande à prendre en charge ou en vérification,
+ * 3 pour une demande validée en attente de dépôt, 5 pour une demande d'info.
  *
- * ⚠️ L'API ne renvoie NI `age_days` NI de flag d'escalade dans la liste
- * (cf. PLAN_documents §6.2) : l'âge est donc recalculé côté client depuis
- * `created_at`. **À re-synchroniser si le réglage Django change** — le jour où
- * le backend expose le seuil, cette constante doit céder la place à sa valeur.
+ * Le client ne recalcule donc plus rien : la version précédente mesurait
+ * l'ancienneté depuis la création avec un seuil unique de 7 jours et affichait
+ * « en retard » des demandes que le backend n'escalade pas.
  */
-export const SLA_ESCALATE_DAYS = 7;
-
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-/** Âge de la demande en jours pleins (J+0 = reçue aujourd'hui). */
-export function getDocumentAgeDays(
-  createdAt: string,
-  now: Date = new Date(),
-): number {
-  const created = new Date(createdAt);
-  if (Number.isNaN(created.getTime())) return 0;
-  return Math.max(
-    0,
-    Math.floor((now.getTime() - created.getTime()) / MS_PER_DAY),
-  );
-}
 
 /**
- * - `late` : seuil d'escalade atteint — le backend a relancé.
+ * - `late` : seuil atteint — le backend a relancé.
  * - `due` : à la veille du seuil.
  * - `ok` : dans les temps.
  * - `dormant` : `info_requested` — la balle est dans le camp du fidèle, donc
- *   **aucune alerte SLA** : la paroisse n'a rien à se reprocher.
+ *   aucune alerte : la paroisse n'a rien à se reprocher.
  * - `closed` : demande terminale, hors file.
+ * - `unknown` : le serveur n'a pas fourni de délai (backend pas encore
+ *   déployé) — état neutre, jamais d'alerte inventée.
  */
-export type SlaKind = 'late' | 'due' | 'ok' | 'dormant' | 'closed';
+export type SlaKind = 'late' | 'due' | 'ok' | 'dormant' | 'closed' | 'unknown';
 
 export interface SlaState {
   kind: SlaKind;
-  ageDays: number;
+  /** Jours depuis la dernière action, tels que calculés par le serveur. */
+  ageDays: number | null;
+  thresholdDays: number | null;
 }
 
-type SlaInput = Pick<DocumentRequest, 'status' | 'created_at'>;
+type SlaInput = Pick<
+  DocumentRequest,
+  'status' | 'sla_days' | 'sla_threshold_days' | 'is_escalated'
+>;
 
-export function getSlaState(document: SlaInput, now?: Date): SlaState {
-  const ageDays = getDocumentAgeDays(document.created_at, now);
+export function getSlaState(document: SlaInput): SlaState {
+  const ageDays = document.sla_days ?? null;
+  const thresholdDays = document.sla_threshold_days ?? null;
 
   if (TERMINAL_STATUSES.includes(document.status))
-    return { kind: 'closed', ageDays };
+    return { kind: 'closed', ageDays, thresholdDays };
   // En attente du fidèle : mise en veille, jamais d'alerte.
-  if (document.status === 'info_requested') return { kind: 'dormant', ageDays };
-  if (ageDays >= SLA_ESCALATE_DAYS) return { kind: 'late', ageDays };
-  if (ageDays >= SLA_ESCALATE_DAYS - 1) return { kind: 'due', ageDays };
-  return { kind: 'ok', ageDays };
+  if (document.status === 'info_requested')
+    return { kind: 'dormant', ageDays, thresholdDays };
+  // Repli : sans donnée serveur, on n'invente pas de seuil.
+  if (ageDays === null || thresholdDays === null)
+    return { kind: 'unknown', ageDays, thresholdDays };
+  if (document.is_escalated || ageDays >= thresholdDays)
+    return { kind: 'late', ageDays, thresholdDays };
+  if (ageDays >= thresholdDays - 1)
+    return { kind: 'due', ageDays, thresholdDays };
+  return { kind: 'ok', ageDays, thresholdDays };
 }
 
 /**
@@ -78,16 +77,17 @@ const QUEUE_RANK: Record<SlaKind, number> = {
   late: 0,
   due: 0,
   ok: 0,
+  unknown: 0,
   dormant: 1,
   closed: 2,
 };
 
-export function compareByUrgency(a: SlaInput, b: SlaInput, now?: Date): number {
-  const stateA = getSlaState(a, now);
-  const stateB = getSlaState(b, now);
+export function compareByUrgency(a: SlaInput, b: SlaInput): number {
+  const stateA = getSlaState(a);
+  const stateB = getSlaState(b);
   const rankDelta = QUEUE_RANK[stateA.kind] - QUEUE_RANK[stateB.kind];
   if (rankDelta !== 0) return rankDelta;
-  return stateB.ageDays - stateA.ageDays;
+  return (stateB.ageDays ?? -1) - (stateA.ageDays ?? -1);
 }
 
 const CHIP_CLASS =
@@ -103,6 +103,7 @@ const CHIP_STYLES: Record<SlaKind, string> = {
   ok: 'bg-success/10 text-success',
   dormant: 'bg-muted text-muted-foreground',
   closed: 'bg-muted text-muted-foreground',
+  unknown: 'bg-muted text-muted-foreground',
 };
 
 const CHIP_ICONS: Record<SlaKind, ReactNode> = {
@@ -111,40 +112,42 @@ const CHIP_ICONS: Record<SlaKind, ReactNode> = {
   ok: <CheckCircle2 />,
   dormant: <PauseCircle />,
   closed: <Archive />,
+  unknown: <HelpCircle />,
 };
 
-function getChipLabel({ kind, ageDays }: SlaState): string {
+function getChipLabel({ kind, ageDays, thresholdDays }: SlaState): string {
   if (kind === 'dormant') return 'En attente du fidèle';
   if (kind === 'closed') return 'Clôturée';
+  if (kind === 'unknown') return 'Délai indisponible';
   if (kind === 'late') return `J+${ageDays} · en retard`;
-  if (kind === 'due') return `J+${ageDays} · seuil J+${SLA_ESCALATE_DAYS}`;
+  if (kind === 'due') return `J+${ageDays} · seuil J+${thresholdDays}`;
   return `J+${ageDays}`;
 }
 
-function getChipTitle({ kind, ageDays }: SlaState): string {
+function getChipTitle({ kind, ageDays, thresholdDays }: SlaState): string {
   if (kind === 'dormant')
     return 'La paroisse attend une réponse du fidèle : le délai de traitement est suspendu.';
   if (kind === 'closed')
     return 'Demande clôturée : elle ne fait plus partie de la file.';
+  if (kind === 'unknown')
+    return "Le serveur n'a pas fourni de délai pour cette demande.";
+  const plural = (ageDays ?? 0) > 1 ? 's' : '';
   if (kind === 'late')
-    return `Reçue il y a ${ageDays} jours — au-delà du seuil d'escalade automatique (J+${SLA_ESCALATE_DAYS}).`;
-  return `Reçue il y a ${ageDays} jour${ageDays > 1 ? 's' : ''} — seuil d'escalade à J+${SLA_ESCALATE_DAYS}.`;
+    return `Sans action depuis ${ageDays} jour${plural} — au-delà du seuil de relance automatique (J+${thresholdDays}).`;
+  return `Sans action depuis ${ageDays} jour${plural} — seuil de relance à J+${thresholdDays}.`;
 }
 
 interface SlaChipProps {
-  status: DocumentStatus;
-  createdAt: string;
-  /** Injectable pour les tests — évite de dépendre de l'horloge réelle. */
-  now?: Date;
+  document: SlaInput;
   className?: string;
 }
 
 /**
- * Pastille d'ancienneté d'une demande, alignée sur l'escalade backend.
- * Rend visible ce que le système surveille déjà en silence.
+ * Pastille de délai d'une demande, reflétant exactement ce que la relance
+ * automatique du backend surveille.
  */
-export function SlaChip({ status, createdAt, now, className }: SlaChipProps) {
-  const state = getSlaState({ status, created_at: createdAt }, now);
+export function SlaChip({ document, className }: SlaChipProps) {
+  const state = getSlaState(document);
 
   return (
     <span

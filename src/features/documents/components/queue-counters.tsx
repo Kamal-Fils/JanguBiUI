@@ -2,7 +2,7 @@
 
 import { cn } from '@/utils/cn';
 
-import { DocumentRequest, DocumentStatus } from '../types';
+import { DocumentStatus } from '../types';
 
 /** `''` = aucun filtre (toute la file). */
 export type QueueFilterValue = DocumentStatus | '';
@@ -47,35 +47,17 @@ export const HISTORY_BUCKETS: QueueBucket[] = [
 
 export type QueueCounts = Partial<Record<QueueFilterValue, number>>;
 
-/**
- * Comptage par étape sur un jeu de demandes DÉJÀ CHARGÉ.
- *
- * L'API `/documents/admin/requests/` est paginée (LimitOffset) et n'expose
- * aucun total par statut (PLAN_documents §6.3) : ce comptage ne vaut donc que
- * pour la page courante — l'appelant est tenu de l'annoncer comme tel.
- */
-export function countQueueBuckets(documents: DocumentRequest[]): QueueCounts {
-  const counts: QueueCounts = { '': documents.length };
-  for (const bucket of QUEUE_BUCKETS) {
-    if (bucket.value === '') continue;
-    counts[bucket.value] = documents.filter(
-      (doc) => doc.status === bucket.value,
-    ).length;
-  }
-  return counts;
-}
-
 interface QueueCountersProps {
   value: QueueFilterValue;
   onChange: (value: QueueFilterValue) => void;
   /**
-   * Comptages par étape. `undefined` = comptage non fiable (filtre serveur
-   * actif) : on affiche les étapes SANS chiffre plutôt qu'un « 0 » mensonger.
+   * Comptages par étape, calculés par le serveur sur tout le périmètre
+   * d'autorité (et non sur la page courante). `undefined` quand l'API ne les
+   * fournit pas : les étapes s'affichent alors sans chiffre plutôt qu'avec un
+   * « 0 » mensonger.
    */
   counts?: QueueCounts;
-  /** Nombre de demandes chargées (page courante) — pour la mention de portée. */
-  loadedCount?: number;
-  /** Total renvoyé par l'API pour le filtre courant. */
+  /** Total renvoyé avec les comptages. */
   totalCount?: number;
 }
 
@@ -87,7 +69,6 @@ export function QueueCounters({
   value,
   onChange,
   counts,
-  loadedCount,
   totalCount,
 }: QueueCountersProps) {
   return (
@@ -161,15 +142,11 @@ export function QueueCounters({
         })}
       </div>
 
-      <p className="text-[11px] text-muted-foreground">
-        {counts
-          ? `Comptages établis sur les ${loadedCount ?? 0} demandes de cette page${
-              totalCount !== undefined && totalCount > (loadedCount ?? 0)
-                ? ` (${totalCount} au total)`
-                : ''
-            }.`
-          : 'Filtre actif : les comptages par étape sont masqués — l’API ne fournit pas de totaux par statut.'}
-      </p>
+      {totalCount !== undefined && (
+        <p className="text-[11px] text-muted-foreground">
+          {totalCount} demande{totalCount > 1 ? 's' : ''} sur votre périmètre.
+        </p>
+      )}
     </div>
   );
 }

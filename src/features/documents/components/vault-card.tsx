@@ -24,12 +24,11 @@ const ACTION_CLASS =
 interface VaultCardProps {
   document: DocumentRequest;
   /**
-   * URL du document final, résolue par le parent (la liste ne porte pas les
-   * pièces jointes). Absente tant qu'elle n'est pas connue.
+   * URL du document final, portée par la liste (`final_document_url`). Absente
+   * si le backend ne l'expose pas encore : la carte reste alors un accès au
+   * détail plutôt qu'un bouton mort.
    */
   downloadUrl?: string;
-  /** Résolution de `downloadUrl` en cours — réserve la place du bouton. */
-  isResolvingDownload?: boolean;
 }
 
 /**
@@ -38,11 +37,7 @@ interface VaultCardProps {
  * référence officielle, et le vocabulaire du document acquis (« Délivré à »,
  * « Déposé le ») plutôt que celui de la demande.
  */
-export function VaultCard({
-  document: doc,
-  downloadUrl,
-  isResolvingDownload = false,
-}: VaultCardProps) {
+export function VaultCard({ document: doc, downloadUrl }: VaultCardProps) {
   const typeLabel = formatDocumentType(doc.document_type);
   const e = feminineSuffix(typeLabel);
   const depositedAt = doc.updated_at ?? doc.created_at;
@@ -99,7 +94,7 @@ export function VaultCard({
         <hr className="hairline-gold my-3" aria-hidden="true" />
 
         <div className="flex flex-wrap items-center gap-2">
-          {downloadUrl ? (
+          {downloadUrl && (
             <a
               href={downloadUrl}
               target="_blank"
@@ -110,18 +105,6 @@ export function VaultCard({
               <FileDown className="size-3.5" aria-hidden="true" />
               Télécharger
             </a>
-          ) : (
-            isResolvingDownload && (
-              // Réserve la place du bouton pendant la résolution, sans annoncer
-              // aux lecteurs d'écran une action qui n'existe pas encore.
-              <span
-                aria-hidden="true"
-                className={`${ACTION_CLASS} bg-primary/40 text-primary-foreground opacity-60`}
-              >
-                <FileDown className="size-3.5" />
-                Télécharger
-              </span>
-            )
           )}
 
           <button

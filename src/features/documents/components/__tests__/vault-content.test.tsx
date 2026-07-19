@@ -93,7 +93,10 @@ describe('VaultContent', () => {
     ).toBeInTheDocument();
   });
 
-  test('téléchargement en 1 clic : le fichier final est résolu via le détail', async () => {
+  test('téléchargement en 1 clic depuis la liste, sans charger le détail', async () => {
+    // La liste porte désormais `final_document_url` : le coffre-fort ne doit
+    // plus appeler le détail de chaque certificat pour obtenir ce lien.
+    let detailCalls = 0;
     server.use(
       http.get(`${env.API_URL}/v1/documents/requests/`, () =>
         HttpResponse.json({
@@ -103,30 +106,39 @@ describe('VaultContent', () => {
               id: '42',
               document_type: 'confirmation',
               status: 'document_deposited',
+              final_document_url: 'https://files.test/attestation-finale.pdf',
             }),
           ],
         }),
       ),
-      http.get(`${env.API_URL}/v1/documents/requests/:id/`, ({ params }) =>
+      http.get(`${env.API_URL}/v1/documents/requests/:id/`, () => {
+        detailCalls += 1;
+        return HttpResponse.json({});
+      }),
+    );
+
+    renderApp(<VaultContent />);
+
+    const download = await screen.findByRole('link', { name: /télécharger/i });
+    expect(download).toHaveAttribute(
+      'href',
+      'https://files.test/attestation-finale.pdf',
+    );
+    expect(detailCalls).toBe(0);
+  });
+
+  test('sans lien fourni par le serveur, aucun bouton de téléchargement mort', async () => {
+    server.use(
+      http.get(`${env.API_URL}/v1/documents/requests/`, () =>
         HttpResponse.json({
-          ...createDocumentRequest({
-            id: String(params.id),
-            document_type: 'confirmation',
-            status: 'document_deposited',
-          }),
-          attachments: [
-            {
-              id: 1,
-              attachment_type: 'supporting',
-              file_url: 'https://files.test/piece-jointe.pdf',
-              created_at: '2026-07-01T09:00:00Z',
-            },
-            {
-              id: 2,
-              attachment_type: 'final_document',
-              file_url: 'https://files.test/attestation-finale.pdf',
-              created_at: '2026-07-10T09:00:00Z',
-            },
+          count: 1,
+          results: [
+            createDocumentRequest({
+              id: '43',
+              document_type: 'baptism',
+              status: 'document_deposited',
+              final_document_url: null,
+            }),
           ],
         }),
       ),
@@ -134,12 +146,10 @@ describe('VaultContent', () => {
 
     renderApp(<VaultContent />);
 
-    const download = await screen.findByRole('link', { name: /télécharger/i });
-    // Le document final prime sur les autres pièces jointes.
-    expect(download).toHaveAttribute(
-      'href',
-      'https://files.test/attestation-finale.pdf',
-    );
+    await screen.findByText(/coffre-fort/i);
+    expect(
+      screen.queryByRole('link', { name: /télécharger/i }),
+    ).not.toBeInTheDocument();
   });
 
   test('partage désactivé et annoncé « Bientôt » sur chaque certificat', async () => {

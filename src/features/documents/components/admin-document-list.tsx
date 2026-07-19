@@ -45,7 +45,7 @@ export function AdminDocumentList({
       header: 'Délai',
       mobileLabel: 'Délai',
       headClassName: TH_CLASS,
-      cell: (doc) => <SlaChip status={doc.status} createdAt={doc.created_at} />,
+      cell: (doc) => <SlaChip document={doc} />,
     },
     {
       header: 'Demande',
