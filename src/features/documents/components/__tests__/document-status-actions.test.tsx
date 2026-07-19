@@ -185,3 +185,43 @@ describe('DocumentStatusActions — dialogues à motif obligatoire (conservés)'
     expect(send).toBeEnabled();
   });
 });
+
+describe('DocumentStatusActions — contrats respectés côté serveur', () => {
+  test('le motif de la demande d’information est bien transmis', async () => {
+    // Le client envoyait `message` là où le serveur attend `comment` : DRF
+    // ignorait le champ inconnu et l'email partait SANS motif, en 200.
+    let body: Record<string, unknown> = {};
+    server.use(
+      http.post(
+        `${env.API_URL}/v1/documents/admin/requests/:id/request-info/`,
+        async ({ request }) => {
+          body = (await request.json()) as Record<string, unknown>;
+          return new HttpResponse(null, { status: 204 });
+        },
+      ),
+    );
+
+    renderApp(
+      <DocumentStatusActions
+        requestId="1"
+        status="under_verification"
+        subject={SUBJECT}
+      />,
+    );
+
+    await openMenu();
+    await userEvent.click(
+      await screen.findByRole('menuitem', { name: /demander une information/i }),
+    );
+    await userEvent.type(
+      screen.getByLabelText(/message pour le requérant/i),
+      'Merci de fournir l’acte de naissance.',
+    );
+    await userEvent.click(screen.getByRole('button', { name: /^envoyer$/i }));
+
+    await waitFor(() =>
+      expect(body.comment).toBe('Merci de fournir l’acte de naissance.'),
+    );
+    expect(body.message).toBeUndefined();
+  });
+});

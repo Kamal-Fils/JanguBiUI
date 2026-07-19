@@ -27,6 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown';
+import { useNotifications } from '@/components/ui/notifications';
 import { Textarea } from '@/components/ui/textarea';
 
 import {
@@ -36,7 +37,12 @@ import {
   useStartVerification,
   useValidateDocument,
 } from '../api/admin-actions';
+import { useUploadDocumentFile } from '../api/upload-document-file';
 import { DocumentStatus } from '../types';
+
+/** Le dépôt attend un acte signé, pas une image d'écran. */
+const DEPOSIT_ACCEPT = '.pdf,application/pdf';
+const DEPOSIT_MAX_BYTES = 10 * 1024 * 1024;
 
 /**
  * Libellés uniques des transitions — repris à l'identique par le bouton
@@ -84,6 +90,12 @@ export function DocumentStatusActions({
   const [rejectReason, setRejectReason] = useState('');
   const [infoOpen, setInfoOpen] = useState(false);
   const [infoMessage, setInfoMessage] = useState('');
+  const [depositOpen, setDepositOpen] = useState(false);
+  const [depositFile, setDepositFile] = useState<File | null>(null);
+  const [depositError, setDepositError] = useState<string | null>(null);
+
+  const { addNotification } = useNotifications();
+  const uploadFile = useUploadDocumentFile();
 
   const startVerification = useStartVerification();
   const requestInfo = useRequestInfo();
@@ -118,10 +130,40 @@ export function DocumentStatusActions({
       label: ACTION_LABELS.deposit,
       icon: <PenLine className="size-4" aria-hidden="true" />,
       variant: 'gold',
-      isPending: deposit.isPending,
-      run: () => deposit.mutate({ requestId }),
+      isPending: deposit.isPending || uploadFile.isPending,
+      // Déposer suppose de joindre l'acte signé : on ouvre le dialogue au lieu
+      // d'envoyer une requête sans fichier, qui échouait en 400.
+      run: () => setDepositOpen(true),
     };
   }
+
+  const submitDeposit = () => {
+    if (!depositFile) return;
+    setDepositError(null);
+    uploadFile.mutate(depositFile, {
+      onSuccess: ({ id }) =>
+        deposit.mutate(
+          { requestId, fileId: id, label: 'Document officiel' },
+          {
+            onSuccess: () => {
+              setDepositOpen(false);
+              setDepositFile(null);
+              addNotification({
+                type: 'success',
+                title: 'Document déposé',
+                message: 'Le fidèle le retrouve dans son coffre-fort.',
+              });
+            },
+            onError: () =>
+              setDepositError(
+                "Le dépôt a échoué. Le document a bien été envoyé, vous pouvez réessayer.",
+              ),
+          },
+        ),
+      onError: () =>
+        setDepositError("L'envoi du document a échoué. Réessayez."),
+    });
+  };
 
   return (
     <>
@@ -180,6 +222,72 @@ export function DocumentStatusActions({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Dépôt du document signé — l'acte terminal du workflow */}
+      <Dialog
+        open={depositOpen}
+        onOpenChange={(open) => {
+          setDepositOpen(open);
+          if (!open) {
+            setDepositFile(null);
+            setDepositError(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Signer et déposer le document</DialogTitle>
+            <DialogDescription>
+              Joignez l’acte signé au format PDF. Il sera déposé dans le
+              coffre-fort numérique du fidèle, qui en sera averti par email.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="deposit-file"
+              className="text-sm font-medium text-foreground"
+            >
+              Document signé (PDF, 10 Mo maximum)
+            </label>
+            <input
+              id="deposit-file"
+              type="file"
+              accept={DEPOSIT_ACCEPT}
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                if (file && file.size > DEPOSIT_MAX_BYTES) {
+                  setDepositFile(null);
+                  setDepositError('Le fichier dépasse 10 Mo.');
+                  return;
+                }
+                setDepositError(null);
+                setDepositFile(file);
+              }}
+              className="block w-full cursor-pointer rounded-lg border border-input bg-background p-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground"
+            />
+            {depositError && (
+              <p role="alert" className="text-sm text-destructive">
+                {depositError}
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDepositOpen(false)}>
+              Annuler
+            </Button>
+            <Button
+              variant="gold"
+              onClick={submitDeposit}
+              disabled={!depositFile || uploadFile.isPending || deposit.isPending}
+              isLoading={uploadFile.isPending || deposit.isPending}
+            >
+              Déposer le document
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Request info dialog */}
       <Dialog open={infoOpen} onOpenChange={setInfoOpen}>

@@ -23,6 +23,10 @@ export const useStartVerification = () => {
 export const useRequestInfo = () => {
   const queryClient = useQueryClient();
   return useMutation({
+    // Le serveur attend `comment`. Le client envoyait `message` : DRF ignorait
+    // le champ inconnu et retombait sur la valeur par défaut vide — la demande
+    // partait donc en 200 avec un email et un journal SANS motif, alors que
+    // l'agent croyait l'avoir écrit.
     mutationFn: ({
       requestId,
       message,
@@ -32,7 +36,7 @@ export const useRequestInfo = () => {
     }) =>
       api.post<void>(
         `/v1/documents/admin/requests/${requestId}/request-info/`,
-        { message },
+        { comment: message },
       ),
     onSuccess: () => invalidateDocuments(queryClient),
   });
@@ -41,10 +45,14 @@ export const useRequestInfo = () => {
 export const useValidateDocument = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ requestId, notes }: { requestId: string; notes?: string }) =>
-      api.post<void>(`/v1/documents/admin/requests/${requestId}/validate/`, {
-        notes,
-      }),
+    // La validation ne porte pas de commentaire : l'endpoint ne lit aucun
+    // corps de requête. On n'envoie donc rien plutôt qu'un champ silencieusement
+    // jeté, qui laissait croire à une note conservée.
+    mutationFn: ({ requestId }: { requestId: string }) =>
+      api.post<void>(
+        `/v1/documents/admin/requests/${requestId}/validate/`,
+        {},
+      ),
     onSuccess: () => invalidateDocuments(queryClient),
   });
 };
@@ -69,9 +77,22 @@ export const useRejectDocument = () => {
 export const useDepositDocument = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ requestId, notes }: { requestId: string; notes?: string }) =>
+    // Déposer = joindre le document signé. `file_id` est OBLIGATOIRE côté
+    // serveur ; le client envoyait `notes`, donc l'action terminale du workflow
+    // échouait systématiquement en 400 et aucune demande n'atteignait jamais le
+    // coffre-fort du fidèle.
+    mutationFn: ({
+      requestId,
+      fileId,
+      label,
+    }: {
+      requestId: string;
+      fileId: number;
+      label?: string;
+    }) =>
       api.post<void>(`/v1/documents/admin/requests/${requestId}/deposit/`, {
-        notes,
+        file_id: fileId,
+        ...(label ? { label } : {}),
       }),
     onSuccess: () => invalidateDocuments(queryClient),
   });
