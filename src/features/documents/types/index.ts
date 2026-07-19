@@ -23,6 +23,16 @@ export const documentRequestSchema = z.object({
   parish_name: z.string().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string().optional(),
+  // Délais calculés par le serveur (apps/documents/sla.py) : l'ancienneté se
+  // mesure depuis la dernière action et le seuil dépend du statut. Optionnels
+  // pour tolérer un front déployé avant le backend — sans eux, l'UI n'affiche
+  // aucune alerte plutôt que d'en inventer une.
+  sla_days: z.number().nullable().optional(),
+  sla_threshold_days: z.number().nullable().optional(),
+  is_escalated: z.boolean().optional(),
+  // Document final déposé, exposé dès la liste : évite au coffre-fort de
+  // charger le détail de chaque certificat pour obtenir ce lien.
+  final_document_url: z.string().nullable().optional(),
 });
 
 const attachmentSchema = z.object({

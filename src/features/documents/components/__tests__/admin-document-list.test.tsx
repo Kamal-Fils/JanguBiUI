@@ -16,9 +16,6 @@ async function openRowActions(name: string) {
   await userEvent.click(trigger);
 }
 
-const daysAgo = (days: number): string =>
-  new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-
 describe('AdminDocumentList — action principale visible par statut', () => {
   test('une demande soumise expose « Démarrer la vérification » en bouton, et « Rejeter » en secondaire', async () => {
     const doc = createDocumentRequest({
@@ -125,19 +122,23 @@ describe('AdminDocumentList — priorisation par SLA', () => {
         id: 'recent',
         document_type: 'Parrain',
         status: 'submitted',
-        created_at: daysAgo(1),
+        sla_days: 1,
+        sla_threshold_days: 7,
       }),
       createDocumentRequest({
         id: 'dormant',
         document_type: 'Mariage',
         status: 'info_requested',
-        created_at: daysAgo(30),
+        sla_days: 30,
+        sla_threshold_days: 5,
       }),
       createDocumentRequest({
         id: 'late',
         document_type: 'Confirmation',
         status: 'submitted',
-        created_at: daysAgo(16),
+        sla_days: 16,
+        sla_threshold_days: 7,
+        is_escalated: true,
       }),
     ];
 
@@ -155,7 +156,9 @@ describe('AdminDocumentList — priorisation par SLA', () => {
     const doc = createDocumentRequest({
       document_type: 'Confirmation',
       status: 'submitted',
-      created_at: daysAgo(16),
+      sla_days: 16,
+      sla_threshold_days: 7,
+      is_escalated: true,
     });
 
     renderApp(<AdminDocumentList documents={[doc]} />);
@@ -168,7 +171,8 @@ describe('AdminDocumentList — priorisation par SLA', () => {
     const doc = createDocumentRequest({
       document_type: 'Mariage',
       status: 'info_requested',
-      created_at: daysAgo(30),
+      sla_days: 30,
+      sla_threshold_days: 5,
     });
 
     renderApp(<AdminDocumentList documents={[doc]} />);

@@ -3,150 +3,95 @@ import { screen } from '@testing-library/react';
 import { createDocumentRequest } from '@/testing/data-generators';
 import { renderApp } from '@/testing/test-utils';
 
-import {
-  compareByUrgency,
-  getDocumentAgeDays,
-  SLA_ESCALATE_DAYS,
-  SlaChip,
-  getSlaState,
-} from '../sla-chip';
+import type { DocumentStatus } from '../../types';
+import { compareByUrgency, SlaChip, getSlaState } from '../sla-chip';
 
-/** Horloge figée : les seuils SLA ne doivent jamais dépendre du jour du test. */
-const NOW = new Date('2026-07-18T12:00:00Z');
+/**
+ * Le délai vient désormais du serveur : plus d'horloge ni de seuil côté client.
+ * Les cas ci-dessous décrivent ce que l'API renvoie, pas ce qu'on recalcule.
+ */
+const doc = (
+  status: DocumentStatus,
+  sla_days: number | null,
+  sla_threshold_days: number | null,
+  is_escalated = false,
+) => createDocumentRequest({ status, sla_days, sla_threshold_days, is_escalated });
 
-/** Date de création située `days` jours avant `NOW`. */
-const daysAgo = (days: number): string =>
-  new Date(NOW.getTime() - days * 24 * 60 * 60 * 1000).toISOString();
-
-describe('getDocumentAgeDays', () => {
-  test('compte les jours pleins écoulés depuis la réception', () => {
-    expect(getDocumentAgeDays(daysAgo(0), NOW)).toBe(0);
-    expect(getDocumentAgeDays(daysAgo(3), NOW)).toBe(3);
-    expect(getDocumentAgeDays(daysAgo(16), NOW)).toBe(16);
-  });
-
-  test('ne renvoie jamais d’âge négatif ni NaN sur une date illisible', () => {
-    expect(getDocumentAgeDays(daysAgo(-5), NOW)).toBe(0);
-    expect(getDocumentAgeDays('pas-une-date', NOW)).toBe(0);
-  });
-});
-
-describe('getSlaState — seuil aligné sur DOCS_ESCALATE_DAYS', () => {
-  test('le seuil front vaut 7 jours, comme le réglage backend par défaut', () => {
-    expect(SLA_ESCALATE_DAYS).toBe(7);
-  });
-
+describe('getSlaState — le serveur fait autorité', () => {
   test('dans les temps → ok ; veille du seuil → due ; seuil atteint → late', () => {
-    const at = (days: number) =>
-      getSlaState({ status: 'submitted', created_at: daysAgo(days) }, NOW).kind;
-
-    expect(at(1)).toBe('ok');
-    expect(at(SLA_ESCALATE_DAYS - 2)).toBe('ok');
-    expect(at(SLA_ESCALATE_DAYS - 1)).toBe('due');
-    expect(at(SLA_ESCALATE_DAYS)).toBe('late');
-    expect(at(SLA_ESCALATE_DAYS + 9)).toBe('late');
+    expect(getSlaState(doc('submitted', 2, 7)).kind).toBe('ok');
+    expect(getSlaState(doc('submitted', 6, 7)).kind).toBe('due');
+    expect(getSlaState(doc('submitted', 7, 7, true)).kind).toBe('late');
   });
 
-  test('une demande en attente du fidèle est en veille, jamais en retard', () => {
-    // 16 jours : largement au-delà du seuil — mais la balle est côté fidèle.
-    const state = getSlaState(
-      { status: 'info_requested', created_at: daysAgo(16) },
-      NOW,
-    );
-
-    expect(state.kind).toBe('dormant');
-    expect(state.ageDays).toBe(16);
+  test('suit le seuil propre au statut, pas une valeur unique', () => {
+    // Une demande validée est relancée dès 3 jours : 4 jours = en retard,
+    // alors que le même âge serait « dans les temps » avec un seuil de 7.
+    expect(getSlaState(doc('validated', 4, 3, true)).kind).toBe('late');
+    expect(getSlaState(doc('submitted', 4, 7)).kind).toBe('ok');
   });
 
-  test('une demande terminale sort de la file (clôturée)', () => {
-    expect(
-      getSlaState(
-        { status: 'document_deposited', created_at: daysAgo(30) },
-        NOW,
-      ).kind,
-    ).toBe('closed');
-    expect(
-      getSlaState({ status: 'rejected', created_at: daysAgo(30) }, NOW).kind,
-    ).toBe('closed');
-  });
-});
-
-describe('SlaChip — rendu', () => {
-  test('affiche l’ancienneté en vert quand la demande est dans les temps', () => {
-    renderApp(<SlaChip status="submitted" createdAt={daysAgo(1)} now={NOW} />);
-
-    const chip = screen.getByText('J+1');
-    expect(chip).toHaveClass('text-success');
+  test('fait confiance au drapeau d’escalade du serveur', () => {
+    expect(getSlaState(doc('submitted', 5, 7, true)).kind).toBe('late');
   });
 
-  test('passe en orange à la veille du seuil, en rappelant le seuil', () => {
-    renderApp(<SlaChip status="submitted" createdAt={daysAgo(6)} now={NOW} />);
-
-    const chip = screen.getByText('J+6 · seuil J+7');
-    expect(chip).toHaveClass('text-warning');
+  test('demande en attente du fidèle → en veille, jamais d’alerte', () => {
+    expect(getSlaState(doc('info_requested', 40, 5, true)).kind).toBe('dormant');
   });
 
-  test('passe en rouge et annonce le retard au-delà du seuil', () => {
-    renderApp(
-      <SlaChip status="under_verification" createdAt={daysAgo(16)} now={NOW} />,
-    );
-
-    const chip = screen.getByText('J+16 · en retard');
-    expect(chip).toHaveClass('text-destructive');
+  test('demande terminale → clôturée', () => {
+    expect(getSlaState(doc('document_deposited', null, null)).kind).toBe('closed');
+    expect(getSlaState(doc('rejected', null, null)).kind).toBe('closed');
   });
 
-  test('neutralise l’alerte pour une demande en attente du fidèle', () => {
-    renderApp(
-      <SlaChip status="info_requested" createdAt={daysAgo(16)} now={NOW} />,
-    );
+  test('sans délai serveur → état neutre, aucun seuil inventé', () => {
+    const sansDonnee = createDocumentRequest({ status: 'submitted' });
+    delete (sansDonnee as Record<string, unknown>).sla_days;
+    delete (sansDonnee as Record<string, unknown>).sla_threshold_days;
 
-    const chip = screen.getByText('En attente du fidèle');
-    expect(chip).toHaveClass('text-muted-foreground');
-    expect(chip).not.toHaveClass('text-destructive');
-    expect(screen.queryByText(/en retard/i)).not.toBeInTheDocument();
+    expect(getSlaState(sansDonnee).kind).toBe('unknown');
   });
 });
 
-describe('compareByUrgency — ordre de la file', () => {
-  test('trie les demandes actives de la plus ancienne à la plus récente', () => {
-    const recent = createDocumentRequest({
-      id: 'recent',
-      status: 'submitted',
-      created_at: daysAgo(1),
-    });
-    const old = createDocumentRequest({
-      id: 'old',
-      status: 'submitted',
-      created_at: daysAgo(16),
-    });
+describe('compareByUrgency', () => {
+  test('le plus ancien d’abord, puis les demandes en veille, puis les clôturées', () => {
+    const recente = doc('submitted', 1, 7);
+    const ancienne = doc('submitted', 9, 7, true);
+    const enVeille = doc('info_requested', 30, 5);
+    const close = doc('document_deposited', null, null);
 
-    expect([recent, old].sort((a, b) => compareByUrgency(a, b, NOW))).toEqual([
-      old,
-      recent,
-    ]);
+    const ordre = [close, enVeille, recente, ancienne].sort(compareByUrgency);
+
+    expect(ordre).toEqual([ancienne, recente, enVeille, close]);
+  });
+});
+
+describe('SlaChip', () => {
+  test('annonce le retard avec le seuil réellement appliqué', () => {
+    renderApp(<SlaChip document={doc('validated', 4, 3, true)} />);
+
+    expect(screen.getByText('J+4 · en retard')).toBeInTheDocument();
   });
 
-  test('relègue les demandes en veille puis clôturées après les demandes actives', () => {
-    const dormant = createDocumentRequest({
-      id: 'dormant',
-      status: 'info_requested',
-      created_at: daysAgo(30),
-    });
-    const closed = createDocumentRequest({
-      id: 'closed',
-      status: 'document_deposited',
-      created_at: daysAgo(40),
-    });
-    const active = createDocumentRequest({
-      id: 'active',
-      status: 'submitted',
-      created_at: daysAgo(1),
-    });
+  test('annonce la veille du seuil', () => {
+    renderApp(<SlaChip document={doc('submitted', 6, 7)} />);
 
-    const ordered = [closed, dormant, active]
-      .sort((a, b) => compareByUrgency(a, b, NOW))
-      .map((doc) => doc.id);
+    expect(screen.getByText('J+6 · seuil J+7')).toBeInTheDocument();
+  });
 
-    expect(ordered).toEqual(['active', 'dormant', 'closed']);
+  test('met en veille une demande qui attend le fidèle', () => {
+    renderApp(<SlaChip document={doc('info_requested', 12, 5, true)} />);
+
+    expect(screen.getByText('En attente du fidèle')).toBeInTheDocument();
+  });
+
+  test('reste neutre quand le serveur ne fournit pas de délai', () => {
+    const sansDonnee = createDocumentRequest({ status: 'submitted' });
+    delete (sansDonnee as Record<string, unknown>).sla_days;
+    delete (sansDonnee as Record<string, unknown>).sla_threshold_days;
+
+    renderApp(<SlaChip document={sansDonnee} />);
+
+    expect(screen.getByText('Délai indisponible')).toBeInTheDocument();
   });
 });
