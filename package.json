@@ -18,7 +18,8 @@
     "generate-api": "openapi-typescript http://localhost:8001/api/schema/ -o src/types/api.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "run-mock-server": "tsx ./mock-server.ts"
+    "run-mock-server": "tsx ./mock-server.ts",
+    "generate-api:offline": "docker compose -f ../JanguBi/docker-compose.yml exec -T django python manage.py spectacular --file /tmp/schema.yml && docker compose -f ../JanguBi/docker-compose.yml exec -T django cat /tmp/schema.yml > /tmp/jangubi-schema.yml && openapi-typescript /tmp/jangubi-schema.yml -o src/types/api.ts"
   },
   "resolutions": {
     "@radix-ui/react-focus-scope": "1.1.7",

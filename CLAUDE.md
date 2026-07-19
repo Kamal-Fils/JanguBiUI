@@ -114,6 +114,37 @@ export const useCreateThing = () => {
 };
 ```
 
+### Corps de requête : dériver du schéma, ne jamais l'écrire à la main
+
+Le backend expose son schéma OpenAPI ; `src/types/api.ts` en est **généré**
+(`yarn generate-api`, ou `yarn generate-api:offline` si l'API n'est pas servie).
+Ce fichier décrit le contrat réel — encore faut-il s'en servir.
+
+Plusieurs pannes de production sont venues d'un client qui inventait sa propre
+forme de payload alors que le bon type dormait dans ce fichier : un `message`
+envoyé là où le serveur lisait `comment` (l'email partait sans motif, en 200),
+un `file_id` obligatoire omis (dépôt en 400 systématique, coffre-fort jamais
+alimenté). Le backend était testé, le frontend aussi ; **rien ne testait la
+jonction**.
+
+Pour toute mutation, dérive donc le corps de requête de l'opération :
+
+```typescript
+import type { RequestBody } from '@/types/api-contract';
+
+type DepositBody = RequestBody<'v1_documents_admin_requests_deposit_create'>;
+
+api.post<void>(url, { file_id: fileId, label } satisfies DepositBody);
+```
+
+Un champ mal nommé ou manquant devient alors une **erreur de compilation**, pas
+une panne silencieuse. `src/features/documents/api/admin-actions.ts` sert de
+référence.
+
+> Si un endpoint n'apparaît pas dans `api.ts`, c'est que drf-spectacular ne sait
+> pas deviner son corps de requête et l'ignore : il faut l'annoter côté backend
+> (`@extend_schema(request=...)`, ou `request=None` s'il n'en prend pas).
+
 ---
 
 ## Authentification
