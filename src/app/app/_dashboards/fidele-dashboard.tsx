@@ -4,13 +4,13 @@ import { ContentContainer } from '@/components/layouts/content-container';
 import { SectionHeader } from '@/components/ui/section-header';
 import { paths } from '@/config/paths';
 import { FideleSummarySection } from '@/features/dashboard/components/fidele-summary-section';
+import { ModuleShortcuts } from '@/features/home/module-shortcuts';
+import { WordOfTheDay } from '@/features/home/word-of-the-day';
 import { PastoralReflectionWidget } from '@/features/reflexion-pastorale/components/pastoral-reflection-widget';
 
-import { ModuleShortcuts } from './module-shortcuts';
 import { MyIntentionsSection } from './my-intentions-section';
 import { ParishEventsSection } from './parish-events-section';
 import { ParishNewsSection } from './parish-news-section';
-import { WordOfTheDay } from './word-of-the-day';
 
 /**
  * Accueil du fidèle.
@@ -29,6 +29,12 @@ import { WordOfTheDay } from './word-of-the-day';
  * L'ancienne bannière de bienvenue — un bloc dégradé portant le prénom en très
  * grand — a cédé la place : elle occupait la position de force pour une
  * information sans valeur d'usage.
+ *
+ * Comme les tableaux de bord du clergé, cet écran vit dans la **couche app** :
+ * il agrège cinq features distinctes (dashboard, réflexion pastorale, actus,
+ * agenda, intentions). Composer cet assemblage depuis `features/home` imposait
+ * des imports croisés, ce que l'architecture interdit ; seule la couche app a
+ * le droit d'importer n'importe quelle feature.
  */
 export function FideleDashboard() {
   return (

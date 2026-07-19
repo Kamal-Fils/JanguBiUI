@@ -12,7 +12,7 @@ vi.stubGlobal('localStorage', {
 });
 
 import { server } from '@/testing/mocks/server';
-import { clearRefreshToken, setRefreshToken } from '@/lib/api-client';
+import { clearSession, setAccessToken } from '@/lib/api-client';
 
 vi.mock('zustand');
 
@@ -49,8 +49,11 @@ beforeAll(() => {
 afterAll(() => server.close());
 
 beforeEach(() => {
-  // Simulate a logged-in session so getUserQueryOptions enables the query
-  setRefreshToken('test-refresh-token');
+  // Simule une session ouverte : le refresh token vit maintenant dans un cookie
+  // HttpOnly illisible depuis JS, donc l'état « connecté » se pose en mémoire via
+  // l'access token (setAccessToken marque la session `active`, ce qui autorise
+  // getUserQueryOptions à interroger /me/).
+  setAccessToken('test-access-token');
 
   class ResizeObserverMock {
     observe = vi.fn();
@@ -103,5 +106,5 @@ beforeEach(() => {
 afterEach(() => {
   server.resetHandlers();
   vi.clearAllMocks();
-  clearRefreshToken();
+  clearSession();
 });

@@ -49,6 +49,7 @@ function scheduleProactiveRefresh(token: string): void {
 
 export function setAccessToken(token: string): void {
   _accessToken = token;
+  _sessionState = 'active';
   scheduleProactiveRefresh(token);
 }
 
@@ -64,37 +65,62 @@ export function getAccessToken(): string | null {
   return _accessToken;
 }
 
-// Refresh token — persisted to localStorage so it survives page reloads
-const REFRESH_TOKEN_KEY = 'jb_refresh_token';
+// -----------------------------------------------------------------------------
+// Refresh token — cookie HttpOnly, JAMAIS accessible depuis ce fichier
+// -----------------------------------------------------------------------------
+// Le refresh token vit 7 jours. Tant qu'il était persisté dans localStorage, tout
+// script exécuté sur la page pouvait le lire : une seule faille XSS donnait une
+// prise de compte d'une semaine, bien au-delà de la session en cours. Il est
+// désormais porté par un cookie `HttpOnly` posé par l'API — invisible pour
+// JavaScript, y compris pour ce module.
+//
+// Le serveur ne bascule dans ce mode que si on le lui demande, via l'en-tête
+// ci-dessous : sans lui, il continue de renvoyer le jeton dans le corps, ce dont
+// le futur client React Native a besoin (un client natif ne gère pas les cookies
+// comme un navigateur). Cf. JanguBi/apps/authentication/cookies.py.
+export const AUTH_TRANSPORT_HEADER = 'X-Auth-Transport';
+export const AUTH_TRANSPORT_COOKIE = 'cookie';
 
-let _refreshToken: string | null = (() => {
-  try {
-    return typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
-  } catch {
-    return null;
-  }
-})();
-
-export function setRefreshToken(token: string): void {
-  _refreshToken = token;
-  try {
-    if (typeof window !== 'undefined') localStorage.setItem(REFRESH_TOKEN_KEY, token);
-  } catch {
-    // localStorage indisponible (SSR / navigation privée) — non bloquant
-  }
+// Le cookie est restreint à `/api/v1/auth/jwt/` côté serveur : seuls ces
+// endpoints le reçoivent, et seuls eux ont besoin de l'en-tête de transport.
+// L'ajouter partout déclencherait un preflight CORS inutile sur chaque appel.
+function isJwtAuthEndpoint(url: string): boolean {
+  return url.includes('/v1/auth/jwt/');
 }
 
-export function clearRefreshToken(): void {
-  _refreshToken = null;
-  try {
-    if (typeof window !== 'undefined') localStorage.removeItem(REFRESH_TOKEN_KEY);
-  } catch {
-    // localStorage indisponible (SSR / navigation privée) — non bloquant
-  }
+/**
+ * État de session connu du client.
+ *
+ * Le cookie de refresh étant illisible, on ne peut plus tester sa présence.
+ * On raisonne donc par présomption : `unknown` tant que le serveur ne s'est pas
+ * prononcé, `anonymous` uniquement après un refresh explicitement rejeté ou une
+ * déconnexion. Cela évite de conclure « déconnecté » à tort au premier rendu.
+ */
+export type SessionState = 'unknown' | 'active' | 'anonymous';
+
+let _sessionState: SessionState = 'unknown';
+
+export function getSessionState(): SessionState {
+  return _sessionState;
 }
 
-export function getRefreshToken(): string | null {
-  return _refreshToken;
+/** `false` seulement quand on SAIT qu'il n'y a plus de session exploitable. */
+export function hasPotentialSession(): boolean {
+  return _sessionState !== 'anonymous';
+}
+
+/**
+ * Efface l'état d'authentification côté client.
+ *
+ * Remplace l'ancien couple `clearAccessToken()` + `clearRefreshToken()` : le
+ * cookie de refresh ne peut être effacé que par le serveur (endpoint logout).
+ * Dans les chemins « session déjà morte » (refresh rejeté), il n'y a rien à
+ * révoquer — le jeton est déjà invalide — donc on se contente d'oublier l'état
+ * local ; le cookie périmé sera écrasé à la prochaine connexion.
+ */
+export function clearSession(): void {
+  clearAccessToken();
+  _sessionState = 'anonymous';
 }
 
 let _isRefreshing = false;
@@ -106,12 +132,16 @@ export async function tryRefreshAccess(): Promise<void> {
   _isRefreshing = true;
   _refreshPromise = (async () => {
     try {
-      if (!_refreshToken) throw new Error('No refresh token');
       const res = await fetch(`${env.API_URL}/v1/auth/jwt/refresh/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          [AUTH_TRANSPORT_HEADER]: AUTH_TRANSPORT_COOKIE,
+        },
+        // Sans `include`, le navigateur n'envoie pas le cookie de refresh
+        // cross-origin : le renouvellement échouerait systématiquement.
         credentials: 'include',
-        body: JSON.stringify({ refresh: _refreshToken }),
+        body: '{}',
       });
       if (!res.ok) throw new Error('Refresh failed');
       const data = await res.json();
@@ -121,8 +151,13 @@ export async function tryRefreshAccess(): Promise<void> {
       if (!data.access) {
         throw new Error('Réponse de refresh invalide : access token absent');
       }
+      // Le refresh token pivoté est reposé dans le cookie par le serveur —
+      // rien à stocker ici, c'est tout l'intérêt.
       setAccessToken(data.access);
-      if (data.refresh) setRefreshToken(data.refresh);
+    } catch (err) {
+      // Le serveur a tranché : plus de session exploitable.
+      _sessionState = 'anonymous';
+      throw err;
     } finally {
       _isRefreshing = false;
       _refreshPromise = null;
@@ -134,20 +169,31 @@ export async function tryRefreshAccess(): Promise<void> {
 
 // --- Bootstrap de session (client uniquement) --------------------------------
 // L'access token ne vit qu'en mémoire : à chaque cold load il est absent alors
-// que le refresh token (localStorage) existe. Sans ce bootstrap, la première
-// requête (/me/, pollers) partait sans Authorization → 401 garanti en console
-// avant le refresh réactif. Ici le refresh démarre au chargement du bundle et
-// fetchApi attend sa résolution avant d'émettre la première requête.
-let _bootstrapPromise: Promise<void> | null =
-  typeof window !== 'undefined' && _refreshToken
-    ? tryRefreshAccess()
-        .catch(() => {
-          // Session morte — les requêtes suivantes déclencheront le redirect login.
-        })
-        .finally(() => {
-          _bootstrapPromise = null;
-        })
-    : null;
+// que le cookie de refresh, lui, a survécu. Sans ce bootstrap, la première
+// requête (/me/, pollers) partirait sans Authorization → 401 garanti.
+//
+// Il ne peut plus être conditionné à la présence d'un jeton en localStorage
+// (on ne peut plus la constater) : on tente donc systématiquement, et c'est la
+// réponse du serveur qui tranche. Déclenché paresseusement, au premier appel
+// d'API réel — pas au chargement du bundle — pour qu'un simple visiteur d'une
+// page publique ne provoque aucune requête.
+let _bootstrapPromise: Promise<void> | null = null;
+let _bootstrapDone = false;
+
+function ensureSessionBootstrap(): Promise<void> | null {
+  if (typeof window === 'undefined' || _bootstrapDone) return null;
+  if (!_bootstrapPromise) {
+    _bootstrapPromise = tryRefreshAccess()
+      .catch(() => {
+        // Session morte — les requêtes suivantes déclencheront le redirect login.
+      })
+      .finally(() => {
+        _bootstrapDone = true;
+        _bootstrapPromise = null;
+      });
+  }
+  return _bootstrapPromise;
+}
 
 type RequestOptions = {
   method?: string;
@@ -247,9 +293,22 @@ async function fetchApi<T>(
     next,
   } = options;
 
-  // Cold load : attendre la fin du bootstrap de session avant la 1ʳᵉ requête.
-  if (typeof window !== 'undefined' && _bootstrapPromise) {
-    await _bootstrapPromise;
+  // A 401 on the login/refresh endpoints means "bad credentials" or "dead
+  // session" — NOT an expired access token. Attempting a refresh here swallows
+  // the error before the user sees it (silent login failure). Let these fall
+  // through to the generic error handler below so a toast is shown.
+  const isAuthCredentialEndpoint =
+    url.includes('/auth/jwt/login/') || url.includes('/auth/jwt/refresh/');
+
+  // Cold load : sans access token en mémoire, tenter de relever la session
+  // depuis le cookie AVANT d'émettre la requête. Jamais devant un login ou un
+  // refresh : on n'a pas besoin d'une session pour aller en ouvrir une.
+  if (
+    typeof window !== 'undefined' &&
+    !_accessToken &&
+    !isAuthCredentialEndpoint
+  ) {
+    await ensureSessionBootstrap();
   }
 
   // Get cookies from the request when running on server
@@ -258,17 +317,24 @@ async function fetchApi<T>(
     cookieHeader = await getServerCookies();
   }
 
+  // Réclame le transport par cookie sur les endpoints JWT : le serveur pose
+  // alors le refresh token en cookie HttpOnly et l'omet du corps de réponse.
+  const effectiveHeaders: Record<string, string> =
+    typeof window !== 'undefined' && isJwtAuthEndpoint(url)
+      ? { [AUTH_TRANSPORT_HEADER]: AUTH_TRANSPORT_COOKIE, ...headers }
+      : headers;
+
   const fullUrl = buildUrlWithParams(`${env.API_URL}${url}`, params);
-  const init = buildFetchInit(method, body, headers, cookieHeader, cache, next);
+  const init = buildFetchInit(
+    method,
+    body,
+    effectiveHeaders,
+    cookieHeader,
+    cache,
+    next,
+  );
 
   const response = await fetch(fullUrl, init);
-
-  // A 401 on the login/refresh endpoints means "bad credentials" or "dead
-  // session" — NOT an expired access token. Attempting a refresh here swallows
-  // the error before the user sees it (silent login failure). Let these fall
-  // through to the generic error handler below so a toast is shown.
-  const isAuthCredentialEndpoint =
-    url.includes('/auth/jwt/login/') || url.includes('/auth/jwt/refresh/');
 
   if (
     response.status === 401 &&
@@ -278,9 +344,9 @@ async function fetchApi<T>(
     try {
       await tryRefreshAccess();
     } catch {
-      // Refresh token expired or missing — session is dead, redirect to login
-      clearAccessToken();
-      clearRefreshToken();
+      // Refresh cookie expired or missing — session is dead, redirect to login.
+      // Rien à révoquer côté serveur : le jeton vient d'être rejeté.
+      clearSession();
       const { pathname } = window.location;
       const isPublicPage = pathname === '/' || pathname.startsWith('/auth/');
       if (!isPublicPage) {
@@ -295,7 +361,7 @@ async function fetchApi<T>(
     const retriedInit = buildFetchInit(
       method,
       body,
-      headers,
+      effectiveHeaders,
       cookieHeader,
       cache,
       next,

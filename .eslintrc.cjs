@@ -1,3 +1,41 @@
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * Zones interdisant les imports entre features, **dérivées du disque** plutôt
+ * qu'écrites à la main.
+ *
+ * La liste précédente était celle du gabarit Bulletproof d'origine : `auth`,
+ * `comments`, `discussions`, `teams`, `users` — dont trois n'ont jamais existé
+ * ici, tandis que les 21 features réelles n'étaient couvertes par AUCUNE zone.
+ * La règle passait donc au vert sur des violations bien réelles : `features/home`
+ * importait cinq autres features sans que rien ne le signale.
+ *
+ * En énumérant le dossier, toute feature ajoutée est protégée le jour de sa
+ * création, sans que personne n'ait à penser à modifier cette configuration —
+ * c'est précisément l'oubli qui a laissé le défaut s'installer.
+ */
+function crossFeatureZones() {
+  const featuresDir = path.join(__dirname, 'src', 'features');
+  let features = [];
+  try {
+    features = fs
+      .readdirSync(featuresDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+  } catch {
+    // Dossier absent (checkout partiel, outillage) : mieux vaut une config qui
+    // charge sans zones qu'un lint qui refuse de démarrer.
+    return [];
+  }
+
+  return features.map((name) => ({
+    target: `./src/features/${name}`,
+    from: './src/features',
+    except: [`./${name}`],
+  }));
+}
+
 module.exports = {
   root: true,
   env: {
@@ -51,33 +89,10 @@ module.exports = {
           'error',
           {
             zones: [
-              // disables cross-feature imports:
-              // eg. src/features/discussions should not import from src/features/comments, etc.
-              {
-                target: './src/features/auth',
-                from: './src/features',
-                except: ['./auth'],
-              },
-              {
-                target: './src/features/comments',
-                from: './src/features',
-                except: ['./comments'],
-              },
-              {
-                target: './src/features/discussions',
-                from: './src/features',
-                except: ['./discussions'],
-              },
-              {
-                target: './src/features/teams',
-                from: './src/features',
-                except: ['./teams'],
-              },
-              {
-                target: './src/features/users',
-                from: './src/features',
-                except: ['./users'],
-              },
+              // Imports entre features interdits — zones dérivées du disque
+              // (voir crossFeatureZones ci-dessus).
+              ...crossFeatureZones(),
+
               // enforce unidirectional codebase:
 
               // e.g. src/app can import from src/features but not the other way around

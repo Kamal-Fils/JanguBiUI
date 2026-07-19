@@ -3,11 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  clearAccessToken,
-  clearRefreshToken,
-  tryRefreshAccess,
-} from '@/lib/api-client';
+import { clearSession, tryRefreshAccess } from '@/lib/api-client';
 import { useUser } from '@/lib/auth';
 import { getFreshWsToken, resolveWsBase } from '@/lib/ws';
 
@@ -74,8 +70,7 @@ export function useChatSocket(conversationId: string) {
       if (!token) {
         // No valid token — cannot establish WS; redirect to login
         setStatus('offline');
-        clearAccessToken();
-        clearRefreshToken();
+        clearSession();
         const redirectTo = encodeURIComponent(window.location.pathname);
         window.location.href = `/auth/login?redirectTo=${redirectTo}`;
         return;
@@ -155,8 +150,7 @@ export function useChatSocket(conversationId: string) {
             if (unmountedRef.current) return;
             // Refresh failed — session dead, redirect to login
             setStatus('offline');
-            clearAccessToken();
-            clearRefreshToken();
+            clearSession();
             const redirectTo = encodeURIComponent(window.location.pathname);
             window.location.href = `/auth/login?redirectTo=${redirectTo}`;
             return;
