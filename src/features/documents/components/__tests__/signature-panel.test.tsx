@@ -41,13 +41,23 @@ describe('SignaturePanel — mise en scène de la signature (niveau 2)', () => {
     ).toBeInTheDocument();
   });
 
-  test('signer déclenche le dépôt côté backend (transition inchangée)', async () => {
+  test('signer joint l’acte signé puis dépose', async () => {
+    // Le dépôt exige `file_id` côté serveur : cliquer sans joindre de fichier
+    // échouait systématiquement en 400, et aucune demande n'atteignait le
+    // coffre-fort. Le parcours passe donc par l'envoi du document signé.
+    let uploaded = false;
+    let depositBody: Record<string, unknown> = {};
     let calledId = '';
     server.use(
+      http.post(`${env.API_URL}/v1/files/upload/standard/`, () => {
+        uploaded = true;
+        return HttpResponse.json({ id: 77 });
+      }),
       http.post(
         `${env.API_URL}/v1/documents/admin/requests/:id/deposit/`,
-        ({ params }) => {
+        async ({ params, request }) => {
           calledId = String(params.id);
+          depositBody = (await request.json()) as Record<string, unknown>;
           return new HttpResponse(null, { status: 204 });
         },
       ),
@@ -59,7 +69,30 @@ describe('SignaturePanel — mise en scène de la signature (niveau 2)', () => {
       screen.getByRole('button', { name: /signer et déposer/i }),
     );
 
+    const input = await screen.findByLabelText(/document signé/i);
+    await userEvent.upload(
+      input,
+      new File(['%PDF-1.4'], 'acte.pdf', { type: 'application/pdf' }),
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: /déposer le document/i }),
+    );
+
     await waitFor(() => expect(calledId).toBe('sign-1'));
+    expect(uploaded).toBe(true);
+    expect(depositBody.file_id).toBe(77);
+  });
+
+  test('sans document joint, le dépôt reste impossible', async () => {
+    renderApp(<SignaturePanel documents={[validated]} />);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /signer et déposer/i }),
+    );
+
+    expect(
+      await screen.findByRole('button', { name: /déposer le document/i }),
+    ).toBeDisabled();
   });
 
   test('le panneau est piloté par le STATUT : rien à signer, rien à afficher', () => {
