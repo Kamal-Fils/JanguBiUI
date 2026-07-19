@@ -859,8 +859,31 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Valider une demande (admin) */
+        /**
+         * Valider une demande (admin)
+         * @description Cet endpoint n'accepte AUCUN corps de requête : la validation est une simple transition d'état. Tout payload envoyé serait ignoré silencieusement.
+         */
         post: operations["v1_documents_admin_requests_validate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/admin/requests/counts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Compter les demandes par statut sur son périmètre (admin)
+         * @description Renvoie les six statuts, à 0 le cas échéant. Le filtre `status` est volontairement ignoré : les comptages porteraient sinon à zéro sur tous les autres statuts.
+         */
+        get: operations["v1_documents_admin_requests_counts_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2248,10 +2271,12 @@ export interface paths {
         get: operations["v1_org_churches_retrieve_2"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Supprimer une église (super_admin) */
+        delete: operations["v1_org_churches_destroy"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Modifier une église (super_admin) */
+        patch: operations["v1_org_churches_partial_update"];
         trace?: never;
     };
     "/api/v1/org/deaneries/": {
@@ -2272,6 +2297,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/org/deaneries/{deanery_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'un doyenné */
+        get: operations["v1_org_deaneries_retrieve"];
+        put?: never;
+        post?: never;
+        /** Supprimer un doyenné (super_admin) */
+        delete: operations["v1_org_deaneries_destroy"];
+        options?: never;
+        head?: never;
+        /** Modifier un doyenné (super_admin) */
+        patch: operations["v1_org_deaneries_partial_update"];
+        trace?: never;
+    };
     "/api/v1/org/dioceses/": {
         parameters: {
             query?: never;
@@ -2288,6 +2332,25 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/org/dioceses/{diocese_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'un diocèse */
+        get: operations["v1_org_dioceses_retrieve_2"];
+        put?: never;
+        post?: never;
+        /** Supprimer un diocèse (super_admin) */
+        delete: operations["v1_org_dioceses_destroy"];
+        options?: never;
+        head?: never;
+        /** Modifier un diocèse (super_admin) */
+        patch: operations["v1_org_dioceses_partial_update"];
         trace?: never;
     };
     "/api/v1/org/parishes/": {
@@ -2343,6 +2406,25 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/org/provinces/{province_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Détail d'une province */
+        get: operations["v1_org_provinces_retrieve_2"];
+        put?: never;
+        post?: never;
+        /** Supprimer une province (super_admin) */
+        delete: operations["v1_org_provinces_destroy"];
+        options?: never;
+        head?: never;
+        /** Modifier une province (super_admin) */
+        patch: operations["v1_org_provinces_partial_update"];
         trace?: never;
     };
     "/api/v1/rag/query/": {
@@ -3814,6 +3896,17 @@ export interface components {
             created_at?: string;
             /** Format: date-time */
             readonly updated_at: string;
+            readonly sla_days: number | null;
+            readonly sla_threshold_days: number | null;
+            readonly is_escalated: boolean;
+            readonly final_document_url: string | null;
+        };
+        /** @description Comptages par statut sur le périmètre d'autorité du demandeur. */
+        DocumentRequestStatusCountsOutput: {
+            counts: {
+                [key: string]: number;
+            };
+            total: number;
         };
         DocumentRequestSupplementInput: {
             additional_info?: string;
@@ -4406,6 +4499,21 @@ export interface components {
             /** Format: date-time */
             readonly updated_at?: string;
         };
+        PatchedChurchUpdateInput: {
+            name?: string;
+            church_type?: components["schemas"]["ChurchTypeEnum"];
+            city?: string;
+            address?: string;
+        };
+        PatchedDeaneryUpdateInput: {
+            name?: string;
+            /** Format: uuid */
+            dean_id?: string | null;
+        };
+        PatchedDioceseUpdateInput: {
+            name?: string;
+            code?: string;
+        };
         PatchedHomilieNoteInput: {
             passage_start_id?: number;
             passage_end_id?: number | null;
@@ -4431,6 +4539,10 @@ export interface components {
             accepts_pastoral_chat?: boolean;
             ordination_year?: number;
             bio?: string;
+        };
+        PatchedProvinceUpdateInput: {
+            name?: string;
+            code?: string;
         };
         PatchedVideoCreateUpdate: {
             title?: string;
@@ -6312,6 +6424,34 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DocumentRequestDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_documents_admin_requests_counts_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Filtrer par agent assigné */
+                assigned_to_id?: number;
+                /** @description Filtrer par type de document */
+                document_type?: string;
+                /** @description Filtrer par nom de paroisse */
+                parish_name?: string;
+                /** @description Recherche textuelle */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestStatusCountsOutput"];
                 };
             };
         };
@@ -8347,6 +8487,53 @@ export interface operations {
             };
         };
     };
+    v1_org_churches_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                church_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_org_churches_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                church_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedChurchUpdateInput"];
+                "multipart/form-data": components["schemas"]["PatchedChurchUpdateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedChurchUpdateInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChurchOutput"];
+                };
+            };
+        };
+    };
     v1_org_deaneries_list: {
         parameters: {
             query?: {
@@ -8385,6 +8572,74 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeaneryOutput"];
+                };
+            };
+        };
+    };
+    v1_org_deaneries_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deanery_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeaneryOutput"];
+                };
+            };
+        };
+    };
+    v1_org_deaneries_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deanery_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_org_deaneries_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deanery_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedDeaneryUpdateInput"];
+                "multipart/form-data": components["schemas"]["PatchedDeaneryUpdateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedDeaneryUpdateInput"];
+            };
+        };
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8436,6 +8691,74 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DioceseOutput"];
+                };
+            };
+        };
+    };
+    v1_org_dioceses_retrieve_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                diocese_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DioceseOutput"];
+                };
+            };
+        };
+    };
+    v1_org_dioceses_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                diocese_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_org_dioceses_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                diocese_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedDioceseUpdateInput"];
+                "multipart/form-data": components["schemas"]["PatchedDioceseUpdateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedDioceseUpdateInput"];
+            };
+        };
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8608,6 +8931,74 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProvinceOutput"];
+                };
+            };
+        };
+    };
+    v1_org_provinces_retrieve_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                province_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProvinceOutput"];
+                };
+            };
+        };
+    };
+    v1_org_provinces_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                province_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_org_provinces_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                province_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedProvinceUpdateInput"];
+                "multipart/form-data": components["schemas"]["PatchedProvinceUpdateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedProvinceUpdateInput"];
+            };
+        };
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
