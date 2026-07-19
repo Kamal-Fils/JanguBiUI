@@ -98,12 +98,28 @@ const CHIP_CLASS =
  * 1.4.1). Tokens sémantiques uniquement.
  */
 const CHIP_STYLES: Record<SlaKind, string> = {
-  late: 'bg-destructive/10 text-destructive',
+  // Le retard porte en plus un cerne : sur un écran dense, une pastille
+  // simplement teintée se noie dans la file.
+  late: 'bg-destructive/10 text-destructive ring-1 ring-destructive/30',
   due: 'bg-warning/10 text-warning',
   ok: 'bg-success/10 text-success',
   dormant: 'bg-muted text-muted-foreground',
   closed: 'bg-muted text-muted-foreground',
   unknown: 'bg-muted text-muted-foreground',
+};
+
+/**
+ * Liseré de la ligne en vue mobile. Redondant avec la pastille (icône +
+ * libellé) : la couleur ne porte jamais seule l'information de retard, elle
+ * ne fait que la rendre repérable au défilement.
+ */
+export const SLA_ROW_ACCENT: Record<SlaKind, string> = {
+  late: 'border-l-destructive',
+  due: 'border-l-warning',
+  ok: 'border-l-border',
+  dormant: 'border-l-border',
+  closed: 'border-l-border',
+  unknown: 'border-l-border',
 };
 
 const CHIP_ICONS: Record<SlaKind, ReactNode> = {

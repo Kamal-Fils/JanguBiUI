@@ -196,3 +196,109 @@ describe('AdminDocumentList — priorisation par SLA', () => {
     ).toBeGreaterThan(0);
   });
 });
+
+describe('AdminDocumentList — densité de la ligne', () => {
+  test('réunit requérant, référence, paroisse et date sur une seule ligne', async () => {
+    const doc = createDocumentRequest({
+      document_type: 'Baptême',
+      requester_name: 'Awa Ndiaye',
+      reference: 'DOC-2026-0301',
+      parish_name: 'Saint-Joseph',
+      created_at: '2026-01-03T10:00:00Z',
+      status: 'submitted',
+    });
+
+    renderApp(<AdminDocumentList documents={[doc]} />);
+
+    // Une seule ligne de contexte remplace trois lignes empilées et deux
+    // colonnes dédiées (paroisse, date de réception).
+    const [context] = await screen.findAllByText(
+      /Awa Ndiaye · Réf\. DOC-2026-0301 · Saint-Joseph · reçue le 3 janv\. 2026/,
+    );
+    expect(context).toBeInTheDocument();
+  });
+
+  test('reste lisible quand référence et paroisse manquent', async () => {
+    const doc = createDocumentRequest({
+      document_type: 'Baptême',
+      requester_name: 'Awa Ndiaye',
+      reference: null,
+      parish_name: null,
+      created_at: '2026-01-03T10:00:00Z',
+      status: 'submitted',
+    });
+
+    renderApp(<AdminDocumentList documents={[doc]} />);
+
+    const [context] = await screen.findAllByText(
+      /^Awa Ndiaye · reçue le 3 janv\. 2026$/,
+    );
+    expect(context).toBeInTheDocument();
+  });
+});
+
+describe('AdminDocumentList — vue mobile exploitable', () => {
+  test('rend une liste de demandes hors du tableau, sans libellés répétés', async () => {
+    const doc = createDocumentRequest({
+      id: 'm-1',
+      document_type: 'Baptême',
+      requester_name: 'Awa Ndiaye',
+      status: 'submitted',
+    });
+
+    renderApp(<AdminDocumentList documents={[doc]} />);
+
+    const table = await screen.findByRole('table');
+    const mobileList = screen.getByRole('list');
+    expect(mobileList).not.toBe(table);
+    expect(mobileList).toHaveTextContent('Baptême');
+    // Les paires libellé/valeur de la DataTable (« Délai », « Statut »…)
+    // n'ont pas leur place sur une file de traitement : la donnée suffit.
+    expect(mobileList).not.toHaveTextContent('Délai');
+    expect(mobileList).not.toHaveTextContent('Statut');
+  });
+
+  test('l’action principale est atteignable depuis la ligne mobile', async () => {
+    const doc = createDocumentRequest({
+      id: 'm-2',
+      document_type: 'Baptême',
+      requester_name: 'Awa Ndiaye',
+      status: 'submitted',
+    });
+
+    renderApp(<AdminDocumentList documents={[doc]} />);
+
+    const mobileList = await screen.findByRole('list');
+    expect(
+      within(mobileList).getByRole('button', {
+        name: /démarrer la vérification/i,
+      }),
+    ).toBeInTheDocument();
+  });
+
+  test('une demande clôturée n’ouvre aucune zone d’action vide', async () => {
+    const doc = createDocumentRequest({
+      id: 'm-3',
+      document_type: 'Baptême',
+      requester_name: 'Awa Ndiaye',
+      status: 'document_deposited',
+    });
+
+    renderApp(<AdminDocumentList documents={[doc]} />);
+
+    const mobileList = await screen.findByRole('list');
+    expect(within(mobileList).queryAllByRole('button')).toHaveLength(0);
+  });
+
+  test('affiche un état de chargement unique, pas un par présentation', () => {
+    const { container } = renderApp(
+      <AdminDocumentList documents={[]} isLoading />,
+    );
+
+    expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/aucune demande à traiter/i),
+    ).not.toBeInTheDocument();
+  });
+});

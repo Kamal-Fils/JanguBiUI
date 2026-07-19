@@ -12,6 +12,7 @@ import { useArticleDetail } from '../api/get-article';
 
 import { ArticleHero } from './article-hero';
 import { ArticleTypeBadge } from './article-type-badge';
+import { EditorialRule } from './editorial-rule';
 
 interface ArticleDetailProps {
   articleId: string;
@@ -65,13 +66,25 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
 
   if (isError || !article) {
     return (
-      <div className="flex flex-col items-center gap-3 py-16 text-center">
-        <p className="text-sm text-muted-foreground">Article introuvable.</p>
+      <div
+        className="mx-auto flex max-w-md flex-col items-center gap-4 px-4 py-16 text-center"
+        role="alert"
+      >
+        <div className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <BookOpen className="size-7" aria-hidden="true" />
+        </div>
+        <p className="font-serif text-xl font-bold text-foreground">
+          Article introuvable.
+        </p>
+        <p className="text-[15px] leading-relaxed text-foreground/70">
+          Cet article a peut-être été retiré, ou le lien n&apos;est plus valide.
+        </p>
         <button
           type="button"
           onClick={() => router.back()}
-          className="text-sm text-primary underline underline-offset-2"
+          className="mt-1 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90"
         >
+          <ArrowLeft className="size-4" aria-hidden="true" />
           Retour
         </button>
       </div>
@@ -86,10 +99,12 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
   return (
     <article className="flex flex-col">
       <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+        {/* R3 — cible tactile 44 px : le retour est l'action la plus utilisée
+            de l'écran, il ne peut pas être un bouton de 32 px. */}
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex size-8 items-center justify-center rounded-full hover:bg-muted"
+          className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-full text-foreground hover:bg-primary/10 hover:text-primary"
           aria-label="Retour"
         >
           <ArrowLeft className="size-5" />
@@ -112,19 +127,21 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
             {article.category && (
               <>
                 <span
-                  className="size-1 rounded-full bg-accent/50"
+                  className="size-1 rounded-full bg-primary/40"
                   aria-hidden="true"
                 />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gold-ink">
+                {/* Bleu profond en clair (AA sur blanc), `--primary` en sombre :
+                    voir la note de contraste dans article-feed-card.tsx. */}
+                <span className="text-xs font-semibold uppercase tracking-widest text-secondary-foreground dark:text-primary">
                   {article.category.name}
                 </span>
               </>
             )}
             <span
-              className="size-1 rounded-full bg-accent/50"
+              className="size-1 rounded-full bg-primary/40"
               aria-hidden="true"
             />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            <span className="text-xs font-semibold uppercase tracking-widest text-foreground/70">
               {scopeLabel[article.scope_type] ?? article.scope_type}
             </span>
           </div>
@@ -134,16 +151,17 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
           </h1>
 
           {article.excerpt && (
-            // Chapô — corps supérieur gris doux, mesure de lecture.
-            <p className="mt-3 max-w-reading text-lg leading-relaxed text-muted-foreground">
+            // Chapô — corps supérieur à la mesure de lecture. Pas de gris clair
+            // sur blanc (R3) : on descend en opacité du texte, pas en gris.
+            <p className="mt-3 max-w-reading text-lg leading-relaxed text-foreground/80">
               {article.excerpt}
             </p>
           )}
 
-          <div className="hairline-gold mb-4 mt-5" aria-hidden="true" />
+          <EditorialRule className="mb-4 mt-5" />
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-muted-foreground">
-            <span className="flex items-center gap-1.5 font-medium text-foreground/80">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-foreground/70">
+            <span className="flex items-center gap-1.5 font-semibold text-foreground">
               <User className="size-3.5" />
               {article.author_name}
             </span>
@@ -172,7 +190,7 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
                 'prose-headings:font-serif prose-headings:tracking-tight prose-headings:text-foreground',
                 'prose-p:leading-[1.8] prose-p:text-foreground/90',
                 'prose-a:text-primary prose-a:underline-offset-2',
-                'prose-blockquote:border-l-accent/60 prose-blockquote:font-serif prose-blockquote:text-foreground/80',
+                'prose-blockquote:border-l-primary/50 prose-blockquote:font-serif prose-blockquote:text-foreground/80',
                 'prose-strong:text-foreground prose-li:text-foreground/90',
                 'prose-img:rounded-xl prose-hr:border-border',
                 withLettrine && 'lettrine',
@@ -194,16 +212,17 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
             </div>
           )}
 
-          {/* Fin d'article — séparateur éditorial, marque de clôture. */}
+          {/* Fin d'article — filets bleus, marque or. L'or n'apparaît qu'ici
+              dans tout l'écran : c'est un accent, pas un registre. */}
           <div
             className="mt-10 flex max-w-reading items-center gap-3"
             aria-hidden="true"
           >
-            <span className="hairline-gold flex-1" />
+            <EditorialRule className="flex-1" />
             <span className="font-serif text-sm leading-none text-gold-ink">
               ✦
             </span>
-            <span className="hairline-gold flex-1" />
+            <EditorialRule className="flex-1" />
           </div>
         </div>
       </div>

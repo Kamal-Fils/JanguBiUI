@@ -1,35 +1,58 @@
 'use client';
 
-import { Plus } from 'lucide-react';
+import { HandHeart, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 import { Card } from '@/components/ui/card/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { paths } from '@/config/paths';
 import { useMyIntentions } from '@/features/intentions/api/get-my-intentions';
 import { IntentionStatusBadge } from '@/features/intentions/components/intention-status-badge';
 
-export function MyIntentionsSection() {
-  const { data, isLoading } = useMyIntentions();
+/** Trois suffit : le reste vit sur la page Intentions, à un tap. */
+const HOME_INTENTIONS_COUNT = 3;
 
-  const recentIntentions = (data?.results ?? []).slice(0, 3);
+export function MyIntentionsSection() {
+  const { data, isLoading, isError, refetch } = useMyIntentions();
+
+  const recentIntentions = (data?.results ?? []).slice(
+    0,
+    HOME_INTENTIONS_COUNT,
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-2">
+        {[1, 2].map((i) => (
+          <Skeleton key={i} className="h-16 w-full rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <ErrorState
+        title="Intentions indisponibles"
+        description="Vos intentions n’ont pas pu être chargées."
+        onRetry={() => void refetch()}
+        className="py-8"
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-3">
-      {isLoading && (
-        <div className="flex flex-col gap-2">
-          {[1, 2].map((i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-xl" />
-          ))}
-        </div>
-      )}
-
-      {!isLoading && recentIntentions.length === 0 && (
-        <p className="rounded-xl border border-dashed border-border py-4 text-center text-sm text-muted-foreground">
-          Vous n&apos;avez pas encore déposé d&apos;intention.
-        </p>
-      )}
-
-      {!isLoading &&
+      {recentIntentions.length === 0 ? (
+        <EmptyState
+          icon={<HandHeart />}
+          title="Aucune intention déposée"
+          description="Confiez une intention à votre paroisse : elle sera portée à la messe."
+          className="py-8"
+        />
+      ) : (
         recentIntentions.map((intention) => (
           <Card
             key={intention.id}
@@ -55,13 +78,14 @@ export function MyIntentionsSection() {
             </div>
             <IntentionStatusBadge status={intention.status} />
           </Card>
-        ))}
+        ))
+      )}
 
       <Link
-        href="/app/intentions"
-        className="flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+        href={paths.app.intentions.getHref()}
+        className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/10 text-sm font-semibold text-primary transition-colors hover:bg-primary/15"
       >
-        <Plus className="size-4" />
+        <Plus className="size-4" aria-hidden="true" />
         Déposer une intention
       </Link>
     </div>

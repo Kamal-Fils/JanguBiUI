@@ -13,9 +13,15 @@ import {
 import { ScriptureQuote } from '@/components/ui/scripture-quote';
 import { SectionHeader } from '@/components/ui/section-header';
 import { paths } from '@/config/paths';
+import { useUser } from '@/lib/auth';
+import { isClergy } from '@/lib/authorization';
 import { cn } from '@/utils/cn';
+import { getLiturgicalTone } from '@/utils/liturgical-color';
 
-// Surtitre éditorial + accent (or / indigo) de la pastille d'icône par section.
+import { useLiturgicalInfo } from '../api/get-liturgy';
+
+// Surtitre éditorial + accent de la pastille d'icône. Le bleu domine
+// (DIRECTION §1) ; l'or reste un accent, réservé à la prière mariale.
 type SectionTone = 'gold' | 'indigo';
 
 interface SpirituelSection {
@@ -81,7 +87,7 @@ const sections: SpirituelSection[] = [
     eyebrow: 'Messe du jour',
     label: 'Liturgie du Jour',
     description: 'Lectures · Évangile · Messe du jour',
-    tone: 'gold',
+    tone: 'indigo',
   },
   {
     href: paths.app.spirituelHeures.getHref(),
@@ -103,9 +109,20 @@ const sections: SpirituelSection[] = [
 
 interface SectionCardProps {
   section: SpirituelSection;
+  /** Pastille du temps liturgique, posée devant le surtitre (R4 — discret). */
+  markerClass?: string;
+  /** Surtitre substitué (ex. le temps liturgique réel du jour). */
+  eyebrow?: string;
+  /** Note de restriction affichée sous la description (ex. accès clergé). */
+  note?: string;
 }
 
-function SectionCard({ section }: SectionCardProps) {
+function SectionCard({
+  section,
+  markerClass,
+  eyebrow,
+  note,
+}: SectionCardProps) {
   const Icon = section.icon;
   return (
     <Link
@@ -129,7 +146,18 @@ function SectionCard({ section }: SectionCardProps) {
           <Icon className={section.featured ? 'size-8' : 'size-7'} />
         </div>
         <div className="min-w-0 flex-1">
-          <CardEyebrow>{section.eyebrow}</CardEyebrow>
+          <CardEyebrow className="flex items-center gap-1.5">
+            {markerClass && (
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'inline-block size-1.5 shrink-0 rounded-full',
+                  markerClass,
+                )}
+              />
+            )}
+            {eyebrow ?? section.eyebrow}
+          </CardEyebrow>
           <CardTitle
             className={cn(
               'mt-1 font-serif',
@@ -141,6 +169,11 @@ function SectionCard({ section }: SectionCardProps) {
           <CardDescription className="mt-1 truncate">
             {section.description}
           </CardDescription>
+          {note && (
+            <p className="mt-1 text-xs font-medium text-muted-foreground">
+              {note}
+            </p>
+          )}
         </div>
         <ChevronRight className="size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none" />
       </Card>
@@ -154,6 +187,15 @@ export function SpirituelContent() {
     title: 'Spiritualité',
     subtitle: "Nourriture de l'âme au quotidien",
   });
+
+  const { data: user } = useUser();
+  // Même clé de cache que la liturgie du jour : la carte annonce le temps de
+  // l'Église sans requête supplémentaire au passage sur la page.
+  const { data: info } = useLiturgicalInfo();
+  const tone = getLiturgicalTone(info?.season);
+  const liturgieHref = paths.app.spirituelLiturgie.getHref();
+  const heuresHref = paths.app.spirituelHeures.getHref();
+  const canAccessHours = isClergy(user);
 
   return (
     <div className="flex flex-col">
@@ -174,9 +216,22 @@ export function SpirituelContent() {
         />
 
         <div className="flex flex-col gap-4">
-          {sections.map((section) => (
-            <SectionCard key={section.href} section={section} />
-          ))}
+          {sections.map((section) => {
+            const isLiturgie = section.href === liturgieHref;
+            return (
+              <SectionCard
+                key={section.href}
+                section={section}
+                markerClass={isLiturgie ? tone.dotClass : undefined}
+                eyebrow={isLiturgie ? tone.label : undefined}
+                note={
+                  section.href === heuresHref && !canAccessHours
+                    ? 'Réservé au clergé et aux religieux'
+                    : undefined
+                }
+              />
+            );
+          })}
         </div>
       </div>
     </div>

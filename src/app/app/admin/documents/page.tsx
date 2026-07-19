@@ -5,7 +5,6 @@ import { useState } from 'react';
 
 import { AdminPageLayout } from '@/components/layouts/admin-page-layout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardEyebrow } from '@/components/ui/card/card';
 import { ErrorState } from '@/components/ui/error-state';
 import { useAdminDocumentCounts } from '@/features/documents/api/get-admin-document-counts';
 import { useAdminDocuments } from '@/features/documents/api/get-admin-documents';
@@ -61,6 +60,8 @@ export default function AdminDocumentsPage() {
   const totalCount = data?.count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const showPagination = !isError && totalCount > PAGE_SIZE;
+  const firstShown = totalCount === 0 ? 0 : page * PAGE_SIZE + 1;
+  const lastShown = Math.min((page + 1) * PAGE_SIZE, totalCount);
 
   // Sans filtre, une file vide n'a rien à montrer : on évite d'afficher un état
   // vide trompeur juste sous un panneau de signature rempli.
@@ -72,7 +73,9 @@ export default function AdminDocumentsPage() {
       title="Demandes de documents"
       subtitle="File de traitement paroissiale, priorisée par délai"
       allow={canProcessDocuments}
-      width="lg"
+      // Écran de travail : on prend la largeur disponible pour tenir plus de
+      // demandes à l'écran, pas une mesure de lecture confortable.
+      width="xl"
       toolbar={
         <QueueCounters
           value={statusFilter}
@@ -83,60 +86,64 @@ export default function AdminDocumentsPage() {
       }
     >
       {isError ? (
-        <Card variant="feature">
-          <CardContent className="p-4 sm:p-5">
-            <ErrorState
-              title="Impossible de charger les demandes"
-              onRetry={() => refetch()}
-            />
-          </CardContent>
-        </Card>
+        <ErrorState
+          title="Impossible de charger les demandes"
+          onRetry={() => refetch()}
+        />
       ) : (
         <>
           <SignaturePanel documents={awaitingSignature} />
 
           {showQueueCard && (
-            <Card variant="feature">
-              <CardContent className="p-4 sm:p-5">
-                <CardEyebrow className="mb-3">Par ordre d’urgence</CardEyebrow>
-                <AdminDocumentList
-                  documents={queueDocuments}
-                  isLoading={isLoading}
-                />
+            <section aria-labelledby="queue-title">
+              <h2
+                id="queue-title"
+                className="mb-2 text-sm font-semibold text-foreground"
+              >
+                File de traitement
+              </h2>
 
-                {showPagination && (
-                  <nav
-                    aria-label="Pagination de la file"
-                    className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3"
+              <AdminDocumentList
+                documents={queueDocuments}
+                isLoading={isLoading}
+              />
+
+              {showPagination && (
+                <nav
+                  aria-label="Pagination de la file"
+                  className="mt-3 flex items-center justify-between gap-3"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-11 md:h-8"
+                    disabled={page === 0}
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
                   >
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page === 0}
-                      onClick={() => setPage((p) => Math.max(0, p - 1))}
-                    >
-                      <ChevronLeft className="size-4" aria-hidden="true" />
-                      Précédent
-                    </Button>
-                    <span
-                      aria-live="polite"
-                      className="text-xs text-muted-foreground"
-                    >
-                      Page {page + 1} sur {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page + 1 >= totalPages}
-                      onClick={() => setPage((p) => p + 1)}
-                    >
-                      Suivant
-                      <ChevronRight className="size-4" aria-hidden="true" />
-                    </Button>
-                  </nav>
-                )}
-              </CardContent>
-            </Card>
+                    <ChevronLeft className="size-4" aria-hidden="true" />
+                    Précédent
+                  </Button>
+                  {/* Une plage exacte situe mieux qu'un numéro de page : l'agent
+                      sait combien de demandes restent derrière lui. */}
+                  <span
+                    aria-live="polite"
+                    className="text-xs tabular-nums text-muted-foreground"
+                  >
+                    {firstShown}–{lastShown} sur {totalCount}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-11 md:h-8"
+                    disabled={page + 1 >= totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Suivant
+                    <ChevronRight className="size-4" aria-hidden="true" />
+                  </Button>
+                </nav>
+              )}
+            </section>
           )}
         </>
       )}

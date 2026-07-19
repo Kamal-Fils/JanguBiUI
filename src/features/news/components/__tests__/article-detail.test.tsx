@@ -258,6 +258,42 @@ describe('ArticleDetail', () => {
     ).toBeInTheDocument();
   });
 
+  test('renders plain-text content as text (content_format "text")', async () => {
+    // Les anciens articles rédigés en textarea ne doivent JAMAIS repasser par
+    // un rendu HTML : les balises qu'ils contiennent restent du texte.
+    server.use(
+      http.get(`${env.API_URL}/v1/news/article-1/`, () =>
+        HttpResponse.json(
+          createArticleDetail({
+            id: 'article-1',
+            content_format: 'text',
+            content: 'Première ligne\n<b>pas du gras</b>',
+          }),
+        ),
+      ),
+    );
+
+    renderApp(<ArticleDetail articleId="article-1" />);
+
+    expect(await screen.findByText(/pas du gras/)).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(document.querySelector('b')).toBeNull();
+  });
+
+  test('not-found state offers a recovery action back to the previous screen', async () => {
+    server.use(
+      http.get(`${env.API_URL}/v1/news/nonexistent/`, () =>
+        HttpResponse.json({ message: 'Not found.' }, { status: 404 }),
+      ),
+    );
+
+    renderApp(<ArticleDetail articleId="nonexistent" />);
+
+    // L'écran d'erreur est annoncé (role alert) et propose une sortie visible.
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /retour/i })).toBeInTheDocument();
+  });
+
   test('shows the estimated reading time computed from the content', async () => {
     // 400 mots à ~200 mots/min → « 2 min de lecture ».
     server.use(

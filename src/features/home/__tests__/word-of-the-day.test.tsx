@@ -5,7 +5,7 @@ import { env } from '@/config/env';
 import { server } from '@/testing/mocks/server';
 import { renderApp } from '@/testing/test-utils';
 
-import { getLiturgicalTone } from '../utils/liturgical-color';
+import { getLiturgicalTone } from '@/utils/liturgical-color';
 import { WordOfTheDay } from '../word-of-the-day';
 
 const LITURGY_URL = `${env.API_URL}/v1/liturgy/today/`;
@@ -59,6 +59,17 @@ describe('getLiturgicalTone — la couleur suit le temps liturgique', () => {
     // « Temps du Carême » précède Pâques : l'ordre des règles compte.
     expect(getLiturgicalTone('Carême — vers Pâques').color).toBe('violet');
   });
+
+  test('n’expose qu’un marqueur discret — pastille et encre, pas de lavis', () => {
+    // Le héros lavait toute la page de la couleur du temps, ce qui mangeait le
+    // bleu Jàngu Bi qui est l'identité (DIRECTION R4). Le contrat est
+    // désormais : une pastille, une encre de surtitre, rien d'autre.
+    const tone = getLiturgicalTone('Temps ordinaire');
+
+    expect(tone.dotClass).toBeTruthy();
+    expect(tone.inkClass).toBeTruthy();
+    expect(tone).not.toHaveProperty('washClass');
+  });
 });
 
 describe('WordOfTheDay', () => {
@@ -103,6 +114,15 @@ describe('WordOfTheDay', () => {
     renderApp(<WordOfTheDay />);
 
     expect(await screen.findByText(/temps de l’avent/i)).toBeInTheDocument();
+  });
+
+  test('le temps liturgique est écrit, jamais porté par la seule couleur', async () => {
+    // WCAG 1.4.1 : la pastille de couleur est décorative (aria-hidden) et le
+    // nom du temps reste lisible à côté.
+    mockDay({ season: 'Temps du Carême' });
+    renderApp(<WordOfTheDay />);
+
+    expect(await screen.findByText(/temps du carême/i)).toBeInTheDocument();
   });
 
   test('sans lectures disponibles, propose d’ouvrir la liturgie', async () => {

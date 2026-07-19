@@ -7,23 +7,28 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { useUser } from '@/lib/auth';
 import { cn } from '@/lib/utils';
+import { getLiturgicalTone } from '@/utils/liturgical-color';
 import { normalizeReadingLabel } from '@/utils/reading-labels';
 
 import { useDailyReadings } from './api/get-daily-readings';
-import { getLiturgicalTone } from './utils/liturgical-color';
 
 /**
  * Ouverture de l'accueil du fidèle.
  *
- * Parti pris : **la Parole du jour est le sujet de la page**, pas le prénom de
- * l'utilisateur. Personne n'ouvre l'application pour se voir salué ; on
- * l'ouvre pour la lecture du jour, désignée comme l'ancre de rétention du
- * produit. La salutation devient donc une ligne de contexte au-dessus, et
- * l'Écriture prend l'échelle.
+ * Parti pris : **la Parole du jour est le geste quotidien qui fait revenir**,
+ * pas le prénom de l'utilisateur. Personne n'ouvre l'application pour se voir
+ * salué. La salutation devient donc une ligne de contexte, et l'Écriture prend
+ * l'échelle (`text-display`, cf. DIRECTION R2).
  *
- * La page s'habille de la **couleur liturgique** du temps (violet, blanc/or,
- * rouge, vert) : un signe que tout fidèle sait lire, qui change au fil de
- * l'année sans qu'on publie quoi que ce soit.
+ * Le registre est **bleu** : le bleu Jàngu Bi est l'identité décidée par le
+ * propriétaire, donc il tient l'ouverture — dégradé de surface, filet vertical,
+ * bouton d'action pleine couleur.
+ *
+ * La **couleur liturgique** reste un marqueur discret (DIRECTION R4) : une
+ * pastille et un surtitre, jamais un lavis. Une première version lavait tout le
+ * héros de la couleur du temps et mangeait le bleu — à ne pas refaire. Elle ne
+ * porte par ailleurs jamais seule une information (WCAG 1.4.1) : le nom du
+ * temps est toujours écrit à côté de la pastille.
  */
 export function WordOfTheDay() {
   const { data: user } = useUser();
@@ -58,43 +63,43 @@ export function WordOfTheDay() {
   return (
     <section
       aria-labelledby="parole-du-jour"
-      className="relative overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-soft-lg"
+      className="relative overflow-hidden rounded-[1.75rem] border border-primary/20 bg-card shadow-soft-lg"
     >
-      {/* Lavis de la couleur liturgique — décoratif, jamais porteur de sens seul */}
+      {/* Le bleu Jàngu Bi habille l'ouverture — décoratif, jamais porteur de sens */}
       <div
         aria-hidden="true"
-        className={cn(
-          'pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b',
-          tone.washClass,
-        )}
+        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/12 via-primary/5 to-transparent"
       />
-      {/* Filet vertical de la couleur du temps, à gauche */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 w-[3px]"
-        style={{ backgroundColor: `hsl(${tone.accentVar} / 0.55)` }}
+        className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-primary/10 blur-2xl"
+      />
+      {/* Filet vertical : signature de marque, à la couleur de l'identité */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-primary"
       />
 
-      <div className="relative bg-paper px-5 py-8 sm:px-10 sm:py-12">
-        {/* Contexte : salutation + date + temps liturgique */}
+      <div className="relative px-5 py-8 sm:px-10 sm:py-12">
+        {/* Contexte : salutation + date */}
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <p className="text-sm text-muted-foreground">
             {greeting}
             {firstName ? ` ${firstName},` : ','}
           </p>
-          <p className="text-sm capitalize text-muted-foreground/80">
-            {dateStr}
-          </p>
+          <p className="text-sm capitalize text-muted-foreground">{dateStr}</p>
         </div>
 
-        <p
-          className={cn(
-            'mt-6 text-[11px] font-semibold uppercase tracking-[0.22em]',
-            tone.inkClass,
-          )}
-        >
-          {tone.label}
-          {data?.day_name ? ` · ${data.day_name}` : ''}
+        {/* Marqueur liturgique : une pastille et un mot, pas un lavis */}
+        <p className="mt-6 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em]">
+          <span
+            aria-hidden="true"
+            className={cn('size-2 shrink-0 rounded-full', tone.dotClass)}
+          />
+          <span className={tone.inkClass}>
+            {tone.label}
+            {data?.day_name ? ` · ${data.day_name}` : ''}
+          </span>
         </p>
 
         <h1
@@ -137,10 +142,11 @@ export function WordOfTheDay() {
                 <span className="mt-1.5 block font-serif text-headline font-bold leading-tight text-foreground transition-colors group-hover:text-primary">
                   {gospel.citation || 'Évangile du jour'}
                 </span>
-                <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+                {/* Action pleine couleur : le bleu porte le geste (R1, R3 ≥44px) */}
+                <span className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-soft transition-colors group-hover:bg-primary/90">
                   Lire l’Évangile
                   <ArrowRight
-                    className="size-4 transition-transform group-hover:translate-x-0.5"
+                    className="size-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none"
                     aria-hidden="true"
                   />
                 </span>
@@ -148,17 +154,17 @@ export function WordOfTheDay() {
             )}
 
             {others.length > 0 && (
-              <ul className="mt-8 flex flex-col divide-y divide-border/50 border-t border-border/50">
+              <ul className="mt-8 flex flex-col divide-y divide-border/60 border-t border-border/60">
                 {others.map((reading) => (
                   <li key={reading.id}>
                     <Link
                       href={paths.app.spirituelLiturgie.getHref()}
-                      className="group flex items-baseline justify-between gap-4 py-3"
+                      className="group flex min-h-11 items-center justify-between gap-4 py-3"
                     >
                       <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                         {normalizeReadingLabel(reading.type ?? '') || 'Lecture'}
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-right font-serif text-sm text-foreground/90 transition-colors group-hover:text-primary">
+                      <span className="min-w-0 flex-1 truncate text-right font-serif text-sm text-foreground transition-colors group-hover:text-primary">
                         {reading.citation}
                       </span>
                     </Link>

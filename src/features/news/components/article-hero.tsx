@@ -34,9 +34,9 @@ export function ArticleHero({ imageUrl, alt }: ArticleHeroProps) {
     <div
       data-testid="article-hero-placeholder"
       aria-hidden="true"
-      className="flex aspect-[3/1] w-full items-center justify-center bg-gradient-to-br from-primary/15 via-primary/5 to-accent/15 md:rounded-xl"
+      className="flex aspect-[3/1] w-full items-center justify-center bg-gradient-to-br from-primary/25 via-primary/10 to-primary/5 md:rounded-xl"
     >
-      <Newspaper className="size-9 text-primary/40" />
+      <Newspaper className="size-10 text-primary/60" />
     </div>
   );
 }

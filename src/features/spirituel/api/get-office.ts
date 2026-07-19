@@ -3,32 +3,23 @@ import { z } from 'zod';
 
 import { api } from '@/lib/api-client';
 
-const hymnSchema = z.object({
-  text: z.string(),
-  type: z.string().optional(),
-});
-
-const psalmSchema = z.object({
-  id: z.number().optional(),
-  citation: z.string().optional(),
-  title: z.string().optional(),
-  text: z.string(),
-});
-
-const intercessionSchema = z.object({
-  text: z.string(),
-});
-
-export const officeSchema = z.object({
-  id: z.number(),
-  office_type: z.string(),
-  date: z.string().optional(),
-  hymns: z.array(hymnSchema).optional(),
-  psalms: z.array(psalmSchema).optional(),
-  intercessions: z.array(intercessionSchema).optional(),
-  intro: z.string().optional(),
-  conclusion: z.string().optional(),
-});
+/**
+ * Un office de la Liturgie des Heures.
+ *
+ * Le schéma est délibérément **tolérant** : le contrat OpenAPI type `psalms`
+ * et `readings` en `unknown`, et le backend livre ces clés tantôt en chaîne
+ * HTML, tantôt en liste d'objets. Une version antérieure les déclarait en
+ * `z.array(...)` stricts : dès que l'AELF renvoyait une chaîne, `parse()`
+ * levait et l'office entier affichait « Impossible de charger cet office ».
+ * La mise en forme est déléguée à `toOfficeSections`, qui absorbe les formes.
+ */
+export const officeSchema = z
+  .object({
+    id: z.number(),
+    office_type: z.string(),
+    date: z.string().nullish(),
+  })
+  .passthrough();
 
 export type Office = z.infer<typeof officeSchema>;
 
@@ -56,5 +47,21 @@ export const getOfficeQueryOptions = (officeKey: OfficeKey, date?: string) =>
     retry: false,
   });
 
-export const useOffice = (officeKey: OfficeKey, date?: string) =>
-  useQuery(getOfficeQueryOptions(officeKey, date));
+interface UseOfficeOptions {
+  date?: string;
+  /**
+   * Les offices sont réservés au clergé et aux religieux côté backend
+   * (`CanAccessLiturgyOfHours`). Laisser un fidèle déclencher la requête
+   * affiche un toast 403 à chaque visite : on passe `enabled: false`.
+   */
+  enabled?: boolean;
+}
+
+export const useOffice = (
+  officeKey: OfficeKey,
+  { date, enabled = true }: UseOfficeOptions = {},
+) =>
+  useQuery({
+    ...getOfficeQueryOptions(officeKey, date),
+    enabled,
+  });

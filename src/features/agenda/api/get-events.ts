@@ -33,11 +33,17 @@ type EventsResponse = z.infer<typeof eventsResponseSchema>;
 // portée « ma paroisse ». Seul le type d'événement reste filtrable.
 type EventsParams = {
   event_type?: string;
+  /** Pagination serveur — évite de rapatrier tout l'agenda pour n'afficher
+      qu'un aperçu (l'accueil n'en montre que trois). */
+  limit?: number;
+  offset?: number;
 };
 
 export const getEvents = (params?: EventsParams): Promise<EventsResponse> => {
   const query = new URLSearchParams();
   if (params?.event_type) query.set('event_type', params.event_type);
+  if (params?.limit !== undefined) query.set('limit', String(params.limit));
+  if (params?.offset !== undefined) query.set('offset', String(params.offset));
   const qs = query.toString();
   return api
     .get<unknown>(`/v1/agenda/events/${qs ? `?${qs}` : ''}`)
