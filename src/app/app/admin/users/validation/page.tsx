@@ -18,7 +18,6 @@ export default function ClergyValidationPage() {
       title="Validation des comptes clergé"
       subtitle="Approuver ou refuser les comptes en attente de validation hiérarchique"
       allow={canManageClergy}
-      width="lg"
     >
       {isError ? (
         <ErrorState

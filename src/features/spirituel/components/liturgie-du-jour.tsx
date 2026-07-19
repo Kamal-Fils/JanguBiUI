@@ -65,7 +65,10 @@ export function LiturgieDuJour() {
   };
 
   return (
-    <ContentContainer width="reading" className="pb-20">
+    // Cadre standard de l'app. La mesure ~68ch n'est PAS portée par le cadre
+    // (elle rétrécissait l'écran entier, en-tête et sommaire compris) mais par
+    // `ReadingSurface` à l'intérieur de chaque `ReadingArticle`.
+    <ContentContainer className="pb-20">
       {isLoading ? (
         <LiturgieSkeleton />
       ) : (

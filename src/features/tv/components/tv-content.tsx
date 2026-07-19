@@ -3,6 +3,7 @@
 import { Play, Radio, Tv } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { PageHeader } from '@/components/layouts/page-header';
 import { Button } from '@/components/ui/button/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -201,7 +202,7 @@ export function TvContent() {
         subtitle="La parole en images — programmes, lives et formations"
       />
 
-      <div className="mx-auto w-full max-w-6xl p-4">
+      <ContentContainer>
         <div className="mb-6">
           <FilterPills
             options={filterOptions}
@@ -275,7 +276,7 @@ export function TvContent() {
             <VideoGrid videos={sortedVideos} />
           </>
         )}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

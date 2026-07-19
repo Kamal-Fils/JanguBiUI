@@ -942,6 +942,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/documents/requests/options/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Options du formulaire de demande (types, motifs, compatibilités)
+         * @description Référentiel du formulaire : types, motifs, et la règle qui les relie.
+         *
+         *     Le frontend consomme cette réponse plutôt que de redéclarer la table en dur —
+         *     une copie côté client finirait par diverger de la règle appliquée au serveur.
+         */
+        get: operations["v1_documents_requests_options_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/donations/{donation_id}/confirm/": {
         parameters: {
             query?: never;
@@ -1018,6 +1041,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Déclencher les erreurs de démonstration (super admin) */
         get: operations["v1_errors_trigger_retrieve"];
         put?: never;
         post?: never;
@@ -1034,6 +1058,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Déclencher une exception non gérée (super admin) */
         get: operations["v1_errors_trigger_exception_retrieve"];
         put?: never;
         post?: never;
@@ -3799,6 +3824,8 @@ export interface components {
         };
         DocumentRequestCreateInput: {
             document_type: components["schemas"]["DocumentTypeEnum"];
+            /** @default  */
+            document_type_free: string;
             reason: components["schemas"]["ReasonEnum"];
             /** @default  */
             reason_free: string;
@@ -3837,6 +3864,7 @@ export interface components {
             reference: string;
             document_type: components["schemas"]["DocumentTypeEnum"];
             readonly document_type_label: string;
+            document_type_free?: string;
             reason: components["schemas"]["ReasonEnum"];
             readonly reason_label: string;
             reason_free?: string;
@@ -3882,6 +3910,7 @@ export interface components {
             reference: string;
             document_type: components["schemas"]["DocumentTypeEnum"];
             readonly document_type_label: string;
+            document_type_free?: string;
             reason: components["schemas"]["ReasonEnum"];
             status?: components["schemas"]["Status165Enum"];
             readonly status_label: string;
@@ -3901,6 +3930,18 @@ export interface components {
             readonly is_escalated: boolean;
             readonly final_document_url: string | null;
         };
+        /** @description Référentiel du formulaire de demande — source unique de la règle type ↔ motif. */
+        DocumentRequestOptionsOutput: {
+            document_types: components["schemas"]["DocumentRequestTypeOption"][];
+            reasons: components["schemas"]["DocumentRequestReasonOption"][];
+        };
+        /** @description Un motif de demande : valeur technique + libellé affichable. */
+        DocumentRequestReasonOption: {
+            /** @description Valeur à renvoyer dans le champ `reason`. */
+            value: string;
+            /** @description Libellé affichable (français). */
+            label: string;
+        };
         /** @description Comptages par statut sur le périmètre d'autorité du demandeur. */
         DocumentRequestStatusCountsOutput: {
             counts: {
@@ -3914,15 +3955,27 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /** @description Un type de document, avec les motifs recevables pour ce type. */
+        DocumentRequestTypeOption: {
+            /** @description Valeur à renvoyer dans le champ `document_type`. */
+            value: string;
+            /** @description Libellé affichable (français). */
+            label: string;
+            /** @description Si vrai, `document_type_free` est obligatoire (cas « Autre document »). */
+            requires_precision: boolean;
+            /** @description Valeurs de `reason` recevables avec ce type de document. */
+            allowed_reasons: string[];
+        };
         /**
          * @description * `baptism` - Certificat de baptême
          *     * `first_communion` - Attestation de première communion
          *     * `confirmation` - Attestation de confirmation
          *     * `religious_marriage` - Attestation de mariage religieux
          *     * `godparent` - Attestation parrain / marraine
+         *     * `other` - Autre document
          * @enum {string}
          */
-        DocumentTypeEnum: "baptism" | "first_communion" | "confirmation" | "religious_marriage" | "godparent";
+        DocumentTypeEnum: "baptism" | "first_communion" | "confirmation" | "religious_marriage" | "godparent" | "other";
         DonationConfirmInput: {
             /** @default  */
             payment_reference: string;
@@ -5570,8 +5623,29 @@ export interface operations {
             };
         };
         responses: {
-            /** @description No response body */
-            200: {
+            /** @description Import enqueued — `{"status": ...}` */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Nom de fichier invalide (chemin de répertoire interdit) — `{"error": ...}` */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Réservé aux super-utilisateurs — `{"error": ...}` */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Fichier introuvable dans le dossier d'importation — `{"error": ...}` */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6561,6 +6635,25 @@ export interface operations {
             };
         };
     };
+    v1_documents_requests_options_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRequestOptionsOutput"];
+                };
+            };
+        };
+    };
     v1_donations_confirm_create: {
         parameters: {
             query?: never;
@@ -6691,12 +6784,16 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
+            /** @description Objet libre : une clé par fonction `trigger_*` de `apps.errors.services`, dont la valeur est la réponse sérialisée par chaque exception handler. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
             };
         };
     };
@@ -6709,8 +6806,8 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
-            200: {
+            /** @description Lève systématiquement une exception non gérée (test du reporting d'erreurs). */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

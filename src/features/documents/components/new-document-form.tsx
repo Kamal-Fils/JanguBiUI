@@ -11,6 +11,7 @@ import {
   FileText,
   Gem,
   HandHeart,
+  FileQuestion,
   Loader2,
   type LucideIcon,
   Paperclip,
@@ -46,6 +47,7 @@ import { useUser } from '@/lib/auth';
 import { cn } from '@/utils/cn';
 
 import { CreateDocumentInput, useCreateDocument } from '../api/create-document';
+import { useDocumentOptions } from '../api/get-document-options';
 import { useUploadDocumentFile } from '../api/upload-document-file';
 import { formatDocumentType } from '../utils/format-document-type';
 
@@ -59,52 +61,81 @@ const ACCEPTED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png';
 // ── Constants ────────────────────────────────────────────────────────────────
 
 /**
- * Les 5 types réels du contrat backend. Le **libellé** vient de la source
- * unique `formatDocumentType` (utils de la feature) : on n'ajoute ici que les
- * repères de choix demandés par la maquette 02 (icône + usage), jamais un
- * libellé concurrent.
+ * Métadonnées de PRÉSENTATION uniquement (icône + repère d'usage), indexées par
+ * la valeur du type. La liste des types, leurs libellés et surtout les motifs
+ * recevables pour chacun viennent du serveur (`useDocumentOptions`) : la règle
+ * « type ↔ motif » est une règle métier ecclésiale, et une copie en dur ici
+ * finirait par diverger de celle que le backend applique réellement.
  */
-const DOCUMENT_TYPES: {
-  value: string;
-  description: string;
-  Icon: LucideIcon;
-}[] = [
-  {
-    value: 'baptism',
+const DOCUMENT_TYPE_META: Record<
+  string,
+  { description: string; Icon: LucideIcon }
+> = {
+  baptism: {
     description:
       'Le plus demandé — requis pour le mariage, le parrainage et la catéchèse.',
     Icon: Droplets,
   },
-  {
-    value: 'first_communion',
+  first_communion: {
     description: "Atteste la réception de l'Eucharistie.",
     Icon: Wheat,
   },
-  {
-    value: 'confirmation',
+  confirmation: {
     description: 'Requise pour être parrain ou marraine.',
     Icon: Flame,
   },
-  {
-    value: 'religious_marriage',
+  religious_marriage: {
     description: 'Noms des deux époux demandés à l’étape Détails.',
     Icon: Gem,
   },
-  {
-    value: 'godparent',
+  godparent: {
     description: 'Précisez la célébration concernée.',
     Icon: HandHeart,
   },
-];
+  other: {
+    description:
+      'Un acte du registre qui ne figure pas dans cette liste — vous préciserez lequel.',
+    Icon: FileQuestion,
+  },
+};
 
-const REQUEST_REASONS = [
-  { value: 'religious_marriage', label: 'Mariage religieux' },
-  { value: 'godparent', label: 'Parrain / marraine' },
-  { value: 'catechism', label: 'Inscription catéchèse' },
-  { value: 'parish_file', label: 'Dossier paroissial' },
-  { value: 'personal', label: 'Usage personnel' },
-  { value: 'other', label: 'Autre' },
-];
+const DEFAULT_TYPE_META = {
+  description: '',
+  Icon: FileText,
+} as const;
+
+/**
+ * Règle « Autre ⇒ précision obligatoire », définie UNE fois.
+ *
+ * Elle est appliquée à deux endroits parce qu'un seul ne suffit pas : le
+ * `superRefine` du schéma ne s'exécute pas tant que l'objet de base est invalide
+ * (à l'étape 1, `parish_id` n'est pas encore saisi — zod court-circuite les
+ * raffinements). L'étape 1 vérifie donc la règle explicitement, et le schéma la
+ * garde pour la soumission finale. Le backend l'applique de son côté.
+ */
+type PrecisionField = 'document_type_free' | 'reason_free';
+
+function precisionIssues(values: {
+  document_type?: string;
+  document_type_free?: string;
+  reason?: string;
+  reason_free?: string;
+}): { path: PrecisionField; message: string }[] {
+  const issues: { path: PrecisionField; message: string }[] = [];
+  if (values.document_type === 'other' && !values.document_type_free?.trim()) {
+    issues.push({
+      path: 'document_type_free',
+      message: 'Veuillez préciser le document demandé',
+    });
+  }
+  if (values.reason === 'other' && !values.reason_free?.trim()) {
+    issues.push({
+      path: 'reason_free',
+      message: 'Veuillez préciser le motif',
+    });
+  }
+  return issues;
+}
 
 const inputClass =
   'w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary';
@@ -120,6 +151,7 @@ const schema = z
     document_type: z
       .string()
       .min(1, 'Veuillez sélectionner un type de document'),
+    document_type_free: z.string().optional(),
     reason: z.string().min(1, 'Veuillez sélectionner un motif'),
     reason_free: z.string().optional(),
     requester_first_names: z.string().min(1, 'Prénom(s) requis'),
@@ -152,6 +184,15 @@ const schema = z
     celebration_type: z.string().optional(),
   })
   .superRefine((data, ctx) => {
+    // « Autre » sans précision = une demande que la paroisse ne peut pas traiter.
+    // Le backend applique la même règle (apps/documents/services.py).
+    for (const issue of precisionIssues(data)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: issue.message,
+        path: [issue.path],
+      });
+    }
     if (data.document_type === 'religious_marriage') {
       if (!data.spouse_full_name_groom?.trim()) {
         ctx.addIssue({
@@ -218,7 +259,7 @@ const STEP_HINTS: Record<Step, string> = {
 };
 
 const STEP_FIELDS: Record<Step, (keyof FormValues)[]> = {
-  document: ['document_type', 'reason'],
+  document: ['document_type', 'document_type_free', 'reason', 'reason_free'],
   parish: ['parish_id'],
   details: [
     'requester_first_names',
@@ -259,6 +300,8 @@ function formatCalendarDate(value: string): string {
 
 interface DocumentTypeCardProps {
   value: string;
+  /** Libellé servi par le référentiel backend (source unique). */
+  label: string;
   description: string;
   Icon: LucideIcon;
   isSelected: boolean;
@@ -267,6 +310,7 @@ interface DocumentTypeCardProps {
 
 function DocumentTypeCard({
   value,
+  label,
   description,
   Icon,
   isSelected,
@@ -292,11 +336,13 @@ function DocumentTypeCard({
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold leading-snug text-foreground">
-          {formatDocumentType(value)}
+          {label}
         </span>
-        <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
-          {description}
-        </span>
+        {description && (
+          <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
+            {description}
+          </span>
+        )}
       </span>
       {isSelected && (
         <Check aria-hidden="true" className="size-4 shrink-0 text-primary" />
@@ -547,12 +593,15 @@ export function NewDocumentForm() {
     trigger,
     watch,
     setValue,
+    setError,
+    clearErrors,
     getValues,
     formState: { errors, isDirty },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       document_type: '',
+      document_type_free: '',
       reason: '',
       reason_free: '',
       requester_first_names: user?.profile?.first_name ?? '',
@@ -576,6 +625,13 @@ export function NewDocumentForm() {
   });
 
   const { mutate, isPending } = useCreateDocument();
+
+  // Référentiel serveur : types, motifs, et la règle qui les relie.
+  const {
+    data: options,
+    isPending: isLoadingOptions,
+    isError: hasOptionsError,
+  } = useDocumentOptions();
 
   const { mutate: uploadFile, isPending: isUploading } =
     useUploadDocumentFile();
@@ -617,7 +673,19 @@ export function NewDocumentForm() {
 
   async function handleNext() {
     const fieldsForStep = STEP_FIELDS[step];
-    const valid = await trigger(fieldsForStep);
+    let valid = await trigger(fieldsForStep);
+
+    // Étape 1 : le superRefine du schéma est court-circuité tant que `parish_id`
+    // manque, on applique donc la règle « Autre ⇒ précision » explicitement.
+    if (step === 'document') {
+      clearErrors(['document_type_free', 'reason_free']);
+      const issues = precisionIssues(getValues());
+      for (const issue of issues) {
+        setError(issue.path, { type: 'manual', message: issue.message });
+      }
+      if (issues.length > 0) valid = false;
+    }
+
     if (valid) setStepIndex((i) => i + 1);
   }
 
@@ -664,8 +732,14 @@ export function NewDocumentForm() {
     if (!values.consent_given) return;
     const payload: CreateDocumentInput = {
       document_type: values.document_type,
+      // Les précisions ne partent que si « Autre » est bien le choix retenu.
+      document_type_free:
+        values.document_type === 'other'
+          ? values.document_type_free?.trim()
+          : undefined,
       reason: values.reason,
-      reason_free: values.reason_free || undefined,
+      reason_free:
+        values.reason === 'other' ? values.reason_free?.trim() : undefined,
       requester_last_name: values.requester_last_name,
       requester_first_names: values.requester_first_names,
       date_of_birth: values.date_of_birth,
@@ -702,6 +776,66 @@ export function NewDocumentForm() {
   const watchedDocumentType = watch('document_type');
   const watchedReason = watch('reason');
   const watchedConsentGiven = watch('consent_given');
+
+  /**
+   * Types proposés — servis par le backend. Tant qu'ils n'ont pas été reçus la
+   * liste est vide : on affiche alors un état de chargement ou d'erreur explicite
+   * (voir l'étape 1) plutôt qu'une étape muette qui semblerait sans options.
+   */
+  const documentTypeOptions = options?.document_types ?? [];
+
+  const selectedTypeOption = documentTypeOptions.find(
+    (t) => t.value === watchedDocumentType,
+  );
+
+  /** « Autre document » exige une précision libre. */
+  const typeRequiresPrecision = selectedTypeOption
+    ? selectedTypeOption.requires_precision
+    : watchedDocumentType === 'other';
+
+  /**
+   * Motifs recevables pour le type choisi. Sans référentiel (chargement, réseau),
+   * on n'invente pas de filtre : tous les motifs restent proposés et c'est le
+   * serveur — seule autorité sur cette règle — qui tranchera.
+   */
+  const reasonOptions = React.useMemo(() => {
+    if (!options) return [];
+    const allowed = selectedTypeOption?.allowed_reasons;
+    if (!allowed) return options.reasons;
+    return options.reasons.filter((r) => allowed.includes(r.value));
+  }, [options, selectedTypeOption]);
+
+  /**
+   * Changement de type : un motif devenu incompatible est RÉINITIALISÉ, jamais
+   * conservé en douce — sinon le formulaire enverrait une combinaison que le
+   * serveur rejette, avec un motif que l'utilisateur ne voit même plus affiché.
+   */
+  function handleSelectDocumentType(value: string) {
+    setValue('document_type', value, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+
+    if (value !== 'other') {
+      setValue('document_type_free', '');
+    }
+
+    const allowed = documentTypeOptions.find(
+      (t) => t.value === value,
+    )?.allowed_reasons;
+    const currentReason = getValues('reason');
+    if (allowed && currentReason && !allowed.includes(currentReason)) {
+      setValue('reason', '', { shouldValidate: false, shouldDirty: true });
+      setValue('reason_free', '');
+    }
+  }
+
+  function handleSelectReason(value: string) {
+    setValue('reason', value, { shouldValidate: true, shouldDirty: true });
+    if (value !== 'other') {
+      setValue('reason_free', '');
+    }
+  }
 
   const recap = getValues();
 
@@ -762,22 +896,33 @@ export function NewDocumentForm() {
                 <p className="text-sm font-semibold text-foreground">
                   Type de document <span className="text-destructive">*</span>
                 </p>
+                {isLoadingOptions && (
+                  <p className="text-sm text-muted-foreground">
+                    Chargement des types de document…
+                  </p>
+                )}
+                {hasOptionsError && (
+                  <p className={errorClass} role="alert">
+                    Impossible de charger les types de document. Vérifiez votre
+                    connexion et rechargez la page.
+                  </p>
+                )}
                 <div className="flex flex-col gap-2">
-                  {DOCUMENT_TYPES.map((type) => (
-                    <DocumentTypeCard
-                      key={type.value}
-                      value={type.value}
-                      description={type.description}
-                      Icon={type.Icon}
-                      isSelected={watchedDocumentType === type.value}
-                      onSelect={(v) =>
-                        setValue('document_type', v, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        })
-                      }
-                    />
-                  ))}
+                  {documentTypeOptions.map((type) => {
+                    const meta =
+                      DOCUMENT_TYPE_META[type.value] ?? DEFAULT_TYPE_META;
+                    return (
+                      <DocumentTypeCard
+                        key={type.value}
+                        value={type.value}
+                        label={type.label}
+                        description={meta.description}
+                        Icon={meta.Icon}
+                        isSelected={watchedDocumentType === type.value}
+                        onSelect={handleSelectDocumentType}
+                      />
+                    );
+                  })}
                 </div>
                 {errors.document_type && (
                   <p className={errorClass} role="alert">
@@ -785,21 +930,42 @@ export function NewDocumentForm() {
                   </p>
                 )}
               </div>
+              {typeRequiresPrecision && (
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="document_type_free" className={labelClass}>
+                    Précisez le document demandé{' '}
+                    <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    id="document_type_free"
+                    className={inputClass}
+                    placeholder="Ex. : certificat de profession religieuse"
+                    {...register('document_type_free')}
+                  />
+                  {errors.document_type_free && (
+                    <p className={errorClass} role="alert">
+                      {errors.document_type_free.message}
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="flex flex-col gap-2">
                 <p className="text-sm font-semibold text-foreground">
                   Motif de la demande{' '}
                   <span className="text-destructive">*</span>
                 </p>
-                <SelectCard
-                  options={REQUEST_REASONS}
-                  value={watchedReason}
-                  onChange={(v) =>
-                    setValue('reason', v, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                    })
-                  }
-                />
+                {watchedDocumentType === '' ? (
+                  <p className="text-sm text-muted-foreground">
+                    Choisissez d’abord un type de document : les motifs proposés
+                    en dépendent.
+                  </p>
+                ) : (
+                  <SelectCard
+                    options={reasonOptions}
+                    value={watchedReason}
+                    onChange={handleSelectReason}
+                  />
+                )}
                 {errors.reason && (
                   <p className={errorClass} role="alert">
                     {errors.reason.message}
@@ -809,13 +975,20 @@ export function NewDocumentForm() {
               {watchedReason === 'other' && (
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="reason_free" className={labelClass}>
-                    Précisez le motif
+                    Précisez le motif{' '}
+                    <span className="text-destructive">*</span>
                   </label>
                   <input
                     id="reason_free"
                     className={inputClass}
+                    placeholder="Ex. : dossier de naturalisation"
                     {...register('reason_free')}
                   />
+                  {errors.reason_free && (
+                    <p className={errorClass} role="alert">
+                      {errors.reason_free.message}
+                    </p>
+                  )}
                 </div>
               )}
             </>
@@ -1118,12 +1291,23 @@ export function NewDocumentForm() {
               <RecapSection title="Document" onEdit={() => setStepIndex(0)}>
                 <RecapRow
                   label="Type"
-                  value={formatDocumentType(recap.document_type)}
+                  value={
+                    documentTypeOptions.find(
+                      (t) => t.value === recap.document_type,
+                    )?.label ?? formatDocumentType(recap.document_type)
+                  }
                 />
+                {recap.document_type === 'other' &&
+                  recap.document_type_free && (
+                    <RecapRow
+                      label="Document précisé"
+                      value={recap.document_type_free}
+                    />
+                  )}
                 <RecapRow
                   label="Motif"
                   value={
-                    REQUEST_REASONS.find((r) => r.value === recap.reason)
+                    options?.reasons.find((r) => r.value === recap.reason)
                       ?.label ?? '—'
                   }
                 />

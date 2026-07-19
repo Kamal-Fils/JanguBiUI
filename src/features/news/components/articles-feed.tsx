@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { PageHeader } from '@/components/layouts/page-header';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -186,7 +187,7 @@ export function ArticlesFeed() {
         subtitle="La vie de l'Église"
       />
 
-      <div className="mx-auto w-full max-w-2xl p-4 md:max-w-3xl md:px-6 lg:max-w-5xl lg:px-8">
+      <ContentContainer>
         {/* Filet bleu au lieu du filet or par défaut : le bleu domine (R4). */}
         <SectionHeader
           eyebrow="La revue"
@@ -251,7 +252,7 @@ export function ArticlesFeed() {
         ) : (
           <FeedRhythm articles={feedArticles} />
         )}
-      </div>
+      </ContentContainer>
     </div>
   );
 }

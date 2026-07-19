@@ -19,7 +19,7 @@ export default function CommunautairePage() {
   return (
     <div className="flex flex-col">
       {joined ? (
-        <ContentContainer width="narrow" className="space-y-4">
+        <ContentContainer className="space-y-4">
           <div className="rounded-xl border border-success/30 bg-success/10 p-4">
             <p className="text-sm font-medium text-success">
               Vous participez au chapelet — décade {joined.current_decade}
@@ -39,7 +39,7 @@ export default function CommunautairePage() {
           </button>
         </ContentContainer>
       ) : (
-        <ContentContainer width="narrow" className="overflow-y-auto">
+        <ContentContainer className="overflow-y-auto">
           <CommunityRosaryList onJoin={setJoined} />
         </ContentContainer>
       )}

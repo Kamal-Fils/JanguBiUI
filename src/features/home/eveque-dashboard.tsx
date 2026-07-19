@@ -1,6 +1,14 @@
 'use client';
 
-import { BookOpen, Church, Clock, FileText, MessageSquare, PlusCircle, Users } from 'lucide-react';
+import {
+  BookOpen,
+  Church,
+  Clock,
+  FileText,
+  MessageSquare,
+  PlusCircle,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 
 import { ContentContainer } from '@/components/layouts/content-container';
@@ -61,7 +69,10 @@ function EvequeHero() {
         <h1 className="mt-1 truncate font-serif text-display font-black italic leading-[0.95] text-primary-foreground">
           {firstName || 'Bienvenue'}
         </h1>
-        <div className="mt-4 h-px w-16 rounded-full bg-gold/70" aria-hidden="true" />
+        <div
+          className="mt-4 h-px w-16 rounded-full bg-gold/70"
+          aria-hidden="true"
+        />
         <p className="mt-3 text-sm capitalize text-primary-foreground/85">
           {dateStr}
         </p>
@@ -185,11 +196,19 @@ function StatsRow({
 // ── Recent messages section ───────────────────────────────────────────────────
 
 interface RecentMessagesSectionProps {
-  messages: Array<{ id: number; subject: string; sender_email: string; read_at?: string | null }>;
+  messages: Array<{
+    id: number;
+    subject: string;
+    sender_email: string;
+    read_at?: string | null;
+  }>;
   isLoading: boolean;
 }
 
-function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionProps) {
+function RecentMessagesSection({
+  messages,
+  isLoading,
+}: RecentMessagesSectionProps) {
   const recent = messages.slice(0, 3);
 
   return (
@@ -204,7 +223,9 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
       <div className="flex flex-col gap-3">
         {isLoading && (
           <div className="flex flex-col gap-2">
-            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-14 w-full rounded-xl" />
+            ))}
           </div>
         )}
 
@@ -224,10 +245,16 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
             )}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-medium text-foreground line-clamp-1">{message.subject}</span>
-              {!message.read_at && <span className="size-2 shrink-0 rounded-full bg-info" />}
+              <span className="text-sm font-medium text-foreground line-clamp-1">
+                {message.subject}
+              </span>
+              {!message.read_at && (
+                <span className="size-2 shrink-0 rounded-full bg-info" />
+              )}
             </div>
-            <p className="text-xs text-muted-foreground">{message.sender_email}</p>
+            <p className="text-xs text-muted-foreground">
+              {message.sender_email}
+            </p>
           </Link>
         ))}
       </div>
@@ -238,11 +265,19 @@ function RecentMessagesSection({ messages, isLoading }: RecentMessagesSectionPro
 // ── Draft articles section ────────────────────────────────────────────────────
 
 interface DraftArticlesSectionProps {
-  articles: Array<{ id: string; title: string; author_name: string; status: string }>;
+  articles: Array<{
+    id: string;
+    title: string;
+    author_name: string;
+    status: string;
+  }>;
   isLoading: boolean;
 }
 
-function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps) {
+function DraftArticlesSection({
+  articles,
+  isLoading,
+}: DraftArticlesSectionProps) {
   const drafts = articles;
 
   return (
@@ -272,13 +307,17 @@ function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps
       <div className="flex flex-col gap-3">
         {isLoading && (
           <div className="flex flex-col gap-2">
-            {[1, 2].map((i) => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
+            {[1, 2].map((i) => (
+              <Skeleton key={i} className="h-14 w-full rounded-xl" />
+            ))}
           </div>
         )}
 
         {!isLoading && drafts.length === 0 && (
           <div className="rounded-xl border border-dashed border-border p-4 text-center">
-            <p className="text-sm text-muted-foreground">Aucun brouillon en attente.</p>
+            <p className="text-sm text-muted-foreground">
+              Aucun brouillon en attente.
+            </p>
           </div>
         )}
 
@@ -292,8 +331,12 @@ function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps
               href={paths.app.admin.articles.getHref()}
               className="flex flex-col gap-0.5 p-3"
             >
-              <span className="text-sm font-medium text-foreground line-clamp-1">{article.title}</span>
-              <p className="text-xs text-muted-foreground">{article.author_name}</p>
+              <span className="text-sm font-medium text-foreground line-clamp-1">
+                {article.title}
+              </span>
+              <p className="text-xs text-muted-foreground">
+                {article.author_name}
+              </p>
             </Link>
           </Card>
         ))}
@@ -306,7 +349,10 @@ function DraftArticlesSection({ articles, isLoading }: DraftArticlesSectionProps
 
 export function EvequeeDashboard() {
   const { data: inboxData, isLoading: loadingMessages } = useClericalInbox();
-  const { data: draftsData, isLoading: loadingArticles } = useAdminArticles({ status: 'draft', limit: 3 });
+  const { data: draftsData, isLoading: loadingArticles } = useAdminArticles({
+    status: 'draft',
+    limit: 3,
+  });
   const { data: parishes = [], isLoading: loadingParishes } = useParishes();
 
   const messages = inboxData?.results ?? [];
@@ -315,7 +361,7 @@ export function EvequeeDashboard() {
   const draftCount = draftsData?.count ?? 0;
 
   return (
-    <ContentContainer width="wide">
+    <ContentContainer>
       <div className="flex flex-col gap-8">
         <EvequeHero />
 
@@ -351,7 +397,10 @@ export function EvequeeDashboard() {
 
         <div className="hairline-gold" aria-hidden="true" />
 
-        <RecentMessagesSection messages={messages} isLoading={loadingMessages} />
+        <RecentMessagesSection
+          messages={messages}
+          isLoading={loadingMessages}
+        />
 
         <div className="hairline-gold" aria-hidden="true" />
 

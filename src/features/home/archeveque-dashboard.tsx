@@ -130,7 +130,7 @@ export function ArchevequeDashboard() {
   const { data, isLoading, isError } = useMyProvinceDashboard();
 
   return (
-    <ContentContainer width="wide">
+    <ContentContainer>
       <div className="flex flex-col gap-8">
         <ArchevequeHero provinceName={data?.province.name} />
 
@@ -207,9 +207,7 @@ export function ArchevequeDashboard() {
                           {diocese.pending_documents > 1 ? 's' : ''} en attente
                         </span>
                       ) : (
-                        <span className="text-muted-foreground/60">
-                          À jour
-                        </span>
+                        <span className="text-muted-foreground/60">À jour</span>
                       )}
                     </span>
                   </div>

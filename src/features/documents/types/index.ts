@@ -17,6 +17,9 @@ export const documentRequestSchema = z.object({
   // n'était jamais affichée nulle part.
   reference: z.string().nullable().optional(),
   document_type: z.string(),
+  // Précision libre du fidèle quand `document_type === 'other'` : c'est elle qui
+  // porte le vrai libellé du document (voir `formatDocumentType`).
+  document_type_free: z.string().nullable().optional(),
   status: documentStatusSchema,
   notes: z.string().nullable().optional(),
   requester_name: z.string().optional(),

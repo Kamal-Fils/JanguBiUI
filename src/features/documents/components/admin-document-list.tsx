@@ -36,7 +36,7 @@ const TH_CLASS =
 
 /** Description humaine d'une demande, réutilisée par les libellés d'action. */
 function describeRequest(doc: DocumentRequest): string {
-  const type = formatDocumentType(doc.document_type);
+  const type = formatDocumentType(doc.document_type, doc.document_type_free);
   return doc.requester_name ? `${type} de ${doc.requester_name}` : type;
 }
 
@@ -66,7 +66,7 @@ function RequestSummary({ document: doc }: RowProps) {
   return (
     <div className="min-w-0">
       <p className="truncate text-sm font-semibold text-foreground">
-        {formatDocumentType(doc.document_type)}
+        {formatDocumentType(doc.document_type, doc.document_type_free)}
       </p>
       <p className="truncate text-xs text-muted-foreground">
         {describeContext(doc)}

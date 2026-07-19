@@ -213,7 +213,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
 
   useRegisterPageMeta({
     title: data
-      ? formatDocumentType(data.document_type)
+      ? formatDocumentType(data.document_type, data.document_type_free)
       : 'Demande de document',
     leafLabel: 'Détail de la demande',
     showHeading: false,
@@ -322,7 +322,7 @@ export function DocumentDetail({ documentId }: DocumentDetailProps) {
                 Type de document
               </CardEyebrow>
               <h1 className="mt-1.5 font-serif text-2xl font-bold leading-tight tracking-tight text-foreground">
-                {formatDocumentType(data.document_type)}
+                {formatDocumentType(data.document_type, data.document_type_free)}
               </h1>
               {data.reference && (
                 <p className="mt-1 text-xs text-muted-foreground">

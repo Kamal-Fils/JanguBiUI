@@ -41,6 +41,85 @@ function mockMe() {
   );
 }
 
+/**
+ * Référentiel du formulaire — reflet exact de `apps/documents/constants.py`.
+ * C'est le serveur qui détient la règle « type ↔ motif » ; le formulaire la
+ * consomme. On la sert donc ici plutôt que de la redéclarer dans le composant.
+ */
+const REASON_LABELS: Record<string, string> = {
+  religious_marriage: 'Mariage religieux',
+  godparent: 'Parrain / marraine',
+  catechism: 'Inscription catéchèse',
+  parish_file: 'Dossier paroissial',
+  personal: 'Usage personnel',
+  other: 'Autre',
+};
+
+const UNIVERSAL = ['parish_file', 'personal', 'other'];
+
+const DOCUMENT_OPTIONS = {
+  document_types: [
+    {
+      value: 'baptism',
+      label: 'Certificat de baptême',
+      requires_precision: false,
+      allowed_reasons: [
+        'religious_marriage',
+        'godparent',
+        'catechism',
+        ...UNIVERSAL,
+      ],
+    },
+    {
+      value: 'first_communion',
+      label: 'Attestation de première communion',
+      requires_precision: false,
+      allowed_reasons: ['catechism', ...UNIVERSAL],
+    },
+    {
+      value: 'confirmation',
+      label: 'Attestation de confirmation',
+      requires_precision: false,
+      allowed_reasons: ['religious_marriage', 'godparent', ...UNIVERSAL],
+    },
+    {
+      value: 'religious_marriage',
+      label: 'Attestation de mariage religieux',
+      requires_precision: false,
+      allowed_reasons: UNIVERSAL,
+    },
+    {
+      value: 'godparent',
+      label: 'Attestation parrain / marraine',
+      requires_precision: false,
+      allowed_reasons: UNIVERSAL,
+    },
+    {
+      value: 'other',
+      label: 'Autre document',
+      requires_precision: true,
+      allowed_reasons: Object.keys(REASON_LABELS),
+    },
+  ],
+  reasons: Object.entries(REASON_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  })),
+};
+
+function mockDocumentOptions() {
+  server.use(
+    http.get(`${env.API_URL}/v1/documents/requests/options/`, () =>
+      HttpResponse.json(DOCUMENT_OPTIONS),
+    ),
+  );
+}
+
+/** Les cartes de type arrivent avec le référentiel : on attend son chargement. */
+async function findTypeCard(name: RegExp) {
+  return screen.findByRole('button', { name });
+}
+
 type User = ReturnType<typeof userEvent.setup>;
 
 /**
@@ -66,9 +145,7 @@ async function fill(user: User, field: HTMLElement, value: string) {
 
 /** Étape 1 → 2 : choisit le type de document et le motif. */
 async function completeDocumentStep(user: User) {
-  await user.click(
-    screen.getByRole('button', { name: /Certificat de baptême/ }),
-  );
+  await user.click(await findTypeCard(/Certificat de baptême/));
   await user.click(screen.getByRole('button', { name: 'Usage personnel' }));
   await user.click(screen.getByRole('button', { name: /continuer/i }));
   await screen.findByRole('heading', { name: 'Quelle paroisse ?' });
@@ -109,16 +186,15 @@ describe('NewDocumentForm', () => {
     mockRouterPush.mockReset();
     mockRouterBack.mockReset();
     mockMe();
+    mockDocumentOptions();
   });
 
   // ── Étape 1 — Document ─────────────────────────────────────────────────────
 
-  test('affiche les 5 cartes de type enrichies (icône + description d’usage)', () => {
+  test('affiche les 6 cartes de type enrichies (icône + description d’usage)', async () => {
     renderApp(<NewDocumentForm />);
 
-    expect(
-      screen.getByRole('button', { name: /Certificat de baptême/ }),
-    ).toBeInTheDocument();
+    expect(await findTypeCard(/Certificat de baptême/)).toBeInTheDocument();
     expect(
       screen.getByRole('button', {
         name: /Attestation de première communion/,
@@ -133,6 +209,10 @@ describe('NewDocumentForm', () => {
     expect(
       screen.getByRole('button', { name: /Attestation parrain \/ marraine/ }),
     ).toBeInTheDocument();
+    // « Autre document » : échappatoire quand aucun type ne convient.
+    expect(
+      screen.getByRole('button', { name: /Autre document/ }),
+    ).toBeInTheDocument();
 
     // La description d'usage fait partie du repère de choix (maquette 02).
     expect(
@@ -144,7 +224,7 @@ describe('NewDocumentForm', () => {
     const user = setupUser();
     renderApp(<NewDocumentForm />);
 
-    const card = screen.getByRole('button', { name: /Certificat de baptême/ });
+    const card = await findTypeCard(/Certificat de baptême/);
     expect(card).toHaveAttribute('aria-pressed', 'false');
 
     await user.click(card);
@@ -168,6 +248,149 @@ describe('NewDocumentForm', () => {
     expect(
       screen.getByRole('heading', { name: 'Quel document ?' }),
     ).toBeInTheDocument();
+  });
+
+  // ── Étape 1 — Motifs conditionnels au type + « Autre » ─────────────────────
+
+  test('les motifs proposés dépendent du type de document choisi', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+
+    // Baptême : pièce du dossier de parrainage → « Parrain / marraine » proposé.
+    await user.click(await findTypeCard(/Certificat de baptême/));
+    expect(
+      screen.getByRole('button', { name: 'Parrain / marraine' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Inscription catéchèse' }),
+    ).toBeInTheDocument();
+
+    // Mariage religieux : atteste un sacrement déjà célébré — ces deux motifs
+    // n'ont plus de sens et disparaissent (le cas signalé par le client).
+    await user.click(await findTypeCard(/Attestation de mariage religieux/));
+    expect(
+      screen.queryByRole('button', { name: 'Parrain / marraine' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Inscription catéchèse' }),
+    ).not.toBeInTheDocument();
+    // Les motifs universels restent proposés.
+    expect(
+      screen.getByRole('button', { name: 'Dossier paroissial' }),
+    ).toBeInTheDocument();
+  });
+
+  test('changer de type réinitialise un motif devenu incompatible', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+
+    // Baptême + parrain/marraine : combinaison valide.
+    await user.click(await findTypeCard(/Certificat de baptême/));
+    await user.click(screen.getByRole('button', { name: 'Parrain / marraine' }));
+    expect(
+      screen.getByRole('button', { name: 'Parrain / marraine' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+
+    // Bascule sur mariage religieux : le motif ne s'applique plus → remis à zéro.
+    await user.click(await findTypeCard(/Attestation de mariage religieux/));
+    await user.click(screen.getByRole('button', { name: /continuer/i }));
+
+    // Aucune valeur incohérente conservée : l'étape reste bloquée sur le motif.
+    expect(
+      await screen.findByText('Veuillez sélectionner un motif'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Quel document ?' }),
+    ).toBeInTheDocument();
+  });
+
+  test('le motif reste sélectionné si le nouveau type l’autorise encore', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+
+    await user.click(await findTypeCard(/Certificat de baptême/));
+    await user.click(screen.getByRole('button', { name: 'Usage personnel' }));
+    await user.click(await findTypeCard(/Attestation de mariage religieux/));
+
+    expect(
+      screen.getByRole('button', { name: 'Usage personnel' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('« Autre document » exige de préciser le document demandé', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+
+    await user.click(await findTypeCard(/Autre document/));
+    await user.click(screen.getByRole('button', { name: 'Usage personnel' }));
+
+    const precision = screen.getByLabelText(/Précisez le document demandé/);
+    expect(precision).toBeInTheDocument();
+
+    // Laissé vide → blocage.
+    await user.click(screen.getByRole('button', { name: /continuer/i }));
+    expect(
+      await screen.findByText('Veuillez préciser le document demandé'),
+    ).toBeInTheDocument();
+
+    // Renseigné → l'étape passe.
+    await fill(user, precision, 'Certificat de profession religieuse');
+    await user.click(screen.getByRole('button', { name: /continuer/i }));
+    expect(
+      await screen.findByRole('heading', { name: 'Quelle paroisse ?' }),
+    ).toBeInTheDocument();
+  });
+
+  test('le motif « Autre » exige de préciser le motif', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+
+    await user.click(await findTypeCard(/Certificat de baptême/));
+    await user.click(screen.getByRole('button', { name: 'Autre' }));
+
+    await user.click(screen.getByRole('button', { name: /continuer/i }));
+    expect(
+      await screen.findByText('Veuillez préciser le motif'),
+    ).toBeInTheDocument();
+
+    await fill(
+      user,
+      screen.getByLabelText(/Précisez le motif/),
+      'Dossier de naturalisation',
+    );
+    await user.click(screen.getByRole('button', { name: /continuer/i }));
+    expect(
+      await screen.findByRole('heading', { name: 'Quelle paroisse ?' }),
+    ).toBeInTheDocument();
+  });
+
+  test('référentiel indisponible : message explicite, pas d’étape muette', async () => {
+    server.use(
+      http.get(`${env.API_URL}/v1/documents/requests/options/`, () =>
+        HttpResponse.json({ detail: 'boom' }, { status: 500 }),
+      ),
+    );
+
+    renderApp(<NewDocumentForm />);
+
+    expect(
+      await screen.findByText(/Impossible de charger les types de document/),
+    ).toBeInTheDocument();
+  });
+
+  test('le champ de précision du type disparaît si le type n’est plus « Autre »', async () => {
+    const user = setupUser();
+    renderApp(<NewDocumentForm />);
+
+    await user.click(await findTypeCard(/Autre document/));
+    expect(
+      screen.getByLabelText(/Précisez le document demandé/),
+    ).toBeInTheDocument();
+
+    await user.click(await findTypeCard(/Certificat de baptême/));
+    expect(
+      screen.queryByLabelText(/Précisez le document demandé/),
+    ).not.toBeInTheDocument();
   });
 
   // ── Stepper + navigation avant / arrière ───────────────────────────────────
@@ -581,9 +804,7 @@ describe('NewDocumentForm', () => {
     const user = setupUser();
     renderApp(<NewDocumentForm />);
 
-    await user.click(
-      screen.getByRole('button', { name: /Certificat de baptême/ }),
-    );
+    await user.click(await findTypeCard(/Certificat de baptême/));
     await user.click(
       screen.getByRole('button', { name: 'Quitter la demande' }),
     );
@@ -605,9 +826,7 @@ describe('NewDocumentForm', () => {
     const user = setupUser();
     renderApp(<NewDocumentForm />);
 
-    await user.click(
-      screen.getByRole('button', { name: /Certificat de baptême/ }),
-    );
+    await user.click(await findTypeCard(/Certificat de baptême/));
     await user.click(
       screen.getByRole('button', { name: 'Quitter la demande' }),
     );

@@ -149,7 +149,7 @@ export function AnalyticsDashboard() {
 
   if (isError && isForbidden) {
     return (
-      <ContentContainer width="wide">
+      <ContentContainer>
         <EmptyState
           icon={<BarChart3 aria-hidden="true" />}
           title="Analytique indisponible"
@@ -161,7 +161,7 @@ export function AnalyticsDashboard() {
 
   if (isError) {
     return (
-      <ContentContainer width="wide">
+      <ContentContainer>
         <ErrorState
           title="Impossible de charger l'analytique"
           description="Une erreur est survenue lors de la récupération des données."
@@ -174,7 +174,7 @@ export function AnalyticsDashboard() {
   const k = data?.kpis;
 
   return (
-    <ContentContainer width="wide">
+    <ContentContainer>
       <div className="flex flex-col gap-7">
         {/* Vue d'ensemble : filtres + KPIs */}
         <section aria-label="Vue d'ensemble">

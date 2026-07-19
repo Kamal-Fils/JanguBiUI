@@ -3,6 +3,7 @@
 import { HeartHandshake } from 'lucide-react';
 import { useState } from 'react';
 
+import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { Button } from '@/components/ui/button';
 import { Card, CardEyebrow } from '@/components/ui/card/card';
@@ -87,7 +88,7 @@ export default function DonsPage() {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto w-full max-w-2xl flex-1 space-y-7 overflow-y-auto p-4 lg:max-w-3xl">
+      <ContentContainer className="flex-1 space-y-7 overflow-y-auto">
         <section aria-label="Campagnes de dons">
           <SectionHeader
             eyebrow="Générosité"
@@ -235,7 +236,9 @@ export default function DonsPage() {
                 </Pill>
                 <p className="min-w-0 truncate text-xs text-foreground">
                   Campagne sélectionnée :{' '}
-                  <span className="font-semibold">{selectedCampaign.title}</span>
+                  <span className="font-semibold">
+                    {selectedCampaign.title}
+                  </span>
                 </p>
               </div>
             )}
@@ -249,7 +252,7 @@ export default function DonsPage() {
             </Button>
           </section>
         </Card>
-      </div>
+      </ContentContainer>
     </div>
   );
 }
