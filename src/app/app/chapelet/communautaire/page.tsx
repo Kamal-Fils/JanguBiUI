@@ -7,6 +7,7 @@ import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { paths } from '@/config/paths';
 import type { CommunityRosary } from '@/features/chapelet/api/get-community-rosaries';
 import { CommunityRosaryList } from '@/features/chapelet/components/community-rosary-list';
+import { LiveRosarySession } from '@/features/chapelet/components/live-rosary-session';
 
 export default function CommunautairePage() {
   const [joined, setJoined] = useState<CommunityRosary | null>(null);
@@ -19,24 +20,14 @@ export default function CommunautairePage() {
   return (
     <div className="flex flex-col">
       {joined ? (
-        <ContentContainer className="space-y-4">
-          <div className="rounded-xl border border-success/30 bg-success/10 p-4">
-            <p className="text-sm font-medium text-success">
-              Vous participez au chapelet — décade {joined.current_decade}
-            </p>
-            {joined.intention && (
-              <p className="mt-1 text-sm italic text-muted-foreground">
-                {joined.intention}
-              </p>
-            )}
-          </div>
-          <button
-            className="rounded text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
-            onClick={() => setJoined(null)}
-            type="button"
-          >
-            Revenir à la liste
-          </button>
+        <ContentContainer className="overflow-y-auto">
+          <LiveRosarySession
+            // Remonter la session comme clé garantit un état neuf (socket,
+            // intentions, participants) si l'on passe d'un chapelet à l'autre.
+            key={joined.id}
+            rosary={joined}
+            onLeave={() => setJoined(null)}
+          />
         </ContentContainer>
       ) : (
         <ContentContainer className="overflow-y-auto">

@@ -4,10 +4,10 @@ import { useSearchParams } from 'next/navigation';
 
 import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
-import { Card, CardContent } from '@/components/ui/card/card';
-import { ScriptureQuote } from '@/components/ui/scripture-quote';
+import { SectionHeader } from '@/components/ui/section-header';
 
 import { BibleBooksTab } from './bible-books-tab';
+import { BibleOpeningQuote } from './bible-opening-quote';
 import { LectioDivina } from './lectio-divina';
 import { ReadingPlanList } from './reading-plan-list';
 
@@ -32,20 +32,30 @@ function resolveTab(tab: string | null): TabValue {
 
 function LectioView() {
   return (
-    <div className="space-y-4">
-      <Card variant="sacred">
-        <CardContent className="p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Lectio Divina
-          </p>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Méditez la Parole en 4 étapes. Sélectionnez un passage depuis la
-            Bible pour démarrer une session sur ce texte précis, ou utilisez le
-            passage du jour (id&nbsp;0 = liturgie du jour).
-          </p>
-        </CardContent>
-      </Card>
-      <LectioDivina passageId={0} />
+    <div className="space-y-5">
+      <BibleOpeningQuote />
+      <SectionHeader
+        eyebrow="Lectio Divina"
+        title="Méditer la Parole en quatre temps"
+        description="Lisez, méditez, priez, contemplez. Sélectionnez un passage depuis la Bible pour démarrer une session sur ce texte précis, ou méditez le passage du jour."
+      />
+      {/* Lectio « du jour » : aucun verset rattaché (le 0 précédent était une
+          sentinelle que le serveur interprétait comme un verset introuvable). */}
+      <LectioDivina passageId={null} />
+    </div>
+  );
+}
+
+function ParcoursView() {
+  return (
+    <div className="space-y-5">
+      <BibleOpeningQuote />
+      <SectionHeader
+        eyebrow="Parcours de lecture"
+        title="Lire la Bible dans la durée"
+        description="Un parcours propose un rythme de lecture jour après jour. Inscrivez-vous pour le suivre à votre main."
+      />
+      <ReadingPlanList />
     </div>
   );
 }
@@ -62,21 +72,15 @@ export function BibleContent() {
   });
 
   return (
-    <div className="flex flex-col">
-      <ContentContainer>
-        {/* Citation d'ouverture éditoriale — pose le ton « Revue Sacrée ». */}
-        <ScriptureQuote
-          eyebrow="Parole de Dieu"
-          text="Au commencement était le Verbe, et le Verbe était Dieu."
-          reference="Jean 1, 1"
-          size="md"
-          className="mb-6"
-        />
-
-        {activeTab === 'bible' && <BibleBooksTab />}
-        {activeTab === 'lectio' && <LectioView />}
-        {activeTab === 'parcours' && <ReadingPlanList />}
-      </ContentContainer>
-    </div>
+    // Le CADRE de page reste en largeur `default` : c'est la recette commune de
+    // l'app. La mesure de lecture (~68ch) n'est PAS portée ici — elle est posée
+    // sur la seule colonne de TEXTE, dans `ChapterReading`. Contraindre la page
+    // entière laissait deux bandes mortes de part et d'autre (« trop de marge
+    // auto qui centre le composant »).
+    <ContentContainer className="pb-20">
+      {activeTab === 'bible' && <BibleBooksTab />}
+      {activeTab === 'lectio' && <LectioView />}
+      {activeTab === 'parcours' && <ParcoursView />}
+    </ContentContainer>
   );
 }

@@ -66,11 +66,25 @@ const mockArticleDetails: Record<
 };
 
 const mockAdminArticles = [
-  createArticle({ id: 'admin-draft-1', title: 'Brouillon en cours', status: 'draft', author_name: 'Père Augustin' }),
-  createArticle({ id: 'article-1', title: 'Le pape François appelle à la prière pour la paix', status: 'published', author_name: 'Rédaction Vatican', category: mockCategory }),
+  createArticle({
+    id: 'admin-draft-1',
+    title: 'Brouillon en cours',
+    status: 'draft',
+    author_name: 'Père Augustin',
+  }),
+  createArticle({
+    id: 'article-1',
+    title: 'Le pape François appelle à la prière pour la paix',
+    status: 'published',
+    author_name: 'Rédaction Vatican',
+    category: mockCategory,
+  }),
 ];
 
-const mockAdminArticleDetails: Record<string, ReturnType<typeof createArticleDetail>> = {
+const mockAdminArticleDetails: Record<
+  string,
+  ReturnType<typeof createArticleDetail>
+> = {
   'admin-draft-1': createArticleDetail({
     id: 'admin-draft-1',
     title: 'Brouillon en cours',
@@ -123,11 +137,16 @@ export const newsHandlers = [
 
   // Admin routes before /v1/news/:id/ — otherwise "admin" would match :id
   http.get(`${env.API_URL}/v1/news/admin/`, () =>
-    HttpResponse.json({ count: mockAdminArticles.length, results: mockAdminArticles }),
+    HttpResponse.json({
+      count: mockAdminArticles.length,
+      results: mockAdminArticles,
+    }),
   ),
 
   http.post(`${env.API_URL}/v1/news/admin/`, () =>
-    HttpResponse.json(createArticleDetail({ status: 'draft' }), { status: 201 }),
+    HttpResponse.json(createArticleDetail({ status: 'draft' }), {
+      status: 201,
+    }),
   ),
 
   http.get(`${env.API_URL}/v1/news/admin/:id/`, ({ params }) => {
@@ -147,19 +166,42 @@ export const newsHandlers = [
 
   http.post(`${env.API_URL}/v1/news/admin/:id/publish/`, ({ params }) => {
     const id = String(params.id);
-    const article = mockAdminArticles.find((a) => a.id === id) ?? createArticle({ id });
+    const article =
+      mockAdminArticles.find((a) => a.id === id) ?? createArticle({ id });
     return HttpResponse.json({ ...article, status: 'published' });
   }),
 
   http.post(`${env.API_URL}/v1/news/admin/:id/unpublish/`, ({ params }) => {
     const id = String(params.id);
-    const article = mockAdminArticles.find((a) => a.id === id) ?? createArticle({ id });
+    const article =
+      mockAdminArticles.find((a) => a.id === id) ?? createArticle({ id });
     return HttpResponse.json({ ...article, status: 'unpublished' });
   }),
 
-  http.delete(`${env.API_URL}/v1/news/admin/:id/delete/`, () =>
-    new HttpResponse(null, { status: 204 }),
+  http.delete(
+    `${env.API_URL}/v1/news/admin/:id/delete/`,
+    () => new HttpResponse(null, { status: 204 }),
   ),
+
+  // Réactions — avant la route paramétrée de détail (même préfixe).
+  http.post(`${env.API_URL}/v1/news/:id/reactions/`, async ({ request }) => {
+    const body = (await request.json()) as {
+      reaction_type: 'pray' | 'amen' | 'attend';
+      active: boolean;
+    };
+
+    // Le serveur renvoie l'état réconcilié, pas un simple 204 : c'est ce qui
+    // permet au client de remplacer son optimisme par la vérité.
+    return HttpResponse.json({
+      counts: {
+        pray: 0,
+        amen: 0,
+        attend: 0,
+        [body.reaction_type]: body.active ? 1 : 0,
+      },
+      mine: body.active ? [body.reaction_type] : [],
+    });
+  }),
 
   // Parameterized public route last
   http.get(`${env.API_URL}/v1/news/:id/`, ({ params }) => {

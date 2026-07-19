@@ -7,6 +7,7 @@ import { formatFrDate } from '@/utils/format-date';
 
 import type { Article } from '../types';
 
+import { ArticleReactionsBar } from './article-reactions';
 import { ArticleTypeBadge } from './article-type-badge';
 
 /**
@@ -94,25 +95,82 @@ export function ArticleFeedCard({
     );
   }
 
+  // La barre de réactions vit HORS du <Link> : un <button> imbriqué dans une
+  // ancre est du HTML invalide, et le clic déclencherait la navigation au lieu
+  // de la réaction. La brève, elle, reste purement typographique — on y accède
+  // par l'article.
+  const reactionsBar = (
+    <ArticleReactionsBar
+      articleId={article.id}
+      reactions={article.reactions}
+      size="compact"
+    />
+  );
+
   // --- Bande pleine largeur : vignette latérale, alternée gauche/droite. ----
   if (variant === 'wide') {
     return (
-      <Link
-        href={`/app/actus/${article.id}`}
-        className={cn(
-          'group flex gap-4 md:gap-6',
-          reverse && 'md:flex-row-reverse',
-        )}
-      >
-        <div className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-lg bg-muted sm:w-40 sm:rounded-xl md:w-[38%]">
+      <article className="flex flex-col gap-3">
+        <Link
+          href={`/app/actus/${article.id}`}
+          className={cn(
+            'group flex gap-4 md:gap-6',
+            reverse && 'md:flex-row-reverse',
+          )}
+        >
+          <div className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-lg bg-muted sm:w-40 sm:rounded-xl md:w-[38%]">
+            {article.cover_image_url ? (
+              <Image
+                src={article.cover_image_url}
+                alt={article.title}
+                fill
+                unoptimized
+                className="object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.03] motion-reduce:transform-none"
+                sizes="(max-width: 640px) 112px, (max-width: 1024px) 160px, 380px"
+              />
+            ) : (
+              <div
+                data-testid="article-card-placeholder"
+                aria-hidden="true"
+                className="flex size-full items-center justify-center bg-gradient-to-br from-primary/25 via-primary/10 to-primary/5 text-primary/60"
+              >
+                <Newspaper className="size-7" />
+              </div>
+            )}
+          </div>
+
+          <div className="flex min-w-0 flex-1 flex-col justify-center">
+            {kicker}
+            <h3 className="font-serif text-xl font-bold leading-snug tracking-tight text-foreground underline-offset-4 group-hover:text-primary group-hover:underline md:text-2xl">
+              {article.title}
+            </h3>
+            {article.excerpt && (
+              <p className="mt-1.5 line-clamp-2 text-[15px] leading-relaxed text-foreground/75">
+                {article.excerpt}
+              </p>
+            )}
+            {meta}
+          </div>
+        </Link>
+        {reactionsBar}
+      </article>
+    );
+  }
+
+  // --- La une : elle doit écraser tout ce qui suit (échelle, image, place). -
+  return (
+    <article className="flex flex-col gap-4">
+      <Link href={`/app/actus/${article.id}`} className="group flex flex-col">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-muted sm:aspect-video md:aspect-[21/9]">
           {article.cover_image_url ? (
             <Image
               src={article.cover_image_url}
               alt={article.title}
               fill
               unoptimized
+              priority
               className="object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.03] motion-reduce:transform-none"
-              sizes="(max-width: 640px) 112px, (max-width: 1024px) 160px, 380px"
+              sizes="(max-width: 1024px) 100vw, 1024px"
             />
           ) : (
             <div
@@ -120,64 +178,25 @@ export function ArticleFeedCard({
               aria-hidden="true"
               className="flex size-full items-center justify-center bg-gradient-to-br from-primary/25 via-primary/10 to-primary/5 text-primary/60"
             >
-              <Newspaper className="size-7" />
+              <Newspaper className="size-14" />
             </div>
           )}
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col justify-center">
+        <div className="flex min-w-0 flex-col pt-4">
           {kicker}
-          <h3 className="font-serif text-xl font-bold leading-snug tracking-tight text-foreground underline-offset-4 group-hover:text-primary group-hover:underline md:text-2xl">
+          <h3 className="font-serif text-headline font-bold tracking-tight text-foreground underline-offset-4 group-hover:text-primary group-hover:underline">
             {article.title}
           </h3>
           {article.excerpt && (
-            <p className="mt-1.5 line-clamp-2 text-[15px] leading-relaxed text-foreground/75">
+            <p className="mt-2 line-clamp-3 max-w-reading text-base leading-relaxed text-foreground/75 md:text-lg">
               {article.excerpt}
             </p>
           )}
           {meta}
         </div>
       </Link>
-    );
-  }
-
-  // --- La une : elle doit écraser tout ce qui suit (échelle, image, place). -
-  return (
-    <Link href={`/app/actus/${article.id}`} className="group flex flex-col">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-muted sm:aspect-video md:aspect-[21/9]">
-        {article.cover_image_url ? (
-          <Image
-            src={article.cover_image_url}
-            alt={article.title}
-            fill
-            unoptimized
-            priority
-            className="object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.03] motion-reduce:transform-none"
-            sizes="(max-width: 1024px) 100vw, 1024px"
-          />
-        ) : (
-          <div
-            data-testid="article-card-placeholder"
-            aria-hidden="true"
-            className="flex size-full items-center justify-center bg-gradient-to-br from-primary/25 via-primary/10 to-primary/5 text-primary/60"
-          >
-            <Newspaper className="size-14" />
-          </div>
-        )}
-      </div>
-
-      <div className="flex min-w-0 flex-col pt-4">
-        {kicker}
-        <h3 className="font-serif text-headline font-bold tracking-tight text-foreground underline-offset-4 group-hover:text-primary group-hover:underline">
-          {article.title}
-        </h3>
-        {article.excerpt && (
-          <p className="mt-2 line-clamp-3 max-w-reading text-base leading-relaxed text-foreground/75 md:text-lg">
-            {article.excerpt}
-          </p>
-        )}
-        {meta}
-      </div>
-    </Link>
+      {reactionsBar}
+    </article>
   );
 }

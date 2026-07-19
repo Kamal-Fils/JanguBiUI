@@ -4,11 +4,9 @@ import { ListVideo, Lock } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
-import { Card, CardContent } from '@/components/ui/card/card';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
-import { SectionHeader } from '@/components/ui/section-header';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { cn } from '@/utils/cn';
 
@@ -24,6 +22,10 @@ const TH_CLASS = 'text-[11px] uppercase tracking-wide text-muted-foreground';
  * Section admin « Catégories » : DataTable sobre (nom, accès, ordre) +
  * formulaire de création repliable. Pas d'actions par ligne : aucune mutation
  * d'édition/suppression de catégorie n'existe côté API.
+ *
+ * Archétype **Travail** : plus de carte à filet or ni de titre serif — même
+ * vocabulaire que la file paroissiale (`/app/admin/documents`), qui sert de
+ * référence. Zéro ornement, action principale visible.
  */
 export function AdminCategoriesSection() {
   const { data: cats, isLoading, isError, refetch } = useTvCategories();
@@ -65,55 +67,56 @@ export function AdminCategoriesSection() {
   ];
 
   return (
-    <Card variant="feature">
-      <CardContent className="p-4 sm:p-5">
-        <SectionHeader
-          eyebrow="Diffusion"
-          title="Catégories"
-          action={
-            <Button
-              size="sm"
-              variant="outline-gold"
-              onClick={() => setShowForm((v) => !v)}
-            >
-              {showForm ? 'Annuler' : '+ Catégorie'}
-            </Button>
+    <section aria-labelledby="tv-categories-title">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <h2
+          id="tv-categories-title"
+          className="text-sm font-semibold text-foreground"
+        >
+          Catégories
+        </h2>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-11 shrink-0 md:h-8"
+          onClick={() => setShowForm((v) => !v)}
+        >
+          {showForm ? 'Annuler' : '+ Catégorie'}
+        </Button>
+      </div>
+
+      {showForm && (
+        <div className="mb-4">
+          <CategoryForm onSuccess={() => setShowForm(false)} />
+        </div>
+      )}
+
+      {isError ? (
+        <ErrorState
+          title="Impossible de charger les catégories"
+          onRetry={() => refetch()}
+        />
+      ) : (
+        <DataTable
+          data={cats?.results}
+          columns={columns}
+          rowKey={(cat) => cat.id}
+          isLoading={isLoading}
+          caption="Liste des catégories TV"
+          emptyState={
+            <EmptyState
+              icon={<ListVideo aria-hidden="true" />}
+              title="Créez votre première catégorie"
+              description="Messes, enseignements, témoignages… Les catégories structurent la chaîne et guident les fidèles vers les bons programmes."
+              action={
+                <Button onClick={() => setShowForm(true)}>
+                  Créer une catégorie
+                </Button>
+              }
+            />
           }
         />
-
-        {showForm && (
-          <div className="mb-4">
-            <CategoryForm onSuccess={() => setShowForm(false)} />
-          </div>
-        )}
-
-        {isError ? (
-          <ErrorState
-            title="Impossible de charger les catégories"
-            onRetry={() => refetch()}
-          />
-        ) : (
-          <DataTable
-            data={cats?.results}
-            columns={columns}
-            rowKey={(cat) => cat.id}
-            isLoading={isLoading}
-            caption="Liste des catégories TV"
-            emptyState={
-              <EmptyState
-                icon={<ListVideo aria-hidden="true" />}
-                title="Créez votre première catégorie"
-                description="Messes, enseignements, témoignages… Les catégories structurent la chaîne et guident les fidèles vers les bons programmes."
-                action={
-                  <Button onClick={() => setShowForm(true)}>
-                    Créer une catégorie
-                  </Button>
-                }
-              />
-            }
-          />
-        )}
-      </CardContent>
-    </Card>
+      )}
+    </section>
   );
 }

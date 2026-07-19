@@ -1,100 +1,119 @@
 'use client';
 
-import { FileText, ScrollText, Users, Wallet } from 'lucide-react';
-import * as React from 'react';
+import { Church } from 'lucide-react';
 
-import { Card } from '@/components/ui/card/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { StatCard } from '@/components/ui/stat-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+import { MetricStrip, type WorkMetric } from '@/components/ui/metric-strip';
+import { ApiError } from '@/lib/api-client';
 
 import { useMyParishDashboard } from '../api/get-parish-dashboard';
+
 
 function formatXof(amount: number): string {
   return `${Math.round(amount).toLocaleString('fr-FR')} FCFA`;
 }
 
-type StatTone = 'primary' | 'gold' | 'success' | 'info';
+const NUMBER_FR = new Intl.NumberFormat('fr-FR');
 
 /**
- * Synthèse paroissiale du curé : total de fidèles + flux de dons + files d'attente.
- * Ne s'affiche que pour un prêtre rattaché à une paroisse (sinon l'endpoint renvoie 404).
+ * Synthèse paroissiale du curé — archétype **Travail** (DIRECTION R6).
+ *
+ * Le bloc renvoyait `null` sur erreur : une panne réseau se lisait comme
+ * « cette paroisse n'a rien à dire », une zone blanche sans explication ni
+ * moyen de réessayer. On distingue désormais deux cas très différents :
+ *
+ * - **404** — le compte n'est rattaché à aucune paroisse. C'est fonctionnel,
+ *   pas une panne : on l'explique, sans bouton « Réessayer » qui ne peut rien
+ *   changer.
+ * - **toute autre erreur** — c'est une panne : message explicite + reprise.
  */
 export function ParishStatsSection() {
-  const { data, isLoading, isError } = useMyParishDashboard();
+  const { data, isLoading, isError, error, refetch } = useMyParishDashboard();
 
-  if (isError) return null;
-  if (isLoading) return <Skeleton className="h-28 w-full rounded-xl" />;
-  if (!data) return null;
+  const isNotFound = error instanceof ApiError && error.status === 404;
 
-  const stats: Array<{
-    label: string;
-    value: string | number;
-    icon: React.ReactNode;
-    tone: StatTone;
-  }> = [
+  if (isError && isNotFound) {
+    return (
+      <section aria-label="Ma paroisse">
+        <EmptyState
+          icon={<Church aria-hidden="true" />}
+          title="Aucune paroisse rattachée"
+          description="Votre compte n'est rattaché à aucune paroisse : les statistiques paroissiales apparaîtront dès qu'un rattachement sera enregistré."
+        />
+      </section>
+    );
+  }
+
+  if (isError) {
+    return (
+      <section aria-label="Ma paroisse">
+        <ErrorState
+          title="Statistiques paroissiales indisponibles"
+          description="Les chiffres de votre paroisse n'ont pas pu être chargés."
+          onRetry={() => refetch()}
+        />
+      </section>
+    );
+  }
+
+  const metrics: WorkMetric[] = [
     {
       label: 'Fidèles',
-      value: data.total_fideles.toLocaleString('fr-FR'),
-      icon: <Users />,
-      tone: 'primary',
+      value: NUMBER_FR.format(data?.total_fideles ?? 0),
     },
     {
       label: 'Dons (année)',
-      value: formatXof(data.donation_flow_year.total),
-      icon: <Wallet />,
-      tone: 'success',
+      value: formatXof(data?.donation_flow_year.total ?? 0),
     },
     {
-      label: 'Documents',
-      value: data.pending_documents,
-      icon: <FileText />,
-      tone: 'gold',
+      label: 'Documents en attente',
+      value: data?.pending_documents ?? 0,
+      alert: (data?.pending_documents ?? 0) > 0,
     },
     {
-      label: 'Intentions',
-      value: data.pending_intentions,
-      icon: <ScrollText />,
-      tone: 'info',
+      label: 'Intentions en attente',
+      value: data?.pending_intentions ?? 0,
+      alert: (data?.pending_intentions ?? 0) > 0,
     },
   ];
 
-  return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold text-foreground">
-        Ma paroisse — {data.parish.name}
-      </h2>
+  const byType = data?.donation_flow_year.by_type ?? [];
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {stats.map((stat) => (
-          <StatCard
-            key={stat.label}
-            icon={stat.icon}
-            value={stat.value}
-            label={stat.label}
-            tone={stat.tone}
-          />
-        ))}
+  return (
+    <section aria-labelledby="parish-stats-title" className="flex flex-col gap-2.5">
+      <div className="flex items-baseline justify-between gap-3 border-b border-border pb-1.5">
+        <h2
+          id="parish-stats-title"
+          className="text-sm font-semibold text-foreground"
+        >
+          Ma paroisse{data ? ` — ${data.parish.name}` : ''}
+        </h2>
       </div>
 
-      {data.donation_flow_year.by_type.length > 0 && (
-        <Card variant="elevated" className="p-4">
-          <h3 className="mb-2 text-xs font-semibold text-muted-foreground">
+      <MetricStrip items={metrics} isLoading={isLoading} />
+
+      {byType.length > 0 && (
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
+          <h3 className="border-b border-border px-4 py-2.5 text-xs font-semibold text-muted-foreground">
             Flux de dons par type (année)
           </h3>
-          <ul className="flex flex-col gap-1">
-            {data.donation_flow_year.by_type.map((row) => (
+          <ul className="divide-y divide-border">
+            {byType.map((row) => (
               <li
                 key={row.donation_type}
-                className="flex items-center justify-between text-sm"
+                className="flex items-center justify-between gap-3 px-4 py-2 text-sm"
               >
-                <span className="text-foreground">{row.donation_type}</span>
-                <span className="font-medium tabular-nums">
+                <span className="min-w-0 truncate text-foreground">
+                  {row.donation_type}
+                </span>
+                <span className="shrink-0 font-semibold tabular-nums text-foreground">
                   {formatXof(row.total)}
                 </span>
               </li>
             ))}
           </ul>
-        </Card>
+        </div>
       )}
     </section>
   );

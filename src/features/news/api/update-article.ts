@@ -1,22 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { api } from '@/lib/api-client';
+import type { RequestBody } from '@/types/api-contract';
 
-import { Article, ContentType, articleSchema } from '../types';
+import { Article, articleSchema } from '../types';
 
-export type UpdateArticleInput = {
-  title?: string;
-  excerpt?: string;
-  content?: string;
-  content_format?: 'text' | 'html';
-  announcement_date?: string | null;
-  category_id?: number;
-  cover_image_id?: number | null;
-  content_type?: ContentType;
-  scope_type?: 'global' | 'diocese' | 'parish';
-  scope_parish_id?: number | null;
-  scope_diocese_id?: number | null;
-};
+/** Corps dérivé du contrat OpenAPI — voir la note de `create-article.ts`. */
+export type UpdateArticleInput = Partial<
+  RequestBody<'v1_news_admin_update_partial_update'>
+>;
 
 export const updateArticle = (
   articleId: string,

@@ -4,7 +4,6 @@ import Link from 'next/link';
 
 import { AdminPageLayout } from '@/components/layouts/admin-page-layout';
 import { Button } from '@/components/ui/button/button';
-import { Card, CardContent, CardEyebrow } from '@/components/ui/card/card';
 import { ErrorState } from '@/components/ui/error-state';
 import { paths } from '@/config/paths';
 import { useInvitations } from '@/features/clergy-accounts/api/get-invitations';
@@ -34,22 +33,26 @@ export default function InvitationsPage() {
         </div>
       }
     >
-      <Card variant="feature">
-        <CardContent className="p-4 sm:p-5">
-          <CardEyebrow className="mb-3">Suivi des invitations</CardEyebrow>
-          {isError ? (
-            <ErrorState
-              title="Impossible de charger les invitations"
-              onRetry={() => refetch()}
-            />
-          ) : (
-            <InvitationList
-              invitations={data?.results ?? []}
-              isLoading={isLoading}
-            />
-          )}
-        </CardContent>
-      </Card>
+      {/* Archétype **Travail** — vocabulaire de `/app/admin/documents`. */}
+      <section aria-labelledby="invitations-title">
+        <h2
+          id="invitations-title"
+          className="mb-2 text-sm font-semibold text-foreground"
+        >
+          Suivi des invitations
+        </h2>
+        {isError ? (
+          <ErrorState
+            title="Impossible de charger les invitations"
+            onRetry={() => refetch()}
+          />
+        ) : (
+          <InvitationList
+            invitations={data?.results ?? []}
+            isLoading={isLoading}
+          />
+        )}
+      </section>
     </AdminPageLayout>
   );
 }

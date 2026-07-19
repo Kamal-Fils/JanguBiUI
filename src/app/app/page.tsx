@@ -1,4 +1,4 @@
-import { HomeRouter } from '@/features/home/home-router';
+import { HomeRouter } from './_dashboards/home-router';
 
 export default function HomePage() {
   return <HomeRouter />;

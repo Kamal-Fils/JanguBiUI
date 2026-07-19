@@ -7,6 +7,7 @@ import { ContentContainer } from '@/components/layouts/content-container';
 import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { ErrorState } from '@/components/ui/error-state';
 import { SectionHeader } from '@/components/ui/section-header';
+import { Skeleton, SkeletonList } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { useAdminTransfers } from '@/features/transfert-paroissial/api/get-admin-transfers';
 import { AdminTransferList } from '@/features/transfert-paroissial/components/admin-transfer-list';
@@ -36,7 +37,17 @@ export default function ClergeTransfertsPage() {
     backHref: paths.app.clerge.root.getHref(),
   });
 
-  if (userLoading || !isClergy(user)) return null;
+  // Pas de `return null` : le temps que la session se résolve (ou que la
+  // redirection parte), l'écran garderait une zone blanche inexpliquée. On
+  // montre la structure attendue à la place.
+  if (userLoading || !isClergy(user)) {
+    return (
+      <ContentContainer className="space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <SkeletonList count={4} />
+      </ContentContainer>
+    );
+  }
 
   return (
     <ContentContainer>

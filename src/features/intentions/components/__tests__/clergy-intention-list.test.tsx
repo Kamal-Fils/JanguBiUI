@@ -149,7 +149,7 @@ describe('ClergyIntentionList', () => {
     expect(body).toEqual({ proposed_date: '2026-06-10' });
   });
 
-  test('date_proposed : seule action possible → Marquer célébrée (POST celebrate)', async () => {
+  test('date_proposed → confirmer la date OU marquer célébrée', async () => {
     let called = false;
     server.use(
       http.post(`${env.API_URL}/v1/mass-intentions/1/celebrate/`, () => {
@@ -170,6 +170,11 @@ describe('ClergyIntentionList', () => {
     expect(
       await screen.findByRole('menuitem', { name: 'Marquer célébrée' }),
     ).toBeInTheDocument();
+    // `confirmed` est désormais atteignable : le clergé peut acter l'accord
+    // donné de vive voix par le fidèle (auparavant ce statut était mort).
+    expect(
+      screen.getByRole('menuitem', { name: 'Confirmer la date' }),
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole('menuitem', { name: 'Proposer une date' }),
     ).not.toBeInTheDocument();
@@ -182,6 +187,30 @@ describe('ClergyIntentionList', () => {
     );
 
     expect(await screen.findByText('Intention célébrée')).toBeInTheDocument();
+    expect(called).toBe(true);
+  });
+
+  test('confirmer la date depuis la vue clergé → POST confirm-date', async () => {
+    let called = false;
+    server.use(
+      http.post(`${env.API_URL}/v1/mass-intentions/1/confirm-date/`, () => {
+        called = true;
+        return HttpResponse.json({}, { status: 200 });
+      }),
+    );
+
+    renderApp(
+      <ClergyIntentionList
+        intentions={[makeIntention({ status: 'date_proposed' })]}
+      />,
+    );
+
+    await openRowActions('fidele@jangubi.sn');
+    await userEvent.click(
+      await screen.findByRole('menuitem', { name: 'Confirmer la date' }),
+    );
+
+    expect(await screen.findByText('Date confirmée')).toBeInTheDocument();
     expect(called).toBe(true);
   });
 

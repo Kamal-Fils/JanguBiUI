@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { FilterPills, type FilterOption } from '@/components/ui/filter-pills';
 import { SectionHeader } from '@/components/ui/section-header';
+import { Skeleton, SkeletonList } from '@/components/ui/skeleton';
 import { paths } from '@/config/paths';
 import { useParishIntentions } from '@/features/intentions/api/get-parish-intentions';
 import { ClergyIntentionList } from '@/features/intentions/components/clergy-intention-list';
@@ -74,7 +75,17 @@ export default function ClergeIntentionsPage() {
     [intentions, statusFilter],
   );
 
-  if (userLoading || !isClergy(user)) return null;
+  // Pas de `return null` : le temps que la session se résolve (ou que la
+  // redirection parte), l'écran garderait une zone blanche inexpliquée. On
+  // montre la structure attendue à la place.
+  if (userLoading || !isClergy(user)) {
+    return (
+      <ContentContainer className="space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <SkeletonList count={4} />
+      </ContentContainer>
+    );
+  }
 
   return (
     <div className="flex flex-col">

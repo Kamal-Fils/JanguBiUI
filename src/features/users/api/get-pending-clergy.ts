@@ -14,6 +14,11 @@ export const pendingClergySchema = z.object({
   diocese_name: z.string().optional().nullable(),
   parish_name: z.string().optional().nullable(),
   date_joined: z.string().optional().nullable(),
+  // Ajouts de l'auto-déclaration : le validateur ne peut pas trancher à
+  // l'aveugle. Optionnels pour rester tolérants aux réponses antérieures.
+  justification_file_url: z.string().optional().nullable(),
+  declaration_message: z.string().optional().nullable(),
+  submitted_at: z.string().optional().nullable(),
 });
 
 export type PendingClergyAccount = z.infer<typeof pendingClergySchema>;

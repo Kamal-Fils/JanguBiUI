@@ -13,6 +13,10 @@ import { useNotifications } from '@/components/ui/notifications';
 import { SectionHeader } from '@/components/ui/section-header';
 import { SkeletonList } from '@/components/ui/skeleton';
 import { useMyIntentions } from '@/features/intentions/api/get-my-intentions';
+import {
+  IntentionFideleActions,
+  hasFideleActions,
+} from '@/features/intentions/components/intention-fidele-actions';
 import { IntentionsIntro } from '@/features/intentions/components/intentions-intro';
 import { MassIntentionCard } from '@/features/intentions/components/mass-intention-card';
 import { SubmitIntentionForm } from '@/features/intentions/components/submit-intention-form';
@@ -98,7 +102,12 @@ export default function IntentionsPage() {
           !isError &&
           data &&
           data.results.map((intention) => (
-            <MassIntentionCard key={intention.id} intention={intention} />
+            <MassIntentionCard key={intention.id} intention={intention}>
+              {/* Pas de conteneur d'actions quand il n'y a rien à faire. */}
+              {hasFideleActions(intention) ? (
+                <IntentionFideleActions intention={intention} />
+              ) : null}
+            </MassIntentionCard>
           ))}
       </ContentContainer>
     </div>

@@ -198,6 +198,9 @@ export const createArticle = (overrides?: Partial<Article>): Article => ({
   scope_diocese_id: null,
   status: 'published',
   views_count: randNumber({ min: 0, max: 1000 }),
+  // Le serveur annote toujours ce bloc (compteurs + réactions du lecteur) :
+  // le générateur le fait aussi, pour que les tests exercent le vrai contrat.
+  reactions: { counts: { pray: 0, amen: 0, attend: 0 }, mine: [] },
   published_at: randPastDate().toISOString(),
   created_at: randPastDate().toISOString(),
   ...overrides,

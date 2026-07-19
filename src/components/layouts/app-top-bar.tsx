@@ -70,11 +70,16 @@ export function AppTopBar() {
           </span>
         </Link>
 
-        {/* Actions globales */}
+        {/* Actions globales.
+            `shrink-0` sur CHAQUE bouton, pas seulement sur leur conteneur : le
+            chevauchement déjà corrigé de la cloche venait d'un contenu qui
+            débordait de sa boîte ronde à taille fixe. Le conteneur suffit tant
+            que rien ne s'élargit ; ces gardes évitent que l'ajout d'une action
+            ne recrée le défaut. */}
         <div className="flex shrink-0 items-center gap-1">
-          <NotificationBell className="size-10 justify-center rounded-full p-0" />
+          <NotificationBell className="size-10 shrink-0 justify-center rounded-full p-0" />
           <ThemeToggle
-            className="size-10 justify-center rounded-full p-0"
+            className="size-10 shrink-0 justify-center rounded-full p-0"
             labelClassName="hidden"
           />
           <DropdownMenu>
@@ -82,7 +87,7 @@ export function AppTopBar() {
               <button
                 type="button"
                 aria-label="Menu du compte"
-                className="flex items-center gap-1.5 rounded-full p-1 pr-2 transition-colors hover:bg-muted/70"
+                className="flex shrink-0 items-center gap-1.5 rounded-full p-1 pr-2 transition-colors hover:bg-muted/70"
               >
                 <UserAvatar
                   size="sm"

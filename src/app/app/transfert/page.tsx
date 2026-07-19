@@ -36,9 +36,10 @@ export default function TransfertPage() {
     <div className="flex flex-col">
       <ContentContainer>
         <div className="mb-4">
+          {/* min-h-11 : cible tactile ≥ 44px (DIRECTION.md R3). */}
           <Link
             href={paths.app.profil.getHref()}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="-ml-1 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-1 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
             Retour au profil

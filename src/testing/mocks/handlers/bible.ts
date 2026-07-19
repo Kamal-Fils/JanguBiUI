@@ -6,6 +6,10 @@ import {
   createRosaryDay,
   createRosaryGroup,
 } from '@/testing/data-generators';
+import type { components } from '@/types/api';
+
+/** Forme réellement servie par l'API (schéma OpenAPI généré). */
+type BookMetadata = components['schemas']['BookMetadataOutput'];
 
 const mockLiturgyDay = createLiturgyDay({
   date: new Date().toISOString().split('T')[0],
@@ -61,13 +65,30 @@ export const bibleHandlers = [
   }),
 
   http.get(`${env.API_URL}/v1/bible/books/`, () => {
-    return HttpResponse.json({
-      count: 2,
-      results: [
-        { id: 1, name: 'Genèse', slug: 'gn', testament: 1, chapters_count: 50 },
-        { id: 2, name: 'Exode', slug: 'ex', testament: 1, chapters_count: 40 },
-      ],
-    });
+    // Typé depuis le schéma généré : la fixture annonçait `chapters_count` et
+    // `testament: 1` là où l'API renvoie `chapter_count` et un libellé texte.
+    // Les tests passaient donc contre une réponse que le serveur n'émet jamais
+    // — et le sélecteur de chapitres serait resté vide en conditions réelles.
+    // L'annotation transforme désormais toute dérive en erreur de compilation.
+    const results: BookMetadata[] = [
+      {
+        id: 1,
+        name: 'Genèse',
+        slug: 'gn',
+        order: 1,
+        testament: 'Ancien Testament',
+        chapter_count: 50,
+      },
+      {
+        id: 2,
+        name: 'Exode',
+        slug: 'ex',
+        order: 2,
+        testament: 'Ancien Testament',
+        chapter_count: 40,
+      },
+    ];
+    return HttpResponse.json({ count: results.length, results });
   }),
 
   http.get(`${env.API_URL}/v1/bible/testaments/`, () => {

@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/lib/auth';
 import { isPretre } from '@/lib/authorization';
@@ -59,24 +61,29 @@ function PlanCard({ plan }: { plan: ReadingPlan }) {
         </div>
       </div>
 
+      {/* Une seule action, selon l'état réel : proposer les deux en permanence
+          laissait le lecteur deviner s'il était inscrit ou non. */}
       <div className="flex gap-2">
-        <Button
-          size="sm"
-          onClick={() => subscribe(plan.id)}
-          disabled={subscribing || unsubscribing}
-          className="flex-1"
-        >
-          {subscribing ? 'Inscription…' : "S'inscrire"}
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => unsubscribe(plan.id)}
-          disabled={subscribing || unsubscribing}
-          className="text-muted-foreground"
-        >
-          Se désinscrire
-        </Button>
+        {plan.is_subscribed ? (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => unsubscribe(plan.id)}
+            disabled={subscribing || unsubscribing}
+            className="min-h-11 flex-1 text-muted-foreground"
+          >
+            {unsubscribing ? 'Désinscription…' : 'Se désinscrire'}
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            onClick={() => subscribe(plan.id)}
+            disabled={subscribing || unsubscribing}
+            className="min-h-11 flex-1"
+          >
+            {subscribing ? 'Inscription…' : "S'inscrire"}
+          </Button>
+        )}
       </div>
     </Card>
   );
@@ -195,7 +202,7 @@ function CreatePlanForm({ onClose }: { onClose: () => void }) {
 
 export function ReadingPlanList() {
   const { data: user } = useUser();
-  const { data, isLoading, isError } = useReadingPlans();
+  const { data, isLoading, isError, refetch } = useReadingPlans();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const canCreate = isPretre(user);
 
@@ -211,9 +218,11 @@ export function ReadingPlanList() {
 
   if (isError) {
     return (
-      <p className="text-sm text-destructive text-center py-6">
-        Erreur lors du chargement des plans.
-      </p>
+      <ErrorState
+        title="Les parcours n’ont pas pu être chargés"
+        description="La liaison avec le serveur n’a pas répondu. Vous pouvez réessayer maintenant."
+        onRetry={() => void refetch()}
+      />
     );
   }
 
@@ -240,9 +249,15 @@ export function ReadingPlanList() {
       )}
 
       {plans.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">
-          Aucun parcours de lecture disponible.
-        </p>
+        <EmptyState
+          icon={<BookOpen />}
+          title="Aucun parcours pour le moment"
+          description={
+            canCreate
+              ? 'Un parcours propose à vos paroissiens un rythme de lecture jour après jour. Créez le premier ci-dessus.'
+              : 'Votre paroisse n’a pas encore publié de parcours de lecture. Dès qu’un prêtre en proposera un, vous pourrez le suivre ici.'
+          }
+        />
       ) : (
         <div className="space-y-3">
           {plans.map((plan) => (

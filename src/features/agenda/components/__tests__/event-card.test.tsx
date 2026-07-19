@@ -50,3 +50,60 @@ describe('EventCard', () => {
     ).toBeInTheDocument();
   });
 });
+
+/**
+ * Le fil agenda se lit en trois mouvements de densité décroissante
+ * (DIRECTION R6, archétype Flux) : la proximité dans le temps *est*
+ * l'importance. Ces tests fixent ce que chaque mouvement doit porter.
+ */
+describe('EventCard — rythme du fil', () => {
+  test('la une porte la description complète et l’inscription', async () => {
+    renderApp(
+      <EventCard
+        event={makeEvent({ description: 'Grande célébration à 10h.' })}
+        variant="lead"
+      />,
+    );
+
+    expect(
+      await screen.findByRole('heading', { name: /messe de la pentecôte/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Grande célébration à 10h.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: "S'inscrire" }),
+    ).toBeInTheDocument();
+  });
+
+  test('la brève tient sur une ligne et renvoie au détail, sans inscription', async () => {
+    renderApp(<EventCard event={makeEvent()} variant="brief" />);
+
+    const link = await screen.findByRole('link', {
+      name: /messe de la pentecôte/i,
+    });
+    expect(link).toHaveAttribute('href', '/app/agenda/1');
+
+    // On ne s'engage pas sur une date lointaine depuis une brève.
+    expect(
+      screen.queryByRole('button', { name: "S'inscrire" }),
+    ).not.toBeInTheDocument();
+    // Ni description : la brève est typographique, pas narrative.
+    expect(
+      screen.queryByText('Grande célébration à 10h.'),
+    ).not.toBeInTheDocument();
+  });
+
+  test('la bande reste le défaut — l’accueil du fidèle n’a pas à le préciser', async () => {
+    const { rerender } = renderApp(<EventCard event={makeEvent()} />);
+    const withDefault = await screen.findByRole('button', {
+      name: "S'inscrire",
+    });
+    expect(withDefault).toBeInTheDocument();
+
+    rerender(<EventCard event={makeEvent()} variant="band" />);
+    expect(
+      screen.getByRole('button', { name: "S'inscrire" }),
+    ).toBeInTheDocument();
+  });
+});

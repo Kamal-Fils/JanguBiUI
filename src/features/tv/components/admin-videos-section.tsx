@@ -11,7 +11,6 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button/button';
-import { Card, CardContent } from '@/components/ui/card/card';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import {
   Dialog,
@@ -30,7 +29,6 @@ import {
 } from '@/components/ui/dropdown';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
-import { SectionHeader } from '@/components/ui/section-header';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { cn } from '@/utils/cn';
 
@@ -62,7 +60,7 @@ function VideoThumb({ video }: { video: TvVideo }) {
   return (
     <div
       aria-hidden="true"
-      className="hidden h-10 w-[4.5rem] shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-primary/10 to-accent/10 text-primary/40 md:flex"
+      className="hidden h-10 w-[4.5rem] shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground md:flex"
     >
       <MonitorPlay className="size-4" />
     </div>
@@ -114,6 +112,10 @@ function VideoRowActions({
  * Section admin « Vidéos » : DataTable + menu « ⋯ » par ligne, formulaire de
  * création/édition repliable, confirmation de suppression en Dialog.
  * La logique métier (mutations, invalidations) est inchangée.
+ *
+ * Archétype **Travail** : même vocabulaire que la file paroissiale
+ * (`/app/admin/documents`) — pas de carte à filet or, pas de titre serif, la
+ * donnée et l'action seules.
  */
 export function AdminVideosSection() {
   const { data: cats } = useTvCategories();
@@ -157,7 +159,7 @@ export function AdminVideosSection() {
         <div className="flex min-w-0 items-center gap-3">
           <VideoThumb video={v} />
           <div className="min-w-0">
-            <p className="line-clamp-1 font-serif text-sm font-semibold text-foreground">
+            <p className="line-clamp-1 text-sm font-semibold text-foreground">
               {v.title || '(sans titre)'}
             </p>
             <p className="truncate text-xs text-muted-foreground">
@@ -209,84 +211,89 @@ export function AdminVideosSection() {
   ];
 
   return (
-    <Card variant="feature">
-      <CardContent className="p-4 sm:p-5">
-        <SectionHeader
-          eyebrow="Programmes"
-          title="Vidéos"
-          action={
-            <Button size="sm" variant="outline-gold" onClick={startCreate}>
-              {showForm && !editingVideo ? 'Annuler' : '+ Vidéo'}
-            </Button>
+    <section aria-labelledby="tv-videos-title">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <h2
+          id="tv-videos-title"
+          className="text-sm font-semibold text-foreground"
+        >
+          Vidéos
+        </h2>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-11 shrink-0 md:h-8"
+          onClick={startCreate}
+        >
+          {showForm && !editingVideo ? 'Annuler' : '+ Vidéo'}
+        </Button>
+      </div>
+
+      {showForm && (
+        <div className="mb-4">
+          <VideoForm
+            key={editingVideo?.id ?? 'new'}
+            categories={categories}
+            video={editingVideo ?? undefined}
+            onSuccess={closeForm}
+            onCancel={closeForm}
+          />
+        </div>
+      )}
+
+      {isError ? (
+        <ErrorState
+          title="Impossible de charger les vidéos"
+          onRetry={() => refetch()}
+        />
+      ) : (
+        <DataTable
+          data={videos?.results}
+          columns={columns}
+          rowKey={(v) => v.id}
+          isLoading={isLoading}
+          caption="Liste des vidéos TV"
+          emptyState={
+            <EmptyState
+              icon={<MonitorPlay aria-hidden="true" />}
+              title="Ajoutez votre première vidéo"
+              description="Collez un lien YouTube pour diffuser une messe, un enseignement ou un direct sur Jàngu Bi TV."
+              action={<Button onClick={openCreate}>Ajouter une vidéo</Button>}
+            />
           }
         />
+      )}
 
-        {showForm && (
-          <div className="mb-4">
-            <VideoForm
-              key={editingVideo?.id ?? 'new'}
-              categories={categories}
-              video={editingVideo ?? undefined}
-              onSuccess={closeForm}
-              onCancel={closeForm}
-            />
-          </div>
-        )}
-
-        {isError ? (
-          <ErrorState
-            title="Impossible de charger les vidéos"
-            onRetry={() => refetch()}
-          />
-        ) : (
-          <DataTable
-            data={videos?.results}
-            columns={columns}
-            rowKey={(v) => v.id}
-            isLoading={isLoading}
-            caption="Liste des vidéos TV"
-            emptyState={
-              <EmptyState
-                icon={<MonitorPlay aria-hidden="true" />}
-                title="Ajoutez votre première vidéo"
-                description="Collez un lien YouTube pour diffuser une messe, un enseignement ou un direct sur Jàngu Bi TV."
-                action={<Button onClick={openCreate}>Ajouter une vidéo</Button>}
-              />
-            }
-          />
-        )}
-
-        {/* Confirmation de suppression */}
-        <Dialog
-          open={!!deleteTarget}
-          onOpenChange={(open) => !open && setDeleteTarget(null)}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Supprimer cette vidéo&nbsp;?</DialogTitle>
-              <DialogDescription>
-                «&nbsp;{deleteTarget?.title || 'Vidéo sans titre'}&nbsp;» sera
-                définitivement retirée de JanguBi TV. Cette action est
-                irréversible.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-                Annuler
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() =>
-                  deleteTarget && deleteMutation.mutate(deleteTarget.id)
-                }
-                isLoading={deleteMutation.isPending}
-              >
-                Supprimer
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </CardContent>
-    </Card>
+      {/* Confirmation de suppression */}
+      <Dialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Supprimer cette vidéo&nbsp;?</DialogTitle>
+            <DialogDescription>
+              «&nbsp;{deleteTarget?.title || 'Vidéo sans titre'}&nbsp;» sera
+              définitivement retirée de JanguBi TV. Cette action est
+              irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() =>
+                deleteTarget && deleteMutation.mutate(deleteTarget.id)
+              }
+              isLoading={deleteMutation.isPending}
+            >
+              Supprimer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </section>
   );
 }

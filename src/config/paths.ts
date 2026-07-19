@@ -54,6 +54,7 @@ export const paths = {
     agenda: { getHref: () => '/app/agenda' },
     agendaEvent: { getHref: (id: number | string) => `/app/agenda/${id}` },
     profil: { getHref: () => '/app/profil' },
+    profilClerge: { getHref: () => '/app/profil/clerge' },
     transfert: { getHref: () => '/app/transfert' },
     clerge: {
       root: { getHref: () => '/app/clerge' },

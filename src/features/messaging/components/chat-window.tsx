@@ -52,6 +52,10 @@ const SCROLL_BOTTOM_THRESHOLD = 80;
 const LONG_MESSAGE_THRESHOLD = 200;
 const GROUP_TIME_GAP_MS = 3 * 60 * 1000; // 3 minutes
 
+/** Filet bleu — séparateur de journée et pied d'en-tête (DIRECTION.md R4). */
+const DAY_RULE_CLASS =
+  'h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent';
+
 interface ChatWindowProps {
   conversationId: string;
   participantName?: string;
@@ -164,18 +168,21 @@ function isOptimistic(message: Message): boolean {
 
 // ── DaySeparator ──────────────────────────────────────────────────────────────
 
-/** Séparateur éditorial entre deux journées : filets or + pastille datée. */
+/**
+ * Séparateur éditorial entre deux journées : filets **bleus** + pastille datée.
+ * Le bleu porte l'identité, l'or reste un accent (DIRECTION.md R4).
+ */
 function DaySeparator({ iso }: { iso: string }) {
   return (
     <div className="mb-1 mt-5 flex items-center gap-3 first:mt-1">
-      <div className="hairline-gold flex-1" aria-hidden="true" />
+      <div className={cn(DAY_RULE_CLASS, 'flex-1')} aria-hidden="true" />
       <span
         suppressHydrationWarning
-        className="shrink-0 rounded-full bg-muted/70 px-3 py-1 text-[11px] font-medium capitalize text-muted-foreground"
+        className="shrink-0 rounded-full bg-muted px-3 py-1 text-xs font-medium capitalize text-muted-foreground"
       >
         {formatDayLabel(iso)}
       </span>
-      <div className="hairline-gold flex-1" aria-hidden="true" />
+      <div className={cn(DAY_RULE_CLASS, 'flex-1')} aria-hidden="true" />
     </div>
   );
 }
@@ -249,7 +256,10 @@ function MessageBubble({
 
       <div
         className={cn(
-          'max-w-[75%] md:max-w-[60%] px-4 py-2.5 text-sm',
+          // 15 px : c'est un échange intime avec un prêtre, lu sur un téléphone
+          // modeste, parfois par un fidèle de plus de soixante ans (R3). La
+          // densité de l'archétype Travail ne doit pas écraser la chaleur.
+          'max-w-[75%] md:max-w-[60%] px-4 py-2.5 text-[15px]',
           getBubbleRadius(message.is_mine, position),
           message.is_mine
             ? 'bg-primary text-primary-foreground shadow-soft-sm'
@@ -272,10 +282,10 @@ function MessageBubble({
             type="button"
             onClick={onToggleExpand}
             className={cn(
-              'mt-1 flex items-center gap-1 rounded text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              'mt-1 flex items-center gap-1 rounded text-xs font-semibold underline-offset-2 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               message.is_mine
-                ? 'text-primary-foreground/70 hover:text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'text-primary-foreground/85 hover:text-primary-foreground'
+                : 'text-secondary-foreground dark:text-primary',
             )}
           >
             {isExpanded ? (
@@ -296,9 +306,9 @@ function MessageBubble({
         {isLast && (
           <div
             className={cn(
-              'mt-1 flex items-center justify-end gap-1 text-[10px]',
+              'mt-1 flex items-center justify-end gap-1 text-[11px]',
               message.is_mine
-                ? 'text-primary-foreground/60'
+                ? 'text-primary-foreground/75'
                 : 'text-muted-foreground',
             )}
           >
@@ -341,8 +351,7 @@ export function ChatWindow({
   const { status: socketStatus, retry: retrySocket } =
     useChatSocket(conversationId);
 
-  const needsCguAcceptance =
-    error instanceof ApiError && error.status === 403;
+  const needsCguAcceptance = error instanceof ApiError && error.status === 403;
   const hasGenericError = !!error && !needsCguAcceptance;
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior) => {
@@ -473,9 +482,9 @@ export function ChatWindow({
             )}
           </span>
         </div>
-        {/* Filet or éditorial sous l'en-tête */}
+        {/* Filet bleu sous l'en-tête */}
         <div
-          className="hairline-gold absolute inset-x-4 bottom-0"
+          className={cn(DAY_RULE_CLASS, 'absolute inset-x-4 bottom-0')}
           aria-hidden="true"
         />
       </div>
@@ -510,8 +519,8 @@ export function ChatWindow({
                   <p className="text-sm text-muted-foreground">
                     Pour préserver la confidentialité de vos échanges, vous
                     devez accepter les conditions d’utilisation de la
-                    messagerie. Cette acceptation ne vous sera demandée
-                    qu’une seule fois, pour toutes vos conversations.
+                    messagerie. Cette acceptation ne vous sera demandée qu’une
+                    seule fois, pour toutes vos conversations.
                   </p>
                   <Button
                     variant="default"

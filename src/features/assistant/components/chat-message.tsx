@@ -199,25 +199,30 @@ export function ChatMessage({ message, onRetry }: ChatMessageProps) {
         )}
       >
         {isUser ? (
-          <User className="size-4 text-accent" />
+          <User className="size-4 text-accent" aria-hidden="true" />
         ) : (
-          <Bot className="size-4 text-primary" />
+          <Bot className="size-4 text-primary" aria-hidden="true" />
         )}
       </div>
 
-      {/* Contenu */}
+      {/* Contenu — la question reste une bulle compacte ; la réponse, elle,
+          se LIT : elle prend toute la colonne et adopte le corps de lecture
+          (DIRECTION.md R6 « Lecture », R3 lisibilité). */}
       <div
-        className={cn('flex max-w-[85%] flex-col gap-2', isUser && 'items-end')}
+        className={cn(
+          'flex min-w-0 flex-col gap-2',
+          isUser ? 'max-w-[85%] items-end' : 'max-w-reading flex-1',
+        )}
       >
         <div
           role={message.isError ? 'alert' : undefined}
           className={cn(
-            'rounded-2xl px-4 py-3 text-sm leading-relaxed',
+            'rounded-2xl px-4 py-3',
             isUser
-              ? 'rounded-tr-sm bg-primary text-primary-foreground'
+              ? 'rounded-tr-sm bg-primary text-sm leading-relaxed text-primary-foreground'
               : message.isError
-                ? 'rounded-tl-sm border border-destructive/30 bg-destructive/5 text-foreground'
-                : 'rounded-tl-sm border border-border bg-background-surface text-foreground',
+                ? 'rounded-tl-sm border border-destructive/30 bg-destructive/5 text-sm leading-relaxed text-foreground'
+                : 'rounded-tl-sm border border-border bg-background-surface px-5 py-4 text-base leading-[1.75] text-foreground',
           )}
         >
           {/* Badge d'intention sur les réponses de l'assistant */}

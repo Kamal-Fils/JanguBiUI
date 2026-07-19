@@ -49,11 +49,13 @@ export function CampaignCard({
         'group w-full overflow-hidden rounded-2xl border text-left shadow-soft-sm transition-[transform,box-shadow,border-color,background-color] duration-[var(--duration-normal)] ease-out-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] motion-reduce:transform-none',
         selected
           ? 'border-primary/60 bg-primary/5 shadow-soft'
-          : 'border-primary/15 bg-secondary/60 hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-soft',
+          : 'border-primary/15 bg-secondary/60 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-soft',
       )}
     >
       <div className="flex gap-3 p-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/15">
+        {/* Bleu et non or : l'or reste un accent (le surtitre), il ne tient pas
+            la chrome principale de la carte (DIRECTION R4). */}
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/15">
           <HeartHandshake className="size-5" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">

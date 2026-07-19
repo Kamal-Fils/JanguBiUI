@@ -11,6 +11,7 @@ import { formatFrDate } from '@/utils/format-date';
 import { useArticleDetail } from '../api/get-article';
 
 import { ArticleHero } from './article-hero';
+import { ArticleReactionsBar } from './article-reactions';
 import { ArticleTypeBadge } from './article-type-badge';
 import { EditorialRule } from './editorial-rule';
 
@@ -224,6 +225,24 @@ export function ArticleDetail({ articleId }: ArticleDetailProps) {
             </span>
             <EditorialRule className="flex-1" />
           </div>
+
+          {/* Le geste communautaire arrive APRÈS la lecture : on ne demande pas
+              de réagir à un texte qu'on n'a pas encore lu. */}
+          <section
+            className="mt-8 max-w-reading"
+            aria-labelledby="reagir-titre"
+          >
+            <h2
+              id="reagir-titre"
+              className="mb-3 text-xs font-semibold uppercase tracking-widest text-foreground/70"
+            >
+              Réagir
+            </h2>
+            <ArticleReactionsBar
+              articleId={article.id}
+              reactions={article.reactions}
+            />
+          </section>
         </div>
       </div>
     </article>

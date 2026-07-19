@@ -33,7 +33,11 @@ export interface paths {
         get: operations["v1_agenda_events_retrieve_2"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Annuler un événement (organisateur ou autorité sur sa portée)
+         * @description Annulation DOUCE : l'événement sort des feeds et n'accepte plus d'inscription, mais ses inscriptions sont conservées et chaque inscrit est prévenu par email.
+         */
+        delete: operations["v1_agenda_events_destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -377,7 +381,10 @@ export interface paths {
         /** Détail d'un plan de lecture */
         get: operations["v1_bible_reading_plans_retrieve"];
         put?: never;
-        /** Publier un plan de lecture */
+        /**
+         * Publier un plan de lecture
+         * @description Aucun corps de requête : publier est une simple bascule d'état, réservée à l'auteur du parcours.
+         */
         post: operations["v1_bible_reading_plans_create_2"];
         delete?: never;
         options?: never;
@@ -395,8 +402,51 @@ export interface paths {
         /** Détail d'un plan de lecture */
         get: operations["v1_bible_reading_plans_publish_retrieve"];
         put?: never;
-        /** Publier un plan de lecture */
+        /**
+         * Publier un plan de lecture
+         * @description Aucun corps de requête : publier est une simple bascule d'état, réservée à l'auteur du parcours.
+         */
         post: operations["v1_bible_reading_plans_publish_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bible/reading-plans/{plan_id}/subscribe/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * S'inscrire à un parcours de lecture
+         * @description Aucun corps de requête. Idempotent : une ré-inscription renvoie 200 sans créer de doublon. Le parcours doit être publié.
+         */
+        post: operations["v1_bible_reading_plans_subscribe_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bible/reading-plans/{plan_id}/unsubscribe/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Se désinscrire d'un parcours de lecture
+         * @description Aucun corps de requête. Idempotent : se désinscrire d'un parcours auquel on n'est pas inscrit renvoie 200.
+         */
+        post: operations["v1_bible_reading_plans_unsubscribe_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1418,8 +1468,31 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Marquer une intention comme célébrée */
+        /**
+         * Marquer une intention comme célébrée
+         * @description Clôt le cycle et émet le reçu numérique. `celebration_date` est facultative : à défaut, la date confirmée ou proposée est retenue, sinon la date du jour.
+         */
         post: operations["v1_mass_intentions_celebrate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mass-intentions/{intention_id}/confirm-date/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirmer la date de célébration proposée
+         * @description Confirme la date proposée par la paroisse. Réservé au fidèle demandeur ou à un membre du clergé ayant autorité sur la paroisse de l'intention. L'intention doit être au statut `date_proposed`.
+         */
+        post: operations["v1_mass_intentions_confirm_date_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1454,6 +1527,26 @@ export interface paths {
         put?: never;
         /** Proposer une date de célébration */
         post: operations["v1_mass_intentions_propose_date_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mass-intentions/{intention_id}/receipt/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Récupérer le reçu numérique d'une intention célébrée
+         * @description Renvoie l'URL du reçu PDF. Disponible uniquement pour une intention au statut `celebrated`.
+         */
+        get: operations["v1_mass_intentions_receipt_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1958,6 +2051,26 @@ export interface paths {
         get: operations["v1_news_retrieve_2"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/news/{article_id}/reactions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Poser ou retirer une réaction sur un article publié
+         * @description Idempotent : rejouer la même requête laisse le système dans le même état. Réagir exige de pouvoir lire l'article (portée + publication). Renvoie les compteurs réconciliés et les réactions de l'utilisateur.
+         */
+        post: operations["v1_news_reactions_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2511,7 +2624,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Intentions déjà déposées dans une session (participants et initiateur)
+         * @description Permet à un participant qui rejoint en cours de chapelet de retrouver les intentions déposées avant sa connexion — le WebSocket ne diffuse que celles émises depuis l'ouverture de son socket.
+         */
+        get: operations["v1_rosary_community_intentions_retrieve"];
         put?: never;
         /** Soumettre une intention de prière */
         post: operations["v1_rosary_community_intentions_create"];
@@ -2742,11 +2859,15 @@ export interface paths {
         get: operations["v1_spiritual_reflections_retrieve_2"];
         put?: never;
         post?: never;
-        /** Supprimer une réflexion (auteur ou admin) */
+        /** Supprimer une réflexion (auteur ou autorité sur sa portée) */
         delete: operations["v1_spiritual_reflections_destroy"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Modifier une réflexion (auteur ou autorité sur sa portée)
+         * @description Édition partielle : seuls les champs fournis changent. L'auteur et la date ne sont pas modifiables. Déplacer la portée exige l'autorité sur la nouvelle portée.
+         */
+        patch: operations["v1_spiritual_reflections_partial_update"];
         trace?: never;
     };
     "/api/v1/spiritual/reflections/my-today/": {
@@ -2988,7 +3109,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Détail d'un utilisateur */
+        /**
+         * Détail d'un utilisateur
+         * @description Fiche complète d'un compte. Accessible aux administrateurs.
+         */
         get: operations["v1_users_retrieve_2"];
         put?: never;
         post?: never;
@@ -3005,7 +3129,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Journal d'audit d'un utilisateur */
+        /**
+         * Journal d'audit d'un utilisateur (paginé)
+         * @description Historique des événements de sécurité, du plus récent au plus ancien. Paginé : un compte ancien peut porter des milliers d'entrées.
+         */
         get: operations["v1_users_audit_logs_retrieve"];
         put?: never;
         post?: never;
@@ -3055,6 +3182,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/{user_id}/reject-account/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refuser un compte clergé en attente
+         * @description Refuse une auto-déclaration clergé. Le motif est obligatoire et notifié au demandeur par email. Le rôle pastoral revendiqué est retiré : le compte redevient un compte fidèle ordinaire.
+         */
+        post: operations["v1_users_reject_account_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/users/{user_id}/toggle-active/": {
         parameters: {
             query?: never;
@@ -3068,8 +3215,31 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Activer ou désactiver un compte */
+        /**
+         * Activer ou désactiver un compte
+         * @description Bascule le statut d'activation d'un compte, dans le périmètre de l'appelant.
+         */
         patch: operations["v1_users_toggle_active_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/users/{user_id}/validate-account/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Valider un compte clergé en attente
+         * @description Approuve une auto-déclaration clergé : le compte devient actif et vérifié. Réservé au super_admin (tous rôles) et à l'évêque/archevêque pour le clergé de son propre périmètre (prêtre, diacre, religieux).
+         */
+        post: operations["v1_users_validate_account_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/users/admin/create/": {
@@ -3163,6 +3333,30 @@ export interface paths {
         get: operations["v1_users_me_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/me/clergy-declaration/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consulter ma demande de compte clergé
+         * @description Renvoie la dernière auto-déclaration du compte connecté (en attente, approuvée, ou refusée avec son motif), ou `null` si aucune demande n'a jamais été déposée.
+         */
+        get: operations["v1_users_me_clergy_declaration_retrieve"];
+        put?: never;
+        /**
+         * Déposer une auto-déclaration de compte clergé
+         * @description Revendique un rôle pastoral, en joignant un justificatif et un territoire de rattachement. Le compte entre en file d'attente : la revendication n'accorde **aucun droit** tant que l'autorité compétente ne l'a pas approuvée. Une seule demande peut être en cours à la fois ; après un refus, une nouvelle demande est possible.
+         */
+        post: operations["v1_users_me_clergy_declaration_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3320,6 +3514,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/pending-validation/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lister les comptes clergé en attente de validation
+         * @description File d'attente des auto-déclarations clergé, restreinte au périmètre territorial de l'appelant (fail-closed : sans affectation territoriale, un validateur non global ne voit aucun dossier). Les comptes créés par invitation n'apparaissent jamais ici — accepter l'invitation vaut validation.
+         */
+        get: operations["v1_users_pending_validation_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/users/register/": {
         parameters: {
             query?: never;
@@ -3459,6 +3673,7 @@ export interface components {
             /** Format du contenu */
             content_format?: components["schemas"]["ContentFormatEnum"];
             readonly cover_image_url: string | null;
+            readonly reactions: components["schemas"]["ArticleReactionsOutput"];
             readonly category: components["schemas"]["ArticleCategoryOutput"];
             readonly author_name: string;
             /** Type de contenu */
@@ -3507,6 +3722,7 @@ export interface components {
             /** Résumé court */
             excerpt?: string;
             readonly cover_image_url: string | null;
+            readonly reactions: components["schemas"]["ArticleReactionsOutput"];
             readonly category: components["schemas"]["ArticleCategoryOutput"];
             readonly author_name: string;
             /** Type de contenu */
@@ -3536,6 +3752,39 @@ export interface components {
             /** Format: date-time */
             created_at?: string;
         };
+        /**
+         * @description État VOULU d'une réaction — pas une bascule.
+         *
+         *     `active` est explicite pour que rejouer la requête soit sans effet : une
+         *     bascule implicite ferait repartir un double-clic dans l'autre sens.
+         */
+        ArticleReactionSetInput: {
+            /**
+             * @description pray (Je prie) · amen (Amen) · attend (Je participe).
+             *
+             *     * `pray` - Je prie
+             *     * `amen` - Amen
+             *     * `attend` - Je participe
+             */
+            reaction_type: components["schemas"]["ReactionTypeEnum"];
+            /** @description true pour poser la réaction, false pour la retirer. */
+            active: boolean;
+        };
+        /**
+         * @description Bloc `reactions` embarqué dans la liste ET le détail d'article.
+         *
+         *     Le front a besoin des deux d'un coup — combien, et est-ce que MOI j'ai
+         *     réagi — sinon il repart chercher l'état article par article et le fil paie
+         *     une requête réseau par carte.
+         */
+        ArticleReactionsOutput: {
+            /** @description Nombre de réactions par type : pray / amen / attend. */
+            counts: {
+                [key: string]: number;
+            };
+            /** @description Types déjà posés par l'utilisateur courant (vide si anonyme). */
+            mine: components["schemas"]["MineEnum"][];
+        };
         ArticleUnpublishInput: {
             /** @default  */
             reason: string;
@@ -3556,6 +3805,29 @@ export interface components {
          * @enum {string}
          */
         AttachmentTypeEnum: "user_supporting" | "parish_final";
+        AuditLogItem: {
+            event: string;
+            ip_address: string | null;
+            metadata: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            created_at: string;
+        };
+        AuditLogPaginatedResponse: {
+            limit: number;
+            offset: number;
+            count: number;
+            /** Format: uri */
+            next: string | null;
+            /** Format: uri */
+            previous: string | null;
+            results: components["schemas"]["AuditLogItem"][];
+        };
+        BibleImportInput: {
+            filename: string;
+            source: string;
+        };
         BlockCreateInput: {
             /** Format: uuid */
             blocked_user_id: string;
@@ -3684,6 +3956,15 @@ export interface components {
          * @enum {string}
          */
         ChurchTypeEnum: "paroissiale" | "succursale" | "chapelle" | "station";
+        /**
+         * @description * `archeveque` - archeveque
+         *     * `diacre` - diacre
+         *     * `eveque` - eveque
+         *     * `pretre` - pretre
+         *     * `religieux` - religieux
+         * @enum {string}
+         */
+        ClaimedPastoralRoleEnum: "archeveque" | "diacre" | "eveque" | "pretre" | "religieux";
         ClergicalMessageOutput: {
             readonly id: number;
             /** Format: email */
@@ -3714,6 +3995,62 @@ export interface components {
             recipient_scope: components["schemas"]["RecipientScopeEnum"];
             scope_id?: number | null;
             individual_recipient_id?: number | null;
+        };
+        /**
+         * @description Motif de refus. Nommée au niveau module pour la même raison que
+         *     ``ClergyDeclarationCreateInputSerializer`` : une classe imbriquée
+         *     ``InputSerializer`` collisionne sur le composant OpenAPI générique ``Input``,
+         *     et le client ne peut alors plus dériver son payload du contrat.
+         */
+        ClergyAccountRejectInput: {
+            reason: string;
+        };
+        ClergyDecisionOutput: {
+            detail: string;
+            /** Format: uuid */
+            id: string;
+            clergy_validation_status: string;
+        };
+        /**
+         * @description Corps de la demande d'auto-déclaration.
+         *
+         *     Déclaré au niveau module, et NON imbriqué dans la vue : drf-spectacular nomme
+         *     le composant OpenAPI d'après la classe, donc une classe imbriquée
+         *     ``InputSerializer`` produit un composant générique ``Input`` — déjà occupé par
+         *     un tout autre endpoint (``{file_id}``). Le client qui dériverait son payload
+         *     de ce nom se retrouverait typé sur la mauvaise forme : exactement la dérive
+         *     de contrat silencieuse que ce projet a déjà payée.
+         */
+        ClergyDeclarationCreateInput: {
+            /**
+             * @description Rôle pastoral revendiqué (sans effet avant approbation).
+             *
+             *     * `archeveque` - archeveque
+             *     * `diacre` - diacre
+             *     * `eveque` - eveque
+             *     * `pretre` - pretre
+             *     * `religieux` - religieux
+             */
+            claimed_pastoral_role: components["schemas"]["ClaimedPastoralRoleEnum"];
+            /** @description Paroisse de rattachement revendiquée. */
+            parish_id: number;
+            /** @description ID du fichier justificatif téléversé via /v1/files/upload/standard/. */
+            justification_file_id: number;
+            /** @description Précisions facultatives pour l'autorité validante. */
+            message?: string;
+        };
+        /** @description État de MA demande — ce que le demandeur suit dans l'application. */
+        ClergyDeclarationOutput: {
+            id: number;
+            claimed_pastoral_role: string;
+            status: string;
+            parish_id: number;
+            parish_name: string | null;
+            message: string;
+            rejection_reason: string;
+            justification_file_url: string | null;
+            submitted_at: string | null;
+            reviewed_at: string | null;
         };
         CommunityRosaryInput: {
             mystery_group_id?: number | null;
@@ -4075,6 +4412,8 @@ export interface components {
             readonly registration_count: string;
             readonly is_registered: boolean;
             /** Format: date-time */
+            cancelled_at: string | null;
+            /** Format: date-time */
             created_at: string;
         };
         /**
@@ -4094,6 +4433,13 @@ export interface components {
             completed_at?: string | null;
             /** Format: date-time */
             created_at?: string;
+        };
+        FileUploadInput: {
+            /**
+             * Format: uri
+             * @description Fichier à téléverser (multipart/form-data).
+             */
+            file: string;
         };
         Group: {
             readonly id: number;
@@ -4119,11 +4465,17 @@ export interface components {
             updated_at: string;
         };
         Input: {
-            filename: string;
-            source: string;
+            file_id: string;
         };
         IntentionInput: {
             text: string;
+        };
+        IntentionOutput: {
+            id: number;
+            text: string;
+            readonly submitted_by: string | null;
+            /** Format: date-time */
+            created_at: string;
         };
         /**
          * @description * `for_deceased` - Pour un défunt
@@ -4193,7 +4545,7 @@ export interface components {
          */
         InvitationOutputStatusEnum: "pending" | "accepted" | "revoked" | "expired";
         LectioDivinaInput: {
-            passage_id: number;
+            passage_id?: number | null;
             /** @default  */
             lectio: string;
             /** @default  */
@@ -4205,7 +4557,9 @@ export interface components {
         };
         LectioDivinaOutput: {
             id: number;
-            passage_id: number;
+            passage_id: number | null;
+            /** Format: date */
+            session_date: string;
             lectio: string;
             meditatio: string;
             oratio: string;
@@ -4227,8 +4581,18 @@ export interface components {
             mystery?: string;
             notes?: string;
             readonly resource: components["schemas"]["AelfResource"];
-            readonly readings: string;
-            readonly offices: string;
+            readonly readings: components["schemas"]["Reading"][];
+            readonly offices: components["schemas"]["Office"][];
+        };
+        /**
+         * @description Corps optionnel : le prêtre peut acter la date réelle de célébration.
+         *
+         *     Tout est facultatif — un ``POST {}`` reste valide et laisse le service
+         *     retomber sur la date confirmée/proposée, puis sur aujourd'hui.
+         */
+        MassIntentionCelebrateInput: {
+            /** Format: date */
+            celebration_date?: string | null;
         };
         MassIntentionDeclineInput: {
             /** @default  */
@@ -4236,6 +4600,8 @@ export interface components {
         };
         MassIntentionOutput: {
             readonly id: number;
+            /** @description Référence publique citée sur le reçu numérique. */
+            reference?: string;
             intention_type: components["schemas"]["IntentionTypeEnum"];
             intention_text: string;
             status?: components["schemas"]["MassIntentionOutputStatusEnum"];
@@ -4248,6 +4614,13 @@ export interface components {
             proposed_date?: string | null;
             /** Format: date */
             celebration_date?: string | null;
+            /**
+             * @description URL du reçu, ou ``None`` tant qu'il n'y en a pas.
+             *
+             *     Un fichier dont l'upload n'est pas terminé (``is_valid`` faux) n'est
+             *     jamais exposé : mieux vaut pas de lien qu'un lien mort.
+             */
+            readonly receipt_url: string | null;
             notes?: string;
             /** Format: date-time */
             created_at?: string;
@@ -4267,6 +4640,13 @@ export interface components {
         MassIntentionProposeDateInput: {
             /** Format: date */
             proposed_date: string;
+        };
+        /** @description Charge utile de l'endpoint de reçu — volontairement minimale. */
+        MassIntentionReceiptOutput: {
+            reference: string;
+            receipt_url: string | null;
+            /** Format: date */
+            celebration_date: string | null;
         };
         MassIntentionSubmitInput: {
             intention_type: components["schemas"]["IntentionTypeEnum"];
@@ -4343,6 +4723,13 @@ export interface components {
             /** Format: date-time */
             accepted_at: string | null;
         };
+        /**
+         * @description * `pray` - Je prie
+         *     * `amen` - Amen
+         *     * `attend` - Je participe
+         * @enum {string}
+         */
+        MineEnum: "pray" | "amen" | "attend";
         MonProfil: {
             readonly id: number;
             /** Format: email */
@@ -4420,6 +4807,21 @@ export interface components {
             readonly id: number;
             readonly name: string;
         };
+        Output: {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string;
+            phone_number: string;
+            role: string;
+            is_active: boolean;
+            is_verified: boolean;
+            is_admin: boolean;
+            is_staff: boolean;
+            readonly date_joined: string;
+            readonly user_profile: string;
+            readonly address: string;
+        };
         PaginatedArticleListOutputList: {
             limit: number;
             offset: number;
@@ -4459,6 +4861,14 @@ export interface components {
             next: string | null;
             previous: string | null;
             results: components["schemas"]["EventOutput"][];
+        };
+        PaginatedIntentionOutputList: {
+            limit: number;
+            offset: number;
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["IntentionOutput"][];
         };
         PaginatedParishOutputList: {
             limit: number;
@@ -4572,6 +4982,9 @@ export interface components {
             passage_end_id?: number | null;
             content?: string;
         };
+        PatchedInput: {
+            is_active?: boolean;
+        };
         PatchedMeUpdateInput: {
             first_name?: string;
             last_name?: string;
@@ -4597,6 +5010,19 @@ export interface components {
             name?: string;
             code?: string;
         };
+        /**
+         * @description Édition partielle : tout est optionnel, seuls les champs fournis changent.
+         *     ``author`` et ``reflection_date`` sont volontairement absents — ils forment
+         *     l'identité de la réflexion (contrainte unique auteur+jour).
+         */
+        PatchedReflectionUpdateInput: {
+            content?: string;
+            title?: string;
+            scope_type?: components["schemas"]["ScopeType349Enum"];
+            scope_parish_id?: number | null;
+            scope_diocese_id?: number | null;
+            scope_church_id?: number | null;
+        };
         PatchedVideoCreateUpdate: {
             title?: string;
             /** Format: uri */
@@ -4613,6 +5039,31 @@ export interface components {
          * @enum {string}
          */
         PaymentProviderEnum: "wave" | "orange_money" | "free_money" | "cash";
+        PendingClergyItem: {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string;
+            readonly pastoral_role: string | null;
+            readonly first_name: string | null;
+            readonly last_name: string | null;
+            readonly diocese_name: string | null;
+            readonly parish_name: string | null;
+            readonly date_joined: string | null;
+            readonly justification_file_url: string | null;
+            readonly declaration_message: string;
+            readonly submitted_at: string | null;
+        };
+        PendingClergyPaginatedResponse: {
+            limit: number;
+            offset: number;
+            count: number;
+            /** Format: uri */
+            next: string | null;
+            /** Format: uri */
+            previous: string | null;
+            results: components["schemas"]["PendingClergyItem"][];
+        };
         /**
          * @description * `ios` - ios
          *     * `android` - android
@@ -4687,6 +5138,13 @@ export interface components {
         ReactInput: {
             emoji: string;
         };
+        /**
+         * @description * `pray` - Je prie
+         *     * `amen` - Amen
+         *     * `attend` - Je participe
+         * @enum {string}
+         */
+        ReactionTypeEnum: "pray" | "amen" | "attend";
         /** @description Serializer for Mass readings. */
         Reading: {
             readonly id: number;
@@ -4706,7 +5164,9 @@ export interface components {
             title: string;
             description: string;
             is_published: boolean;
-            readonly author_email: string;
+            /** @default false */
+            is_subscribed: boolean;
+            readonly author_email: string | null;
             /** Format: date-time */
             created_at: string;
         };
@@ -5167,6 +5627,26 @@ export interface operations {
             };
         };
     };
+    v1_agenda_events_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     v1_agenda_events_register_create: {
         parameters: {
             query?: never;
@@ -5617,9 +6097,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Input"];
-                "multipart/form-data": components["schemas"]["Input"];
-                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+                "application/json": components["schemas"]["BibleImportInput"];
+                "multipart/form-data": components["schemas"]["BibleImportInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["BibleImportInput"];
             };
         };
         responses: {
@@ -5679,7 +6159,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["LectioDivinaInput"];
                 "multipart/form-data": components["schemas"]["LectioDivinaInput"];
@@ -5760,6 +6240,13 @@ export interface operations {
                     "application/json": components["schemas"]["ReadingPlanOutput"];
                 };
             };
+            /** @description No response body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     v1_bible_reading_plans_create_2: {
@@ -5780,6 +6267,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ReadingPlanOutput"];
                 };
+            };
+            /** @description No response body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -5802,6 +6296,13 @@ export interface operations {
                     "application/json": components["schemas"]["ReadingPlanOutput"];
                 };
             };
+            /** @description No response body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     v1_bible_reading_plans_publish_create: {
@@ -5822,6 +6323,69 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ReadingPlanOutput"];
                 };
+            };
+            /** @description No response body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_bible_reading_plans_subscribe_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingPlanOutput"];
+                };
+            };
+            /** @description No response body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_bible_reading_plans_unsubscribe_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingPlanOutput"];
+                };
+            };
+            /** @description No response body */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -6851,7 +7415,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["FileUploadInput"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -6900,7 +7468,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["FileUploadInput"];
+            };
+        };
         responses: {
             201: {
                 headers: {
@@ -7242,6 +7814,33 @@ export interface operations {
             };
             cookie?: never;
         };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MassIntentionCelebrateInput"];
+                "multipart/form-data": components["schemas"]["MassIntentionCelebrateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["MassIntentionCelebrateInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MassIntentionOutput"];
+                };
+            };
+        };
+    };
+    v1_mass_intentions_confirm_date_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intention_id: number;
+            };
+            cookie?: never;
+        };
         requestBody?: never;
         responses: {
             200: {
@@ -7304,6 +7903,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MassIntentionOutput"];
+                };
+            };
+        };
+    };
+    v1_mass_intentions_receipt_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intention_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MassIntentionReceiptOutput"];
                 };
             };
         };
@@ -8062,6 +8682,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ArticleDetailOutput"];
+                };
+            };
+        };
+    };
+    v1_news_reactions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                article_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArticleReactionSetInput"];
+                "multipart/form-data": components["schemas"]["ArticleReactionSetInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ArticleReactionSetInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArticleReactionsOutput"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };
@@ -9195,6 +9862,32 @@ export interface operations {
             };
         };
     };
+    v1_rosary_community_intentions_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Nombre de résultats (défaut 50, max 200) */
+                limit?: number;
+                /** @description Décalage de pagination */
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                rosary_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedIntentionOutputList"];
+                };
+            };
+        };
+    };
     v1_rosary_community_intentions_create: {
         parameters: {
             query?: never;
@@ -9471,6 +10164,33 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    v1_spiritual_reflections_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reflection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedReflectionUpdateInput"];
+                "multipart/form-data": components["schemas"]["PatchedReflectionUpdateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedReflectionUpdateInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReflectionOutput"];
+                };
             };
         };
     };
@@ -10037,18 +10757,48 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Output"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
         };
     };
     v1_users_audit_logs_retrieve: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Nombre d'éléments par page (défaut 50) */
+                limit?: number;
+                /** @description Index de début */
+                offset?: number;
+            };
             header?: never;
             path: {
                 user_id: string;
@@ -10057,12 +10807,37 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AuditLogPaginatedResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
         };
     };
@@ -10077,12 +10852,44 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
+            /** @description Compte supprimé (soft) */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
         };
     };
@@ -10097,12 +10904,103 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
+            /** @description Compte supprimé définitivement */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    v1_users_reject_account_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClergyAccountRejectInput"];
+                "multipart/form-data": components["schemas"]["ClergyAccountRejectInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ClergyAccountRejectInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClergyDecisionOutput"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
         };
     };
@@ -10115,14 +11013,106 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedInput"];
+                "multipart/form-data": components["schemas"]["PatchedInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedInput"];
+            };
+        };
         responses: {
-            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Output"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    v1_users_validate_account_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClergyDecisionOutput"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
         };
     };
@@ -10133,14 +11123,45 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
         responses: {
-            /** @description No response body */
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Output"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
         };
     };
@@ -10227,7 +11248,13 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
         responses: {
             /** @description Email restauré, réinitialisation du mot de passe requise */
             200: {
@@ -10260,6 +11287,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MonProfil"];
+                };
+            };
+        };
+    };
+    v1_users_me_clergy_declaration_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClergyDeclarationOutput"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    v1_users_me_clergy_declaration_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClergyDeclarationCreateInput"];
+                "multipart/form-data": components["schemas"]["ClergyDeclarationCreateInput"];
+                "application/x-www-form-urlencoded": components["schemas"]["ClergyDeclarationCreateInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClergyDeclarationOutput"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -10459,6 +11554,46 @@ export interface operations {
             };
         };
     };
+    v1_users_pending_validation_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Nombre d'éléments par page (défaut 50) */
+                limit?: number;
+                /** @description Index de début */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PendingClergyPaginatedResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     v1_users_register_create: {
         parameters: {
             query?: never;
@@ -10565,7 +11700,13 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Input"];
+                "multipart/form-data": components["schemas"]["Input"];
+                "application/x-www-form-urlencoded": components["schemas"]["Input"];
+            };
+        };
         responses: {
             /** @description Compte activé avec succès */
             200: {

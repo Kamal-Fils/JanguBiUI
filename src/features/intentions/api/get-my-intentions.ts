@@ -5,6 +5,12 @@ import { api } from '@/lib/api-client';
 
 export const intentionSchema = z.object({
   id: z.number(),
+  /**
+   * Référence publique (`INT-AAAAMMJJ-XXXXXXXX`) — c'est elle que le fidèle
+   * cite au secrétariat et qu'on retrouve sur le reçu. `optional()` le temps
+   * que les clients déjà déployés reçoivent la nouvelle charge utile.
+   */
+  reference: z.string().optional(),
   intention_type: z.string(),
   intention_text: z.string(),
   status: z.string(),
@@ -13,6 +19,8 @@ export const intentionSchema = z.object({
   parish_name: z.string().nullable().optional(),
   proposed_date: z.string().nullable().optional(),
   celebration_date: z.string().nullable().optional(),
+  /** URL du reçu PDF — renseignée seulement une fois la messe célébrée. */
+  receipt_url: z.string().nullable().optional(),
   notes: z.string(),
   created_at: z.string(),
   updated_at: z.string(),

@@ -5,7 +5,14 @@ import { api } from '@/lib/api-client';
 
 export const lectioDivinaSchema = z.object({
   id: z.number(),
-  passage_id: z.number(),
+  // Nullable depuis que la Lectio « du jour » est reconnue côté serveur : une
+  // méditation peut ne se rattacher à aucun verset précis. Le schéma exigeait
+  // un nombre — avec la nouvelle réponse, le parse aurait échoué et l'écran
+  // serait tombé en erreur pour toute session sans passage.
+  passage_id: z.number().nullable(),
+  // Jour de la session : c'est lui qui identifie une Lectio sans verset
+  // (clé d'unicité serveur = (utilisateur, date) dans ce cas).
+  session_date: z.string().nullable().optional(),
   lectio: z.string(),
   meditatio: z.string(),
   oratio: z.string(),

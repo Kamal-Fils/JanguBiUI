@@ -1,83 +1,106 @@
 'use client';
 
-import { AlertTriangle, Church, FileText, Users, Wallet } from 'lucide-react';
-import * as React from 'react';
+import { AlertTriangle, Landmark } from 'lucide-react';
 
-import { Skeleton } from '@/components/ui/skeleton';
-import { StatCard } from '@/components/ui/stat-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+import { MetricStrip, type WorkMetric } from '@/components/ui/metric-strip';
+import { ApiError } from '@/lib/api-client';
 
 import { useMyDioceseDashboard } from '../api/get-diocese-dashboard';
+
 
 function formatXof(amount: number): string {
   return `${Math.round(amount).toLocaleString('fr-FR')} FCFA`;
 }
 
-type StatTone = 'primary' | 'gold' | 'success' | 'info';
+const NUMBER_FR = new Intl.NumberFormat('fr-FR');
 
-/** Consolidation diocésaine de l'évêque (paroisses, fidèles, dons, alerte qualité). */
+/**
+ * Consolidation diocésaine de l'évêque — archétype **Travail** (DIRECTION R6).
+ *
+ * Comme la synthèse paroissiale, le bloc disparaissait silencieusement en cas
+ * d'erreur. Il distingue désormais le rattachement manquant (404, fonctionnel)
+ * de la panne (reprise possible).
+ */
 export function DioceseStatsSection() {
-  const { data, isLoading, isError } = useMyDioceseDashboard();
+  const { data, isLoading, isError, error, refetch } = useMyDioceseDashboard();
 
-  if (isError) return null;
-  if (isLoading) return <Skeleton className="h-28 w-full rounded-xl" />;
-  if (!data) return null;
+  const isNotFound = error instanceof ApiError && error.status === 404;
 
-  const stats: Array<{
-    label: string;
-    value: string | number;
-    icon: React.ReactNode;
-    tone: StatTone;
-  }> = [
+  if (isError && isNotFound) {
+    return (
+      <section aria-label="Mon diocèse">
+        <EmptyState
+          icon={<Landmark aria-hidden="true" />}
+          title="Aucun diocèse rattaché"
+          description="Votre compte n'est rattaché à aucun diocèse : la consolidation diocésaine apparaîtra dès qu'un rattachement sera enregistré."
+        />
+      </section>
+    );
+  }
+
+  if (isError) {
+    return (
+      <section aria-label="Mon diocèse">
+        <ErrorState
+          title="Consolidation diocésaine indisponible"
+          description="Les chiffres de votre diocèse n'ont pas pu être chargés."
+          onRetry={() => refetch()}
+        />
+      </section>
+    );
+  }
+
+  const metrics: WorkMetric[] = [
     {
       label: 'Paroisses',
-      value: data.parishes_count,
-      icon: <Church />,
-      tone: 'gold',
+      value: NUMBER_FR.format(data?.parishes_count ?? 0),
     },
     {
       label: 'Fidèles',
-      value: data.total_fideles.toLocaleString('fr-FR'),
-      icon: <Users />,
-      tone: 'primary',
+      value: NUMBER_FR.format(data?.total_fideles ?? 0),
     },
     {
       label: 'Dons',
-      value: formatXof(data.donations_total),
-      icon: <Wallet />,
-      tone: 'success',
+      value: formatXof(data?.donations_total ?? 0),
     },
     {
-      label: 'Documents',
-      value: data.pending_documents,
-      icon: <FileText />,
-      tone: 'info',
+      label: 'Documents en attente',
+      value: data?.pending_documents ?? 0,
+      alert: (data?.pending_documents ?? 0) > 0,
     },
   ];
 
-  return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold text-foreground">
-        Mon diocèse — {data.diocese.name}
-      </h2>
+  const withoutMainChurch = data?.parishes_without_main_church ?? 0;
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {stats.map((stat) => (
-          <StatCard
-            key={stat.label}
-            icon={stat.icon}
-            value={stat.value}
-            label={stat.label}
-            tone={stat.tone}
-          />
-        ))}
+  return (
+    <section
+      aria-labelledby="diocese-stats-title"
+      className="flex flex-col gap-2.5"
+    >
+      <div className="flex items-baseline justify-between gap-3 border-b border-border pb-1.5">
+        <h2
+          id="diocese-stats-title"
+          className="text-sm font-semibold text-foreground"
+        >
+          Mon diocèse{data ? ` — ${data.diocese.name}` : ''}
+        </h2>
       </div>
 
-      {data.parishes_without_main_church > 0 && (
-        <div className="flex items-center gap-2 rounded-xl border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
-          <AlertTriangle className="size-4 shrink-0" />
-          {data.parishes_without_main_church} paroisse(s) sans église principale —
-          à corriger.
-        </div>
+      <MetricStrip items={metrics} isLoading={isLoading} />
+
+      {withoutMainChurch > 0 && (
+        <p className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 px-3.5 py-2.5 text-sm text-warning">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>
+            <span className="font-semibold tabular-nums">
+              {withoutMainChurch}
+            </span>{' '}
+            paroisse{withoutMainChurch > 1 ? 's' : ''} sans église principale —
+            à corriger.
+          </span>
+        </p>
       )}
     </section>
   );

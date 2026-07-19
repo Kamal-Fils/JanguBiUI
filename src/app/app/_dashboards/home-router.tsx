@@ -5,6 +5,8 @@ import { useEffect } from 'react';
 
 import { paths } from '@/config/paths';
 import { DailyMysteryCard } from '@/features/chapelet/components/daily-mystery-card';
+import { FideleDashboard } from '@/features/home/fidele-dashboard';
+import { HomeContent } from '@/features/home/home-content';
 import { useUser } from '@/lib/auth';
 import {
   isAdmin,
@@ -16,10 +18,19 @@ import {
 
 import { ArchevequeDashboard } from './archeveque-dashboard';
 import { EvequeeDashboard } from './eveque-dashboard';
-import { FideleDashboard } from './fidele-dashboard';
-import { HomeContent } from './home-content';
 import { PretreeDashboard } from './pretre-dashboard';
 
+/**
+ * Aiguillage de l'accueil selon le rôle.
+ *
+ * Il vit dans la **couche app** et non dans `features/home` : un tableau de
+ * bord de clergé agrège intentions, messagerie, actualités et statistiques
+ * — quatre features distinctes. Composer cet assemblage depuis une feature
+ * imposait des imports croisés (`features/home` → `features/intentions`,
+ * `features/messaging`, `features/news`, `features/reflexion-pastorale`), ce
+ * que l'architecture interdit. L'assemblage inter-features est précisément le
+ * métier de la couche app, qui a le droit d'importer n'importe quelle feature.
+ */
 export function HomeRouter() {
   const { data: user, isLoading } = useUser();
   const router = useRouter();

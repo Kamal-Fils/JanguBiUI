@@ -10,7 +10,12 @@ import { Card } from '@/components/ui/card/card';
 import { useSaveLectioSession } from '../api/save-lectio-session';
 
 interface LectioDivinaProps {
-  passageId: number;
+  /**
+   * Verset médité, ou `null` pour une Lectio « du jour » sans passage précis.
+   * L'appelant transmettait `0` — une valeur sentinelle qui ne voulait rien dire
+   * pour le serveur et provoquait un 400 à chaque sauvegarde.
+   */
+  passageId: number | null;
   initial?: {
     lectio?: string;
     meditatio?: string;
@@ -88,7 +93,7 @@ function useStepTimer(durationMinutes: number, active: boolean) {
 }
 
 export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
-  const { mutate, isPending, isSuccess } = useSaveLectioSession();
+  const { mutate, isPending, isSuccess, isError } = useSaveLectioSession();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -174,7 +179,7 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
                 reset();
                 setCurrentStepIndex(index);
               }}
-              className="flex flex-1 flex-col items-center gap-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="flex min-h-11 flex-1 flex-col items-center justify-center gap-1.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <div
                 className={`h-1.5 w-full rounded-full transition-colors motion-reduce:transition-none ${
@@ -186,7 +191,7 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
                 }`}
               />
               <span
-                className={`text-[10px] font-medium transition-colors motion-reduce:transition-none ${
+                className={`text-xs font-medium transition-colors motion-reduce:transition-none ${
                   index === currentStepIndex
                     ? 'text-primary'
                     : completedSteps.has(index)
@@ -246,18 +251,20 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
               <button
                 type="button"
                 onClick={() => setTimerActive((v) => !v)}
-                className="rounded text-[10px] text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="min-h-11 rounded px-1 text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 {timerActive ? 'Pause' : 'Démarrer'}
               </button>
-              <span className="text-[10px] text-muted-foreground">·</span>
+              <span className="text-xs text-muted-foreground" aria-hidden="true">
+                ·
+              </span>
               <button
                 type="button"
                 onClick={() => {
                   reset();
                   setTimerActive(false);
                 }}
-                className="rounded text-[10px] text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="min-h-11 rounded px-1 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 aria-label="Réinitialiser le timer"
               >
                 <RotateCcw className="size-3" />
@@ -320,9 +327,30 @@ export function LectioDivina({ passageId, initial }: LectioDivinaProps) {
       ))}
 
       {allStepsCompleted && (
-        <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? 'Sauvegarde…' : 'Sauvegarder ma session Lectio Divina'}
-        </Button>
+        <div className="space-y-2">
+          {/* Un échec silencieux ferait perdre quatre étapes de méditation :
+              on le dit, et le bouton reste le moyen de réessayer. */}
+          {isError && (
+            <p
+              className="text-sm font-medium text-destructive"
+              role="alert"
+            >
+              La sauvegarde a échoué. Vos notes sont toujours là — réessayez.
+            </p>
+          )}
+          <Button
+            type="submit"
+            className="h-12 w-full"
+            disabled={isPending}
+            isLoading={isPending}
+          >
+            {isPending
+              ? 'Sauvegarde…'
+              : isError
+                ? 'Réessayer la sauvegarde'
+                : 'Sauvegarder ma session Lectio Divina'}
+          </Button>
+        </div>
       )}
     </form>
   );
