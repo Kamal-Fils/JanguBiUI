@@ -2,21 +2,19 @@
 
 import { ContentContainer } from '@/components/layouts/content-container';
 
-import { DailyReadingCard } from './daily-reading-card';
 import { QuickAccessGrid } from './quick-access-grid';
-import { WelcomeBanner } from './welcome-banner';
+import { WordOfTheDay } from './word-of-the-day';
 
 interface HomeContentProps {
-  /** Optional slot for a dashboard widget rendered between the daily reading and quick access grid. */
+  /** Encart optionnel inséré entre la Parole du jour et les accès rapides. */
   widget?: React.ReactNode;
 }
 
 export function HomeContent({ widget }: HomeContentProps) {
   return (
     <ContentContainer>
-      <div className="flex flex-col gap-6">
-        <WelcomeBanner />
-        <DailyReadingCard />
+      <div className="flex flex-col gap-8">
+        <WordOfTheDay />
         {widget}
         <QuickAccessGrid />
       </div>
