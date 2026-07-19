@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 
 import { paths } from '@/config/paths';
 import { DailyMysteryCard } from '@/features/chapelet/components/daily-mystery-card';
-import { FideleDashboard } from '@/features/home/fidele-dashboard';
 import { HomeContent } from '@/features/home/home-content';
 import { useUser } from '@/lib/auth';
 import {
@@ -18,6 +17,7 @@ import {
 
 import { ArchevequeDashboard } from './archeveque-dashboard';
 import { EvequeeDashboard } from './eveque-dashboard';
+import { FideleDashboard } from './fidele-dashboard';
 import { PretreeDashboard } from './pretre-dashboard';
 
 /**

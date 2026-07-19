@@ -8,11 +8,9 @@ import { z } from 'zod';
 
 import {
   api,
-  clearAccessToken,
-  clearRefreshToken,
-  getRefreshToken,
+  clearSession,
+  hasPotentialSession,
   setAccessToken,
-  setRefreshToken,
 } from './api-client';
 
 // Dimension 1 — capacité d'administration digitale. Reflète le champ `role`
@@ -104,7 +102,10 @@ export interface User {
 
 export interface AuthResponse {
   access: string;
-  refresh: string;
+  // Absent en mode cookie (clients navigateur) : le refresh token est posé dans
+  // un cookie HttpOnly et n'apparaît plus dans le corps de réponse. Le champ
+  // reste typé pour les clients qui n'utilisent pas ce transport (mobile).
+  refresh?: string;
   user: User;
 }
 
@@ -115,11 +116,16 @@ export const getUser = async (): Promise<User> => {
 const userQueryKey = ['user'];
 
 export const getUserQueryOptions = () => {
-  const hasToken = typeof window !== 'undefined' ? !!getRefreshToken() : false;
+  // Le cookie de refresh est illisible : on ne peut plus tester sa présence
+  // pour décider d'interroger /me/. On interroge donc tant qu'une session
+  // reste plausible, et on ne coupe que lorsque le serveur a explicitement
+  // rejeté un refresh (état `anonymous`). Le bootstrap de session dans
+  // api-client relève l'access token depuis le cookie avant cet appel.
+  const enabled = typeof window !== 'undefined' && hasPotentialSession();
   return queryOptions({
     queryKey: userQueryKey,
     queryFn: getUser,
-    enabled: hasToken,
+    enabled,
     retry: false,
   });
 };
@@ -131,8 +137,10 @@ export const useLogin = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   return useMutation({
     mutationFn: loginWithEmailAndPassword,
     onSuccess: (data) => {
+      // `data.refresh` n'est plus renvoyé au client web : le serveur l'a posé
+      // dans un cookie HttpOnly. Poser l'access token suffit à marquer la
+      // session active.
       if (data.access) setAccessToken(data.access);
-      if (data.refresh) setRefreshToken(data.refresh);
       queryClient.setQueryData(userQueryKey, data.user);
       onSuccess?.();
     },
@@ -157,8 +165,9 @@ export const useLogout = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   return useMutation({
     mutationFn: logout,
     onSettled: () => {
-      clearAccessToken();
-      clearRefreshToken();
+      // Le cookie de refresh est effacé par le serveur dans la réponse du
+      // logout ; ici on n'oublie que l'état local.
+      clearSession();
       queryClient.clear();
       onSuccess?.();
     },
@@ -166,8 +175,9 @@ export const useLogout = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
 };
 
 const logout = (): Promise<void> => {
-  const refresh = getRefreshToken();
-  return api.post('/v1/auth/jwt/logout/', refresh ? { refresh } : undefined);
+  // Aucun corps : le serveur lit le refresh token dans le cookie HttpOnly,
+  // le blackliste, puis efface le cookie.
+  return api.post('/v1/auth/jwt/logout/');
 };
 
 export const useLogoutAll = ({
@@ -177,8 +187,7 @@ export const useLogoutAll = ({
   return useMutation({
     mutationFn: () => api.post<void>('/v1/auth/jwt/logout-all/'),
     onSuccess: () => {
-      clearAccessToken();
-      clearRefreshToken();
+      clearSession();
       queryClient.removeQueries({ queryKey: userQueryKey });
       onSuccess?.();
     },

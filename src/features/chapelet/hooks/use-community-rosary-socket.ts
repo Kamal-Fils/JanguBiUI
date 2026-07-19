@@ -3,11 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
 
-import {
-  clearAccessToken,
-  clearRefreshToken,
-  tryRefreshAccess,
-} from '@/lib/api-client';
+import { clearSession, tryRefreshAccess } from '@/lib/api-client';
 import { getFreshWsToken, resolveWsBase } from '@/lib/ws';
 
 const RECONNECT_DELAYS = [1000, 3000, 10000];
@@ -221,8 +217,7 @@ export function useCommunityRosarySocket({
       if (unmountedRef.current) return;
       if (!token) {
         setStatus('offline');
-        clearAccessToken();
-        clearRefreshToken();
+        clearSession();
         const redirectTo = encodeURIComponent(window.location.pathname);
         window.location.href = `/auth/login?redirectTo=${redirectTo}`;
         return;
@@ -328,8 +323,7 @@ export function useCommunityRosarySocket({
           } catch {
             if (unmountedRef.current) return;
             setStatus('offline');
-            clearAccessToken();
-            clearRefreshToken();
+            clearSession();
             const redirectTo = encodeURIComponent(window.location.pathname);
             window.location.href = `/auth/login?redirectTo=${redirectTo}`;
             return;
