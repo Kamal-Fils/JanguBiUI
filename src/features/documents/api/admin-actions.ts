@@ -1,6 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { api } from '@/lib/api-client';
+import type { RequestBody } from '@/types/api-contract';
+
+/**
+ * Les corps de requête sont DÉRIVÉS du schéma OpenAPI du serveur, pas écrits
+ * à la main : c'est ici que les divergences se payaient cher (un `message`
+ * envoyé pour un `comment` attendu, un `file_id` obligatoire oublié). Toute
+ * dérive du contrat devient désormais une erreur de compilation.
+ */
+type RequestInfoBody = RequestBody<'v1_documents_admin_requests_request_info_create'>;
+type DepositBody = RequestBody<'v1_documents_admin_requests_deposit_create'>;
+type RejectBody = RequestBody<'v1_documents_admin_requests_reject_create'>;
 
 const invalidateDocuments = (
   queryClient: ReturnType<typeof useQueryClient>,
@@ -36,7 +47,7 @@ export const useRequestInfo = () => {
     }) =>
       api.post<void>(
         `/v1/documents/admin/requests/${requestId}/request-info/`,
-        { comment: message },
+        { comment: message } satisfies RequestInfoBody,
       ),
     onSuccess: () => invalidateDocuments(queryClient),
   });
@@ -69,7 +80,7 @@ export const useRejectDocument = () => {
     }) =>
       api.post<void>(`/v1/documents/admin/requests/${requestId}/reject/`, {
         reason,
-      }),
+      } satisfies RejectBody),
     onSuccess: () => invalidateDocuments(queryClient),
   });
 };
@@ -92,8 +103,8 @@ export const useDepositDocument = () => {
     }) =>
       api.post<void>(`/v1/documents/admin/requests/${requestId}/deposit/`, {
         file_id: fileId,
-        ...(label ? { label } : {}),
-      }),
+        label: label ?? 'Document officiel',
+      } satisfies DepositBody),
     onSuccess: () => invalidateDocuments(queryClient),
   });
 };
