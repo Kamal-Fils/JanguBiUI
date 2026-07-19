@@ -36,38 +36,39 @@ export function AppSidebar() {
         collapsed ? 'w-[72px]' : 'w-[264px]',
       )}
     >
-      <nav
-        aria-label="Navigation principale"
-        className="min-h-0 flex-1 overflow-y-auto px-3 py-4"
+      {/* En tête de barre : la commande de repli est là où l'œil arrive, et
+          reste atteignable sans faire défiler une navigation longue. */}
+      <div
+        className={cn(
+          'flex items-center px-2 pt-3',
+          collapsed ? 'justify-center' : 'justify-end',
+        )}
       >
-        <SidebarSections
-          collapsed={collapsed}
-          onExpandRequest={() => persistCollapsed(false)}
-        />
-      </nav>
-      <div className="border-t border-border/60 p-2">
         <button
           type="button"
           onClick={() => persistCollapsed(!collapsed)}
           aria-label={
             collapsed ? 'Déplier la navigation' : 'Replier la navigation'
           }
-          title={
-            collapsed ? 'Déplier la navigation' : 'Replier la navigation'
-          }
-          className={cn(
-            'flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground',
-            collapsed && 'justify-center px-0',
-          )}
+          title={collapsed ? 'Déplier la navigation' : 'Replier la navigation'}
+          className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {collapsed ? (
-            <PanelLeftOpen className="size-4 shrink-0" aria-hidden="true" />
+            <PanelLeftOpen className="size-4" aria-hidden="true" />
           ) : (
-            <PanelLeftClose className="size-4 shrink-0" aria-hidden="true" />
+            <PanelLeftClose className="size-4" aria-hidden="true" />
           )}
-          {!collapsed && <span>Replier</span>}
         </button>
       </div>
+      <nav
+        aria-label="Navigation principale"
+        className="min-h-0 flex-1 overflow-y-auto px-3 pb-4 pt-2"
+      >
+        <SidebarSections
+          collapsed={collapsed}
+          onExpandRequest={() => persistCollapsed(false)}
+        />
+      </nav>
     </aside>
   );
 }

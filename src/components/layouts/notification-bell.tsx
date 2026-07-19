@@ -77,10 +77,20 @@ function NotificationItem({
 }
 
 interface NotificationBellProps {
+  /**
+   * Affiche le libellé « Notifications » à côté de l'icône. Faux par défaut :
+   * les trois appelants (top bar, en-tête contextuel, cloche flottante) sont
+   * des boutons ronds à taille fixe, où le libellé débordait de la boîte et
+   * chevauchait l'avatar voisin.
+   */
+  showLabel?: boolean;
   className?: string;
 }
 
-export function NotificationBell({ className }: NotificationBellProps) {
+export function NotificationBell({
+  className,
+  showLabel = false,
+}: NotificationBellProps) {
   const { data: notifications = [] } = useNotifications();
   const { mutate: markRead } = useMarkNotificationRead();
 
@@ -109,7 +119,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
               </span>
             )}
           </span>
-          <span className="hidden lg:block">Notifications</span>
+          {showLabel && <span>Notifications</span>}
         </button>
       </DropdownMenuTrigger>
 

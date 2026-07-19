@@ -17,8 +17,9 @@ export const viewport: Viewport = {
   ],
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // Le zoom reste autorisé (WCAG 1.4.4) : l'app sert des textes de lecture —
+  // Écriture, offices, actes — à des fidèles dont beaucoup ont besoin
+  // d'agrandir. Bloquer le zoom pour un rendu « app native » les exclut.
 };
 
 export const dynamic = 'force-dynamic';
