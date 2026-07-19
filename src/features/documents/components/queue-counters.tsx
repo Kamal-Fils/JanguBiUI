@@ -76,7 +76,7 @@ export function QueueCounters({
       <div
         role="group"
         aria-label="Étapes de la file"
-        className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5"
+        className="flex flex-wrap gap-1.5"
       >
         {QUEUE_BUCKETS.map((bucket) => {
           const active = bucket.value === value;
@@ -88,28 +88,25 @@ export function QueueCounters({
               onClick={() => onChange(bucket.value)}
               aria-pressed={active}
               className={cn(
-                'rounded-xl border bg-card px-3 py-2 text-left shadow-soft-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                // Chiffre et libellé sur une seule ligne : la charge se lit
+                // d'un balayage horizontal au lieu d'occuper trois rangées.
+                'inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 active
-                  ? 'border-primary ring-1 ring-primary/35'
-                  : 'border-border hover:border-primary/40 hover:bg-muted/40',
+                  ? 'border-primary bg-primary/10 ring-1 ring-primary/40'
+                  : 'border-border bg-card hover:border-primary/40 hover:bg-muted/40',
               )}
             >
               {count !== undefined && (
                 <span
                   className={cn(
-                    'block font-serif text-lg font-bold leading-none tabular-nums',
+                    'text-base font-bold leading-none tabular-nums',
                     bucket.toneClass,
                   )}
                 >
                   {count}
                 </span>
               )}
-              <span
-                className={cn(
-                  'block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground',
-                  count !== undefined && 'mt-1',
-                )}
-              >
+              <span className="text-xs font-semibold leading-none text-foreground">
                 {bucket.label}
               </span>
             </button>
@@ -117,8 +114,10 @@ export function QueueCounters({
         })}
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+      {/* Historique + périmètre sur une seule ligne : ce sont des repères, pas
+          la charge de travail — ils ne méritent pas une rangée chacun. */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="text-xs font-medium text-muted-foreground">
           Historique
         </span>
         {HISTORY_BUCKETS.map((bucket) => {
@@ -130,23 +129,23 @@ export function QueueCounters({
               onClick={() => onChange(bucket.value)}
               aria-pressed={active}
               className={cn(
-                'rounded-full px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 active
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:text-foreground',
+                  : 'bg-muted text-foreground hover:bg-muted/70',
               )}
             >
               {bucket.label}
             </button>
           );
         })}
-      </div>
 
-      {totalCount !== undefined && (
-        <p className="text-[11px] text-muted-foreground">
-          {totalCount} demande{totalCount > 1 ? 's' : ''} sur votre périmètre.
-        </p>
-      )}
+        {totalCount !== undefined && (
+          <p className="text-xs text-muted-foreground sm:ml-auto">
+            {totalCount} demande{totalCount > 1 ? 's' : ''} sur votre périmètre.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

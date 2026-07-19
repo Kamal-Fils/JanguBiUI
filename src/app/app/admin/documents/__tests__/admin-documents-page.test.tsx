@@ -94,18 +94,20 @@ describe('AdminDocumentsPage', () => {
     const nav = await screen.findByRole('navigation', {
       name: /pagination de la file/i,
     });
-    expect(nav).toHaveTextContent('Page 1 sur 3');
+    // Une plage exacte, pas un numéro de page : l'agent situe ce qu'il traite
+    // dans l'ensemble de sa file.
+    expect(nav).toHaveTextContent('1–20 sur 42');
     expect(captured[0]).toMatchObject({ limit: '20', offset: '0' });
 
     await userEvent.click(within(nav).getByRole('button', { name: /suivant/i }));
 
-    // La DataTable rend chaque ligne deux fois (tableau desktop + carte mobile).
+    // La file est rendue deux fois (tableau desktop + lignes mobiles).
     await screen.findAllByText('Demande offset 20');
     // Le bloc de pagination est re-rendu : on le ré-interroge plutôt que de
     // garder une référence devenue obsolète.
     expect(
       screen.getByRole('navigation', { name: /pagination de la file/i }),
-    ).toHaveTextContent('Page 2 sur 3');
+    ).toHaveTextContent('21–40 sur 42');
     expect(captured.at(-1)).toMatchObject({ limit: '20', offset: '20' });
   });
 
@@ -126,9 +128,30 @@ describe('AdminDocumentsPage', () => {
 
     renderApp(<AdminDocumentsPage />);
 
-    await screen.findByText(/par ordre d’urgence/i);
+    await screen.findByRole('heading', { name: /file de traitement/i });
     expect(
       screen.queryByRole('navigation', { name: /pagination de la file/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  test('une erreur de chargement reste récupérable', async () => {
+    asParishAdmin();
+    mockCounts();
+    server.use(
+      http.get(LIST_URL, () => new HttpResponse(null, { status: 500 })),
+    );
+
+    renderApp(<AdminDocumentsPage />);
+
+    expect(
+      await screen.findByText(/impossible de charger les demandes/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /réessayer/i }),
+    ).toBeInTheDocument();
+    // Pas de file affichée sous l'erreur : l'écran ne prétend pas être vide.
+    expect(
+      screen.queryByRole('heading', { name: /file de traitement/i }),
     ).not.toBeInTheDocument();
   });
 });

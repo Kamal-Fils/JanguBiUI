@@ -110,7 +110,9 @@ export function NewsScopeFilter({ value, onChange }: NewsScopeFilterProps) {
             aria-pressed={active}
             onClick={() => onChange(opt.value)}
             className={cn(
-              'shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium uppercase tracking-[0.08em] transition-[background-color,border-color,color,box-shadow] duration-150',
+              // min-h-11 = 44 px : cible tactile exigée par DIRECTION.md R3 (l'ancienne
+              // pastille faisait ~30 px, difficile à viser sur téléphone).
+              'inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full border px-4 text-xs font-medium uppercase tracking-[0.08em] transition-[background-color,border-color,color,box-shadow] duration-150',
               active
                 ? 'border-primary bg-primary text-primary-foreground shadow-soft-sm'
                 : 'border-border/70 bg-transparent text-muted-foreground hover:border-accent/40 hover:text-foreground',

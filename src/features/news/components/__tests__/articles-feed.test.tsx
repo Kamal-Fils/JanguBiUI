@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
 import { useSearchParams } from 'next/navigation';
@@ -438,5 +438,82 @@ describe('ArticlesFeed', () => {
     expect(
       screen.getByRole('heading', { level: 3, name: 'Article secondaire' }),
     ).toBeInTheDocument();
+  });
+
+  // --- Rythme éditorial du fil (V5 — archétype « Flux ») ---
+  //
+  // Le fil se lit en trois mouvements de densité décroissante : la une, trois
+  // bandes illustrées, puis les brèves. Ce qui est testable ici n'est pas
+  // l'esthétique mais la CONSÉQUENCE du rythme : les mouvements n'ont pas le
+  // même traitement, et aucun article ne se perd entre eux.
+
+  test('trois mouvements : la une et les bandes sont illustrées, les brèves ne le sont pas', async () => {
+    const results = Array.from({ length: 6 }, (_, i) =>
+      createArticle({
+        id: `a${i}`,
+        title: `Article ${i}`,
+        excerpt: null,
+        cover_image_url: `https://example.com/${i}.jpg`,
+      }),
+    );
+    server.use(
+      http.get(FEED, () =>
+        HttpResponse.json({ count: results.length, results }),
+      ),
+    );
+
+    renderApp(<ArticlesFeed />);
+
+    await screen.findByText('Article 0');
+
+    // Une (1) + bandes (3) portent un visuel. Les deux derniers passent en
+    // brèves : le visuel tombe, la densité change — c'est le tempo.
+    expect(screen.getAllByRole('img')).toHaveLength(4);
+
+    const briefs = screen.getByRole('region', { name: 'En bref' });
+    expect(within(briefs).getByText('Article 4')).toBeInTheDocument();
+    expect(within(briefs).getByText('Article 5')).toBeInTheDocument();
+    expect(within(briefs).queryByRole('img')).not.toBeInTheDocument();
+    // Et la une n'est pas dans les brèves.
+    expect(within(briefs).queryByText('Article 0')).not.toBeInTheDocument();
+  });
+
+  test('quatre articles ou moins → pas de mouvement « En bref »', async () => {
+    const results = Array.from({ length: 4 }, (_, i) =>
+      createArticle({ id: `b${i}`, title: `Bande ${i}`, excerpt: null }),
+    );
+    server.use(
+      http.get(FEED, () =>
+        HttpResponse.json({ count: results.length, results }),
+      ),
+    );
+
+    renderApp(<ArticlesFeed />);
+
+    await screen.findByText('Bande 0');
+    expect(
+      screen.queryByRole('region', { name: 'En bref' }),
+    ).not.toBeInTheDocument();
+  });
+
+  test('aucun article ne se perd entre les trois mouvements', async () => {
+    const results = Array.from({ length: 7 }, (_, i) =>
+      createArticle({ id: `x${i}`, title: `Titre ${i}`, excerpt: null }),
+    );
+    server.use(
+      http.get(FEED, () =>
+        HttpResponse.json({ count: results.length, results }),
+      ),
+    );
+
+    renderApp(<ArticlesFeed />);
+
+    await screen.findByText('Titre 0');
+    // Les 7 entrées restent atteignables, quel que soit leur mouvement.
+    for (let i = 0; i < results.length; i += 1) {
+      expect(
+        screen.getByRole('link', { name: new RegExp(`Titre ${i}`) }),
+      ).toHaveAttribute('href', `/app/actus/x${i}`);
+    }
   });
 });

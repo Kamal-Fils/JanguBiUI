@@ -1,123 +1,76 @@
 'use client';
 
-import DOMPurify from 'isomorphic-dompurify';
-import { BookOpen } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
-import { Card } from '@/components/ui/card/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { OfficeKey, useOffice } from '../../api/get-office';
-
-const safe = (html: string) => DOMPurify.sanitize(html);
+import { toOfficeSections } from '../../utils/normalize-office';
+import { OfficeSections } from '../office-sections';
 
 interface OfficeViewProps {
   officeKey: OfficeKey;
+  fontSize: number;
+  /** Faux pour un fidèle : la requête ne part pas (403 côté backend). */
+  enabled?: boolean;
 }
 
-export function OfficeView({ officeKey }: OfficeViewProps) {
-  const { data: office, isLoading, isError, error } = useOffice(officeKey);
-
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-5 w-48" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    const isAuthError =
-      error instanceof Error &&
-      (error.message.includes('401') || error.message.includes('403'));
-    return (
-      <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-        <p className="font-medium text-destructive">
-          {isAuthError
-            ? 'Accès réservé au clergé et aux religieux.'
-            : 'Impossible de charger cet office. Veuillez réessayer.'}
-        </p>
-      </div>
-    );
-  }
-
-  if (!office) return null;
-
+function OfficeSkeleton() {
   return (
-    <div className="space-y-6">
-      {office.intro && (
-        <div
-          className="prose prose-sm max-w-none rounded-xl bg-muted/50 p-4 text-muted-foreground"
-          dangerouslySetInnerHTML={{ __html: safe(office.intro) }}
-        />
-      )}
-
-      {office.hymns && office.hymns.length > 0 && (
-        <section>
-          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            <BookOpen className="size-4" />
-            Hymne
-          </h3>
-          {office.hymns.map((hymn, i) => (
-            <Card
-              key={i}
-              variant="elevated"
-              className="prose prose-sm max-w-none p-4 text-foreground"
-              dangerouslySetInnerHTML={{ __html: safe(hymn.text) }}
-            />
-          ))}
-        </section>
-      )}
-
-      {office.psalms && office.psalms.length > 0 && (
-        <section>
-          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            <BookOpen className="size-4" />
-            Psaumes
-          </h3>
-          <div className="space-y-3">
-            {office.psalms.map((psalm, i) => (
-              <Card key={i} variant="elevated" className="p-4">
-                {psalm.citation && (
-                  <p className="mb-2 text-xs font-medium text-primary">
-                    {psalm.citation}
-                    {psalm.title ? ` — ${psalm.title}` : ''}
-                  </p>
-                )}
-                <div
-                  className="prose prose-sm max-w-none text-foreground"
-                  dangerouslySetInnerHTML={{ __html: safe(psalm.text) }}
-                />
-              </Card>
+    <div aria-hidden="true" className="flex flex-col gap-8">
+      {[0, 1].map((block) => (
+        <div key={block}>
+          <Skeleton className="h-3 w-24" />
+          <div className="mt-3 flex flex-col gap-2.5">
+            {[0, 1, 2, 3].map((line) => (
+              <Skeleton key={line} className="h-4 w-full last:w-2/3" />
             ))}
           </div>
-        </section>
-      )}
-
-      {office.intercessions && office.intercessions.length > 0 && (
-        <section>
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Intercessions
-          </h3>
-          <div className="space-y-2">
-            {office.intercessions.map((item, i) => (
-              <div
-                key={i}
-                className="prose prose-sm max-w-none text-foreground"
-                dangerouslySetInnerHTML={{ __html: safe(item.text) }}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {office.conclusion && (
-        <div
-          className="prose prose-sm max-w-none rounded-xl bg-muted/50 p-4 text-muted-foreground"
-          dangerouslySetInnerHTML={{ __html: safe(office.conclusion) }}
-        />
-      )}
+        </div>
+      ))}
     </div>
   );
+}
+
+export function OfficeView({
+  officeKey,
+  fontSize,
+  enabled = true,
+}: OfficeViewProps) {
+  const {
+    data: office,
+    isLoading,
+    isError,
+    refetch,
+  } = useOffice(officeKey, {
+    enabled,
+  });
+
+  if (isLoading) return <OfficeSkeleton />;
+
+  if (isError) {
+    return (
+      <ErrorState
+        title="Cet office n’a pas pu être chargé"
+        description="La liaison avec l’AELF n’a pas répondu. Vous pouvez réessayer maintenant."
+        onRetry={() => void refetch()}
+      />
+    );
+  }
+
+  const sections = toOfficeSections(office);
+
+  if (sections.length === 0) {
+    return (
+      <EmptyState
+        icon={<Clock />}
+        title="Cet office n’est pas encore disponible"
+        description="Les textes sont synchronisés chaque nuit depuis l’AELF. Revenez dans un moment."
+      />
+    );
+  }
+
+  return <OfficeSections sections={sections} fontSize={fontSize} />;
 }

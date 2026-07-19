@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/dropdown';
 import { useNotifications } from '@/components/ui/notifications';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/utils/cn';
 
 import {
   useDepositDocument,
@@ -66,11 +67,27 @@ interface PrimaryAction {
   run: () => void;
 }
 
+/** Statuts terminaux : la demande est sortie de la file, plus rien à faire. */
+const CLOSED_STATUSES: DocumentStatus[] = ['rejected', 'document_deposited'];
+
+/**
+ * Une demande offre-t-elle encore des actions ? Exporté pour que les listes
+ * n'aient pas à réserver d'espace (ni de séparateur) sous une ligne clôturée.
+ */
+export function hasStatusActions(status: DocumentStatus): boolean {
+  return !CLOSED_STATUSES.includes(status);
+}
+
 interface DocumentStatusActionsProps {
   requestId: string;
   status: DocumentStatus;
   /** Description humaine de la demande (ex. « Baptême de A. Ndiaye »). */
   subject?: string;
+  /**
+   * Étire l'action principale sur toute la largeur — utilisé par les lignes
+   * mobiles, où viser un bouton compact aligné à droite coûte un essai raté.
+   */
+  fullWidthPrimary?: boolean;
 }
 
 /**
@@ -85,6 +102,7 @@ export function DocumentStatusActions({
   requestId,
   status,
   subject = 'la demande',
+  fullWidthPrimary = false,
 }: DocumentStatusActionsProps) {
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
@@ -103,7 +121,7 @@ export function DocumentStatusActions({
   const reject = useRejectDocument();
   const deposit = useDepositDocument();
 
-  if (status === 'rejected' || status === 'document_deposited') return null;
+  if (!hasStatusActions(status)) return null;
 
   // `info_requested` n'a volontairement pas d'action principale : la balle est
   // dans le camp du fidèle. Ses transitions restent accessibles en secondaire.
@@ -167,12 +185,19 @@ export function DocumentStatusActions({
 
   return (
     <>
-      <div className="flex items-center justify-end gap-2">
+      <div
+        className={cn(
+          'flex items-center gap-2',
+          fullWidthPrimary ? 'w-full' : 'justify-end',
+        )}
+      >
         {primary && (
           <Button
             variant={primary.variant}
             size="sm"
-            className="h-10 md:h-8"
+            // 44px de haut sur mobile (cible tactile), 32px sur desktop où la
+            // densité de la file prime.
+            className={cn('h-11 md:h-8', fullWidthPrimary && 'flex-1')}
             icon={primary.icon}
             isLoading={primary.isPending}
             onClick={primary.run}

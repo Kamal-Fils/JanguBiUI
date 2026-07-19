@@ -12,7 +12,11 @@ const pillVariants = cva(
   {
     variants: {
       tone: {
-        primary: 'bg-primary/10 text-primary',
+        // Le bleu de marque (#1A8FCC) ne tient que ~3,4:1 sur blanc : trop
+        // faible pour du petit texte (WCAG AA exige 4,5:1). En thème clair on
+        // descend donc sur le bleu profond ; en sombre, `--primary` est très
+        // lisible sur le navy. Bleu dans les deux cas, lisible dans les deux.
+        primary: 'bg-primary/10 text-secondary-foreground dark:text-primary',
         gold: 'bg-accent/15 text-gold-ink',
         muted: 'bg-muted text-muted-foreground',
         outline: 'border border-border text-muted-foreground',

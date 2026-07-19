@@ -9,6 +9,11 @@
  *
  * L'API n'expose pas ce champ (`LiturgicalDate` n'a que `season`/`day_name`) :
  * on le dérive du libellé, ce qui est déterministe et sans coût réseau.
+ *
+ * ⚠️ **Marqueur discret, pas lavis de page** (DIRECTION.md R4). Le bleu Jàngu Bi
+ * est l'identité et doit dominer : la couleur liturgique se pose en liseré, en
+ * pastille ou en surtitre. Une première version lavait tout le héros et mangeait
+ * le bleu — à ne pas refaire.
  */
 
 export type LiturgicalColor = 'violet' | 'white' | 'red' | 'green';
@@ -17,11 +22,11 @@ export interface LiturgicalTone {
   color: LiturgicalColor;
   /** Nom du temps, tel qu'on l'affiche en surtitre. */
   label: string;
-  /** Teinte d'accent — variables CSS, jamais de couleur brute. */
+  /** Teinte d'accent, en composantes HSL — jamais de couleur brute en dur. */
   accentVar: string;
-  /** Surface teintée très douce pour le fond du héros. */
-  washClass: string;
-  /** Texte d'accent lisible sur fond clair ET sombre. */
+  /** Pastille discrète : point ou liseré marquant le temps. */
+  dotClass: string;
+  /** Texte d'accent lisible sur fond clair ET sombre (surtitres). */
   inkClass: string;
 }
 
@@ -30,28 +35,28 @@ const TONES: Record<LiturgicalColor, Omit<LiturgicalTone, 'label'>> = {
   violet: {
     color: 'violet',
     accentVar: '265 45% 45%',
-    washClass: 'from-[hsl(265_45%_45%_/_0.10)] to-transparent',
+    dotClass: 'bg-[hsl(265_45%_45%)] dark:bg-[hsl(265_60%_74%)]',
     inkClass: 'text-[hsl(265_50%_38%)] dark:text-[hsl(265_60%_78%)]',
   },
   // Noël, Pâques, fêtes du Seigneur et de la Vierge — joie.
   white: {
     color: 'white',
     accentVar: '40 65% 48%',
-    washClass: 'from-[hsl(40_65%_48%_/_0.12)] to-transparent',
+    dotClass: 'bg-gold',
     inkClass: 'text-gold-ink',
   },
   // Pentecôte, martyrs, Rameaux — le feu et le sang.
   red: {
     color: 'red',
     accentVar: '0 60% 45%',
-    washClass: 'from-[hsl(0_60%_45%_/_0.10)] to-transparent',
+    dotClass: 'bg-[hsl(0_60%_45%)] dark:bg-[hsl(0_70%_70%)]',
     inkClass: 'text-[hsl(0_62%_40%)] dark:text-[hsl(0_70%_74%)]',
   },
   // Temps ordinaire — l'espérance qui dure.
   green: {
     color: 'green',
     accentVar: '150 40% 34%',
-    washClass: 'from-[hsl(150_40%_34%_/_0.10)] to-transparent',
+    dotClass: 'bg-[hsl(150_40%_34%)] dark:bg-[hsl(150_45%_66%)]',
     inkClass: 'text-[hsl(150_45%_28%)] dark:text-[hsl(150_45%_70%)]',
   },
 };

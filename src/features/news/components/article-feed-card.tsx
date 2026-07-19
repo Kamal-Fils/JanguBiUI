@@ -9,102 +9,174 @@ import type { Article } from '../types';
 
 import { ArticleTypeBadge } from './article-type-badge';
 
+/**
+ * Les trois traitements du fil (R6 « Flux »). Ils ne sont pas trois tailles
+ * d'une même carte : ce sont trois formes différentes, ce qui donne au fil un
+ * tempo au lieu d'une grille.
+ *
+ * - `lead`  : la une. Visuel panoramique pleine largeur, titre `text-headline`.
+ * - `wide`  : bande pleine largeur, vignette latérale (alternée gauche/droite).
+ * - `brief` : brève typographique, sans visuel, dans la liste « En bref ».
+ */
+export type FeedCardVariant = 'lead' | 'wide' | 'brief';
+
 interface ArticleFeedCardProps {
   article: Article;
-  /** À la une : visuel large + titre display serif (une de journal). */
-  featured?: boolean;
+  variant?: FeedCardVariant;
+  /** `wide` uniquement : visuel à droite — zigzag éditorial, pas de colonne. */
+  reverse?: boolean;
 }
 
 /**
- * Carte « presse » du fil d'actualité (inspiration NYT/BBC) : visuel à ratio
- * stable avec repli brandé AU MÊME ratio (zéro reflow), kicker type + rubrique
- * en micro-capitales, titre serif, chapô et méta discrète. Sans cadre : la
- * hiérarchie vient de l'image et de la typographie, pas de la boîte.
+ * Carte du fil d'actualité, registre **bleu dominant** (l'or n'apparaît que sur
+ * le badge « Lettre pastorale », via `ArticleTypeBadge`).
+ *
+ * Lisibilité (R3) : titres en sérif à forte échelle, chapô et métadonnées en
+ * `text-foreground/…` plutôt qu'en gris clair, surface de clic occupant tout le
+ * bloc. Les visuels ont un ratio fixe et un repli au même ratio : zéro saut de
+ * mise en page au chargement.
  */
 export function ArticleFeedCard({
   article,
-  featured = false,
+  variant = 'wide',
+  reverse = false,
 }: ArticleFeedCardProps) {
-  return (
-    <Link href={`/app/actus/${article.id}`} className="group flex flex-col">
-      <div
+  // Appareil éditorial commun : date + audience. Volontairement à 13 px et non
+  // en gris clair — c'est la ligne la plus souvent illisible en plein soleil.
+  const meta = (
+    <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-foreground/65">
+      {article.published_at && (
+        <span className="flex items-center gap-1.5">
+          <Clock className="size-3.5" aria-hidden="true" />
+          {formatFrDate(article.published_at, 'short')}
+        </span>
+      )}
+      <span className="flex items-center gap-1.5">
+        <Eye className="size-3.5" aria-hidden="true" />
+        {article.views_count}
+      </span>
+    </div>
+  );
+
+  // Surtitre de rubrique. Bleu dans les deux thèmes, mais PAS le même bleu :
+  // `--primary` (#1A8FCC) ne tient que ~3,5:1 sur blanc, insuffisant pour du
+  // 12 px (R3). En clair on descend sur le bleu profond, en sombre on reprend
+  // `--primary` qui, lui, contraste largement sur le navy.
+  const kicker = (
+    <div className="mb-2 flex flex-wrap items-center gap-2">
+      <ArticleTypeBadge contentType={article.content_type} />
+      {article.category && (
+        <span className="text-xs font-semibold uppercase tracking-widest text-secondary-foreground dark:text-primary">
+          {article.category.name}
+        </span>
+      )}
+    </div>
+  );
+
+  // --- Brève : pas de visuel, la typographie seule porte l'item. ------------
+  if (variant === 'brief') {
+    return (
+      <Link
+        href={`/app/actus/${article.id}`}
+        className="group flex items-start gap-3.5 py-4"
+      >
+        <span
+          aria-hidden="true"
+          className="mt-2.5 size-2 shrink-0 rounded-full bg-primary"
+        />
+        <div className="min-w-0 flex-1">
+          <h3 className="font-serif text-lg font-semibold leading-snug text-foreground underline-offset-4 group-hover:text-primary group-hover:underline">
+            {article.title}
+          </h3>
+          {meta}
+        </div>
+      </Link>
+    );
+  }
+
+  // --- Bande pleine largeur : vignette latérale, alternée gauche/droite. ----
+  if (variant === 'wide') {
+    return (
+      <Link
+        href={`/app/actus/${article.id}`}
         className={cn(
-          'relative w-full overflow-hidden rounded-xl bg-muted',
-          featured ? 'aspect-video md:aspect-[2/1]' : 'aspect-[3/2]',
+          'group flex gap-4 md:gap-6',
+          reverse && 'md:flex-row-reverse',
         )}
       >
+        <div className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-lg bg-muted sm:w-40 sm:rounded-xl md:w-[38%]">
+          {article.cover_image_url ? (
+            <Image
+              src={article.cover_image_url}
+              alt={article.title}
+              fill
+              unoptimized
+              className="object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.03] motion-reduce:transform-none"
+              sizes="(max-width: 640px) 112px, (max-width: 1024px) 160px, 380px"
+            />
+          ) : (
+            <div
+              data-testid="article-card-placeholder"
+              aria-hidden="true"
+              className="flex size-full items-center justify-center bg-gradient-to-br from-primary/25 via-primary/10 to-primary/5 text-primary/60"
+            >
+              <Newspaper className="size-7" />
+            </div>
+          )}
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col justify-center">
+          {kicker}
+          <h3 className="font-serif text-xl font-bold leading-snug tracking-tight text-foreground underline-offset-4 group-hover:text-primary group-hover:underline md:text-2xl">
+            {article.title}
+          </h3>
+          {article.excerpt && (
+            <p className="mt-1.5 line-clamp-2 text-[15px] leading-relaxed text-foreground/75">
+              {article.excerpt}
+            </p>
+          )}
+          {meta}
+        </div>
+      </Link>
+    );
+  }
+
+  // --- La une : elle doit écraser tout ce qui suit (échelle, image, place). -
+  return (
+    <Link href={`/app/actus/${article.id}`} className="group flex flex-col">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-muted sm:aspect-video md:aspect-[21/9]">
         {article.cover_image_url ? (
           <Image
             src={article.cover_image_url}
             alt={article.title}
             fill
             unoptimized
-            priority={featured}
+            priority
             className="object-cover transition-transform duration-500 ease-out-soft group-hover:scale-[1.03] motion-reduce:transform-none"
-            sizes={
-              featured
-                ? '(max-width: 1024px) 100vw, 1024px'
-                : '(max-width: 768px) 100vw, 50vw'
-            }
+            sizes="(max-width: 1024px) 100vw, 1024px"
           />
         ) : (
-          // Repli éditorial brandé, au même ratio que l'image (pas de trou).
           <div
             data-testid="article-card-placeholder"
             aria-hidden="true"
-            className="flex size-full items-center justify-center bg-gradient-to-br from-primary/15 via-primary/5 to-accent/15 text-primary/40"
+            className="flex size-full items-center justify-center bg-gradient-to-br from-primary/25 via-primary/10 to-primary/5 text-primary/60"
           >
-            <Newspaper className={featured ? 'size-12' : 'size-9'} />
+            <Newspaper className="size-14" />
           </div>
         )}
       </div>
 
-      <div className={cn('flex min-w-0 flex-col', featured ? 'pt-4' : 'pt-3')}>
-        <div className="mb-1.5 flex flex-wrap items-center gap-2">
-          <ArticleTypeBadge contentType={article.content_type} />
-          {article.category && (
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gold-ink">
-              {article.category.name}
-            </span>
-          )}
-        </div>
-
-        <h3
-          className={cn(
-            'font-serif font-bold tracking-tight text-foreground transition-colors group-hover:text-primary',
-            featured
-              ? 'text-2xl leading-tight md:text-3xl'
-              : 'line-clamp-2 text-lg leading-snug',
-          )}
-        >
+      <div className="flex min-w-0 flex-col pt-4">
+        {kicker}
+        <h3 className="font-serif text-headline font-bold tracking-tight text-foreground underline-offset-4 group-hover:text-primary group-hover:underline">
           {article.title}
         </h3>
-
         {article.excerpt && (
-          <p
-            className={cn(
-              'mt-1.5 text-muted-foreground',
-              featured
-                ? 'line-clamp-3 text-base leading-relaxed'
-                : 'line-clamp-2 text-sm',
-            )}
-          >
+          <p className="mt-2 line-clamp-3 max-w-reading text-base leading-relaxed text-foreground/75 md:text-lg">
             {article.excerpt}
           </p>
         )}
-
-        <div className="mt-2.5 flex items-center gap-3 text-xs text-muted-foreground">
-          {article.published_at && (
-            <span className="flex items-center gap-1">
-              <Clock className="size-3" />
-              {formatFrDate(article.published_at, 'short')}
-            </span>
-          )}
-          <span className="flex items-center gap-1">
-            <Eye className="size-3" />
-            {article.views_count}
-          </span>
-        </div>
+        {meta}
       </div>
     </Link>
   );

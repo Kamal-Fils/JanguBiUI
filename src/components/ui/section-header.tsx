@@ -40,8 +40,10 @@ export function SectionHeader({
     <div className={cn('mb-4', className)}>
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
+          {/* Surtitre en 12 px et pleine opacité : à 10 px atténué, il était
+              illisible sur un téléphone en plein soleil (DIRECTION.md R3). */}
           {eyebrow && (
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {eyebrow}
             </p>
           )}

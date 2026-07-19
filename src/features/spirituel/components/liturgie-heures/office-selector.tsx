@@ -2,7 +2,7 @@
 
 import { Moon, Sun, Sunrise, Sunset } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/cn';
 
 import type { OfficeKey } from '../../api/get-office';
 
@@ -69,34 +69,67 @@ const OFFICES: OfficeMeta[] = [
 interface OfficeSelectorProps {
   selected: OfficeKey;
   onChange: (key: OfficeKey) => void;
+  /** Office correspondant à l'heure courante — signalé « maintenant ». */
+  currentKey?: OfficeKey;
 }
 
-export function OfficeSelector({ selected, onChange }: OfficeSelectorProps) {
+/**
+ * Choix de l'heure. Le bleu porte la sélection (identité + action) ; l'office
+ * de l'heure courante est signalé par un mot, pas par la seule couleur
+ * (WCAG 1.4.1). Cibles ≥ 44px (R3).
+ */
+export function OfficeSelector({
+  selected,
+  onChange,
+  currentKey,
+}: OfficeSelectorProps) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+    <div
+      role="group"
+      aria-label="Choisir un office"
+      className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+    >
       {OFFICES.map((office) => {
         const Icon = office.icon;
         const isActive = selected === office.key;
+        const isNow = currentKey === office.key;
+
         return (
           <button
             key={office.key}
             type="button"
+            aria-pressed={isActive}
             onClick={() => onChange(office.key)}
             className={cn(
-              'flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all',
+              'flex min-h-[4.25rem] flex-col items-start gap-0.5 rounded-xl border p-3 text-left transition-colors',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
               isActive
-                ? 'border-primary bg-primary/10 text-primary shadow-sm'
-                : 'border-border bg-card text-muted-foreground hover:border-primary/40 hover:bg-muted/50',
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted/50',
             )}
           >
-            <div className="flex w-full items-center justify-between">
-              <Icon className="size-4" />
-              <span className="text-xs opacity-60">{office.time}</span>
+            <div className="flex w-full items-center justify-between gap-2">
+              <Icon className="size-4 shrink-0" aria-hidden="true" />
+              <span
+                className={cn(
+                  'text-xs tabular-nums',
+                  isActive ? 'text-primary' : 'text-muted-foreground',
+                )}
+              >
+                {isNow ? 'maintenant' : office.time}
+              </span>
             </div>
             <span className="text-sm font-semibold leading-tight">
               {office.label}
             </span>
-            <span className="text-xs opacity-70">{office.subtitle}</span>
+            <span
+              className={cn(
+                'text-xs',
+                isActive ? 'text-primary/80' : 'text-muted-foreground',
+              )}
+            >
+              {office.subtitle}
+            </span>
           </button>
         );
       })}

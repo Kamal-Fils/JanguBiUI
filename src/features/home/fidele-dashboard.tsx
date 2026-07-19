@@ -6,6 +6,7 @@ import { paths } from '@/config/paths';
 import { FideleSummarySection } from '@/features/dashboard/components/fidele-summary-section';
 import { PastoralReflectionWidget } from '@/features/reflexion-pastorale/components/pastoral-reflection-widget';
 
+import { ModuleShortcuts } from './module-shortcuts';
 import { MyIntentionsSection } from './my-intentions-section';
 import { ParishEventsSection } from './parish-events-section';
 import { ParishNewsSection } from './parish-news-section';
@@ -14,11 +15,20 @@ import { WordOfTheDay } from './word-of-the-day';
 /**
  * Accueil du fidèle.
  *
- * Hiérarchie assumée : la Parole du jour ouvre la page en pleine échelle,
- * puis la vie de la paroisse, puis ce qui appartient en propre au fidèle
- * (sa méditation, ses intentions). L'ancienne bannière de bienvenue — un
- * bloc dégradé portant le prénom en très grand — a cédé la place : elle
- * occupait la position de force pour une information sans valeur d'usage.
+ * Le trajet, dans l'ordre où on le lit :
+ *
+ * 1. **La Parole du jour** — le geste quotidien qui fait revenir, en pleine
+ *    échelle et en bleu.
+ * 2. **Mon espace** — où j'en suis (demandes, dons) et, juste dessous, tout ce
+ *    que l'application sait faire. C'est là que se joue la différence avec une
+ *    app de lectures : demander un acte, écrire à son curé, confier une
+ *    intention. Placé haut exprès — un avantage qu'on ne voit pas n'existe pas.
+ * 3. **La vie de la communauté**, puis ce qui appartient en propre au fidèle
+ *    (sa méditation, ses intentions).
+ *
+ * L'ancienne bannière de bienvenue — un bloc dégradé portant le prénom en très
+ * grand — a cédé la place : elle occupait la position de force pour une
+ * information sans valeur d'usage.
  */
 export function FideleDashboard() {
   return (
@@ -26,7 +36,17 @@ export function FideleDashboard() {
       <div className="flex flex-col gap-10">
         <WordOfTheDay />
 
-        <FideleSummarySection />
+        <section>
+          <SectionHeader
+            eyebrow="Tout au même endroit"
+            title="Mon espace"
+            description="Vos démarches, votre paroisse et votre prière — sans changer d’application."
+          />
+          <div className="flex flex-col gap-4">
+            <FideleSummarySection />
+            <ModuleShortcuts />
+          </div>
+        </section>
 
         <div className="hairline-gold" aria-hidden="true" />
 
