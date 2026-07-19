@@ -127,3 +127,78 @@ describe('DonsPage — bénéficiaire & paiement (C7c)', () => {
     expect(body).toMatchObject({ church_id: 211, parish_id: 21 });
   });
 });
+
+/**
+ * La page de don est un **parcours** (DIRECTION R1) : on juge le trajet, pas
+ * la capture. Ces tests fixent les trois défauts corrigés — on ne confirme pas
+ * un versement à l'aveugle, un échec ne peut pas être muet, et une saisie
+ * invalide doit le dire.
+ */
+describe('DonsPage — le parcours de don', () => {
+  beforeEach(mockBackend);
+
+  test('un récapitulatif précède la confirmation du versement', async () => {
+    const user = userEvent.setup();
+    renderApp(<DonsPage />);
+    await screen.findByLabelText('Bénéficiaire');
+
+    // Avant saisie : rien à récapituler.
+    expect(screen.queryByText('Montant')).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('Montant (XOF)'), '5000');
+
+    // Après saisie : combien, et à qui — dans le récapitulatif lui-même
+    // (« 5 000 XOF » existe aussi comme raccourci de montant).
+    const recap = await screen.findByLabelText('Récapitulatif du don');
+    expect(within(recap).getByText('Montant')).toBeInTheDocument();
+    expect(within(recap).getByText('5 000 XOF')).toBeInTheDocument();
+    expect(within(recap).getByText('Église A')).toBeInTheDocument();
+  });
+
+  test('un montant invalide est signalé au lieu d’être ignoré en silence', async () => {
+    const user = userEvent.setup();
+    renderApp(<DonsPage />);
+    await screen.findByLabelText('Bénéficiaire');
+
+    // Champ laissé vide : l'ancien code sortait de la fonction sans un mot.
+    await user.click(screen.getByRole('button', { name: /confirmer le don/i }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      /montant d’au moins 1 xof/i,
+    );
+  });
+
+  test('un refus du serveur est affiché et l’action reste rejouable', async () => {
+    server.use(
+      http.post(
+        `${env.API_URL}/v1/donations/donate/`,
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+
+    const user = userEvent.setup();
+    renderApp(<DonsPage />);
+    await screen.findByLabelText('Bénéficiaire');
+
+    await user.type(screen.getByLabelText('Montant (XOF)'), '5000');
+    await user.click(screen.getByRole('button', { name: /confirmer le don/i }));
+
+    expect(
+      await screen.findByText(/pas pu être enregistré/i),
+    ).toBeInTheDocument();
+    // Le bouton reste actionnable : on peut réessayer sans recharger.
+    expect(
+      screen.getByRole('button', { name: /confirmer le don/i }),
+    ).toBeEnabled();
+  });
+
+  test('les étapes du parcours sont numérotées et ordonnées', async () => {
+    renderApp(<DonsPage />);
+
+    expect(
+      await screen.findByRole('heading', { name: /pour qui/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /combien/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /comment/i })).toBeInTheDocument();
+  });
+});

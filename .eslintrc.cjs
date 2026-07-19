@@ -124,7 +124,21 @@ module.exports = {
         'import/no-named-as-default': 'off',
         'react/react-in-jsx-scope': 'off',
         'jsx-a11y/anchor-is-valid': 'off',
-        '@typescript-eslint/no-unused-vars': ['error'],
+        // Le préfixe `_` marque un identifiant volontairement non consommé.
+        // Cas principal : les gardes de contrat front↔back
+        // (`type _XMatchesContract = Expect<Matches<…>>` dans les couches
+        // `api/`). Ces alias N'ONT pas d'usage — c'est leur seule évaluation
+        // par le compilateur qui fait échouer le build quand le serveur change
+        // de forme. Les signaler comme « défini mais jamais utilisé » pousserait
+        // à les supprimer, donc à retirer précisément la protection.
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            varsIgnorePattern: '^_',
+            argsIgnorePattern: '^_',
+            caughtErrorsIgnorePattern: '^_',
+          },
+        ],
         '@typescript-eslint/explicit-function-return-type': ['off'],
         '@typescript-eslint/explicit-module-boundary-types': ['off'],
         '@typescript-eslint/no-empty-function': ['off'],

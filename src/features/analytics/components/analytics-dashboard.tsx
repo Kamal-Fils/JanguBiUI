@@ -17,7 +17,6 @@ import { useRegisterPageMeta } from '@/components/layouts/page-meta';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { FilterPills } from '@/components/ui/filter-pills';
-import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatCard } from '@/components/ui/stat-card';
 import { paths } from '@/config/paths';
@@ -79,6 +78,29 @@ const ACTIVE_UNITS_LABEL: Record<string, string> = {
   parish: 'Paroisses actives · avec dons',
   diocese: 'Diocèses actifs · avec dons',
 };
+
+/**
+ * En-tête de section d'un écran de travail : titre sobre + filet de séparation
+ * neutre. `SectionHeader` porte le registre éditorial (surtitre en capitales,
+ * titre serif, filet or) : il convient au fil d'actualités, pas à un tableau
+ * de pilotage qu'on ouvre pour lire des chiffres (DIRECTION R6).
+ */
+function WorkHeading({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string;
+}) {
+  return (
+    <div className="mb-4 border-b border-border pb-1.5">
+      <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+      {description && (
+        <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+      )}
+    </div>
+  );
+}
 
 /** Variation vs période précédente, colorée sémantiquement (hausse/baisse). */
 function DeltaPill({ delta }: { delta: number }) {
@@ -178,8 +200,10 @@ export function AnalyticsDashboard() {
       <div className="flex flex-col gap-7">
         {/* Vue d'ensemble : filtres + KPIs */}
         <section aria-label="Vue d'ensemble">
-          <SectionHeader
-            eyebrow="Pilotage"
+          {/* Écran de **travail** (DIRECTION R6) : en-têtes sobres, sans
+              surtitre éditorial ni filet or. L'ornement du registre « lecture »
+              ne fait ici que repousser les chiffres vers le bas. */}
+          <WorkHeading
             title="Vue d'ensemble"
             description={
               data?.entity
@@ -310,8 +334,7 @@ export function AnalyticsDashboard() {
 
         {/* Graphiques */}
         <section aria-label="Flux de dons">
-          <SectionHeader
-            eyebrow="Tendances"
+          <WorkHeading
             title="Flux de dons"
             description="Évolution, répartition par type et classement territorial."
           />
@@ -325,8 +348,7 @@ export function AnalyticsDashboard() {
         {/* Matrice d'activité + files en souffrance (incrément 2) */}
         {!isLoading && data && (
           <section aria-label="Activité du périmètre">
-            <SectionHeader
-              eyebrow="Suivi"
+            <WorkHeading
               title="Activité du périmètre"
               description="Files d'attente et vitalité de chaque entité."
             />

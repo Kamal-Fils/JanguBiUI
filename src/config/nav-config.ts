@@ -231,15 +231,19 @@ export interface NavSection {
 // (config ne doit jamais importer depuis features — flux unidirectionnel).
 const ACTUS_TYPE_PARAM = 'type';
 
-// Vues internes de la page Bible (retours testeurs n°2 : plus de barre
-// d'onglets, la sidebar pilote les vues via `?tab=`). Valeurs VÉRIFIÉES sur
-// `VALID_TABS` de src/features/bible/components/bible-content.tsx :
-// 'bible' (défaut) | 'lectio' | 'parcours'. Même contrainte d'import que pour
-// ACTUS_TYPE_PARAM (flux unidirectionnel config ↛ features).
-const BIBLE_TAB_PARAM = 'tab';
+// Vues internes d'une page, pilotées par la sidebar (retours testeurs n°2 :
+// plus de barre d'onglets dans la page). Deux consommateurs aujourd'hui :
+//  · Bible — `VALID_TABS` de src/features/bible/components/bible-content.tsx :
+//    'bible' (défaut) | 'lectio' | 'parcours' ;
+//  · Messagerie inter-clergé — src/app/app/clerge/messages/page.tsx :
+//    absent (boîte de réception, défaut) | 'nouveau' (rédaction).
+// Même contrainte d'import que pour ACTUS_TYPE_PARAM : config ne peut pas
+// importer depuis features (flux unidirectionnel), les valeurs sont vérifiées
+// à la main contre les pages.
+const TAB_PARAM = 'tab';
 
 /** Query params discriminants pour l'activation des sous-navs. */
-const SUBNAV_PARAMS = [ACTUS_TYPE_PARAM, BIBLE_TAB_PARAM] as const;
+const SUBNAV_PARAMS = [ACTUS_TYPE_PARAM, TAB_PARAM] as const;
 
 /**
  * Sections de la sidebar, filtrées par rôle (même RBAC que buildNavItems :
@@ -268,14 +272,14 @@ export const buildNavSections = (
       activeRoot: paths.app.spirituel.getHref(),
       items: [
         { label: 'Bible', href: paths.app.bible.getHref() },
-        // Vues internes de la page Bible (?tab=…) — cf. BIBLE_TAB_PARAM.
+        // Vues internes de la page Bible (?tab=…) — cf. TAB_PARAM.
         {
           label: 'Lectio divina',
-          href: `${paths.app.bible.getHref()}?${BIBLE_TAB_PARAM}=lectio`,
+          href: `${paths.app.bible.getHref()}?${TAB_PARAM}=lectio`,
         },
         {
           label: 'Parcours de lecture',
-          href: `${paths.app.bible.getHref()}?${BIBLE_TAB_PARAM}=parcours`,
+          href: `${paths.app.bible.getHref()}?${TAB_PARAM}=parcours`,
         },
         {
           label: 'Liturgie du jour',
@@ -337,6 +341,13 @@ export const buildNavSections = (
           label: 'Messagerie inter-clergé',
           href: paths.app.clerge.messages.getHref(),
         },
+        // Rédaction : dernière vue encore rendue en onglets DANS la page. Le
+        // client a tranché contre les onglets — elle devient une rubrique de la
+        // barre latérale (?tab=nouveau), comme les vues de Bible et d'Actualité.
+        {
+          label: 'Nouveau message',
+          href: `${paths.app.clerge.messages.getHref()}?${TAB_PARAM}=nouveau`,
+        },
         {
           label: 'Transferts paroissiaux',
           href: paths.app.clerge.transferts.getHref(),
@@ -379,7 +390,10 @@ export const buildNavSections = (
     )
     .map((s) =>
       s.items
-        ? { ...s, items: s.items.filter((i) => !i.clergyOnly || isClergy(user)) }
+        ? {
+            ...s,
+            items: s.items.filter((i) => !i.clergyOnly || isClergy(user)),
+          }
         : s,
     );
 };

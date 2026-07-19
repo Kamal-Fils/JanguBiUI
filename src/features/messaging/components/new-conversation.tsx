@@ -106,7 +106,9 @@ export function NewConversation() {
             <ArrowLeft className="size-5" />
           </Button>
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+            {/* 12 px pleine opacité : à 10 px atténué, ce surtitre était
+                illisible en plein soleil (DIRECTION.md R3). */}
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Nouvelle conversation
             </p>
             <h1 className="truncate font-serif text-lg font-bold tracking-tight text-foreground">
@@ -116,9 +118,10 @@ export function NewConversation() {
           {isPending && (
             <Loader2 className="ml-auto size-4 animate-spin text-muted-foreground motion-reduce:animate-none" />
           )}
-          {/* Filet or éditorial sous l'en-tête */}
+          {/* Filet bleu sous l'en-tête : le bleu porte l'identité, l'or reste
+              un accent (DIRECTION.md R4). */}
           <div
-            className="hairline-gold absolute inset-x-4 bottom-0"
+            className="absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent"
             aria-hidden="true"
           />
         </div>

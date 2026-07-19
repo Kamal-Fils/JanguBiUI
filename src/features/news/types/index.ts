@@ -8,6 +8,35 @@ export const articleCategorySchema = z.object({
   color: z.string().nullable().optional(),
 });
 
+/**
+ * Réactions communautaires (SRS) — prier / amen / participer.
+ *
+ * `counts` est global, `mine` est personnel : la carte doit pouvoir afficher
+ * « 12 » ET « vous en faites partie » sans une requête par article. Les deux
+ * arrivent donc DANS la charge utile de l'article (liste et détail), annotés
+ * côté serveur.
+ */
+export const REACTION_TYPES = ['pray', 'amen', 'attend'] as const;
+
+export const reactionTypeSchema = z.enum(REACTION_TYPES);
+
+export const articleReactionsSchema = z.object({
+  counts: z.object({
+    pray: z.number(),
+    amen: z.number(),
+    attend: z.number(),
+  }),
+  mine: z.array(reactionTypeSchema),
+});
+
+export type ReactionType = z.infer<typeof reactionTypeSchema>;
+export type ArticleReactions = z.infer<typeof articleReactionsSchema>;
+
+export const EMPTY_REACTIONS: ArticleReactions = {
+  counts: { pray: 0, amen: 0, attend: 0 },
+  mine: [],
+};
+
 export const articleSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -30,6 +59,10 @@ export const articleSchema = z.object({
   status: z.enum(['draft', 'published', 'unpublished']),
   status_label: z.string().optional(),
   views_count: z.number(),
+  // Optionnel pour rester tolérant aux réponses servies avant le déploiement
+  // du bloc `reactions` — l'UI retombe alors sur EMPTY_REACTIONS plutôt que de
+  // faire échouer le parse de tout le fil.
+  reactions: articleReactionsSchema.optional(),
   published_at: z.string().nullable().optional(),
   created_at: z.string(),
 });

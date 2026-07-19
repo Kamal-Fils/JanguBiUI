@@ -1,6 +1,11 @@
 'use client';
 
-import { MoreHorizontal, UserCheck, UserX, Users as UsersIcon } from 'lucide-react';
+import {
+  MoreHorizontal,
+  UserCheck,
+  UserX,
+  Users as UsersIcon,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -16,7 +21,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardEyebrow } from '@/components/ui/card/card';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import {
   DropdownMenu,
@@ -233,38 +237,44 @@ export default function AdminUsersPage() {
         />
       }
     >
-      <Card variant="feature">
-        <CardContent className="p-4 sm:p-5">
-          <CardEyebrow className="mb-3">Comptes &amp; accès</CardEyebrow>
-          {isError ? (
-            <ErrorState
-              title="Impossible de charger les utilisateurs"
-              onRetry={() => refetch()}
-            />
-          ) : (
-            <DataTable
-              data={data?.results}
-              columns={columns}
-              rowKey={(u) => u.id}
-              isLoading={isLoading}
-              caption="Liste des utilisateurs"
-              emptyState={
-                <EmptyState
-                  icon={<UsersIcon />}
-                  title="Aucun utilisateur pour ce filtre"
-                  description="Élargissez le filtre pour retrouver un compte, ou invitez un membre du clergé à rejoindre la plateforme."
-                />
-              }
-              pagination={{
-                count: data?.count ?? 0,
-                limit: PAGE_SIZE,
-                offset,
-                onOffsetChange: setOffset,
-              }}
-            />
-          )}
-        </CardContent>
-      </Card>
+      {/* Archétype **Travail** : plus de carte à filet or ni de surtitre
+          éditorial — même vocabulaire que la file paroissiale
+          (`/app/admin/documents`), qui sert de référence. */}
+      <section aria-labelledby="admin-users-title">
+        <h2
+          id="admin-users-title"
+          className="mb-2 text-sm font-semibold text-foreground"
+        >
+          Comptes &amp; accès
+        </h2>
+        {isError ? (
+          <ErrorState
+            title="Impossible de charger les utilisateurs"
+            onRetry={() => refetch()}
+          />
+        ) : (
+          <DataTable
+            data={data?.results}
+            columns={columns}
+            rowKey={(u) => u.id}
+            isLoading={isLoading}
+            caption="Liste des utilisateurs"
+            emptyState={
+              <EmptyState
+                icon={<UsersIcon />}
+                title="Aucun utilisateur pour ce filtre"
+                description="Élargissez le filtre pour retrouver un compte, ou invitez un membre du clergé à rejoindre la plateforme."
+              />
+            }
+            pagination={{
+              count: data?.count ?? 0,
+              limit: PAGE_SIZE,
+              offset,
+              onOffsetChange: setOffset,
+            }}
+          />
+        )}
+      </section>
     </AdminPageLayout>
   );
 }

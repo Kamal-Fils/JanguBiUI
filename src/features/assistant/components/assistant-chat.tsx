@@ -89,7 +89,7 @@ export function AssistantChat() {
     <div className="flex h-dvh flex-col">
       {/* En-tête */}
       <header className="bg-background-surface/95 sticky top-0 z-40 border-b border-border px-4 py-3 backdrop-blur-md">
-        <div className="mx-auto flex max-w-2xl items-center gap-3">
+        <div className="mx-auto flex max-w-3xl items-center gap-3">
           {/* Vue plein écran exemptée de l'AppHeader → retour porté par
               l'en-tête custom, vers le parent logique (hub Spiritualité). */}
           <Link
@@ -115,7 +115,7 @@ export function AssistantChat() {
 
       {/* Fil de conversation */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pb-4">
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-3xl">
           {messages.length === 0 ? (
             <WelcomeState onSuggestion={sendQuery} />
           ) : (
@@ -138,16 +138,21 @@ export function AssistantChat() {
                   <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
                     <Bot className="size-4 text-primary" aria-hidden="true" />
                   </div>
-                  <div className="bg-background-surface rounded-2xl rounded-tl-sm border border-border px-4 py-3">
-                    <div
-                      className="flex items-center gap-1.5"
-                      role="status"
-                      aria-label="L'assistant réfléchit"
-                    >
+                  {/* Réflexion en cours : l'animation seule ne dit rien à qui
+                      ne la voit pas (mouvement réduit, lecteur d'écran) — le
+                      libellé est donc écrit, pas seulement annoncé. */}
+                  <div
+                    className="bg-background-surface flex items-center gap-2.5 rounded-2xl rounded-tl-sm border border-border px-4 py-3"
+                    role="status"
+                  >
+                    <span className="flex items-center gap-1.5" aria-hidden="true">
                       <span className="size-2 animate-pulse rounded-full bg-primary motion-reduce:animate-none" />
                       <span className="size-2 animate-pulse rounded-full bg-primary [animation-delay:150ms] motion-reduce:animate-none" />
                       <span className="size-2 animate-pulse rounded-full bg-primary [animation-delay:300ms] motion-reduce:animate-none" />
-                    </div>
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      L&apos;assistant cherche dans les Écritures…
+                    </span>
                   </div>
                 </div>
               )}
@@ -159,7 +164,7 @@ export function AssistantChat() {
       {/* Raccourcis après la première réponse */}
       {messages.length > 0 && !isLoading && (
         <div className="border-t border-border bg-background px-4 py-2">
-          <div className="mx-auto max-w-2xl">
+          <div className="mx-auto max-w-3xl">
             <SuggestionChips onSelect={sendQuery} compact />
           </div>
         </div>
@@ -169,7 +174,7 @@ export function AssistantChat() {
       <div className="bg-background-surface border-t border-border px-4 pb-20 pt-3">
         <form
           onSubmit={handleSubmit}
-          className="mx-auto flex max-w-2xl items-end gap-2"
+          className="mx-auto flex max-w-3xl items-end gap-2"
         >
           <div className="flex-1">
             <textarea
@@ -184,7 +189,9 @@ export function AssistantChat() {
               placeholder="Posez votre question…"
               rows={1}
               className={cn(
-                'w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground',
+                // text-base (16px) : en dessous, iOS zoome au focus et le
+                // texte devient illisible dehors (R3).
+                'min-h-11 w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-base text-foreground',
                 'placeholder:text-muted-foreground',
                 'focus:border-border-focus focus:outline-none focus:ring-1 focus:ring-ring',
                 'disabled:cursor-not-allowed disabled:opacity-50',
@@ -209,24 +216,32 @@ export function AssistantChat() {
 }
 
 /* ─── Écran d'accueil avant le premier message ─── */
+
+/**
+ * Première visite : la question n'est pas « bonjour », c'est **que puis-je
+ * demander ?**. On répond par l'échelle (R2) puis par des exemples réels,
+ * cliquables — le fidèle part d'une vraie question, pas d'une page blanche.
+ */
 function WelcomeState({
   onSuggestion,
 }: {
   onSuggestion: (text: string) => void;
 }) {
   return (
-    <div className="flex flex-col items-center gap-6 px-4 pb-8 pt-16">
-      <div className="flex size-16 items-center justify-center rounded-2xl bg-primary/10">
-        <Sparkles className="size-8 text-primary" aria-hidden="true" />
-      </div>
-      <div className="text-center">
-        <h2 className="font-serif text-lg font-semibold text-foreground">
-          Bienvenue dans l&apos;Assistant
-        </h2>
-        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-          Je suis votre compagnon spirituel. Posez-moi vos questions sur la
-          Bible, le chapelet, ou trouvez un prêtre disponible.
+    <div className="flex flex-col gap-7 pb-8 pt-12">
+      <div>
+        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+          <Sparkles className="size-3.5" aria-hidden="true" />
+          Assistant spirituel
         </p>
+        <h2 className="mt-3 font-serif text-headline font-bold tracking-tight text-foreground">
+          Que souhaitez-vous demander&nbsp;?
+        </h2>
+        <p className="max-w-reading mt-3 text-base leading-relaxed text-muted-foreground">
+          Posez votre question sur la Bible, le chapelet ou la prière du jour.
+          Vous pouvez aussi chercher un prêtre disponible près de chez vous.
+        </p>
+        <div className="hairline-gold mt-6" aria-hidden="true" />
       </div>
       <SuggestionChips onSelect={onSuggestion} />
     </div>

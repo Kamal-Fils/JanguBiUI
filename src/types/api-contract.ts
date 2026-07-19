@@ -45,15 +45,30 @@ export type ResponseBody<Id extends OperationId> =
       : never;
 
 /**
- * Vérifie à la compilation qu'un type écrit à la main est **assignable** au
- * contrat du serveur. À utiliser quand on ne peut pas dériver directement le
- * type (schéma zod, forme partielle) mais qu'on veut malgré tout être averti
- * d'une divergence.
+ * Vérifie à la compilation qu'un type écrit à la main correspond au contrat du
+ * serveur. À utiliser quand on ne peut pas dériver directement le type — un
+ * schéma zod, par exemple, doit rester pour valider la réponse à l'exécution,
+ * mais rien ne garantit qu'il décrive la même forme que le serveur.
  *
  * ```ts
- * type _Check = AssertAssignable<MonPayload, RequestBody<'...'>>;
+ * type _Check = Expect<Matches<MonType, ResponseBody<'...'>>>;
  * ```
+ *
+ * ⚠️ Le détour par `Expect` n'est pas cosmétique. Une première version se
+ * contentait d'un alias valant `never` en cas d'écart — or un alias de type
+ * inutilisé ne fait rien échouer, et la garde ne mordait sur RIEN (vérifié en
+ * renommant un champ : zéro erreur). C'est la CONTRAINTE `T extends true` qui
+ * produit l'erreur de compilation.
  */
-export type AssertAssignable<Actual, Expected> = Actual extends Expected
-  ? true
-  : never;
+export type Expect<T extends true> = T;
+
+/**
+ * Égalité stricte de deux types, dans les deux sens. Les tuples autour de `A`
+ * et `B` neutralisent la distribution sur les unions, sans quoi `never` ou un
+ * type union donnerait un verdict faussement positif.
+ */
+export type Matches<A, B> = [A] extends [B]
+  ? [B] extends [A]
+    ? true
+    : false
+  : false;

@@ -2,6 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  ArrowRight,
+  BadgeCheck,
   KeyRound,
   Loader2,
   LogOut,
@@ -18,11 +20,13 @@ import { z } from 'zod';
 import { ThemeToggle } from '@/components/layouts/theme-toggle';
 import { MembershipManager } from '@/components/org/membership-manager';
 import { Card, CardEyebrow } from '@/components/ui/card/card';
+import { Link } from '@/components/ui/link/link';
 import { useNotifications } from '@/components/ui/notifications';
 import { RoleBadge } from '@/components/ui/role-badge';
 import { UserAvatar } from '@/components/ui/user-avatar';
+import { paths } from '@/config/paths';
 import { useDeleteAccount, useLogout, useUser } from '@/lib/auth';
-import { isFidele } from '@/lib/authorization';
+import { isClergy, isFidele } from '@/lib/authorization';
 import { cn } from '@/utils/cn';
 
 import {
@@ -58,10 +62,14 @@ type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 // ── Sub-components ───────────────────────────────────────────────────────────
 
+/** Filet bleu — le bleu porte l'identité, l'or reste un accent (R4). */
+const RULE_CLASS =
+  'h-px w-full bg-gradient-to-r from-transparent via-primary/35 to-transparent';
+
 /**
- * Section éditoriale « Revue Sacrée » : carte `sacred` avec surtitre majuscule
- * (eyebrow), titre serif et filet or. Le `<section>` + `<h2>` sont conservés
- * pour rester compatibles avec les tests (heading.closest('section')).
+ * Section du profil : carte `sacred` avec surtitre majuscule (eyebrow), titre
+ * serif et filet **bleu**. Le `<section>` + `<h2>` sont conservés pour rester
+ * compatibles avec les tests (heading.closest('section')).
  */
 function SectionCard({
   eyebrow,
@@ -79,7 +87,10 @@ function SectionCard({
       <section className="space-y-4 p-5">
         <header className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-accent" aria-hidden="true">
+            <span
+              className="text-secondary-foreground dark:text-primary"
+              aria-hidden="true"
+            >
               {icon}
             </span>
             <CardEyebrow>{eyebrow}</CardEyebrow>
@@ -87,7 +98,7 @@ function SectionCard({
           <h2 className="font-serif text-lg font-bold tracking-tight text-foreground">
             {title}
           </h2>
-          <div className="hairline-gold" aria-hidden="true" />
+          <div className={RULE_CLASS} aria-hidden="true" />
         </header>
         {children}
       </section>
@@ -95,12 +106,15 @@ function SectionCard({
   );
 }
 
+// Champs de formulaire calibrés pour R3 : libellé à 14 px sur `foreground` (le
+// gris clair sur blanc est banni), champ d'au moins 44 px de haut, valeur à
+// 16 px — en dessous, iOS zoome automatiquement à la mise au point.
 const inputClass =
-  'w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary';
-const labelClass = 'block text-xs font-medium text-muted-foreground mb-1';
-const errorClass = 'mt-1 text-xs text-destructive';
+  'block min-h-11 w-full rounded-xl border border-border bg-background px-4 py-2.5 text-base text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary';
+const labelClass = 'block text-sm font-medium text-foreground mb-1.5';
+const errorClass = 'mt-1 text-sm font-medium text-destructive';
 const primaryButtonClass =
-  'flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-soft-sm transition-[background-color,box-shadow] hover:bg-primary/90 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50';
+  'flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft-sm transition-[background-color,box-shadow] hover:bg-primary/90 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50';
 
 // ── Main component ───────────────────────────────────────────────────────────
 
@@ -220,12 +234,14 @@ export function ProfilContent() {
 
   return (
     <div className="mx-auto w-full max-w-2xl md:max-w-3xl lg:max-w-5xl">
-      {/* En-tête éditorial : bandeau indigo dégradé + portrait cerclé or/indigo */}
+      {/* En-tête : bandeau BLEU (l'identité domine) + portrait cerclé bleu,
+          l'or n'intervient plus qu'en pointe du dégradé — un accent, pas le
+          registre (DIRECTION.md R4). */}
       <header className="relative overflow-hidden">
-        <div className="h-28 bg-gradient-to-br from-primary/25 via-primary/10 to-accent/15" />
-        <div className="hairline-gold" aria-hidden="true" />
+        <div className="h-28 bg-gradient-to-br from-primary/30 via-primary/15 to-primary/5" />
+        <div className={RULE_CLASS} aria-hidden="true" />
         <div className="-mt-12 flex items-end gap-4 px-4 pb-5 md:px-6">
-          <div className="rounded-full bg-gradient-to-br from-accent via-accent/60 to-primary p-[3px] shadow-soft">
+          <div className="rounded-full bg-gradient-to-br from-primary via-primary/70 to-accent/60 p-[3px] shadow-soft">
             <div className="rounded-full bg-background p-1">
               <UserAvatar
                 name={
@@ -241,10 +257,11 @@ export function ProfilContent() {
             </div>
           </div>
           <div className="min-w-0 pb-1.5">
-            <h1 className="truncate font-serif text-xl font-bold leading-tight text-foreground">
+            {/* Le nom EST le sujet de l'écran : il doit se voir sans lire (R2). */}
+            <h1 className="truncate font-serif text-2xl font-bold leading-tight tracking-tight text-foreground md:text-3xl">
               {displayName}
             </h1>
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="truncate text-sm text-muted-foreground">
               {user?.email}
             </p>
             {user?.role && (
@@ -411,6 +428,30 @@ export function ProfilContent() {
           </SectionCard>
         )}
 
+        {/* Mon ministère — porte d'entrée de l'auto-déclaration de clergé.
+            Un compte déjà reconnu clergé n'a rien à revendiquer. Sans ce point
+            d'entrée l'écran existerait sans être atteignable, ce qui est
+            exactement le défaut que l'auto-déclaration vient corriger. */}
+        {!isClergy(user) && (
+          <SectionCard
+            eyebrow="Mon ministère"
+            title="Je suis prêtre, diacre ou religieux"
+            icon={<BadgeCheck className="size-4" />}
+          >
+            <p className="text-sm text-muted-foreground">
+              Déclarez le rôle que vous exercez pour que votre autorité
+              hiérarchique ouvre vos accès clergé.
+            </p>
+            <Link
+              href={paths.app.profilClerge.getHref()}
+              className="mt-3 inline-flex min-h-11 items-center gap-2 font-medium text-primary underline underline-offset-4"
+            >
+              Déclarer mon ministère
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </SectionCard>
+        )}
+
         {/* Apparence — bascule clair/sombre (ThemeToggle conservé) */}
         <SectionCard
           eyebrow="Apparence"
@@ -466,7 +507,7 @@ export function ProfilContent() {
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-border hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="min-h-11 flex-1 rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-border hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Annuler
                 </button>
@@ -475,11 +516,14 @@ export function ProfilContent() {
                   onClick={() => deleteAccount()}
                   disabled={isDeletingAccount}
                   className={cn(
-                    'flex flex-1 items-center justify-center gap-2 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50',
+                    'flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-colors hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50',
                   )}
                 >
                   {isDeletingAccount && (
-                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                    <Loader2
+                      className="size-4 animate-spin"
+                      aria-hidden="true"
+                    />
                   )}
                   Confirmer
                 </button>

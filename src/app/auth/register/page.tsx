@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { paths } from '@/config/paths';
 import { RegisterForm } from '@/features/auth/components/register-form';
+import { safeRedirect } from '@/utils/safe-redirect';
 
 const RegisterPage = () => {
   const router = useRouter();
@@ -13,9 +14,8 @@ const RegisterPage = () => {
   return (
     <RegisterForm
       onSuccess={() =>
-        router.replace(
-          `${redirectTo ? `${decodeURIComponent(redirectTo)}` : paths.app.root.getHref()}`,
-        )
+        // `redirectTo` vient de l'URL : assaini avant navigation (cf. login).
+        router.replace(safeRedirect(redirectTo, paths.app.root.getHref()))
       }
     />
   );

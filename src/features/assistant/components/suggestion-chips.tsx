@@ -46,12 +46,14 @@ export function SuggestionChips({ onSelect, compact }: SuggestionChipsProps) {
             type="button"
             onClick={() => onSelect(s.text)}
             className={cn(
-              'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+              // min-h-11 : ces pastilles sont tapées au pouce, pas cliquées
+              // à la souris (DIRECTION.md R3, cibles ≥ 44px).
+              'inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               s.color,
             )}
           >
-            <s.icon className="size-3" aria-hidden="true" />
+            <s.icon className="size-3.5" aria-hidden="true" />
             {s.label}
           </button>
         ))}
@@ -80,8 +82,12 @@ export function SuggestionChips({ onSelect, compact }: SuggestionChipsProps) {
             <s.icon className="size-4" aria-hidden="true" />
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">{s.label}</p>
-            <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+            <p className="font-serif text-base font-semibold text-foreground">
+              {s.label}
+            </p>
+            {/* La question complète est montrée, pas résumée : c'est ce qui
+                sera réellement envoyé — l'exemple enseigne quoi demander. */}
+            <p className="mt-1 text-sm leading-snug text-muted-foreground">
               {s.text}
             </p>
           </div>

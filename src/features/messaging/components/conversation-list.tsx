@@ -84,7 +84,9 @@ export function ConversationList() {
         <div className="relative px-4 pb-3 pt-3.5">
           <div className="flex items-center justify-between gap-3 pr-12 md:pr-0">
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+              {/* 12 px pleine opacité : à 10 px atténué, ce surtitre était
+                  illisible sur un téléphone en plein soleil (DIRECTION.md R3). */}
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Messagerie sécurisée
               </p>
               <h1 className="truncate font-serif text-xl font-bold tracking-tight text-foreground">
@@ -115,8 +117,12 @@ export function ConversationList() {
             />
           </div>
 
-          {/* Filet or éditorial sous l'en-tête */}
-          <div className="hairline-gold absolute inset-x-4 bottom-0" aria-hidden="true" />
+          {/* Filet bleu sous l'en-tête : le bleu porte l'identité, l'or reste
+              un accent (DIRECTION.md R4). */}
+          <div
+            className="absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent"
+            aria-hidden="true"
+          />
         </div>
       </header>
 
@@ -183,9 +189,10 @@ export function ConversationList() {
                     <span
                       suppressHydrationWarning
                       className={cn(
-                        'shrink-0 text-[11px]',
+                        // 12 px : l'horodatage est lu, pas deviné (R3).
+                        'shrink-0 text-xs',
                         isUnread
-                          ? 'font-medium text-primary'
+                          ? 'font-semibold text-secondary-foreground dark:text-primary'
                           : 'text-muted-foreground',
                       )}
                     >

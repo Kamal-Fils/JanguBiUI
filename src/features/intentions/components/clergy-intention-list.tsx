@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  CalendarCheck,
   CalendarClock,
   CheckCircle2,
   Inbox,
@@ -33,6 +34,7 @@ import { useNotifications } from '@/components/ui/notifications';
 import { cn } from '@/utils/cn';
 import { formatFrDate } from '@/utils/format-date';
 
+import { useConfirmIntentionDate } from '../api/confirm-intention-date';
 import { type MassIntention } from '../api/get-my-intentions';
 import {
   useAcceptIntention,
@@ -55,6 +57,7 @@ const TH_CLASS = 'text-[11px] uppercase tracking-wide text-muted-foreground';
  * - accept        : pending
  * - decline       : pending | accepted
  * - propose-date  : accepted | confirmed
+ * - confirm-date  : date_proposed
  * - celebrate     : accepted | date_proposed | confirmed
  * On ne propose JAMAIS une action que le backend refuserait (400 assuré).
  */
@@ -63,6 +66,14 @@ const canDecline = (status: string) =>
   status === 'pending' || status === 'accepted';
 const canProposeDate = (status: string) =>
   status === 'accepted' || status === 'confirmed';
+/**
+ * La confirmation appartient d'abord au fidèle. Elle est aussi offerte au
+ * clergé pour acter un accord donné de vive voix (au presbytère, par
+ * téléphone) — cas courant : beaucoup de fidèles n'ouvriront jamais l'app
+ * pour cliquer, et sans cela leur intention resterait bloquée en
+ * « date proposée » jusqu'à la célébration.
+ */
+const canConfirmDate = (status: string) => status === 'date_proposed';
 const canCelebrate = (status: string) =>
   status === 'accepted' || status === 'date_proposed' || status === 'confirmed';
 
@@ -70,6 +81,7 @@ const hasActions = (status: string) =>
   canAccept(status) ||
   canDecline(status) ||
   canProposeDate(status) ||
+  canConfirmDate(status) ||
   canCelebrate(status);
 
 interface IntentionRowActionsProps {
@@ -77,6 +89,7 @@ interface IntentionRowActionsProps {
   onAccept: (intention: MassIntention) => void;
   onCelebrate: (intention: MassIntention) => void;
   onProposeDate: (intention: MassIntention) => void;
+  onConfirmDate: (intention: MassIntention) => void;
   onDecline: (intention: MassIntention) => void;
 }
 
@@ -86,6 +99,7 @@ function IntentionRowActions({
   onAccept,
   onCelebrate,
   onProposeDate,
+  onConfirmDate,
   onDecline,
 }: IntentionRowActionsProps) {
   if (!hasActions(intention.status)) {
@@ -118,6 +132,12 @@ function IntentionRowActions({
           <DropdownMenuItem onSelect={() => onProposeDate(intention)}>
             <CalendarClock className="mr-2 size-4" aria-hidden="true" />
             Proposer une date
+          </DropdownMenuItem>
+        )}
+        {canConfirmDate(intention.status) && (
+          <DropdownMenuItem onSelect={() => onConfirmDate(intention)}>
+            <CalendarCheck className="mr-2 size-4" aria-hidden="true" />
+            Confirmer la date
           </DropdownMenuItem>
         )}
         {canCelebrate(intention.status) && (
@@ -172,7 +192,18 @@ export function ClergyIntentionList({
   const { mutate: celebrate, isPending: celebrating } = useCelebrateIntention();
   const { mutate: decline, isPending: declining } = useDeclineIntention();
   const { mutate: proposeDate, isPending: proposingDate } = useProposeDate();
+  const { mutate: confirmDate, isPending: confirmingDate } =
+    useConfirmIntentionDate();
 
+  /**
+   * Note sur les échecs : `api-client` remonte déjà TOUTE réponse non-2xx
+   * (hors 404) en notification d'erreur globale, avec le `detail` du serveur —
+   * message plus précis que ce qu'on écrirait ici. On n'ajoute donc pas de
+   * second toast, qui ferait doublon. Ce qui compte côté composant, c'est de
+   * ne PAS refermer les dialogues tant que l'action n'a pas abouti (voir
+   * `handleConfirmProposeDate` / `handleConfirmDecline`) : sinon le formulaire
+   * disparaît et l'utilisateur ne peut plus corriger sa saisie.
+   */
   function handleAccept(intention: MassIntention) {
     if (accepting) return;
     accept(intention.id, {
@@ -192,7 +223,19 @@ export function ClergyIntentionList({
         addNotification({
           type: 'success',
           title: 'Intention célébrée',
-          message: "L'intention a été marquée comme célébrée.",
+          message: 'Le reçu numérique est mis à disposition du fidèle.',
+        }),
+    });
+  }
+
+  function handleConfirmDate(intention: MassIntention) {
+    if (confirmingDate) return;
+    confirmDate(intention.id, {
+      onSuccess: () =>
+        addNotification({
+          type: 'success',
+          title: 'Date confirmée',
+          message: 'La date de célébration est confirmée avec le fidèle.',
         }),
     });
   }
@@ -301,6 +344,7 @@ export function ClergyIntentionList({
           intention={intention}
           onAccept={handleAccept}
           onCelebrate={handleCelebrate}
+          onConfirmDate={handleConfirmDate}
           onProposeDate={(target) => {
             setProposeTarget(target);
             setDateInput('');

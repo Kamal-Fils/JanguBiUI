@@ -117,6 +117,9 @@ describe('buildNavSections — RBAC', () => {
     expect(labels(clerge?.items ?? [])).toEqual([
       'Intentions de messe',
       'Messagerie inter-clergé',
+      // Vue « rédaction » de la messagerie inter-clergé : rubrique de la barre
+      // latérale (?tab=nouveau) depuis la suppression des onglets dans la page.
+      'Nouveau message',
       'Transferts paroissiaux',
       'Analytique',
     ]);
@@ -228,9 +231,9 @@ describe('isSubNavActive — activation avec query param `type`', () => {
   });
 
   test('un item hors de la base reste inactif', () => {
-    expect(isSubNavActive('/app/bible', 'article', '/app/actus?type=article')).toBe(
-      false,
-    );
+    expect(
+      isSubNavActive('/app/bible', 'article', '/app/actus?type=article'),
+    ).toBe(false);
   });
 });
 

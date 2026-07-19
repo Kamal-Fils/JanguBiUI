@@ -8,6 +8,11 @@ export const readingPlanSchema = z.object({
   title: z.string(),
   description: z.string(),
   is_published: z.boolean(),
+  // État d'inscription de l'utilisateur courant, annoté côté serveur par
+  // sous-requête EXISTS (pas de N+1). Sans lui, l'interface affichait
+  // « S'inscrire » ET « Se désinscrire » en permanence, sans jamais refléter
+  // la réalité. Optionnel pour tolérer un front déployé avant le backend.
+  is_subscribed: z.boolean().optional(),
   author_email: z.string().email().nullable().optional(),
   created_at: z.string(),
 });

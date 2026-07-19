@@ -12,32 +12,31 @@ import {
 import Link from 'next/link';
 
 import { AdminPageLayout } from '@/components/layouts/admin-page-layout';
-import { SectionHeader } from '@/components/ui/section-header';
 import { paths } from '@/config/paths';
 import { GlobalStatsSection } from '@/features/dashboard/components/global-stats-section';
 import { useUser } from '@/lib/auth';
 import { canManageUsers, isAdmin, isSuperAdmin } from '@/lib/authorization';
-import { cn } from '@/lib/utils';
 
 interface AdminSection {
   label: string;
   description: string;
   href: string;
   icon: React.ElementType;
-  tone: string;
   visible: boolean;
 }
 
 export default function AdminDashboardPage() {
   const { data: user } = useUser();
 
+  // Pas de teinte par pôle : six couleurs décoratives ne disent rien (R4 — la
+  // couleur porte un état, pas une catégorie) et transformaient un écran de
+  // travail en nuancier.
   const sections: AdminSection[] = [
     {
       label: 'Articles',
       description: 'Créer, éditer et publier les actualités',
       href: paths.app.admin.articles.getHref(),
       icon: BookOpen,
-      tone: 'bg-primary/10 text-primary',
       visible: true,
     },
     {
@@ -45,7 +44,6 @@ export default function AdminDashboardPage() {
       description: 'Traiter les demandes de documents',
       href: paths.app.admin.documents.getHref(),
       icon: FileText,
-      tone: 'bg-warning/10 text-warning',
       visible: true,
     },
     {
@@ -53,7 +51,6 @@ export default function AdminDashboardPage() {
       description: 'Créer et gérer les événements',
       href: paths.app.admin.agenda.getHref(),
       icon: Calendar,
-      tone: 'bg-success/10 text-success',
       visible: true,
     },
     {
@@ -61,7 +58,6 @@ export default function AdminDashboardPage() {
       description: 'Gérer les comptes et accès',
       href: paths.app.admin.users.list.getHref(),
       icon: Users,
-      tone: 'bg-accent/15 text-accent',
       visible: canManageUsers(user),
     },
     {
@@ -69,7 +65,6 @@ export default function AdminDashboardPage() {
       description: 'Gérer les vidéos et catégories',
       href: paths.app.admin.tv.getHref(),
       icon: Tv2,
-      tone: 'bg-destructive/10 text-destructive',
       visible: isSuperAdmin(user),
     },
     {
@@ -77,7 +72,6 @@ export default function AdminDashboardPage() {
       description: 'Provinces, diocèses et paroisses',
       href: paths.app.admin.org.getHref(),
       icon: Settings2,
-      tone: 'bg-info/10 text-info',
       visible: isSuperAdmin(user),
     },
   ].filter((s) => s.visible);
@@ -100,48 +94,50 @@ export default function AdminDashboardPage() {
         </section>
       )}
 
-      <section aria-label="Pôles de gestion">
-        <SectionHeader
-          eyebrow="Administration"
-          title="Pôles de gestion"
-          description="Sélectionnez un espace pour piloter la plateforme."
-        />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+      {/* Archétype **Travail** : même vocabulaire que la file paroissiale
+          (`/app/admin/documents`) — un titre de section discret, puis la
+          matière. Les pôles sont une liste de destinations, pas une vitrine :
+          rangées denses, cible ≥ 44 px, aucune animation de survol comme seule
+          affordance (DIRECTION.md R3/R6). */}
+      <section aria-labelledby="admin-poles-title">
+        <h2
+          id="admin-poles-title"
+          className="mb-2 text-sm font-semibold text-foreground"
+        >
+          Pôles de gestion
+        </h2>
+        <ul className="grid gap-2 sm:grid-cols-2">
           {sections.map((section) => {
             const Icon = section.icon;
             return (
-              <Link
-                key={section.href}
-                href={section.href}
-                className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-border/60 bg-card p-4 shadow-soft-sm transition-[box-shadow,transform,border-color] duration-[var(--duration-normal)] ease-out-soft before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:bg-gradient-to-r before:from-gold before:via-gold/70 before:to-transparent before:opacity-0 before:transition-opacity hover:-translate-y-0.5 hover:border-border hover:shadow-soft hover:before:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:hover:translate-y-0"
-              >
-                <div className="flex items-start justify-between">
-                  <div
+              <li key={section.href}>
+                <Link
+                  href={section.href}
+                  className="group flex min-h-[60px] items-center gap-3.5 rounded-lg border border-border bg-card px-3.5 py-3 transition-colors hover:border-primary/40 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <span
                     aria-hidden="true"
-                    className={cn(
-                      'flex size-10 items-center justify-center rounded-xl',
-                      section.tone,
-                    )}
+                    className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-secondary-foreground dark:group-hover:text-primary"
                   >
-                    <Icon className="size-5" />
-                  </div>
+                    <Icon className="size-[18px]" />
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-sm font-semibold text-foreground">
+                      {section.label}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {section.description}
+                    </span>
+                  </span>
                   <ChevronRight
                     aria-hidden="true"
-                    className="size-4 -translate-x-1 text-muted-foreground/50 opacity-0 transition-all group-hover:translate-x-0 group-hover:text-accent group-hover:opacity-100"
+                    className="size-4 shrink-0 text-muted-foreground"
                   />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="font-serif text-base font-bold tracking-tight text-foreground">
-                    {section.label}
-                  </span>
-                  <span className="text-[11px] leading-tight text-muted-foreground">
-                    {section.description}
-                  </span>
-                </div>
-              </Link>
+                </Link>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </section>
     </AdminPageLayout>
   );

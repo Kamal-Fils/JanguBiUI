@@ -47,9 +47,10 @@ describe('SubmitIntentionForm', () => {
 
     renderApp(<SubmitIntentionForm onSuccess={onSuccess} />);
 
-    await userEvent.selectOptions(
-      screen.getByLabelText(/type d'intention/i),
-      'for_living',
+    // Le motif se choisit en UN appui sur une pastille (plus de <select> :
+    // cf. DIRECTION.md R1, on compte les gestes du parcours).
+    await userEvent.click(
+      screen.getByRole('radio', { name: /pour un vivant/i }),
     );
     await userEvent.type(
       screen.getByLabelText(/votre intention/i),

@@ -66,7 +66,10 @@ export function MassIntentionCard({
         {intention.intention_text}
       </p>
 
-      {(showRequester || intention.proposed_date || intention.pretre_email) && (
+      {(showRequester ||
+        intention.proposed_date ||
+        intention.pretre_email ||
+        intention.reference) && (
         <div className="hairline-gold opacity-60" aria-hidden="true" />
       )}
 
@@ -99,6 +102,13 @@ export function MassIntentionCard({
           <div className="flex gap-1.5">
             <dt className="font-medium text-foreground/70">Célébrée le</dt>
             <dd>{formatDate(intention.celebration_date)}</dd>
+          </div>
+        )}
+        {/* Référence citable au secrétariat, et reprise sur le reçu. */}
+        {intention.reference && (
+          <div className="flex gap-1.5">
+            <dt className="font-medium text-foreground/70">Référence</dt>
+            <dd className="font-mono tabular-nums">{intention.reference}</dd>
           </div>
         )}
       </dl>

@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button/button';
 import { RichTextEditor } from '@/components/ui/rich-text-editor/rich-text-editor';
 import { Spinner } from '@/components/ui/spinner';
 import { paths } from '@/config/paths';
+import { useChurches } from '@/lib/org/get-churches';
 import { useDioceses } from '@/lib/org/get-dioceses';
 
 import { useCategories } from '../api/get-categories';
@@ -29,6 +30,7 @@ const SCOPE_OPTIONS = [
   { value: 'global', label: "Global (toute l'Église du Sénégal)" },
   { value: 'diocese', label: 'Diocèse' },
   { value: 'parish', label: 'Paroisse' },
+  { value: 'church', label: 'Église (une seule église de la paroisse)' },
 ];
 
 const articleFormSchema = z.object({
@@ -42,9 +44,14 @@ const articleFormSchema = z.object({
   // Annonces : date du jour concerné (bloc « Annonces du dimanche »).
   announcement_date: z.string().nullable().optional(),
   cover_image_id: z.number().nullable().optional(),
-  scope_type: z.enum(['global', 'diocese', 'parish']),
+  scope_type: z.enum(['global', 'diocese', 'parish', 'church']),
   scope_parish_id: z.coerce.number().nullable().optional(),
   scope_diocese_id: z.coerce.number().nullable().optional(),
+  // Le serveur accepte la portée « église » depuis le chantier hiérarchie
+  // (modèle, index et sérialiseurs d'entrée/sortie), mais le formulaire ne la
+  // proposait pas : une paroisse à plusieurs églises ne pouvait pas adresser
+  // une annonce à une seule d'entre elles.
+  scope_church_id: z.coerce.number().nullable().optional(),
 });
 
 export type ArticleFormValues = z.infer<typeof articleFormSchema>;
@@ -95,6 +102,15 @@ export function ArticleForm({
 
   const scopeType = watch('scope_type');
   const contentType = watch('content_type');
+
+  // Paroisse servant UNIQUEMENT à filtrer la liste des églises : elle n'est pas
+  // envoyée au serveur, qui déduit la paroisse de l'église choisie.
+  const [churchParishId, setChurchParishId] = useState<number | null>(
+    defaultValues?.scope_parish_id ?? null,
+  );
+  const { data: churches = [], isLoading: churchesLoading } = useChurches({
+    parishId: churchParishId ?? undefined,
+  });
 
   function handleCoverSelected(file: File | undefined) {
     if (!file) return;
@@ -267,6 +283,68 @@ export function ArticleForm({
               {errors.scope_parish_id.message}
             </p>
           )}
+        </div>
+      )}
+
+      {scopeType === 'church' && (
+        <div className="space-y-4 rounded-lg border border-border bg-background-surface p-4">
+          {/* Une église se désigne toujours à travers sa paroisse : la liste
+              plate de toutes les églises du pays serait inexploitable. */}
+          {/* Pas de <label> ici : `ParishSelector` est une cascade qui porte
+              déjà ses propres libellés associés (province, diocèse, paroisse).
+              Un label supplémentaire serait redondant à la lecture d'écran et
+              ne pourrait viser aucun contrôle unique. */}
+          <div
+            role="group"
+            aria-label="Paroisse de rattachement"
+            className="space-y-2"
+          >
+            <ParishSelector
+              value={churchParishId}
+              onChange={(parishId) => {
+                setChurchParishId(parishId);
+                // Changer de paroisse invalide l'église choisie : la conserver
+                // enverrait une église qui n'appartient plus à la paroisse.
+                setValue('scope_church_id', null, { shouldDirty: true });
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="form-church-id"
+              className="block text-sm font-medium text-foreground"
+            >
+              Église <span className="text-destructive">*</span>
+            </label>
+            <select
+              id="form-church-id"
+              {...register('scope_church_id')}
+              disabled={!churchParishId || churchesLoading}
+              className="min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+            >
+              <option value="">
+                {churchParishId
+                  ? 'Sélectionner une église'
+                  : "Choisissez d'abord une paroisse"}
+              </option>
+              {churches.map((church) => (
+                <option key={church.id} value={church.id}>
+                  {church.name}
+                </option>
+              ))}
+            </select>
+            {churchParishId && !churchesLoading && churches.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                Cette paroisse n&apos;a aucune église enregistrée.
+              </p>
+            )}
+            {errors.scope_church_id && (
+              <p className="text-xs text-destructive">
+                {errors.scope_church_id.message}
+              </p>
+            )}
+          </div>
         </div>
       )}
 
